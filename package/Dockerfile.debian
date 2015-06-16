@@ -1,0 +1,11 @@
+FROM st2buildenv-debian
+
+ENV ST2_URI=https://github.com/StackStorm/st2 \
+    ST2_REV=master
+
+RUN git clone --depth 1 -b $ST2_REV $ST2_URI /code
+ADD entry-point.sh /root/entry-point.sh
+
+VOLUME ["/sources", "/out"]
+
+ENTRYPOINT ["/bin/bash", "/root/entry-point.sh"]

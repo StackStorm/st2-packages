@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+export DH_VIRTUALENV_INSTALL_PATH=/usr/share/python/st2
+export DH_ALWAYS_EXCLUDE := .pyc
+
+%:
+	dh $@ --with python-virtualenv
+
+override_dh_virtualenv:
+	dh_auto_install  # get back autoinstall
+	dh_virtualenv
