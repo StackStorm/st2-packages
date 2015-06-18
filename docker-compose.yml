@@ -1,0 +1,14 @@
+# docker-compose >= 1.3.0rc3
+
+buildenv:
+  dockerfile: buildenv/Dockerfile.debian
+  build: ./
+
+debian:
+  dockerfile: package/Dockerfile.debian
+  build: ./
+  volumes:
+    - "sources:/sources"
+    - "/tmp:/out"
+
+# $(pwd)/sources:/sources st2packages-debian

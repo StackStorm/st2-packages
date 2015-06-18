@@ -1,14 +1,16 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
+# Virtualenv and pip should be updated (better not to use the distro defaults).
+# Updated ones can be found under /use/local.
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
-export DH_VIRTUALENV_INSTALL_PATH=/usr/share/python/st2
-export DH_ALWAYS_EXCLUDE := .pyc
 
 %:
 	dh $@ --with python-virtualenv
 
 override_dh_virtualenv:
-	dh_auto_install  # get back autoinstall
+	# We need dh_auto_install stage, because we do custom installs
+	dh_auto_install
 	dh_virtualenv

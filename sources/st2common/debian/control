@@ -2,13 +2,13 @@ Source: st2common
 Section: Python
 Priority: optional
 Maintainer: StackStorm Engineering <opsadmin@stackstorm.com>
-Build-Depends: debhelper (>= 9.0.0), python, dh-virtualenv (>= 0.9)
+Build-Depends: debhelper (>= 9.0.0), python, dh-virtualenv (>= 0.7)
 Standards-Version: 3.9.5
 Homepage: http://www.stackstorm.com
 
 Package: st2common
 Architecture: any
 Pre-Depends: dpkg (>= 1.17.0), python2.7, ${misc:Pre-Depends}
-Depends: ${python:Depends}, ${misc:Depends}
+Depends: ${python:Depends}, ${misc:Depends}, ${shlibs:Depends}
 Description: ST2 Common
  This is a description that should be much better before we ship this.
