@@ -1,6 +1,6 @@
-.PHONY: install all requirements wheelhouse
+.PHONY: install debchange all requirements 
 
-setup_py_prerequisites: st2_version wheelhouse
+setup_py_prerequisites: st2_version debchange wheelhouse 
 	touch setup_py_prerequisites
 
 all: install
@@ -10,14 +10,15 @@ st2_version:
 	install -m644 ../st2_version ./st2_version
 
 install: setup_py_prerequisites
-	install -m644 ../conf/logrotate.conf $(DESTDIR)/etc/logrotate.d/st2.conf
-	install -m644 ../conf/st2.prod.conf $(DESTDIR)/etc/st2/st2.conf
-	# We don't do: install ../tools/*
-	# Because this sort of hackery should NOT go to prod, and if someone
-	# needs he can install it.
+	@echo "st2common" >> requirements.txt
+
+debchange:
+	$(eval ST2_VER := $(shell cat st2_version))
+	debchange -v $(ST2_VER) -M 'new version build'
 
 requirements:
 	python ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 
+# Install wheels into shared location
 wheelhouse: requirements
 	pip wheel --wheel-dir=/tmp/wheelhouse -r requirements.txt
