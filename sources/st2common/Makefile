@@ -1,23 +1,20 @@
-.PHONY: install all requirements wheelhouse
+.PHONY: all pre_install install requirements wheelhouse
 
-setup_py_prerequisites: st2_version wheelhouse
-	touch setup_py_prerequisites
+WHEELDIR ?= /tmp/wheelhouse
+ST2_BUILD_VERSION ?= $(shell cat st2_version)
 
 all: install
+
+# st2common can't be installed since it's not shiped as a standalone component.
+install: ;
 
 # Borrow global version if there's no specific one (NOT .PHONY)
 st2_version:
 	install -m644 ../st2_version ./st2_version
 
-install: setup_py_prerequisites
-	install -m644 ../conf/logrotate.conf $(DESTDIR)/etc/logrotate.d/st2.conf
-	install -m644 ../conf/st2.prod.conf $(DESTDIR)/etc/st2/st2.conf
-	# We don't do: install ../tools/*
-	# Because this sort of hackery should NOT go to prod, and if someone
-	# needs he can install it.
-
 requirements:
 	python ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 
-wheelhouse: requirements
-	pip wheel --wheel-dir=/tmp/wheelhouse -r requirements.txt
+# Install wheels into shared location
+wheelhouse: requirements st2_version
+	pip wheel --wheel-dir=$(WHEELDIR) -r requirements.txt

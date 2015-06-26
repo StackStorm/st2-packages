@@ -1,36 +1,28 @@
 #!/bin/bash
 
+export WHEELDIR=/tmp/wheelhouse
 export TERM=xterm
-export ST2_COMPONENTS=(st2api)
+export ST2_COMPONENTS=(st2actions st2api)
 
+build_debian () {
+  BUILD_LIST=${@:-$ST2_COMPONENTS}
+  cd /code
 
-function create_st2common_wheel {
-  cd /code/st2common
-  make setup_py_prerequisites
-  python setup.py bdist_wheel -d /tmp/wheelhouse
+  for makedir in "${BUILD_LIST[@]}"; do
+    pushd $makedir && \
+      dpkg-buildpackage -b -uc -us && \
+      popd
+  done
 }
 
-function build_debian {
-  cd /code/st2api && \
-    dpkg-buildpackage -b -uc -us && mv /code/*.deb /code/*.changes /code/*.dsc /out
-}
-
-# for component in "${ST2_COMPONENTS[@]}"; do
-#   cd /code/$component && make wheelhouse
-#   && dpkg-buildpackage -b -uc -us && \
-#   mv /code/*.deb /code/*.changes /code/*.dsc /out  && \
-#   dh_clean
-# done
-
-
-# Update sources with new Makefiles and debian/* files
+# --- Merge new debian makefiles with upstream
 cp -r /sources/* /code
 
-# Empty command then build initiated
-if [ -z $1 ]; then
-  [ -f /etc/debian_version ] && build_debian
-  sleep infinity # sleep for debug
-else
-  cp -r /sources/* /code
-  bash -c "$@"
-fi
+# --- Build st2common wheel
+cd /code/st2common && \
+  make wheelhouse && \
+  python setup.py bdist_wheel -d $WHEELDIR 
+
+
+# --- Run build
+[ -f /etc/debian_version ] && build_debian "$@"
