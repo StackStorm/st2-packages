@@ -1,2 +1,3 @@
 ../contrib/examples usr/share/doc/st2/
 ../docs usr/share/doc/st2/
+conf/* etc/st2api/

@@ -9,6 +9,8 @@ install: pre_install
 	# Here're only files which are renamed, since the dh_install can't handle it.
 	install -m644 ../conf/logrotate.conf $(DESTDIR)/etc/logrotate.d/st2.conf
 	install -m644 ../conf/st2.prod.conf $(DESTDIR)/etc/st2/st2.conf
+	# We don't want anything like below to be postinst
+	sed -ir "/args\s*=\s*/s%logs%/var/log/st2%g" $(DESTDIR)/etc/st2api/logging.conf
 
 pre_install: wheelhouse
 	debchange -v $(ST2_BUILD_VERSION) -M 'new version build'
