@@ -12,5 +12,5 @@ Package: st2reactor
 Architecture: any
 Pre-Depends: dpkg (>= 1.17.0), python2.7, ${misc:Pre-Depends}
 Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}
-Description: St2Reactor - StackStorm sensors compnent.
+Description: St2Reactor - StackStorm sensors component.
  <insert long description, indented with spaces>

@@ -12,5 +12,5 @@ Package: st2auth
 Architecture: any
 Pre-Depends: dpkg (>= 1.17.0), python2.7, ${misc:Pre-Depends}
 Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}
-Description: St2Auth - StackStorm authentication service compnent.
+Description: St2Auth - StackStorm authentication service component.
  <insert long description, indented with spaces>
