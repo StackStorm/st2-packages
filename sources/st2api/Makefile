@@ -1,7 +1,7 @@
 .PHONY: all install wheelhouse
 
 WHEELDIR ?= /tmp/wheelhouse
-ST2_BUILD_VERSION ?= $(shell cat st2_version)
+# ST2PKG_BUILDVER it's evaluated in st2version, but can be overriden
 ST2_COMPONENT := $(notdir $(CURDIR))
 
 ifneq (,$(wildcard /etc/debian_version))
@@ -18,21 +18,29 @@ post_install:
 	# We don't want anything like below to be postinst
 	sed -i -r "/args\s*=\s*/s%logs%/var/log/st2%g" $(DESTDIR)/etc/st2api/logging.conf
 
-st2_version:
-	# Use top version if none is available under ./
-	install -m644 ../st2_version ./st2_version
+st2version: install_py_version
+	# Use common component version, by default
+	$(eval SVER := $(shell python -c 'from $(ST2_COMPONENT) import __version__; print __version__,'))
+	$(eval ST2PKG_BUILDVER ?= $(SVER))
+
+install_py_version:
+	# Install __init__.py of st2common (containging __version__) in case if
+	# component doesn't file.
+ifeq (,$(wildcard $(ST2_COMPONENT)/__init__.py))
+	install -m644 ../st2common/st2common/__init__.py ./$(ST2_COMPONENT)/__init__.py
+endif
 
 requirements:
 	python ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 
-changelog: st2_version wheelhouse
+changelog: st2version
 	# Add debian changelog entry for new automatic new version
-	debchange -v $(ST2_BUILD_VERSION) -M 'new version build'
-	# We can modify requirements ONLY AFTER wheelhouse has been built
-	@echo "st2common" >> requirements.txt
+	debchange -v $(ST2PKG_BUILDVER) -M 'new version build'
 
 wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: st2_version requirements
+.stamp-wheelhouse: st2version requirements
 	# Install wheels into shared location
 	pip wheel --wheel-dir=$(WHEELDIR) -r requirements.txt
+	# We can modify requirements ONLY AFTER wheelhouse has been built
+	@echo "st2common" >> requirements.txt
 	touch $@

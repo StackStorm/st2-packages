@@ -18,9 +18,11 @@ post_install:
 	# We don't want anything like below to be postinst
 	sed -i -r "/args\s*=\s*/s%logs%/var/log/st2%g" $(DESTDIR)/etc/st2actions/logging.conf
 
-st2_version:
-	# Use top version if none is available under ./
-	install -m644 ../st2_version ./st2_version
+st2_version: .st2_version
+.st2_version:
+	# Use common component version
+	install -m644 ../st2common/st2common/__init__.py ./$(ST2_COMPONENT)/__init__.py
+	touch $@
 
 requirements:
 	python ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
