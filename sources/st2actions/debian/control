@@ -10,7 +10,7 @@ Homepage: <insert the upstream URL, if relevant>
 
 Package: st2actions
 Architecture: any
-Pre-Depends: dpkg (>= 1.17.0), python2.7, ${misc:Pre-Depends}
+Pre-Depends: dpkg (>= 1.17.0), python2.7, ${misc:Pre-Depends}, st2common
 Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Description: St2Actions - StackStorm action runner component.
  <insert long description, indented with spaces>

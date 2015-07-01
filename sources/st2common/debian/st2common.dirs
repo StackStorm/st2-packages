@@ -1,2 +1,3 @@
 /etc/st2
 /etc/logrotate.d
+/var/log/st2

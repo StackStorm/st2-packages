@@ -11,6 +11,6 @@ Homepage: <insert the upstream URL, if relevant>
 Package: st2api
 Architecture: any
 Pre-Depends: dpkg (>= 1.17.0), python2.7, ${misc:Pre-Depends}
-Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}, st2common
 Description: St2Api - StackStorm API component.
  <insert long description, indented with spaces>

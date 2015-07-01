@@ -1,25 +1,33 @@
 #!/bin/bash
 
-export WHEELDIR=/tmp/wheelhouse
 export TERM=xterm
-export ST2_COMPONENTS=(st2actions st2api st2auth st2client st2reactor)
+export WHEELDIR=/tmp/wheelhouse
 
-build_debian () {
-  BUILD_LIST=(${@:-${ST2_COMPONENTS[@]}})
-  cd /code
+DEBUG=1
+ST2_COMPONENTS=(st2common st2actions st2api st2auth st2client st2reactor)
+[ -f /etc/debian_version ] && DEBIAN=1
 
-  echo "++++++++++++++++++++++++++++++++++++"
-  echo "${BUILD_LIST[@]}"
 
-  for makedir in ${BUILD_LIST[@]}; do
-    echo
-    echo "--------------- Creating debian package for ${makedir} ---------------"
-    pushd $makedir && \
-      dpkg-buildpackage -b -uc -us && \
-      popd
-  done
-  mv /code/*.deb /code/*.changes /code/*.dsc /out
+move_packages () {
+  [ $DEBIAN -eq 1 ] && mv /code/*.deb /code/*.changes /code/*.dsc /out
 }
+
+build_package () {
+  [ $DEBIAN -eq 1 ] && dpkg-buildpackage -b -uc -us
+}
+
+build () {
+  cd /code
+  BUILD_LIST=(${@:-${ST2_COMPONENTS[@]}})
+  for makedir in ${BUILD_LIST[@]}; do
+    [ ! -d $makedir ] && { echo "Error: component \`${makedir}' not found"; exit 1; }
+    echo
+    echo "--------------- Creating package for ${makedir} ---------------"
+    pushd $makedir && \
+      build_package && popd
+  done
+}
+
 
 # --- Merge new debian makefiles with upstream
 cp -r /sources/* /code
@@ -30,6 +38,8 @@ cd /code/st2common && \
   make wheelhouse && \
   python setup.py bdist_wheel -d $WHEELDIR 
 
+build "$@"
+move_packages
 
-# --- Run build
-[ -f /etc/debian_version ] && build_debian "$@"
+# Don't exit container, for debug purposes
+[ $DEBUG -eq 1 ] && sleep infinity

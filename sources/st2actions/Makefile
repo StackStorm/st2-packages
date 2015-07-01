@@ -5,19 +5,13 @@ ST2_BUILD_VERSION ?= $(shell cat st2_version)
 ST2_COMPONENT := $(notdir $(CURDIR))
 
 ifneq (,$(wildcard /etc/debian_version))
-	STAGE_TEMP := debian/tmp
 	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
 endif
 
 
 all: install
 
-install: wheelhouse changelog pre_install
-
-pre_install:
-	# Write temp files which will be processed by debhelpers
-	install -D -m644 ../conf/st2.prod.conf $(STAGE_TEMP)/etc/st2/st2.conf
-	install -D -m644 ../conf/logrotate.conf $(STAGE_TEMP)/etc/logrotate.d/st2
+install: wheelhouse changelog
 
 post_install:
 	# post_install is triggered from rules, don't call it from install target!
@@ -38,7 +32,7 @@ changelog: st2_version wheelhouse
 	@echo "st2common" >> requirements.txt
 
 wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: requirements
+.stamp-wheelhouse: st2_version requirements
 	# Install wheels into shared location
 	pip wheel --wheel-dir=$(WHEELDIR) -r requirements.txt
 	touch $@
