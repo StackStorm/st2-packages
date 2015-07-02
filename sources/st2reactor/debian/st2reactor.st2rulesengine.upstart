@@ -1,4 +1,4 @@
-description     "StackStorm st2api service"
+description     "StackStorm st2rulesengine service"
 author          "StackStorm Ops"
 
 start on filesystem and net-device-up IFACE!=lo
@@ -13,7 +13,7 @@ umask 007
 kill timeout 60
 
 script
-  NAME=st2api
+  NAME=st2rulesengine
   DEFAULT_ARGS="--config-file /etc/st2/st2.conf"
 
   # Read configuration variable file if it is present

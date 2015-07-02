@@ -1,0 +1,10 @@
+# Defaults for st2rulesengine initscript
+# sourced by /etc/init.d/st2rulesengine
+# installed at /etc/default/st2reactor by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# Change default service startup arguments
+#DAEMON_ARGS="--config-file /etc/st2/st2.conf"
