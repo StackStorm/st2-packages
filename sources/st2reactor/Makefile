@@ -1,28 +1,46 @@
-.PHONY: all pre_install install requirements wheelhouse
+.PHONY: all install wheelhouse
 
 WHEELDIR ?= /tmp/wheelhouse
-ST2_BUILD_VERSION ?= $(shell cat st2_version)
+# ST2PKG_BUILDVER it's evaluated in st2version, but can be overriden
+ST2_COMPONENT := $(notdir $(CURDIR))
+
+ifneq (,$(wildcard /etc/debian_version))
+	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
+endif
+
 
 all: install
 
-install: pre_install
-	# Here're only files which are renamed, since the dh_install can't handle it.
-	install -m644 ../conf/logrotate.conf $(DESTDIR)/etc/logrotate.d/st2.conf
-	install -m644 ../conf/st2.prod.conf $(DESTDIR)/etc/st2/st2.conf
+install: wheelhouse changelog
+
+post_install:
+	# post_install is triggered from rules, don't call it from install target!
 	# We don't want anything like below to be postinst
-	sed -ir "/args\s*=\s*/s%logs%/var/log/st2%g" $(DESTDIR)/etc/st2reactor/logging.conf
+	sed -i -r "/args\s*=\s*/s%logs%/var/log/st2%g" $(DESTDIR)/etc/st2reactor/logging*.conf
 
-pre_install: wheelhouse
-	debchange -v $(ST2_BUILD_VERSION) -M 'new version build'
-	@echo "st2common" >> requirements.txt
+st2version: install_py_version
+	# Use common component version, by default
+	$(eval SVER := $(shell python -c 'from $(ST2_COMPONENT) import __version__; print __version__,'))
+	$(eval ST2PKG_BUILDVER ?= $(SVER))
 
-# Borrow global version if there's no specific one (NOT .PHONY)
-st2_version:
-	install -m644 ../st2_version ./st2_version
+install_py_version:
+	# Install __init__.py of st2common (containging __version__) in case if
+	# component doesn't file.
+ifeq (,$(wildcard $(ST2_COMPONENT)/__init__.py))
+	install -m644 ../st2common/st2common/__init__.py ./$(ST2_COMPONENT)/__init__.py
+endif
 
 requirements:
 	python ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 
-# Install wheels into shared location
-wheelhouse: requirements st2_version
+changelog: st2version
+	# Add debian changelog entry for new automatic new version
+	debchange -v $(ST2PKG_BUILDVER) -M 'new version build'
+
+wheelhouse: .stamp-wheelhouse
+.stamp-wheelhouse: st2version requirements
+	# Install wheels into shared location
 	pip wheel --wheel-dir=$(WHEELDIR) -r requirements.txt
+	# We can modify requirements ONLY AFTER wheelhouse has been built
+	@echo "st2common" >> requirements.txt
+	touch $@

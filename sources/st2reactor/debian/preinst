@@ -16,7 +16,7 @@ set -e
 
 DIV_LINKS="bin/st2-bootstrap-rmq bin/st2-register-content"
 
-for file in DIV_LINKS; do
+for file in $DIV_LINKS; do
   if [ install = "$1" ]; then
      dpkg-divert --package st2api --add --rename \
         --divert /usr/${file}.divert /usr/$file

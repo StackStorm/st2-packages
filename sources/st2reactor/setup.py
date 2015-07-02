@@ -17,6 +17,7 @@
 import os.path
 from pip.req import parse_requirements
 from setuptools import setup, find_packages
+from st2reactor import __version__
 
 
 def fetch_requirements():
@@ -29,16 +30,13 @@ def fetch_requirements():
     return (reqs, links)
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
-with open(os.path.join(current_dir, 'st2_version'), 'r') as f:
-    st2_version = f.read().strip()
-
-install_reqs, dep_links = fetch_requirements()
 st2_component = os.path.basename(current_dir)
+install_reqs, dep_links = fetch_requirements()
 
 
 setup(
     name=st2_component,
-    version=st2_version,
+    version=__version__,
     description='{} component'.format(st2_component),
     author='StackStorm',
     author_email='info@stackstorm.com',
