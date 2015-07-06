@@ -1,3 +1,5 @@
+[![Build Status](http://drone.vos.io/api/badge/github.com/dennybaa/st2-packages/status.svg?branch=master)](http://drone.vos.io/github.com/dennybaa/st2-packages)
+
 # Building debian packages
 
 ## Install docker compose
