@@ -1,3 +1,3 @@
-image: dockerfile/nginx
+image: ubuntu
 script:
   - echo hello world
