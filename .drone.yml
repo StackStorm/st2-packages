@@ -1,3 +1,3 @@
-image: ubuntu
+image: quay.io/dennybaa/droneunit-ubuntu
 script:
   - echo hello world
