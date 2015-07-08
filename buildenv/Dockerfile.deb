@@ -30,7 +30,8 @@ RUN adduser --disabled-password --gecos "" seafella && \
     mkdir /home/seafella/.ssh/ && chmod 700 /home/seafella/.ssh
 ADD conf/seafella.pub /home/seafella/.ssh/authorized_keys
 
-VOLUME [ "/code" ]
+# Strange fix
+RUN mkdir /var/run/sshd
 
 # Run ssh daemon and wait for fellas)
 CMD ["/usr/sbin/sshd", "-D"]

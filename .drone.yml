@@ -3,5 +3,7 @@ script:
   - cat /etc/hosts
   - pwd
   - find ./
-# services:
-#   - quay.io/stackstorm/st2packages-buildenv-deb
+  - "/root/.ssh/ && chmod 700 /root/.ssh"
+  - "cp conf/sefella /home/sefella/.ssh/id_rsa && chmod 600 /home/sefella/.ssh/id_rsa"
+services:
+  - quay.io/stackstorm/st2packages-buildenv-deb
