@@ -4,4 +4,4 @@ script:
   - pwd
   - find ./
 services:
-  - quay.io/stackstorm/st2packages-buildenv-debian
+  - quay.io/stackstorm/st2packages-buildenv-deb
