@@ -5,7 +5,6 @@ script:
   - cat /etc/hosts
   - pwd
   - find ./
-  - "mkdir /root/.ssh/ && chmod 700 /root/.ssh"
   - "cp conf/sefella /root/.ssh/id_rsa && chmod 600 /root/.ssh/id_rsa"
   - ssh sefella@$BUILDHOST cat /etc/hosts
 services:
