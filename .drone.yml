@@ -7,6 +7,7 @@ script:
   - pwd
   - find ./
   - "cp conf/seafella /root/.ssh/id_rsa && chmod 600 /root/.ssh/id_rsa"
+  - sleep infinity
   - ssh sefella@$BUILDHOST cat /etc/hosts
 services:
   - quay.io/stackstorm/st2packages-buildenv-deb
