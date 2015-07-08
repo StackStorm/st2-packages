@@ -3,5 +3,5 @@ script:
   - cat /etc/hosts
   - pwd
   - find ./
-services:
-  - quay.io/stackstorm/st2packages-buildenv-deb
+# services:
+#   - quay.io/stackstorm/st2packages-buildenv-deb
