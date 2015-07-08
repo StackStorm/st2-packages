@@ -5,7 +5,7 @@ script:
   - cat /etc/hosts
   - pwd
   - find ./
-  - "cp conf/sefella /root/.ssh/id_rsa && chmod 600 /root/.ssh/id_rsa"
+  - "cp conf/seafella /root/.ssh/id_rsa && chmod 600 /root/.ssh/id_rsa"
   - ssh sefella@$BUILDHOST cat /etc/hosts
 services:
   - quay.io/stackstorm/st2packages-buildenv-deb
