@@ -3,10 +3,10 @@
 export TERM=xterm
 export WHEELDIR=/tmp/wheelhouse
 
-DEBUG=1
+#DEBUG=1
+
 ST2_COMPONENTS=(st2common st2actions st2api st2auth st2client st2reactor)
 [ -f /etc/debian_version ] && DEBIAN=1
-
 
 move_packages () {
   [ $DEBIAN -eq 1 ] && mv /code/*.deb /code/*.changes /code/*.dsc /out

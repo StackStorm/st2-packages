@@ -1,3 +1,9 @@
 image: quay.io/dennybaa/droneunit-ubuntu
+
+service:
+  - quay.io/stackstorm/st2packages-buildenv-debian
+
 script:
+
   - echo hello world
+  - s
