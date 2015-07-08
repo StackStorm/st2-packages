@@ -28,7 +28,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python; pip install --upgrade vi
 # Create remote seafella user
 RUN adduser --disabled-password --gecos "" seafella && \
     mkdir /home/seafella/.ssh/ && chmod 700 /home/seafella/.ssh
-ADD ./conf/seafella.pub /home/seafella/.ssh/authorized_keys
+ADD conf/seafella.pub /home/seafella/.ssh/authorized_keys
 
 VOLUME [ "/code" ]
 
