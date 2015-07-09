@@ -1,4 +1,4 @@
-image: quay.io/dennybaa/droneunit-ubuntu
+image: quay.io/dennybaa/droneunit-ubuntu:latest
 env:
   - BUILDHOST=st2packages-buildenv-deb
 script:
@@ -8,4 +8,4 @@ script:
   - find ./
   - ssh busybee@$BUILDHOST cat /etc/hosts
 services:
-  - quay.io/stackstorm/st2packages-buildenv-deb
+  - quay.io/stackstorm/st2packages-buildenv-deb:latest
