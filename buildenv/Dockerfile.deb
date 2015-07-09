@@ -35,7 +35,5 @@ RUN SHD=/home/busybee/.ssh && echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCdCmmP
 # Strange fix, but it's needed
 RUN mkdir /var/run/sshd
 
-RUN echo 'hello world' > /test.file
-
 # Run ssh daemon in foreground and wait for bees to connect.
 CMD ["/usr/sbin/sshd", "-D"]
