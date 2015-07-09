@@ -5,7 +5,5 @@
 
 set -e
 
-alias ssh='ssh -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null'
-alias | grep ssh
 
-ssh busybee@$BUILDHOST cat /etc/hosts
+ssh -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null busybee@$BUILDHOST cat /etc/hosts || true
