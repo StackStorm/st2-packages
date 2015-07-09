@@ -2,7 +2,7 @@ image: quay.io/dennybaa/droneunit-ubuntu:latest
 env:
   - BUILDHOST=st2packages-buildenv-deb
 script:
-  - alias ssh=ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null
+  - alias ssh='ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null'
   - cat /etc/hosts
   - pwd
   - find ./
