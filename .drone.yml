@@ -7,5 +7,6 @@ script:
   - pwd
   - find ./
   - ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null busybee@$BUILDHOST cat /etc/hosts || true
+  - sleep infinity
 services:
   - quay.io/stackstorm/st2packages-buildenv-deb:latest
