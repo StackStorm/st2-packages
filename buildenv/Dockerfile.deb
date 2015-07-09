@@ -29,7 +29,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python; pip install --upgrade vi
 RUN SHD=/home/busybee/.ssh && adduser --disabled-password --gecos "" busybee && \
     mkdir $SHD && chown busybee.busybee $SHD && chmod 700 $SHD
 
-RUN SHD=/home/busybee/.ssh && echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOyk9g9x9sayUcpmEBY17dEXiqO99/AyzNcDozYTl7GYwHVaGJ91WqRETCgAQFRoSAVcWSgjlU0BB+TL74aCeRPKMBtfSc6IhjBgIh7gZNge2/oRngfSjCRwhk7Xb2Eca/ZvWV7S7254aV/BFxdtqRUHfMuGzRNiQtQ2GYps2YD5QzVkRsKh2HRL5JOc5sJAIcT27F1ZGUhvgnktR01kBGc8nIzQRGZVmz84ZwUbeCWgln5fP3p0H6AwO9k975n9+0NdW22HXnRbqY+t4rd0UySJ2KzOfAWXv2LAnLpPirYxyw9qARBiTVXjiNoMQzhrvke3/59sSfjas5hyFqmojf busybee" >> $SHD/authorized_keys && \
+RUN SHD=/home/busybee/.ssh && echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCdCmmPjsOBWRXc+PKdgDRrsciNjp25zTacyz8Gdkln2ma046brOYXAphhp/85DKgHtANBBt3cl4+HnpDbmAfyq2qZT7hWzAbMxtq0Sj+yyFyUdreXoe4gEKyxpV6o8p/R/XzEcawvqX/vFc5EIFmvTdamxZs9DQmOE5AZMzUB18Kerkrb0/arUcZ8iMi9Ng9a18avow+7oUFZ6Oub7ISz/dkIRojaKO/2paJZ4p+v7ZLn7Hq8TUeBkgAlx872oh8J8linhIq17zK6x4MGL8qiurp2hnfe0cuCxwcsYGy+4DfK51+E2vks6FprCIfF5hIdz26euPn67/YpM0F0b5nXF busybee@dockerunit" >> $SHD/authorized_keys && \
     chown busybee.busybee $SHD/authorized_keys
 
 # Strange fix, but it's needed
