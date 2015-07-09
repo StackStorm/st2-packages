@@ -25,13 +25,14 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install \
 # Install fresh pip and co
 RUN curl https://bootstrap.pypa.io/get-pip.py | python; pip install --upgrade virtualenv
 
-# Create remote seafella user
-RUN adduser --disabled-password --gecos "" seafella && \
-    mkdir /home/seafella/.ssh/ && chmod 700 /home/seafella/.ssh
-ADD conf/seafella.pub /home/seafella/.ssh/authorized_keys
+# Create remote busybee remote user
+RUN adduser --disabled-password --gecos "" busybee && \
+    mkdir /home/busybee/.ssh/ && chmod 700 /home/busybee/.ssh
 
-# Strange fix
+RUN echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOyk9g9x9sayUcpmEBY17dEXiqO99/AyzNcDozYTl7GYwHVaGJ91WqRETCgAQFRoSAVcWSgjlU0BB+TL74aCeRPKMBtfSc6IhjBgIh7gZNge2/oRngfSjCRwhk7Xb2Eca/ZvWV7S7254aV/BFxdtqRUHfMuGzRNiQtQ2GYps2YD5QzVkRsKh2HRL5JOc5sJAIcT27F1ZGUhvgnktR01kBGc8nIzQRGZVmz84ZwUbeCWgln5fP3p0H6AwO9k975n9+0NdW22HXnRbqY+t4rd0UySJ2KzOfAWXv2LAnLpPirYxyw9qARBiTVXjiNoMQzhrvke3/59sSfjas5hyFqmojf busybee\n" > /home/busybee/authorized_keys
+
+# Strange fix, but it's needed
 RUN mkdir /var/run/sshd
 
-# Run ssh daemon and wait for fellas)
+# Run ssh daemon in foreground and wait for bees to connect.
 CMD ["/usr/sbin/sshd", "-D"]
