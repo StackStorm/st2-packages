@@ -1,7 +1,7 @@
-image: quay.io/dennybaa/droneunit-ubuntu:latest
+image: quay.io/dennybaa/droneunit-ubuntu
 env:
   - BUILDHOST=st2packages-buildenv-deb
 script:
   - ./.drone/build.sh
 services:
-  - quay.io/stackstorm/st2packages-buildenv-deb:latest
+  - quay.io/stackstorm/st2packages-buildenv-deb
