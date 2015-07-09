@@ -1,4 +1,4 @@
-image: quay.io/dennybaa/droneunit-ubuntu
+image: quay.io/dennybaa/droneunit-ubuntu:latest
 env:
   - BUILDHOST=st2packages-buildenv-deb
 script:
