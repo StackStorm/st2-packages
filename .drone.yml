@@ -6,7 +6,6 @@ script:
   - cat /etc/hosts
   - pwd
   - find ./
-  - sleep infinity
   - ssh busybee@$BUILDHOST cat /etc/hosts
 services:
   - quay.io/stackstorm/st2packages-buildenv-deb
