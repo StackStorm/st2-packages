@@ -15,6 +15,6 @@ SCH
 )
 
 
-scp -r scripts busybee@$BUILDHOST
-ssh busybee@$BUILDHOST ls -l
+scp -r scripts busybee@$BUILDHOST:
+ssh busybee@$BUILDHOST ls -ld
 # ssh -t busybee@$BUILDHOST "$RUNBUILD"
