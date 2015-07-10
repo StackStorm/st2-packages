@@ -5,8 +5,7 @@ set -e
 export WHEELDIR=/tmp/wheelhouse
 export DEBUG=1
 
-# st2common package not included
-PACKAGES="st2actions st2api st2auth st2client st2reactor"
+PACKAGES="st2comomn st2actions st2api st2auth st2client st2reactor"
 PACKAGES_TO_BUILD="${@:-${PACKAGES}}"
 ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 ST2_GITREV="${ST2_GITREV:-master}"
@@ -30,10 +29,6 @@ build_package() {
   fi
 
   pushd $1
-
-  find
-  cat setup.py
-
   echo
   echo "===> Starting package $1 build"
   if [ "$BUILD_DEB" = 1 ]; then
@@ -54,13 +49,14 @@ git clone --depth 1 -b $ST2_GITREV $ST2_GITURL $GITDIR
 # enter root
 pushd $GITDIR
 
-# We always build st2common since other components anyway needed
-# to have its wheel prebuilt beforehand
-build_package st2common
+# We always have to pre-build st2common wheel dist and put into
+# the common location since all the packages use it
+pushd /code/st2common && \
+  make wheelhouse && \
+  python setup.py bdist_wheel -d $WHEELDIR && popd
 
 # Build package loop
 for pkg in $PACKAGES_TO_BUILD; do
-  [ st2common = $pkg ] && continue
   build_package $pkg
 done
 
