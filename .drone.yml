@@ -1,10 +1,10 @@
 image: quay.io/dennybaa/droneunit-ubuntu:latest
 env:
-  - ALLOWED="st2common st2api st2auth"
+  - BUILDLIST="st2common st2api st2auth st2client"
   - BUILDHOST=st2packages-buildenv-deb
   - ST2_GITURL=https://github.com/dennybaa/st2.git
   - ST2_GITREV=setuptools_packaging_improvements
 script:
-  - ./.drone/build.sh $ALLOWED
+  - ./.drone/build.sh $BUILDLIST
 services:
   - quay.io/stackstorm/st2packages-buildenv-deb
