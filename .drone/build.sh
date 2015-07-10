@@ -4,6 +4,7 @@
 set -e
 shopt -s expand_aliases
 alias ssh="ssh -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
+alias scp="scp -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
 
 # We exose env by providing heredoc
 RUNBUILD=$(cat <<SCH
@@ -13,4 +14,6 @@ export ST2_GITREV="${ST2_GITREV:-master}"
 SCH
 )
 
+
+scp -r scripts busybee@$BUILDHOST
 ssh -t busybee@$BUILDHOST "$RUNBUILD"
