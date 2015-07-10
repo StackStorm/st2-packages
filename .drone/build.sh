@@ -10,7 +10,7 @@ alias scp="scp -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHosts
 RUNBUILD=$(cat <<SCH
 export ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 export ST2_GITREV="${ST2_GITREV:-master}"
-/bin/bash scripts/package.sh
+/bin/bash scripts/package.sh st2common st2api
 SCH
 )
 

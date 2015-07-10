@@ -33,7 +33,7 @@ build_package() {
   echo
   echo "===> Starting package $1 build"
   if [ "$BUILD_DEB" = 1 ]; then
-    echo dpkg-buildpackage -b -uc -us
+    dpkg-buildpackage -b -uc -us
   fi
   echo "===> Finished package $1 build sucessfully"
   popd
