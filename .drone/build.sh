@@ -14,5 +14,5 @@ export ST2_GITREV="${ST2_GITREV:-master}"
 SCH
 )
 
-scp -r scripts busybee@$BUILDHOST:
+scp -r scripts sources busybee@$BUILDHOST:
 ssh busybee@$BUILDHOST "$RUNBUILD"

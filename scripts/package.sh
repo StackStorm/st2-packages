@@ -11,6 +11,7 @@ PACKAGES_TO_BUILD="${@:-${PACKAGES}}"
 ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 ST2_GITREV="${ST2_GITREV:-master}"
 GITDIR=code
+GITUPDATE=sources
 
 # DEB / RPM
 if [ -f /etc/debian_version ]; then
@@ -41,14 +42,19 @@ build_package() {
 
 # ---------------------------------------------------------
 
+# clone repository
 git clone --depth 1 -b $ST2_GITREV $ST2_GITURL $GITDIR
+# update code with updated sources
+[ -z $GITUPDATE ] || cp -r $GITUPDATE $GITDIR
+
+# enter root
 pushd $GITDIR
 
 # We always build st2common since other components anyway needed
 # to have its wheel prebuilt beforehand
 build_package st2common
 
-
+# Build package loop
 for pkg in $PACKAGES_TO_BUILD; do
   [ st2common = $pkg ] && continue
   build_package $pkg
@@ -59,9 +65,3 @@ popd
 # move_packages () {
 #   [ $DEBIAN -eq 1 ] && mv /code/*.deb /code/*.changes /code/*.dsc /out
 # }
-
-
-
-# --- Merge new debian makefiles with upstream
-# cp -r /sources/* /code
-
