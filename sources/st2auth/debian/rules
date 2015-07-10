@@ -18,7 +18,6 @@ override_dh_installdirs:
 	dh_installdirs
 	# Restore dh_auto_install behaviour, because it was removed by dh_virtualenv
 	# dh_auto_install same with:
-	env
 	$(MAKE) install
 
 override_dh_installinit:

@@ -19,6 +19,7 @@ from pip.req import parse_requirements
 from setuptools import setup, find_packages
 from st2client import __version__
 
+
 def fetch_requirements():
     links = []
     reqs = []
