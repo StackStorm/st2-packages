@@ -14,7 +14,5 @@ export ST2_GITREV="${ST2_GITREV:-master}"
 SCH
 )
 
-
 scp -r scripts busybee@$BUILDHOST:
-ssh busybee@$BUILDHOST echo $ST2_GITURL
-# ssh -t busybee@$BUILDHOST "$RUNBUILD"
+ssh busybee@$BUILDHOST "$RUNBUILD"
