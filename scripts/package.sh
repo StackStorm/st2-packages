@@ -49,7 +49,7 @@ build_package() {
 # clone repository
 git clone --depth 1 -b $ST2_GITREV $ST2_GITURL $GITDIR
 # update code with updated sources
-[ -z $GITUPDATE ] || cp -r $GITUPDATE $GITDIR
+[ -z $GITUPDATE ] || cp -r $GITUPDATE/. $GITDIR
 
 # enter root
 pushd $GITDIR
