@@ -16,4 +16,5 @@ SCH
 
 
 scp -r scripts busybee@$BUILDHOST
-ssh -t busybee@$BUILDHOST "$RUNBUILD"
+ssh busybee@$BUILDHOST ls -l
+# ssh -t busybee@$BUILDHOST "$RUNBUILD"
