@@ -16,5 +16,5 @@ SCH
 
 
 scp -r scripts busybee@$BUILDHOST:
-ssh busybee@$BUILDHOST ls -l
+ssh busybee@$BUILDHOST echo $ST2_GITURL
 # ssh -t busybee@$BUILDHOST "$RUNBUILD"
