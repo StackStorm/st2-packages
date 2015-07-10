@@ -1,0 +1,10 @@
+# Defaults for st2resultstracker initscript
+# sourced by /etc/init.d/st2resultstracker
+# installed at /etc/default/st2resultstracker by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# Change default service startup arguments
+#DAEMON_ARGS="--config-file /etc/st2/st2.conf"

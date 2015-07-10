@@ -1,0 +1,22 @@
+# StackStorm actionrunner worker task. Spawns st2actionrunner worker.
+#
+
+description     "StackStorm actionrunner worker task"
+ 
+respawn
+respawn limit 2 5
+
+umask 007
+kill timeout 60
+
+instance $WORKERID
+ 
+script
+  NAME=st2actionrunner
+  DEFAULT_ARGS="--config-file /etc/st2/st2.conf"
+
+  # Read configuration variable file if it is present
+  [ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+  /usr/bin/$NAME ${DEFAULT_ARGS}
+end script

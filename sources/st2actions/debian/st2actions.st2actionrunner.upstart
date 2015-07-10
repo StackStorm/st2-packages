@@ -1,0 +1,18 @@
+# StackStorm actionrunner main task. Starts up multiple workers.
+#
+
+description     "StackStorm actionrunner task"
+author          "chef-client"
+
+start on filesystem and net-device-up IFACE!=lo
+stop on starting rc RUNLEVEL=[016]
+task
+ 
+script
+  WORKERSNUM=$(/usr/bin/nproc 2>/dev/null)
+  WORKERSNUM=${WORKERSNUM:-2}
+  for i in $(seq 1 $WORKERSNUM)
+  do
+    start st2actionrunner-worker WORKERID=$i
+  done
+end script

@@ -20,6 +20,13 @@ override_dh_installdirs:
 	# dh_auto_install same with:
 	$(MAKE) install
 
+override_dh_installinit:
+	# So far don't start services
+	dh_installinit --no-start --name=st2actionrunner-worker
+	dh_installinit --no-start --name=st2actionrunner
+	dh_installinit --no-start --name=st2notifier
+	dh_installinit --no-start --name=st2resultstracker
+
 override_dh_installdeb:
 	$(MAKE) post_install
 	dh_installdeb

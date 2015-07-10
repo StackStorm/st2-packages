@@ -1,6 +1,6 @@
 image: quay.io/dennybaa/droneunit-ubuntu:latest
 env:
-  - BUILDLIST="st2common st2api st2auth st2client st2reactor"
+  - BUILDLIST="st2common st2api st2auth st2client st2reactor st2actions"
   - BUILDHOST=st2packages-buildenv-deb
   - ST2_GITURL=https://github.com/dennybaa/st2.git
   - ST2_GITREV=setuptools_packaging_improvements
