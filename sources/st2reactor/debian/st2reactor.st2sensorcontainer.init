@@ -10,7 +10,7 @@
 #
 ### END INIT INFO
 
-# Author: unknown <opsadmin@stackstorm.com>
+# Author: StackStorm Engineering <opsadmin@stackstorm.com>
 
 # Do NOT "set -e"
 
@@ -18,7 +18,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2sensorcontainer"
 NAME=st2sensorcontainer
-DAEMON=/usr/bin/st2sensorcontainer
+DAEMON=/usr/bin/$NAME
 DAEMON_ARGS="--config-file /etc/st2/st2.conf"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

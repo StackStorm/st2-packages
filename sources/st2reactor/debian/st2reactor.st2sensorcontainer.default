@@ -1,6 +1,6 @@
 # Defaults for st2sensorcontainer initscript
 # sourced by /etc/init.d/st2sensorcontainer
-# installed at /etc/default/st2reactor by the maintainer scripts
+# installed at /etc/default/st2sensorcontainer by the maintainer scripts
 
 #
 # This is a POSIX shell fragment

@@ -1,5 +1,5 @@
 #!/bin/sh
-# preinst script for st2reactor
+# preinst script for st2 component
 #
 # see: dh_installdeb(1)
 
@@ -10,15 +10,13 @@ set -e
 #        * <new-preinst> `install' <old-version>
 #        * <new-preinst> `upgrade' <old-version>
 #        * <old-preinst> `abort-upgrade' <new-version>
-# for details, see http://www.debian.org/doc/debian-policy/ or
-# the debian-policy package
 
-
+PKG=$DPKG_MAINTSCRIPT_PACKAGE
 DIV_LINKS="bin/st2-bootstrap-rmq bin/st2-register-content"
 
 for file in $DIV_LINKS; do
   if [ install = "$1" ]; then
-     dpkg-divert --package st2api --add --rename \
+     dpkg-divert --package $PKG --add --rename \
         --divert /usr/${file}.divert /usr/$file
   fi
 done
