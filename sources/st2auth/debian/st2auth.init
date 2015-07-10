@@ -1,12 +1,12 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          st2api
+# Provides:          st2auth
 # Required-Start:    $local_fs $network $remote_fs $syslog
 # Required-Stop:     $local_fs $network $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: StackStorm st2api
-# Description:       Debain sysvinit for st2api (StackStorm API service).
+# Short-Description: StackStorm st2auth
+# Description:       Debain sysvinit for st2auth (StackStorm API service).
 #
 ### END INIT INFO
 
@@ -16,9 +16,9 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="st2api"
-NAME=st2api
-DAEMON=/usr/share/python/$NAME/bin/st2api
+DESC="st2auth"
+NAME=st2auth
+DAEMON=/usr/share/python/$NAME/bin/st2auth
 DAEMON_ARGS="--config-file /etc/st2/st2.conf"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

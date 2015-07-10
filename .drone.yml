@@ -1,6 +1,6 @@
 image: quay.io/dennybaa/droneunit-ubuntu:latest
 env:
-  - ALLOWED="st2common st2api"
+  - ALLOWED="st2common st2api st2auth"
   - BUILDHOST=st2packages-buildenv-deb
   - ST2_GITURL=https://github.com/dennybaa/st2.git
   - ST2_GITREV=setuptools_packaging_improvements

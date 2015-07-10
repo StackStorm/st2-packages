@@ -10,7 +10,8 @@ PACKAGES_TO_BUILD="${@:-${PACKAGES}}"
 ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 ST2_GITREV="${ST2_GITREV:-master}"
 GITDIR=code
-GITUPDATE=sources
+# by defaul
+GITUPDATE=${GITUPDATE:-sources}
 ARTIFACTS=$(pwd)/build
 
 # Take care about artifacts dir creation
@@ -55,7 +56,11 @@ copy_artifact() {
 
 # clone repository
 git clone --depth 1 -b $ST2_GITREV $ST2_GITURL $GITDIR
-# update code with updated sources
+
+# !!! Update code with updated sources !!!
+# Now this step is required, because new debian packaging code and
+# new propper setuptools (setup.py) code hasn't been merged to master yet.
+#
 [ -z $GITUPDATE ] || cp -r $GITUPDATE/. $GITDIR
 
 # We always have to pre-build st2common wheel dist and put into

@@ -1,7 +1,7 @@
 Source: st2auth
 Section: Python
 Priority: optional
-Maintainer: unknown <opsadmin@stackstorm.com>
+Maintainer: StackStorm Engineering <opsadmin@stackstorm.com>
 Build-Depends: debhelper (>= 9), python, dh-virtualenv (>= 0.8)
 Standards-Version: 3.9.5
 Homepage: <insert the upstream URL, if relevant>

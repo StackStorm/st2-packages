@@ -1,5 +1,5 @@
 #!/bin/sh
-# preinst script for st2api
+# preinst script for st2 component
 #
 # see: dh_installdeb(1)
 
@@ -11,11 +11,12 @@ set -e
 #        * <new-preinst> `upgrade' <old-version>
 #        * <old-preinst> `abort-upgrade' <new-version>
 
+PKG=$DPKG_MAINTSCRIPT_PACKAGE
 DIV_LINKS="bin/st2-bootstrap-rmq bin/st2-register-content"
 
 for file in $DIV_LINKS; do
   if [ install = "$1" ]; then
-     dpkg-divert --package st2api --add --rename \
+     dpkg-divert --package $PKG --add --rename \
         --divert /usr/${file}.divert /usr/$file
   fi
 done
