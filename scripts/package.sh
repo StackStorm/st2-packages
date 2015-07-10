@@ -3,7 +3,7 @@
 set -e
 
 export WHEELDIR=/tmp/wheelhouse
-export DEBUG=1
+# export DEBUG=1
 
 PACKAGES="st2common st2actions st2api st2auth st2client st2reactor"
 PACKAGES_TO_BUILD="${@:-${PACKAGES}}"
@@ -46,7 +46,7 @@ build_package() {
 # Copy built artifact into artifacts store
 copy_artifact() {
   if [ "$BUILD_DEB" = 1 ]; then
-    cp -v $1{*.deb,*.changes,*.dsc} $ARTIFACTS || true
+    cp -v $1{*.deb,*.changes,*.dsc} $ARTIFACTS 2>/dev/null || true
   fi 
 }
 
@@ -64,19 +64,18 @@ pushd $GITDIR/st2common && \
   make wheelhouse && \
   python setup.py bdist_wheel -d $WHEELDIR && popd
 
-# enter root
-pushd $GITDIR
 
-# Build package loop
+# Enter root and build packages in a loop
+pushd $GITDIR
 for pkg in $PACKAGES_TO_BUILD; do
   build_package $pkg
   copy_artifact $pkg
 done
-
 popd
 
+# Some debug info
 if [ "$DEBUG" = 1 ]; then
   echo
-  echo "$GITDIR after packages build ===>"
-  ls -l $GITDIR
+  echo "Contents of artifacts directory ===>"
+  ls -1 $ARTIFACTS
 fi

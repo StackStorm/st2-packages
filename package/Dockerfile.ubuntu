@@ -1,4 +1,6 @@
 FROM quay.io/dennybaa/droneunit-ubuntu
 ADD ./ /root/workdir
+VOLUME ["/home/busybee/build"]
+WORKDIR /root/workdir
 
-CMD ["/bin/bash", "-c", "cd /root/workdir; bash .drone/build.sh"]
+ENTRYPOINT ["/bin/bash", "/root/workdir/.drone/build.sh"]

@@ -2,6 +2,8 @@
 
 buildenvdeb: 
   image: quay.io/stackstorm/st2packages-buildenv-deb
+  volumes:
+    - /tmp:/home/busybee/build
 
 ubuntu:
   build: .

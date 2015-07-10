@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Build runner is executed on droneunit,
+# the actual build process takes place on $BUILDHOST.
 #
 set -e
 shopt -s expand_aliases
@@ -10,9 +12,9 @@ alias scp="scp -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHosts
 RUNBUILD=$(cat <<SCH
 export ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 export ST2_GITREV="${ST2_GITREV:-master}"
-/bin/bash scripts/package.sh st2common st2api
+/bin/bash scripts/package.sh $@
 SCH
 )
 
-scp -r scripts sources busybee@$BUILDHOST:
+scp -r scripts sources busybee@$BUILDHOST: &>/dev/null
 ssh busybee@$BUILDHOST "$RUNBUILD"

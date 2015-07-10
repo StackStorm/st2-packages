@@ -11,23 +11,29 @@ pip install docker-compose
 
 ## Build containers
 
-For the first build run:
+Build packaging container with the following command:
 ```
 docker-compose build
-```
-if you want to rebuild packaging container run:
-```
-docker-compose build --no-cache debian
+
+# Or if you want to rebuild packaging containers invoke
+docker-compose build --no-cache
 ```
 
 ## Build packages
-On build docker mounts host /tmp directory where built debian packages will be written. To build debian packages invoke:
-```
-# Build all st2 packages
-docker-compose run debian
 
-# Build specific st2 packages
-docker-compose run debian st2actions st2api
+On build docker mounts host /tmp directory where built debian packages will be written. Invocation examples:
+```
+# Build all world
+docker-compose up -d buildenvdeb && \
+docker-compose run ubuntu
+
+# Build specific st2 packages.
+# First command is required as it rebuilds buildenvdeb container
+docker-compose up -d buildenvdeb && \
+docker-compose run ubuntu st2actions st2api
+
+# Finally you may want to clean up buildenvdeb container
+docker-compose stop && docker-compose rm -f
 ```
 
 ## Trying if IT's real:)
