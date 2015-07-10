@@ -30,6 +30,10 @@ build_package() {
   fi
 
   pushd $1
+
+  find
+  cat setup.py
+
   echo
   echo "===> Starting package $1 build"
   if [ "$BUILD_DEB" = 1 ]; then
