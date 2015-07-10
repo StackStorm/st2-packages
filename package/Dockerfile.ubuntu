@@ -1,0 +1,4 @@
+FROM quay.io/dennybaa/droneunit-ubuntu
+ADD ./ /root/workdir
+
+CMD ["/bin/bash", "-c", "cd /root/workdir; bash .drone/build.sh"]

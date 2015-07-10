@@ -1,14 +1,14 @@
 # docker-compose >= 1.3.0rc3
 
-# buildenv:
-#   dockerfile: buildenv/Dockerfile.debian
-#   build: .
+buildenvdeb: 
+  image: quay.io/stackstorm/st2packages-buildenv-deb
 
-debian:
-  dockerfile: package/Dockerfile.debian
+ubuntu:
   build: .
-  volumes:
-    - "sources:/sources"
-    - "/tmp:/out"
-
-# $(pwd)/sources:/sources st2packages-debian
+  dockerfile: package/Dockerfile.ubuntu
+  environment:
+    - BUILDHOST=buildenvdeb
+    - ST2_GITURL=https://github.com/dennybaa/st2.git
+    - ST2_GITREV=setuptools_packaging_improvements
+  links:
+    - buildenvdeb

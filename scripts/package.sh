@@ -39,21 +39,21 @@ build_package() {
 }
 
 
-# ---------------------------------------------------------
+# ------------------------------- MAIN -------------------------------
 
 # clone repository
 git clone --depth 1 -b $ST2_GITREV $ST2_GITURL $GITDIR
 # update code with updated sources
 [ -z $GITUPDATE ] || cp -r $GITUPDATE/. $GITDIR
 
-# enter root
-pushd $GITDIR
-
 # We always have to pre-build st2common wheel dist and put into
 # the common location since all the packages use it
-pushd /code/st2common && \
+pushd $GITDIR/st2common && \
   make wheelhouse && \
   python setup.py bdist_wheel -d $WHEELDIR && popd
+
+# enter root
+pushd $GITDIR
 
 # Build package loop
 for pkg in $PACKAGES_TO_BUILD; do
