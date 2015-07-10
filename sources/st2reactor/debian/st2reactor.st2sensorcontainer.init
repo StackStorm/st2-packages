@@ -6,7 +6,7 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: StackStorm st2sensorcontainer
-# Description:       Debain sysvinit for st2sensorcontainer (StackStorm API service).
+# Description:       Debain sysvinit for st2sensorcontainer.
 #
 ### END INIT INFO
 
