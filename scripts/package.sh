@@ -67,8 +67,8 @@ if (! echo $BUILD_LIST | grep -q "\bst2common\b"); then
 fi
 
 # Populate wheel house with st2common wheel since other packages require it!
-# pushd $GITDIR/st2common && make wheelhouse && \
-#   python setup.py bdist_wheel -d $WHEELDIR && popd
+pushd $GITDIR/st2common && make wheelhouse && \
+  python setup.py bdist_wheel -d $WHEELDIR && popd
 
 # Enter root and build packages in a loop
 pushd $GITDIR
