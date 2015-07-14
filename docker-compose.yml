@@ -2,15 +2,17 @@
 
 buildenvdeb: 
   image: quay.io/stackstorm/st2packages-buildenv-deb
-  volumes:
-    - /tmp:/home/busybee/build
 
 ubuntu:
   build: .
   dockerfile: package/Dockerfile.ubuntu
   environment:
-    - BUILDHOST=buildenvdeb
+    # Full list of st2 packages configures the default build
+    - ST2_PACKAGES="st2common st2actions st2api st2auth st2client st2reactor"
     - ST2_GITURL=https://github.com/dennybaa/st2.git
     - ST2_GITREV=setuptools_packaging_improvements
+    - BUILDHOST=buildenvdeb
   links:
     - buildenvdeb
+  volumes:
+    - /tmp/st2-packages:/root/build

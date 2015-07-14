@@ -25,12 +25,12 @@ On build docker mounts host /tmp directory where built debian packages will be w
 ```
 # Build all world
 docker-compose up -d buildenvdeb && \
-docker-compose run ubuntu
+docker-compose run --rm ubuntu
 
 # Build specific st2 packages.
 # First command is required as it rebuilds buildenvdeb container
 docker-compose up -d buildenvdeb && \
-docker-compose run ubuntu st2actions st2api
+docker-compose run --rm ubuntu st2actions st2api
 
 # Finally you may want to clean up buildenvdeb container
 docker-compose stop && docker-compose rm -f

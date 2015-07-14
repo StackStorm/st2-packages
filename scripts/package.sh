@@ -3,19 +3,17 @@
 set -e
 
 export WHEELDIR=/tmp/wheelhouse
-# export DEBUG=1
+export DEBUG=1
 
-PACKAGES="st2common st2actions st2api st2auth st2client st2reactor"
-PACKAGES_TO_BUILD="${@:-${PACKAGES}}"
+BUILD_LIST="$@"
 ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 ST2_GITREV="${ST2_GITREV:-master}"
-GITDIR=code
-# by defaul
-GITUPDATE=${GITUPDATE:-sources}
-ARTIFACTS=$(pwd)/build
+GITDIR=code                       # code directore
+GITUPDATE=${GITUPDATE:-sources}   # updateable sources for st2 repository
+ARTIFACTS_PATH=~/build
 
 # Take care about artifacts dir creation
-[ -d $ARTIFACTS ] || mkdir -p $ARTIFACTS
+[ -d $ARTIFACTS_PATH ] || mkdir -p $ARTIFACTS_PATH
 
 # DEB / RPM
 if [ -f /etc/debian_version ]; then
@@ -47,7 +45,7 @@ build_package() {
 # Copy built artifact into artifacts store
 copy_artifact() {
   if [ "$BUILD_DEB" = 1 ]; then
-    cp -v $1{*.deb,*.changes,*.dsc} $ARTIFACTS 2>/dev/null || true
+    cp -v $1{*.deb,*.changes,*.dsc} $ARTIFACTS_PATH 2>/dev/null || true
   fi 
 }
 
@@ -63,16 +61,18 @@ git clone --depth 1 -b $ST2_GITREV $ST2_GITURL $GITDIR
 #
 [ -z $GITUPDATE ] || cp -r $GITUPDATE/. $GITDIR
 
-# We always have to pre-build st2common wheel dist and put into
-# the common location since all the packages use it
-pushd $GITDIR/st2common && \
-  make wheelhouse && \
-  python setup.py bdist_wheel -d $WHEELDIR && popd
+# Common is the dependency for all packages, so it's always built!
+if (! echo $BUILD_LIST | grep -q "\bst2common\b"); then
+  BUILD_LIST="st2common ${BUILD_LIST}"
+fi
 
+# Populate wheel house with st2common wheel since other packages require it!
+# pushd $GITDIR/st2common && make wheelhouse && \
+#   python setup.py bdist_wheel -d $WHEELDIR && popd
 
 # Enter root and build packages in a loop
 pushd $GITDIR
-for pkg in $PACKAGES_TO_BUILD; do
+for pkg in $BUILD_LIST; do
   build_package $pkg
   copy_artifact $pkg
 done
@@ -81,6 +81,6 @@ popd
 # Some debug info
 if [ "$DEBUG" = 1 ]; then
   echo
-  echo "Contents of artifacts directory ===>"
-  ls -1 $ARTIFACTS
+  echo "DEBUG: Contents of artifacts directory ===>"
+  ls -1 $ARTIFACTS_PATH
 fi
