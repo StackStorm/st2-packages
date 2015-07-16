@@ -3,7 +3,7 @@
 set -e
 
 export WHEELDIR=/tmp/wheelhouse
-export DEBUG=1
+# export DEBUG
 
 BUILD_LIST="$@"
 ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
@@ -62,9 +62,7 @@ git clone --depth 1 -b $ST2_GITREV $ST2_GITURL $GITDIR
 [ -z $GITUPDATE ] || cp -r $GITUPDATE/. $GITDIR
 
 # Common is the dependency for all packages, so it's always built!
-if (! echo $BUILD_LIST | grep -q "\bst2common\b"); then
-  BUILD_LIST="st2common ${BUILD_LIST}"
-fi
+BUILD_LIST="st2common $(echo $BUILD_LIST | sed 's/st2common//')"
 
 # Populate wheel house with st2common wheel since other packages require it!
 pushd $GITDIR/st2common && make wheelhouse && \

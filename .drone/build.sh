@@ -8,14 +8,14 @@ shopt -s expand_aliases
 alias ssh="ssh -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
 alias scp="scp -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
 
-PACKAGES_TO_BUILD="${@:-${ST2_PACKAGES}}"
+PACKAGE_LIST=${@:-${ST2_PACKAGES}}
 
 # We exose env by providing heredoc
 RUNBUILD=$(cat <<SCH
 export ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 export ST2_GITREV="${ST2_GITREV:-master}"
 echo "------------------- PACKAGE BUILD STAGE -------------------"
-/bin/bash scripts/package.sh $PACKAGES_TO_BUILD
+/bin/bash scripts/package.sh $PACKAGE_LIST
 SCH
 )
 
@@ -26,4 +26,6 @@ ssh busybee@$BUILDHOST "$RUNBUILD"
 scp -r busybee@$BUILDHOST:build /root/
 
 echo "------------------- INTEGRATION TESTING STAGE -------------------"
-/bin/bash scripts/install.sh
+
+# Install packages on the host system
+/bin/bash scripts/install.sh $PACKAGE_LIST

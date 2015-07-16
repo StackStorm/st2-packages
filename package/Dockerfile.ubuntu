@@ -1,4 +1,4 @@
-FROM quay.io/dennybaa/droneunit-ubuntu
+FROM quay.io/dennybaa/droneruby-ubuntu
 ADD ./ /root/workdir
 VOLUME ["/root/build"]
 WORKDIR /root/workdir
