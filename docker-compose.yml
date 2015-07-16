@@ -15,4 +15,4 @@ ubuntu:
   links:
     - buildenvdeb
   volumes:
-    - /tmp/st2-packages:/root/build
+    - /tmp/st2-packages:/root/packages

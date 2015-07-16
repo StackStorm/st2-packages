@@ -8,6 +8,7 @@ shopt -s expand_aliases
 alias ssh="ssh -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
 alias scp="scp -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
 
+export PACKAGE_DIR=/root/packages
 PACKAGE_LIST=${@:-${ST2_PACKAGES}}
 
 # We exose env by providing heredoc
@@ -23,7 +24,8 @@ scp -r scripts sources busybee@$BUILDHOST: 1>/dev/null
 ssh busybee@$BUILDHOST "$RUNBUILD"
 
 # copy build artifact directory to the testing machine
-scp -r busybee@$BUILDHOST:build /root/
+scp -pr busybee@$BUILDHOST:build /tmp 1>/dev/bull && \
+    cp -prvT /tmp/build $PACKAGE_DIR && rm -r /tmp/build
 
 echo "------------------- INTEGRATION TESTING STAGE -------------------"
 

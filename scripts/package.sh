@@ -1,5 +1,7 @@
 #!/bin/bash
-
+#
+# Script prepares st2 repository and performs build of OS packages.
+#
 set -e
 
 export WHEELDIR=/tmp/wheelhouse
