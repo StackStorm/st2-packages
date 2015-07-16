@@ -15,4 +15,5 @@ ubuntu:
   links:
     - buildenvdeb
   volumes:
+    - .:/root/workdir
     - /tmp/st2-packages:/root/packages

@@ -1,6 +1,5 @@
 FROM quay.io/dennybaa/droneruby-ubuntu
-ADD ./ /root/workdir
-VOLUME ["/root/build"]
+VOLUME ["/root/workdir", "/root/build"]
 WORKDIR /root/workdir
 
 ENTRYPOINT ["/bin/bash", "/root/workdir/.drone/build.sh"]
