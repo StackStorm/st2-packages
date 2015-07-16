@@ -8,7 +8,8 @@ PACKAGE_DIR=${PACKAGE_DIR:-packages}
 
 # DEB / RPM
 if [ -f /etc/debian_version ]; then
-  INSTALLCMD="gdebi -n"
+  # noninteractive and quiet
+  INSTALLCMD="gdebi -nq"
   PKGEXT=deb
 else
   INSTALLCMD=
@@ -25,6 +26,7 @@ for name in $PACKAGE_LIST; do
   package_path=$(ls -1t ${PACKAGE_DIR}/${name}*.${PKGEXT} | head -n1)
   fullname=$(basename $package_path)
   fullname=${fullname%%.$PKGEXT}
+  echo
   echo "===> Installing package $fullname"
   $INSTALLCMD $package_path
 done

@@ -21,10 +21,12 @@ set -e
 PKG=$DPKG_MAINTSCRIPT_PACKAGE
 DIV_LINKS="bin/st2-bootstrap-rmq bin/st2-register-content"
 
+# Link to an existing st2 binary which is left on the system
 for file in $DIV_LINKS; do
   if [ remove = "$1" -o abort-install = "$1" -o disappear = "$1" ]; then
-     dpkg-divert --package $PKG --remove --rename \
-        --divert /usr/${file}.divert /usr/$file
+    [ -L /usr/$file ] && rm /usr/$file
+    div=$(find /usr/share/python/st2*/bin -name `basename $file` -executable -print -quit)
+    [ -z "$div" ] || ln -s $div /usr/$file
   fi
 done
 
