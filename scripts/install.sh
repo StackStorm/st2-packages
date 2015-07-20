@@ -26,7 +26,6 @@ for name in $PACKAGE_LIST; do
   package_path=$(ls -1t ${PACKAGE_DIR}/${name}*.${PKGEXT} | head -n1)
   fullname=$(basename $package_path)
   fullname=${fullname%%.$PKGEXT}
-  echo
   echo "===> Installing package $fullname"
   $INSTALLCMD $package_path
 done

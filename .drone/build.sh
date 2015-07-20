@@ -11,28 +11,29 @@ alias scp="scp -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHosts
 export PACKAGE_DIR=/root/packages
 export PACKAGE_LIST=${@:-${ST2_PACKAGES}}
 
-
 # We exose env via ssh by runing heredoc command
 RUNBUILD=$(cat <<SCH
 export ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 export ST2_GITREV="${ST2_GITREV:-master}"
-echo "------------------- PACKAGE BUILD STAGE -------------------"
+echo -e "\n--------------- Packages build phase ---------------"
 /bin/bash scripts/package.sh $PACKAGE_LIST
 SCH
 )
 
+# Merge upstream st2 sources (located on the build host) with updates
+# from the current repository and perform packages build.
 scp -r scripts sources busybee@$BUILDHOST: 1>/dev/null
 ssh busybee@$BUILDHOST "$RUNBUILD"
 
-# copy build artifact directory to the testing machine
+# Copy build artifact directory content on to the testing machine
+# (i.e. this machine where this script is run).
 scp -pr busybee@$BUILDHOST:build /tmp 1>/dev/bull && \
     cp -prvT /tmp/build $PACKAGE_DIR && rm -r /tmp/build
 
-echo "------------------- INTEGRATION TESTING STAGE -------------------"
-# Install packages on the host system
+echo -e "\n--------------- Packages installation phase ---------------"
 /bin/bash scripts/install.sh $PACKAGE_LIST
 
-# Run integration testing
 source /etc/profile.d/rvm.sh
 bundle install
+echo -e "\n--------------- Integration tests phase ---------------"
 rspec spec
