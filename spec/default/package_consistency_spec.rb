@@ -2,7 +2,17 @@ require 'spec_helper'
 require 'packages_helper'
 
 packages = PackagesHelper
-contexts_available = %w(st2common)
+contexts_available = %w(st2common st2api)
+
+shared_examples 'common binaries' do
+  describe file('/usr/bin/st2-bootstrap-rmq') do
+    it_behaves_like 'script or binary'
+  end
+
+  describe file('/usr/bin/st2-register-content') do
+    it_behaves_like 'script or binary'
+  end
+end
 
 # Package st2common check up
 shared_context 'st2common' do
@@ -26,12 +36,33 @@ shared_context 'st2common' do
   end
 
   describe file('/var/log/st2') do
-    it_behaves_like 'owner_has_rwx', packages.service_user
+    it { is_expected.to be_directory & be_writable.by('owner') }
   end
 
   describe file('/home/stanley') do
-    it_behaves_like 'owner_has_rwx', packages.stanley_user
+    it do
+      is_expected.to be_directory & be_writable.by('owner') & \
+        be_readable.by('owner') & be_executable.by('owner')
+    end
   end
+end
+
+# Package st2api check up
+shared_context 'st2api' do
+  describe file('/usr/bin/st2api') do
+    it_behaves_like 'script or binary'
+  end
+
+  describe file('/etc/default/st2api'),
+           if: %w(debian ubuntu).include?(os[:family]) do
+    it { is_expected.to exist }
+  end
+
+  describe service('st2api') do
+    it { is_expected.to be_enabled }
+  end
+
+  include_examples 'common binaries'
 end
 
 describe 'Package consistency:' do

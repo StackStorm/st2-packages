@@ -17,7 +17,7 @@ DIV_LINKS="bin/st2-bootstrap-rmq bin/st2-register-content"
 # Handle links manually without dpkg-divert (it can't be used in this case).
 for file in $DIV_LINKS; do
   # Links are updated on removal, so just create if a link doesn't exist
-  [ -L /usr/$file ] || ln -s usr/share/python/$PKG/$file /usr/$file
+  [ -L /usr/$file ] || ln -s /usr/share/python/$PKG/$file /usr/$file
 done
 
 # dh_installdeb will replace this with shell code automatically
