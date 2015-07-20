@@ -1,6 +1,32 @@
 # PackagesHelper
 #
 module PackagesHelper
+  CONF_DIR = '/etc/st2'
+  LOG_DIR  = '/var/log/st2'
+
+  OS_PACKAGE_OPTS = {
+    'st2actions' => {
+      services: %w(st2actionrunner st2notifier st2resultstracker),
+      logging_conf: %w(notifier resultstracker)
+    },
+    'st2reactor' => {
+      services: %w(st2rulesengine st2sensorcontainer),
+      binaries: %w(st2-rule-tester st2-trigger-refire),
+      logging_conf: %w(rulesengine sensorcontainer),
+      default_logs: false
+    }
+  }
+
+  COMMON_DIRECTORIES = %W(
+    #{CONF_DIR}
+    #{LOG_DIR}
+    /etc/logrotate.d
+    /opt/stackstorm/packs
+  )
+
+  SERVICE_USER = 'st2'
+  STANLEY_USER = 'stanley'
+
   class << self
     # Full list of available st2 packages
     def full_list
@@ -12,21 +38,15 @@ module PackagesHelper
       @list ||= (ENV['PACKAGE_LIST'] || '').split
     end
 
-    def essential_directories
-      %w( /etc/st2
-          /etc/logrotate.d
-          /var/log/st2
-          /opt/stackstorm/packs )
-    end
-
-    # System services user except st2action runner (which is runas root)
-    def service_user
-      'st2'
-    end
-
-    # Stanley is an action execution user and sudoer
-    def stanley_user
-      'stanley'
+    # OS package options hash generating method
+    def opts(package_name)
+      {
+        name: package_name,
+        services: [package_name],
+        binaries: [],
+        logging_conf: [],
+        default_logs: true
+      }.merge(OS_PACKAGE_OPTS[package_name] || {})
     end
   end
 end

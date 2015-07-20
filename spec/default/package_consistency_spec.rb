@@ -2,134 +2,116 @@ require 'spec_helper'
 require 'packages_helper'
 
 packages = PackagesHelper
-contexts_available = %w(st2actions st2api st2auth st2common st2reactor)
 
-shared_examples 'common binaries' do
-  describe file('/usr/bin/st2-bootstrap-rmq') do
-    it_behaves_like 'script or binary'
-  end
+# Default os package layout. It contains:
+#   - A service or multiple service.
+#   - Zero or more binaries which.
+#
+shared_examples 'os package' do |opts|
+  context "#{opts[:name]}" do
+    describe file("/etc/#{opts[:name]}") do
+      it { is_expected.to be_directory }
+    end
 
-  describe file('/usr/bin/st2-register-content') do
-    it_behaves_like 'script or binary'
-  end
-end
+    # Logging configurations
+    if opts[:default_logs]
+      describe file("/etc/#{opts[:name]}/logging.conf") do
+        it { is_expected.to be_file }
+      end
 
-# Package st2actions check up
-shared_context 'st2actions' do
-  services = %w(st2actionrunner st2notifier st2resultstracker)
-  services.each do |service_name|
-    describe file("/usr/bin/#{service_name}") do
+      describe file("/etc/#{opts[:name]}/syslog.conf") do
+        it { is_expected.to be_file }
+      end
+    end
+
+    opts[:logging_conf].each do |log_name|
+      describe file("/etc/#{opts[:name]}/logging.#{log_name}.conf") do
+        example = described_class
+        it { is_expected.to be_file }
+        it "should log to #{packages::LOG_DIR}/st2#{log_name}.log" do
+          content = example.described_class
+          expect(content).to match(%r{#{packages::LOG_DIR}/st2#{log_name}.log})
+        end
+        it "should log to #{packages::LOG_DIR}/st2#{log_name}.audit.log" do
+          content = example.described_class
+          expect(content).to \
+            match(%r{#{packages::LOG_DIR}/st2#{log_name}.audit.log})
+        end
+      end
+
+      describe file("/etc/#{opts[:name]}/syslog.#{log_name}.conf") do
+        it { is_expected.to be_file }
+      end
+    end
+
+    # Check services files
+    opts[:services].each do |service_name|
+      describe file("/usr/bin/#{service_name}") do
+        it_behaves_like 'script or binary'
+      end
+
+      describe file("/etc/default/#{service_name}"),
+               if: %w(debian ubuntu).include?(os[:family]) do
+        it { is_expected.to exist }
+      end
+
+      describe service(service_name) do
+        it { is_expected.to be_enabled }
+      end
+    end
+
+    # Check binaries
+    opts[:binaries].each do |binary|
+      describe file("/usr/bin/#{binary}") do
+        it_behaves_like 'script or binary'
+      end
+    end
+
+    # Shared binares are installed by multiple st2 packages.
+    # They exist due to st2common and require it, however st2common
+    # is not packaged with its own  virtualenv.
+    #
+    describe file('/usr/bin/st2-bootstrap-rmq') do
       it_behaves_like 'script or binary'
     end
 
-    describe file("/etc/default/#{service_name}"),
-             if: %w(debian ubuntu).include?(os[:family]) do
-      it { is_expected.to exist }
-    end
-
-    describe service(service_name) do
-      it { is_expected.to be_enabled }
+    describe file('/usr/bin/st2-register-content') do
+      it_behaves_like 'script or binary'
     end
   end
-
-  include_examples 'common binaries'
 end
 
-# Package st2api check up
-shared_context 'st2api' do
-  describe file('/usr/bin/st2api') do
-    it_behaves_like 'script or binary'
-  end
-
-  describe file('/etc/default/st2api'),
-           if: %w(debian ubuntu).include?(os[:family]) do
-    it { is_expected.to exist }
-  end
-
-  describe service('st2api') do
-    it { is_expected.to be_enabled }
-  end
-
-  include_examples 'common binaries'
-end
-
-# Package st2auth check up
-shared_context 'st2auth' do
-  describe file('/usr/bin/st2auth') do
-    it_behaves_like 'script or binary'
-  end
-
-  describe file('/etc/default/st2auth'),
-           if: %w(debian ubuntu).include?(os[:family]) do
-    it { is_expected.to exist }
-  end
-
-  describe service('st2auth') do
-    it { is_expected.to be_enabled }
-  end
-
-  include_examples 'common binaries'
-end
-
-# Package st2common check up
+# Package st2common examples
 shared_context 'st2common' do
-  describe file('/etc/st2/st2.conf') do
+  describe file("#{packages::CONF_DIR}/st2.conf") do
     it { is_expected.to exist }
   end
 
-  packages.essential_directories.each do |d|
+  packages::COMMON_DIRECTORIES.each do |d|
     describe file(d) do
       it { is_expected.to be_directory }
     end
   end
 
-  describe user(packages.service_user) do
+  describe user(packages::SERVICE_USER) do
     it { is_expected.to exist }
   end
 
-  describe user(packages.stanley_user) do
+  describe user(packages::STANLEY_USER) do
     it { is_expected.to exist }
-    it { is_expected.to have_home_directory '/home/stanley' }
+    it { is_expected.to have_home_directory "/home/#{packages::STANLEY_USER}" }
   end
 
-  describe file('/var/log/st2') do
+  describe file(packages::LOG_DIR) do
     it { is_expected.to be_directory & be_writable.by('owner') }
   end
 
-  describe file('/home/stanley') do
+  describe file("/home/#{packages::STANLEY_USER}") do
     it do
       is_expected.to be_directory & be_writable.by('owner') & \
         be_readable.by('owner') & be_executable.by('owner')
     end
   end
-end
-
-# Package st2reactor check up
-shared_context 'st2reactor' do
-  services = %w(st2rulesengine st2sensorcontainer)
-  services.each do |service_name|
-    describe file("/usr/bin/#{service_name}") do
-      it_behaves_like 'script or binary'
-    end
-
-    describe file("/etc/default/#{service_name}"),
-             if: %w(debian ubuntu).include?(os[:family]) do
-      it { is_expected.to exist }
-    end
-
-    describe service(service_name) do
-      it { is_expected.to be_enabled }
-    end
-  end
-
-  binaries = %w(st2-rule-tester st2-trigger-refire)
-  binaries.each do |binary|
-    describe file("/usr/bin/#{binary}") do
-      it_behaves_like 'script or binary'
-    end
-  end
-
-  include_examples 'common binaries'
 end
 
 describe 'Package consistency' do
@@ -144,11 +126,15 @@ describe 'Package consistency' do
   end
 
   packages.list.each do |name|
-    # package should be installed
     describe package(name) do
       it { is_expected.to be_installed }
     end
-
-    include_context(name) if contexts_available.include?(name)
   end
+
+  include_examples 'st2common'
+
+  it_behaves_like 'os package', packages.opts('st2api')
+  it_behaves_like 'os package', packages.opts('st2auth')
+  it_behaves_like 'os package', packages.opts('st2actions')
+  it_behaves_like 'os package', packages.opts('st2reactor')
 end
