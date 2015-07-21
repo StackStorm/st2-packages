@@ -50,7 +50,7 @@ echo -e "\n--------------- Packages install phase ---------------"
 
 # We can't use volumes_from in Drone, that's why perform copy
 if [ "$COMPOSE" != "1" ]; then
-  scp -pr busybee@$BUILDHOST:build busybee@$TESTHOST 1>/dev/null
+  scp -r busybee@$BUILDHOST:build busybee@$TESTHOST: 1>/dev/null
 fi
 scp -r scripts busybee@$TESTHOST: &>/dev/null || true
 th_cmd /bin/bash scripts/install.sh
@@ -61,5 +61,17 @@ th_cmd /bin/bash scripts/install.sh
 source /etc/profile.d/rvm.sh
 bundle install
 
-echo -e "\n--------------- Tests phase ---------------"
-rspec spec
+# If all packages are available, we can do full integration tests.
+l1=$(echo $PACKAGE_LIST | sed 's/ /\n/' | sort -u)
+l2=$(echo $ST2_PACKAGES | sed 's/ /\n/' | sort -u)
+
+if [ "$l1" = "$l2" ]; then
+  # th_cmd /bin/bash scripts/dependencies.sh
+
+  echo -e "\n--------------- Tests phase ---------------"
+  rspec spec
+else
+
+  echo -e "\n--------------- Tests phase ---------------"
+  rspec spec/default/package*_spec.rb
+fi
