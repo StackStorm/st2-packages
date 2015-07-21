@@ -9,11 +9,13 @@ alias ssh="ssh -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHosts
 alias scp="scp -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
 
 export PACKAGE_LIST="${@:-${ST2_PACKAGES}}"
+export MISTRAL_DISABLED=${MISTRAL_DISABLED:-0}
 
 # Remote environment passthrough
 #
 REMOTEENV=$(cat <<SCH
-export DEBUG="${DEBUG:-0}"
+export DEBUG=${DEBUG:-0}
+export MISTRAL_DISABLED=$MISTRAL_DISABLED
 export PACKAGE_LIST="${PACKAGE_LIST}"
 export ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 export ST2_GITREV="${ST2_GITREV:-master}"
@@ -21,7 +23,11 @@ export BUILD_ARTIFACT=~/build
 SCH
 )
 
-[ "$DEBUG" = "1" ] && echo -e "DEBUG: Remote exports\n===>\n${REMOTEENV}"
+if [ "$DEBUG" = "1" ]; then
+  echo -e "DEBUG: Remote exports:\n${REMOTEENV}"
+  echo -e "DEBUG: /etc/hosts:\n"
+  cat /etc/hosts
+fi
 
 # ssh on the build host
 bh_cmd() {
@@ -66,7 +72,7 @@ l1=$(echo $PACKAGE_LIST | sed 's/ /\n/' | sort -u)
 l2=$(echo $ST2_PACKAGES | sed 's/ /\n/' | sort -u)
 
 if [ "$l1" = "$l2" ]; then
-  # th_cmd /bin/bash scripts/dependencies.sh
+  th_cmd /bin/bash scripts/dependencies.sh
 
   echo -e "\n--------------- Tests phase ---------------"
   rspec spec

@@ -32,6 +32,12 @@ module SpecDefaults
     /etc/logrotate.d
     /opt/stackstorm/packs
   )
+
+  def os
+    @os ||= Specinfra::Helper::Os.os
+  end
+
+  module_function :os
 end
 
 shared_examples 'script or binary' do
