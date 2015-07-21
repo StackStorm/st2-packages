@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Script installs packages on to the host system
 #
@@ -16,12 +16,13 @@ else
   exit 1
 fi
 
-# Set components and ensure st2common is the first
-if [ "$@" = "" -a "$PACKAGE_LIST" = "" ]; then
-  echo "ERROR: ./install.sh requires arguments or \$PACKAGE_LIST to be set."
+if [ "x$PACKAGE_LIST" = "x" -a "x$@" = "x" ]; then
+  echo "ERROR: ./package.sh requires arguments or \$PACKAGE_LIST to be set."
   exit 1
 fi
 
+# !!! st2common is always first since others depend on it
+#
 PACKAGE_LIST=${@:-$PACKAGE_LIST}
 PACKAGE_LIST="st2common $(echo $PACKAGE_LIST | sed 's/st2common//')"
 

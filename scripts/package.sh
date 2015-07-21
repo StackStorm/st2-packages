@@ -5,6 +5,11 @@
 set -e
 export WHEELDIR=/tmp/wheelhouse
 
+if [ "x$PACKAGE_LIST" = "x" -a "x$@" = "x" ]; then
+  echo "ERROR: ./package.sh requires arguments or \$PACKAGE_LIST to be set."
+  exit 1
+fi
+
 PACKAGE_LIST="${@:-$PACKAGE_LIST}"
 BUILD_LIST="${PACKAGE_LIST}"
 ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Build runner is executed on droneunit,
 # the actual build process takes place on $BUILDHOST.
