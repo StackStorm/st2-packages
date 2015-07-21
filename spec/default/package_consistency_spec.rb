@@ -13,37 +13,6 @@ shared_examples 'os package' do |opts|
       it { is_expected.to be_directory }
     end
 
-    # Logging configurations
-    if opts[:default_logs]
-      describe file("/etc/#{opts[:name]}/logging.conf") do
-        it { is_expected.to be_file }
-      end
-
-      describe file("/etc/#{opts[:name]}/syslog.conf") do
-        it { is_expected.to be_file }
-      end
-    end
-
-    opts[:logging_conf].each do |log_name|
-      describe file("/etc/#{opts[:name]}/logging.#{log_name}.conf") do
-        example = described_class
-        it { is_expected.to be_file }
-        it "should log to #{packages::LOG_DIR}/st2#{log_name}.log" do
-          content = example.described_class
-          expect(content).to match(%r{#{packages::LOG_DIR}/st2#{log_name}.log})
-        end
-        it "should log to #{packages::LOG_DIR}/st2#{log_name}.audit.log" do
-          content = example.described_class
-          expect(content).to \
-            match(%r{#{packages::LOG_DIR}/st2#{log_name}.audit.log})
-        end
-      end
-
-      describe file("/etc/#{opts[:name]}/syslog.#{log_name}.conf") do
-        it { is_expected.to be_file }
-      end
-    end
-
     # Check services files
     opts[:services].each do |service_name|
       describe file("/usr/bin/#{service_name}") do
