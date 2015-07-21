@@ -3,19 +3,18 @@
 # Script prepares st2 repository and performs build of OS packages.
 #
 set -e
-
 export WHEELDIR=/tmp/wheelhouse
-# export DEBUG
 
-BUILD_LIST="$@"
+PACKAGE_LIST="${@:-$PACKAGE_LIST}"
+BUILD_LIST="${PACKAGE_LIST}"
 ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 ST2_GITREV="${ST2_GITREV:-master}"
 GITDIR=code                       # code directore
-GITUPDATE=${GITUPDATE:-sources}   # updateable sources for st2 repository
-ARTIFACTS_PATH=~/build
+GITUPDATE="${GITUPDATE:-sources}"   # updateable sources for st2 repository
+BUILD_ARTIFACT=${BUILD_ARTIFACT:-~/build}
 
 # Take care about artifacts dir creation
-[ -d $ARTIFACTS_PATH ] || mkdir -p $ARTIFACTS_PATH
+[ -d $BUILD_ARTIFACT ] || mkdir -p $BUILD_ARTIFACT
 
 # DEB / RPM
 if [ -f /etc/debian_version ]; then
@@ -23,7 +22,6 @@ if [ -f /etc/debian_version ]; then
 else
   BUILD_RPM=1
 fi
-
 
 # Package build function
 build_package() {
@@ -47,7 +45,7 @@ build_package() {
 # Copy built artifact into artifacts store
 copy_artifact() {
   if [ "$BUILD_DEB" = 1 ]; then
-    cp -v $1{*.deb,*.changes,*.dsc} $ARTIFACTS_PATH 2>/dev/null || true
+    cp -v $1{*.deb,*.changes,*.dsc} $BUILD_ARTIFACT 2>/dev/null || true
   fi 
 }
 
@@ -82,5 +80,5 @@ popd
 if [ "$DEBUG" = 1 ]; then
   echo
   echo "DEBUG: Contents of artifacts directory ===>"
-  ls -1 $ARTIFACTS_PATH
+  ls -1 $BUILD_ARTIFACT
 fi

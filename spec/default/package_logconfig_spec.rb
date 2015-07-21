@@ -1,7 +1,6 @@
 require 'spec_helper'
-require 'packages_helper'
 
-packages = PackagesHelper
+specs = SpecDefaults
 
 # Log config file checker example.
 # It checks log config file existance and it checks that
@@ -9,7 +8,7 @@ packages = PackagesHelper
 #
 shared_examples 'has log config' do |opts|
   confdir = "/etc/#{opts[:package]}"
-  logdir = packages::LOG_DIR
+  logdir = specs::LOG_DIR
   let(:content) { described_class.content }
 
   describe file(confdir) do

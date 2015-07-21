@@ -2,18 +2,30 @@
 
 buildenvdeb: 
   image: quay.io/stackstorm/st2packages-buildenv-deb
+  volumes:
+    - /tmp/st2-packages:/home/busybee/build
+
+ubuntuworker:
+  image: quay.io/dennybaa/droneunit-ubuntu-upstart
+  volumes_from:
+    - buildenvdeb
 
 ubuntu:
   build: .
-  dockerfile: package/Dockerfile.ubuntu
+  dockerfile: dockerfiles/Dockerfile.ubuntu
   environment:
     # Full list of st2 packages configures the default build
+    - COMPOSE=1
     - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor
     - ST2_GITURL=https://github.com/dennybaa/st2.git
     - ST2_GITREV=setuptools_packaging_improvements
     - BUILDHOST=buildenvdeb
+    - TESTHOST=ubuntuworker
+    - DEBUG=1
   links:
     - buildenvdeb
+    - ubuntuworker
   volumes:
     - .:/root/workdir
     - /tmp/st2-packages:/root/packages
+

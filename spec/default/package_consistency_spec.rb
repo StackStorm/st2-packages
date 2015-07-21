@@ -1,13 +1,19 @@
 require 'spec_helper'
-require 'packages_helper'
 
-packages = PackagesHelper
+specs = SpecDefaults
 
 # Default os package layout. It contains:
 #   - A service or multiple service.
 #   - Zero or more binaries which.
 #
-shared_examples 'os package' do |opts|
+shared_examples 'os package' do |package_name|
+  opts = {
+    name: package_name,
+    services: [package_name],
+    binaries: []
+  }
+  opts.merge!(specs::OS_PACKAGE_OPTS[package_name] || {})
+
   context "#{opts[:name]}" do
     describe file("/etc/#{opts[:name]}") do
       it { is_expected.to be_directory }
@@ -52,30 +58,30 @@ end
 
 # Package st2common examples
 shared_context 'st2common' do
-  describe file("#{packages::CONF_DIR}/st2.conf") do
+  describe file("#{specs::CONF_DIR}/st2.conf") do
     it { is_expected.to exist }
   end
 
-  packages::COMMON_DIRECTORIES.each do |d|
+  specs::COMMON_DIRECTORIES.each do |d|
     describe file(d) do
       it { is_expected.to be_directory }
     end
   end
 
-  describe user(packages::SERVICE_USER) do
+  describe user(specs::SERVICE_USER) do
     it { is_expected.to exist }
   end
 
-  describe user(packages::STANLEY_USER) do
+  describe user(specs::STANLEY_USER) do
     it { is_expected.to exist }
-    it { is_expected.to have_home_directory "/home/#{packages::STANLEY_USER}" }
+    it { is_expected.to have_home_directory "/home/#{specs::STANLEY_USER}" }
   end
 
-  describe file(packages::LOG_DIR) do
+  describe file(specs::LOG_DIR) do
     it { is_expected.to be_directory & be_writable.by('owner') }
   end
 
-  describe file("/home/#{packages::STANLEY_USER}") do
+  describe file("/home/#{specs::STANLEY_USER}") do
     it do
       is_expected.to be_directory & be_writable.by('owner') & \
         be_readable.by('owner') & be_executable.by('owner')
@@ -86,15 +92,15 @@ end
 describe 'Package consistency' do
   context 'Environment variable' do
     it 'ST2_PACKAGES is non-empty' do
-      expect(packages.full_list).not_to be_empty
+      expect(specs::ST2_AVAILABLE_PACKAGES).not_to be_empty
     end
 
     it 'PACKAGE_LIST is non-empty' do
-      expect(packages.list).not_to be_empty
+      expect(specs::PACKAGE_LIST).not_to be_empty
     end
   end
 
-  packages.list.each do |name|
+  specs::PACKAGE_LIST.each do |name|
     describe package(name) do
       it { is_expected.to be_installed }
     end
@@ -102,8 +108,8 @@ describe 'Package consistency' do
 
   include_examples 'st2common'
 
-  it_behaves_like 'os package', packages.opts('st2api')
-  it_behaves_like 'os package', packages.opts('st2auth')
-  it_behaves_like 'os package', packages.opts('st2actions')
-  it_behaves_like 'os package', packages.opts('st2reactor')
+  it_behaves_like 'os package', 'st2api'
+  it_behaves_like 'os package', 'st2auth'
+  it_behaves_like 'os package', 'st2actions'
+  it_behaves_like 'os package', 'st2reactor'
 end

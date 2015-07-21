@@ -2,4 +2,7 @@ FROM quay.io/dennybaa/droneruby-ubuntu
 VOLUME ["/root/workdir", "/root/build"]
 WORKDIR /root/workdir
 
+#RUN echo -e "#!/bin/sh -e\n/root/workdir/.drone/build.sh\n" > /etc/rc.local && \
+#    chmod +x /etc/rc.local
+
 ENTRYPOINT ["/bin/bash", "/root/workdir/.drone/build.sh"]
