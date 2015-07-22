@@ -11,6 +11,11 @@ alias scp="scp -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHosts
 export PACKAGE_LIST="${@:-${ST2_PACKAGES}}"
 export MISTRAL_DISABLED=${MISTRAL_DISABLED:-0}
 
+BUILDHOST_IP=$(getent hosts $BUILDHOST | awk '{ print $1 }')
+TESTHOST_IP=$(getent hosts $TESTHOST | awk '{ print $1 }')
+BUILDHOST_IP=${BUILDHOST_IP:-$BUILDHOST}
+TESTHOST_IP=${TESTHOST_IP:-$TESTHOST}
+
 # Remote environment passthrough
 #
 REMOTEENV=$(cat <<SCH
@@ -56,9 +61,10 @@ echo -e "\n--------------- Packages install phase ---------------"
 
 # We can't use volumes_from in Drone, that's why perform copy
 if [ "$COMPOSE" != "1" ]; then
+  # Copy directly between remotes (IP is required for this operation)
   scp -r busybee@$BUILDHOST:build busybee@$TESTHOST: 1>/dev/null
 fi
-scp -r scripts busybee@$TESTHOST: &>/dev/null || true
+scp -r scripts busybee@$TESTHOST: 1>/dev/null
 th_cmd /bin/bash scripts/install.sh
 
 
