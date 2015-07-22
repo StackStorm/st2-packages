@@ -6,6 +6,7 @@ env:
   - ST2_GITREV=setuptools_packaging_improvements
   - BUILDHOST=st2packages-buildenv-deb
   - TESTHOST=droneunit-ubuntu-upstart
+  - DEBUG=1
 script:
   - ./.drone/build.sh
 services:
