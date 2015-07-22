@@ -13,8 +13,8 @@ export MISTRAL_DISABLED=${MISTRAL_DISABLED:-0}
 
 BUILDHOST_IP=$(getent hosts $BUILDHOST | awk '{ print $1 }')
 TESTHOST_IP=$(getent hosts $TESTHOST | awk '{ print $1 }')
-BUILDHOST_IP=${BUILDHOST_IP:-$BUILDHOST}
-TESTHOST_IP=${TESTHOST_IP:-$TESTHOST}
+BUILDHOST=${BUILDHOST_IP:-$BUILDHOST}
+TESTHOST=${TESTHOST_IP:-$TESTHOST}
 
 # Remote environment passthrough
 #
