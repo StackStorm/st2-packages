@@ -54,7 +54,7 @@ ssh_cmd() {
 # from the current repository and perform packages build.
 #
 echo -e "\n--------------- Packages build phase ---------------"
-scp -r scripts sources $BUILDHOST:
+scp -r scripts sources $BUILDHOST: 1>/dev/null
 ssh_cmd $BUILDHOST /bin/bash scripts/package.sh
 
 # === Install phase
@@ -65,7 +65,7 @@ echo -e "\n--------------- Packages install phase ---------------"
 [ "$COMPOSE" != "1" ] && scp -3 -r $BUILDHOST:build $TESTHOST:
 
 
-scp -r scripts $TESTHOST:
+scp -r scripts $TESTHOST: 1>/dev/null
 ssh_cmd $TESTHOST /bin/bash scripts/install.sh
 
 # === RSpec phase
