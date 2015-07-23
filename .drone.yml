@@ -5,7 +5,7 @@ env:
   - ST2_GITURL=https://github.com/dennybaa/st2.git
   - ST2_GITREV=setuptools_packaging_improvements
   - BUILDHOST=buildenv-pkg
-  - TESTHOST=droneunit-ubuntu-upstart
+  - TESTHOST=droneunit
   - DEBUG=1
 script:
   - ./.drone/build.sh
