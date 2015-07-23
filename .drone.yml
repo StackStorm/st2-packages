@@ -11,4 +11,4 @@ script:
   - ./.drone/build.sh
 services:
   - quay.io/dennybaa/droneunit:trusty-upstart
-  - quay.io/stackstorm/st2packages-buildenv:deb
+  - quay.io/stackstorm/buildenv-pkg:deb
