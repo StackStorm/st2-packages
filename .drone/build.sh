@@ -4,10 +4,6 @@
 # the actual build process takes place on $BUILDHOST.
 #
 set -e
-shopt -s expand_aliases
-alias ssh="ssh -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
-alias scp="scp -i /root/.ssh/busybee -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
-
 export PACKAGE_LIST="${@:-${ST2_PACKAGES}}"
 export MISTRAL_DISABLED=${MISTRAL_DISABLED:-0}
 
@@ -28,6 +24,19 @@ export BUILD_ARTIFACT=~/build
 SCH
 )
 
+# Ssh agent
+if [ -z "$SSH_AUTH_SOCK" ] && [ -z "$SSH_AGENT_PID" ]; then
+  eval $(ssh-agent)
+fi
+ssh-add /root/.ssh/busybee
+
+cat > /root/.ssh/config <<SCH
+Host *
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+SCH
+
+
 if [ "$DEBUG" = "1" ]; then
   echo -e "DEBUG: Remote exports:\n${REMOTEENV}"
   echo -e "DEBUG: /etc/hosts:\n"
@@ -35,38 +44,29 @@ if [ "$DEBUG" = "1" ]; then
 fi
 
 # ssh on the build host
-bh_cmd() {
-  cmd=$(echo -e "${REMOTEENV}\n$@")
-  ssh busybee@$BUILDHOST "${cmd}"
+ssh_cmd() {
+  host="$1" && shift
+  ssh "$host" "$(echo -e "${REMOTEENV}\n$@")"
 }
-
-# ssh on the test host
-th_cmd() {
-  cmd=$(echo -e "${REMOTEENV}\n$@")
-  ssh busybee@$TESTHOST "${cmd}"
-}
-
 
 # === Build phase
 # Merge upstream st2 sources (located on the build host) with updates
 # from the current repository and perform packages build.
 #
 echo -e "\n--------------- Packages build phase ---------------"
-scp -r scripts sources busybee@$BUILDHOST: 1>/dev/null
-bh_cmd /bin/bash scripts/package.sh
-
+scp -r scripts sources $BUILDHOST:
+ssh_cmd $BUILDHOST /bin/bash scripts/package.sh
 
 # === Install phase
 echo -e "\n--------------- Packages install phase ---------------"
 
-# We can't use volumes_from in Drone, that's why perform copy
-if [ "$COMPOSE" != "1" ]; then
-  # Copy directly between remotes (IP is required for this operation)
-  scp -r busybee@$BUILDHOST:build busybee@$TESTHOST: 1>/dev/null
-fi
-scp -r scripts busybee@$TESTHOST: 1>/dev/null
-th_cmd /bin/bash scripts/install.sh
+# We can't use volumes_from in Drone, that's why perform scp
+# inside drone environment.
+[ "$COMPOSE" != "1" ] && scp -3 -r $BUILDHOST:build $TESTHOST:
 
+
+scp -r scripts $TESTHOST:
+ssh_cmd $TESTHOST /bin/bash scripts/install.sh
 
 # === RSpec phase
 # Get bundler gem deps
@@ -78,7 +78,7 @@ l1=$(echo $PACKAGE_LIST | sed 's/ /\n/' | sort -u)
 l2=$(echo $ST2_PACKAGES | sed 's/ /\n/' | sort -u)
 
 if [ "$l1" = "$l2" ]; then
-  th_cmd /bin/bash scripts/dependencies.sh
+  ssh_cmd $TESTHOST /bin/bash scripts/dependencies.sh
 
   echo -e "\n--------------- Tests phase ---------------"
   rspec spec

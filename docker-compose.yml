@@ -1,18 +1,19 @@
 # docker-compose >= 1.3.0rc3
 
 buildenvdeb: 
-  image: quay.io/stackstorm/st2packages-buildenv-deb
+  image: quay.io/stackstorm/buildenv-pkg:deb
   volumes:
-    - /tmp/st2-packages:/home/busybee/build
+    - /tmp/st2-packages:/root/build
 
-ubuntuworker:
-  image: quay.io/dennybaa/droneunit-ubuntu-upstart
+specubuntu:
+  image: quay.io/dennybaa/droneunit:trusty-upstart
   volumes_from:
     - buildenvdeb
 
 ubuntu:
-  build: .
-  dockerfile: dockerfiles/Dockerfile.ubuntu
+  image: quay.io/dennybaa/droneruby
+  working_dir: /root/workdir
+  entrypoint: ["/bin/bash", "/root/workdir/.drone/build.sh"]
   environment:
     # Full list of st2 packages configures the default build
     - COMPOSE=1
@@ -20,12 +21,11 @@ ubuntu:
     - ST2_GITURL=https://github.com/dennybaa/st2.git
     - ST2_GITREV=setuptools_packaging_improvements
     - BUILDHOST=buildenvdeb
-    - TESTHOST=ubuntuworker
+    - TESTHOST=specubuntu
     - DEBUG=1
   links:
     - buildenvdeb
-    - ubuntuworker
+    - specubuntu
   volumes:
     - .:/root/workdir
     - /tmp/st2-packages:/root/packages
-

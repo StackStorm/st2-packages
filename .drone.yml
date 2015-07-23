@@ -10,5 +10,5 @@ env:
 script:
   - ./.drone/build.sh
 services:
-  - quay.io/dennybaa/droneunit-ubuntu-upstart
-  - quay.io/stackstorm/st2packages-buildenv-deb
+  - quay.io/dennybaa/droneunit:trusty-upstart
+  - quay.io/stackstorm/st2packages-buildenv:deb

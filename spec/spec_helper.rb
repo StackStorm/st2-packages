@@ -3,7 +3,7 @@ require 'specinfra'
 
 set :backend, :ssh
 set :host, ENV['TESTHOST']
-set :ssh_options, user: 'busybee',
+set :ssh_options, user: 'root',
                   keys: ['/root/.ssh/busybee'],
                   keys_only: true
 

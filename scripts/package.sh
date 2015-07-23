@@ -50,8 +50,8 @@ build_package() {
 # Copy built artifact into artifacts store
 copy_artifact() {
   if [ "$BUILD_DEB" = 1 ]; then
-    cp -v $1{*.deb,*.changes,*.dsc} $BUILD_ARTIFACT 2>/dev/null || true
-  fi 
+    sudo cp -v $1{*.deb,*.changes,*.dsc} $BUILD_ARTIFACT || true
+  fi
 }
 
 
@@ -85,5 +85,5 @@ popd
 if [ "$DEBUG" = 1 ]; then
   echo
   echo "DEBUG: Contents of artifacts directory ===>"
-  ls -1 $BUILD_ARTIFACT
+  ls -la $BUILD_ARTIFACT
 fi
