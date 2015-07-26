@@ -12,4 +12,4 @@ services:
   - quay.io/dennybaa/droneunit:trusty-upstart
   - quay.io/stackstorm/buildenv-pkg:deb
   - rabbitmq
-  - mongo
+  - mongodb
