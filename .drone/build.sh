@@ -3,12 +3,26 @@
 # Build runner is executed on droneunit,
 # the actual build process takes place on $BUILDHOST.
 #
+
+# ssh on the build host
+ssh_cmd() {
+  host="$1" && shift
+  ssh "$host" "$(echo -e "${REMOTEENV}\n$@")"
+}
+
+# ----- Go.
 set -e
 export PACKAGE_LIST="${@:-${ST2_PACKAGES}}"
 export MISTRAL_DISABLED=${MISTRAL_DISABLED:-0}
 
+# Define environment of remote services
+# Serverspec is buggy due to buggy netcat (reachable tests may not work)
+#
 BUILDHOST_IP=$(getent hosts $BUILDHOST | awk '{ print $1 }')
 TESTHOST_IP=$(getent hosts $TESTHOST | awk '{ print $1 }')
+export RABBITMQHOST=${RABBITMQHOST:=rabbitmq}
+export MONGODBHOST=${MONGODBHOST:=mongodb}
+
 BUILDHOST=${BUILDHOST_IP:-$BUILDHOST}
 TESTHOST=${TESTHOST_IP:-$TESTHOST}
 
@@ -43,12 +57,6 @@ if [ "$DEBUG" = "1" ]; then
   cat /etc/hosts
 fi
 
-# ssh on the build host
-ssh_cmd() {
-  host="$1" && shift
-  ssh "$host" "$(echo -e "${REMOTEENV}\n$@")"
-}
-
 # === Build phase
 # Merge upstream st2 sources (located on the build host) with updates
 # from the current repository and perform packages build.
@@ -64,7 +72,6 @@ echo -e "\n--------------- Packages install phase ---------------"
 # inside drone environment.
 [ "$COMPOSE" != "1" ] && scp -3 -r $BUILDHOST:build $TESTHOST:
 
-
 scp -r scripts $TESTHOST: 1>/dev/null
 ssh_cmd $TESTHOST /bin/bash scripts/install.sh
 
@@ -73,13 +80,14 @@ ssh_cmd $TESTHOST /bin/bash scripts/install.sh
 source /etc/profile.d/rvm.sh
 bundle install
 
+echo "====================="
+echo $RABBITMQHOST
+
 # If all packages are available, we can do full integration tests.
 l1=$(echo $PACKAGE_LIST | sed 's/ /\n/' | sort -u)
 l2=$(echo $ST2_PACKAGES | sed 's/ /\n/' | sort -u)
 
 if [ "$l1" = "$l2" ]; then
-  ssh_cmd $TESTHOST /bin/bash scripts/dependencies.sh
-
   echo -e "\n--------------- Tests phase ---------------"
   rspec spec
 else

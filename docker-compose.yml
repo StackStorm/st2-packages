@@ -22,10 +22,24 @@ ubuntu:
     - ST2_GITREV=setuptools_packaging_improvements
     - BUILDHOST=buildenvdeb
     - TESTHOST=specubuntu
-    - DEBUG=1
+    - DEBUG=0
   links:
     - buildenvdeb
     - specubuntu
+    - rabbitmq
+    - mongodb
   volumes:
     - .:/root/workdir
     - /tmp/st2-packages:/root/packages
+
+rabbitmq:
+  image: rabbitmq:management
+  hostname: rabbit
+  ports:
+    - "15672:15672"  # managment plugin port
+    - "5672:5672"
+
+mongodb:
+  image: mongo
+  ports:
+    - "27017:27017"

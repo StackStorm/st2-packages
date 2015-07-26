@@ -1,14 +1,12 @@
 require 'spec_helper'
 
-specs = SpecDefaults
-
 # Log config file checker example.
 # It checks log config file existance and it checks that
 # it directs logs into correct destination directory.
 #
 shared_examples 'has log config' do |opts|
   confdir = "/etc/#{opts[:package]}"
-  logdir = specs::LOG_DIR
+  logdir = ST2Specs[:log_dir]
   let(:content) { described_class.content }
 
   describe file(confdir) do
