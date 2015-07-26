@@ -11,5 +11,5 @@ script:
 services:
   - quay.io/dennybaa/droneunit:trusty-upstart
   - quay.io/stackstorm/buildenv-pkg:deb
-  - rabbitmq:management
+  - rabbitmq
   - mongo
