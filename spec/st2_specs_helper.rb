@@ -41,6 +41,7 @@ class ST2Specs
   }
 
   SERVICES = %w(
+    st2api
     st2auth
   ) + PACKAGE_OPTS.map { |_, opts| opts[:services] }.flatten
 

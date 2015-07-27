@@ -16,22 +16,26 @@ export PACKAGE_LIST="${@:-${ST2_PACKAGES}}"
 export MISTRAL_DISABLED=${MISTRAL_DISABLED:-0}
 
 # Define environment of remote services
-# Serverspec is buggy due to buggy netcat (reachable tests may not work)
 #
 BUILDHOST_IP=$(getent hosts $BUILDHOST | awk '{ print $1 }')
 TESTHOST_IP=$(getent hosts $TESTHOST | awk '{ print $1 }')
-export RABBITMQHOST=${RABBITMQHOST:=rabbitmq}
-export MONGODBHOST=${MONGODBHOST:=mongodb}
 
 BUILDHOST=${BUILDHOST_IP:-$BUILDHOST}
 TESTHOST=${TESTHOST_IP:-$TESTHOST}
+RABBITMQHOST=${RABBITMQHOST:-rabbitmq}
+MONGODBHOST=${MONGODBHOST:-mongodb}
+
+# Localy needed exports
+#
+export RABBITMQHOST
+export MONGODBHOST
 
 # Remote environment passthrough
 #
 REMOTEENV=$(cat <<SCH
 export DEBUG=${DEBUG:-0}
 export MISTRAL_DISABLED=$MISTRAL_DISABLED
-export PACKAGE_LIST="${PACKAGE_LIST}"
+export PACKAGE_LIST="$PACKAGE_LIST"
 export ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 export ST2_GITREV="${ST2_GITREV:-master}"
 export BUILD_ARTIFACT=~/build
@@ -72,26 +76,31 @@ echo -e "\n--------------- Packages install phase ---------------"
 # inside drone environment.
 [ "$COMPOSE" != "1" ] && scp -3 -r $BUILDHOST:build $TESTHOST:
 
-scp -r scripts $TESTHOST: 1>/dev/null
-ssh_cmd $TESTHOST /bin/bash scripts/install.sh
+# Install st2 packages
+ssh_cmd $TESTHOST /bin/bash scripts/install.sh2
 
-# === RSpec phase
 # Get bundler gem deps
 source /etc/profile.d/rvm.sh
 bundle install
 
-echo "====================="
-echo $RABBITMQHOST
+# === RSpec phase
+# Make docker links available to the remote test host
+cat /etc/hosts | sed -n '1,2d;/172.17.0./p' | \
+  ssh $TESTHOST "cat >> /etc/hosts"
+# Copy scripts
+scp -r scripts $TESTHOST: 1>/dev/null
+
+echo -e "\n--------------- Tests phase ---------------"
 
 # If all packages are available, we can do full integration tests.
 l1=$(echo $PACKAGE_LIST | sed 's/ /\n/' | sort -u)
 l2=$(echo $ST2_PACKAGES | sed 's/ /\n/' | sort -u)
 
+# Substitute varibles into the configuration file st2.conf
+ssh_cmd $TESTHOST /bin/bash scripts/config.sh
+
 if [ "$l1" = "$l2" ]; then
-  echo -e "\n--------------- Tests phase ---------------"
   rspec spec
 else
-
-  echo -e "\n--------------- Tests phase ---------------"
   rspec spec/default/package*_spec.rb
 fi
