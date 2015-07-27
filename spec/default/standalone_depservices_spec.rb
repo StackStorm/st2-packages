@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 shared_examples 'start st2 services' do
-  WAITFORSTART = ENV['ST2_WAITFORSTART'] || 10
+  WAITFORSTART = (ENV['ST2_WAITFORSTART'] || 10).to_i
 
   before(:context) do
     ST2Specs[:services].each do |svc|
