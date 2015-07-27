@@ -96,6 +96,7 @@ MONGODBHOST=${MONGODBHOST:-mongodb}
 #
 export RABBITMQHOST
 export MONGODBHOST
+export ST2_WAITFORSTART
 
 # --- Remote environment passthrough
 #

@@ -4,6 +4,7 @@ env:
   - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor
   - ST2_GITURL=https://github.com/dennybaa/st2.git
   - ST2_GITREV=setuptools_packaging_improvements
+  - ST2_WAITFORSTART=20
   - BUILDHOST=buildenv-pkg
   - TESTHOSTS=droneunit
   - DEBUG=1
