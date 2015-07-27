@@ -5,7 +5,7 @@ buildenvdeb:
   volumes:
     - /tmp/st2-packages:/root/build
 
-specubuntu:
+trusty:
   image: quay.io/dennybaa/droneunit:trusty-upstart
   volumes_from:
     - buildenvdeb
@@ -21,13 +21,13 @@ ubuntu:
     - ST2_GITURL=https://github.com/dennybaa/st2.git
     - ST2_GITREV=setuptools_packaging_improvements
     - BUILDHOST=buildenvdeb
-    - TESTHOST=specubuntu
-    - DEBUG=0
+    - TESTHOSTS=trusty
+    - DEBUG=1
   links:
     - buildenvdeb
-    - specubuntu
     - rabbitmq
     - mongodb
+    - trusty
   volumes:
     - .:/root/workdir
     - /tmp/st2-packages:/root/packages

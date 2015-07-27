@@ -31,8 +31,7 @@ class ST2Specs
 
   PACKAGE_OPTS = {
     st2actions: {
-      services: %w(st2actionrunner st2notifier st2resultstracker),
-      binaries: []
+      services: %w(st2actionrunner st2notifier st2resultstracker)
     },
     st2reactor: {
       services: %w(st2rulesengine st2sensorcontainer),
@@ -61,10 +60,7 @@ class ST2Specs
     def package_opts
       @package_opts ||= begin
         mash = Hashie::Mash.new(PACKAGE_OPTS)
-        mash.default_proc = proc do |_, key|
-          Hashie::Mash.new(name: key, services: [key], binaries: [])
-        end
-        mash
+        _set_package_defaults(_fetch_override(mash))
       end
     end
 
@@ -73,6 +69,29 @@ class ST2Specs
         host: ENV['TESTHOST'],
         ssh_options: ::SSH_OPTIONS
       )
+    end
+
+    private
+
+    # Meta sugar for PACKAGE_OPTS
+    def _fetch_override(o)
+      class << o; self; end.class_eval %{
+        def [](key)
+          current = fetch(key, nil)
+          defaults = self._package_defaults(key)
+          current.nil? ? defaults : defaults.merge(current)
+        end
+      }
+      o
+    end
+
+    def _set_package_defaults(o)
+      class << o; self; end.class_eval %@
+        def _package_defaults(key)
+          Hashie::Mash.new({name: key.to_s, services: [key.to_s], binaries: []})
+        end
+      @
+      o
     end
   end
 end
