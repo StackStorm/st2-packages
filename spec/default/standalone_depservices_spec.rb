@@ -8,7 +8,7 @@ shared_examples 'start st2 services' do
       cmd = ST2Specs.backend.command.get(:start_service, svc)
       ST2Specs.backend.run_command(cmd)
     end
-    puts "===> Started st2, wait for them to start #{WAITFORSTART} sec..."
+    puts "===> Starting st2 services and wait for them #{WAITFORSTART} sec..."
     sleep WAITFORSTART
   end
 end
