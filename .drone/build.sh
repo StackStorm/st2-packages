@@ -111,6 +111,11 @@ export MONGODBHOST=$MONGODBHOST
 SCH
 )
 
+if [ "$DEBUG" = 1 ]; then
+  echo "DEBUG: Remote environment passed through >>>"
+  echo "$REMOTEENV"
+fi
+
 # --- SSH agent and config settings
 #
 if [ -z "$SSH_AUTH_SOCK" ] && [ -z "$SSH_AGENT_PID" ]; then
