@@ -20,7 +20,7 @@ testhost_setup() {
   echo -e "\n..... Preparing test host $desc"
 
   # Make docker links available to the remote test host
-  cat /etc/hosts | sed -n '1,2d;/172.17.0./p' | \
+  cat /etc/hosts | sed -n '1,2d;/172.17./p' | \
     ssh $testhost "cat >> /etc/hosts"
   # Copy scripts
   scp -r scripts $testhost: 1>/dev/null
@@ -149,5 +149,3 @@ for testhost in $TESTHOSTS; do
   source /etc/profile.d/rvm.sh
   run_rspec $TESTHOST $desc || true   # - 4
 done
-
-sleep infinity

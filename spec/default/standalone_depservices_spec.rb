@@ -13,7 +13,7 @@ shared_examples 'start st2 services' do
   end
 end
 
-describe 'St2 services' do
+describe 'St2 services and dependencies' do
   include_examples 'start st2 services'
 
   # buggy buggy netcat and serverspec!
