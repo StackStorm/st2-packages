@@ -149,5 +149,3 @@ for testhost in $TESTHOSTS; do
   source /etc/profile.d/rvm.sh
   run_rspec $TESTHOST $desc || true   # - 4
 done
-
-sleep infinity
