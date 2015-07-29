@@ -17,7 +17,7 @@ ssh_cmd() {
 testhost_setup() {
   testhost="$1"
   desc="${2:-$1}"
-  echo -e "\n..... Preparing test host $desc"
+  echo -e "\n..... Preparing for tests on $desc"
 
   # Make docker links available to the remote test host
   cat /etc/hosts | sed -n '1,2d;/172.17./p' | \
@@ -144,8 +144,8 @@ for testhost in $TESTHOSTS; do
   ip_addr=$(getent hosts $testhost | awk '{ print $1 }')
   export TESTHOST=${ip_addr:-$testhost}
 
-  testhost_setup $TESTHOST $desc      # - 2
-  install_packages $TESTHOST $desc    # - 3
+  testhost_setup $TESTHOST "$desc"    # - 2
+  install_packages $TESTHOST "$desc"  # - 3
   source /etc/profile.d/rvm.sh
-  run_rspec $TESTHOST $desc || true   # - 4
+  run_rspec $TESTHOST "$desc"         # - 4
 done

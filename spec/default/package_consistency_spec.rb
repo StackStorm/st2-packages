@@ -4,7 +4,10 @@ include ST2Spec::Helper
 # OS package shared example group
 #
 shared_examples 'os package' do |name, opts|
-  opts ||= {}
+  defs = {
+    config_dir: true
+  }
+  opts = defs.merge(opts || {})
 
   describe package(name) do
     it { is_expected.to be_installed }
@@ -29,11 +32,11 @@ shared_examples 'os package' do |name, opts|
   end
 
   context 'files' do
-    if opts[:no_services]
-      no_services_msg = 'no services, no configuration directory is needed'
+    unless opts[:config_dir]
+      no_config_dir_msg = 'no services, no configuration directory is needed'
     end
 
-    describe file("/etc/#{name}"), skip: no_services_msg do
+    describe file("/etc/#{name}"), skip: no_config_dir_msg do
       it { is_expected.to be_directory }
     end
 
@@ -112,8 +115,8 @@ describe 'packages consistency' do
 
   shared_binaries = %w(st2-bootstrap-rmq st2-register-content)
 
-  it_behaves_like 'os package', 'st2common', no_services: true
-  it_behaves_like 'os package', 'st2client', no_services: true
+  it_behaves_like 'os package', 'st2common', config_dir: false
+  it_behaves_like 'os package', 'st2client', config_dir: false
   it_behaves_like 'os package', 'st2api',  binaries: shared_binaries
   it_behaves_like 'os package', 'st2auth', binaries: shared_binaries
   it_behaves_like 'os package', 'st2actions', binaries: shared_binaries

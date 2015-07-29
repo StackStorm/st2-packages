@@ -15,6 +15,7 @@ set :ssh_options, SSH_OPTIONS
 class ST2Spec
   SPECCONF = {
     bin_prefix: '/usr/bin',
+    etc_dir: '/etc',
     conf_dir: '/etc/st2',
     log_dir: '/var/log/st2',
     package_list: (ENV['PACKAGE_LIST'] || '').split,
@@ -24,8 +25,16 @@ class ST2Spec
     service_list: %w(st2api st2auth st2actionrunner st2notifier
                      st2resultstracker st2rulesengine st2sensorcontainer),
 
+    separate_log_config: %w(st2notifier st2resultstracker
+                            st2rulesengine st2sensorcontainer),
+
+    logdest_pattern: {
+      st2actionrunner: 'st2actionrunner.{pid}'
+    },
+
     package_has_services: {
-      st2actions: %w(st2actionrunner st2notifier st2resultstracker)
+      st2actions: %w(st2actionrunner st2notifier st2resultstracker),
+      st2reactor: %w(st2rulesengine st2sensorcontainer)
     },
 
     package_has_binaries: {
@@ -33,12 +42,8 @@ class ST2Spec
     },
 
     package_has_directories: {
-      st2common: %w(
-        /etc/st2
-        /var/log/st2
-        /etc/logrotate.d
-        /opt/stackstorm/packs
-      )
+      st2common: %w(/etc/st2 /var/log/st2 /etc/logrotate.d
+                    /opt/stackstorm/packs)
     },
 
     package_has_files: {
@@ -73,8 +78,8 @@ class ST2Spec
 
   # Helper mixin
   module Helper
-    def self.included(o)
-      o.class_eval %( def spec; ST2Spec; end )
+    def spec
+      ST2Spec
     end
 
     def each_with_options(collection, &block)
