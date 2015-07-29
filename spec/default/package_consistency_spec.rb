@@ -1,108 +1,125 @@
 require 'spec_helper'
+include ST2Spec::Helper
 
-# Default os package layout. It contains:
-#   - A service or multiple service.
-#   - Zero or more binaries which.
+# OS package shared example group
 #
-shared_examples 'os package' do |package_name|
-  opts = ST2Specs.package_opts[package_name]
+shared_examples 'os package' do |name, opts|
+  opts ||= {}
 
-  context "#{opts[:name]}" do
-    describe file("/etc/#{opts[:name]}") do
-      it { is_expected.to be_directory }
-    end
+  describe package(name) do
+    it { is_expected.to be_installed }
+  end
 
-    # Check services files
-    opts[:services].each do |service_name|
-      describe file("/usr/bin/#{service_name}") do
-        it_behaves_like 'script or binary'
-      end
-
-      describe file("/etc/default/#{service_name}"),
-               if: %w(debian ubuntu).include?(os[:family]) do
+  # check for presence of users
+  user_list = (opts[:users] || []) + (spec[:package_has_users][name] || [])
+  if user_list
+    each_with_options user_list do |u, uopts|
+      describe user(u) do
         it { is_expected.to exist }
+
+        # Home directory check
+        case uopts[:home]
+        when false, nil
+        else
+          home_dir = uopts[:home] == true ? "/home/#{u}" : "#{uopts[:home]}"
+          it { is_expected.to have_home_directory home_dir }
+        end
       end
-
-      describe service(service_name) do
-        it { is_expected.to be_enabled }
-      end
-    end
-
-    # Check binaries
-    opts[:binaries].each do |binary|
-      describe file("/usr/bin/#{binary}") do
-        it_behaves_like 'script or binary'
-      end
-    end
-
-    # Shared binares are installed by multiple st2 packages.
-    # They exist due to st2common and require it, however st2common
-    # is not packaged with its own  virtualenv.
-    #
-    describe file('/usr/bin/st2-bootstrap-rmq') do
-      it_behaves_like 'script or binary'
-    end
-
-    describe file('/usr/bin/st2-register-content') do
-      it_behaves_like 'script or binary'
     end
   end
-end
 
-# Package st2common examples
-shared_context 'st2common' do
-  describe file("#{ST2Specs[:conf_dir]}/st2.conf") do
-    it { is_expected.to exist }
-  end
+  context 'files' do
+    if opts[:no_services]
+      no_services_msg = 'no services, no configuration directory is needed'
+    end
 
-  ST2Specs[:common_dirs].each do |d|
-    describe file(d) do
+    describe file("/etc/#{name}"), skip: no_services_msg do
       it { is_expected.to be_directory }
     end
+
+    # check for presences of directories
+    dir_list = (opts[:directories] || []) + \
+               (spec[:package_has_directories][name] || [])
+    if dir_list
+      each_with_options dir_list do |path, _|
+        describe file(path) do
+          it { is_expected.to be_directory }
+        end
+      end
+    end
+
+    # check files
+    file_list = (opts[:files] || []) + \
+                (spec[:package_has_files][name] || [])
+    if file_list
+      each_with_options file_list do |path, _|
+        describe file(path) do
+          it { is_expected.to be_file }
+        end
+      end
+    end
+
+    # check binaries
+    binary_list = (opts[:binaries] || []) + \
+                  (spec[:package_has_binaries][name] || [])
+    if binary_list
+      each_with_options binary_list do |bin_name, _|
+        unless bin_name.start_with? '/'
+          prefix = File.join(spec[:bin_prefix], '')
+        end
+        describe file("#{prefix}#{bin_name}") do
+          it_behaves_like 'script or binary'
+        end
+      end
+    end
   end
 
-  describe user(ST2Specs[:service_user]) do
-    it { is_expected.to exist }
-  end
+  context 'services' do
+    service_list = (opts[:services] || []) + \
+                   (spec[:package_has_services][name] || [])
+    if service_list
+      each_with_options service_list do |service_name, _|
+        prefix = File.join(spec[:bin_prefix], '')
+        describe file("#{prefix}#{service_name}") do
+          it_behaves_like 'script or binary'
+        end
 
-  describe user(ST2Specs[:stanley_user]) do
-    it { is_expected.to exist }
-    it { is_expected.to have_home_directory "/home/#{ST2Specs[:stanley_user]}" }
-  end
+        describe file("/etc/default/#{service_name}"),
+                 if: %w(debian ubuntu).include?(os[:family]) do
+          it { is_expected.to exist }
+        end
 
-  describe file(ST2Specs[:log_dir]) do
-    it { is_expected.to be_directory & be_writable.by('owner') }
-  end
-
-  describe file("/home/#{ST2Specs[:stanley_user]}") do
-    it do
-      is_expected.to be_directory & be_writable.by('owner') & \
-        be_readable.by('owner') & be_executable.by('owner')
+        describe service(service_name) do
+          it { is_expected.to be_enabled }
+        end
+      end
     end
   end
 end
 
-describe 'Package consistency' do
-  context 'Environment variable' do
+# Main example group checking package consistency
+#
+describe 'packages consistency' do
+  context 'environment variable' do
     it 'ST2_PACKAGES is non-empty' do
-      expect(ST2Specs[:available_packages]).not_to be_empty
+      expect(spec[:available_packages]).not_to be_empty
     end
 
     it 'PACKAGE_LIST is non-empty' do
-      expect(ST2Specs[:package_list]).not_to be_empty
+      expect(spec[:package_list]).not_to be_empty
     end
   end
 
-  ST2Specs[:package_list].each do |name|
-    describe package(name) do
-      it { is_expected.to be_installed }
-    end
+  shared_binaries = %w(st2-bootstrap-rmq st2-register-content)
+
+  it_behaves_like 'os package', 'st2common', no_services: true
+  it_behaves_like 'os package', 'st2client', no_services: true
+  it_behaves_like 'os package', 'st2api',  binaries: shared_binaries
+  it_behaves_like 'os package', 'st2auth', binaries: shared_binaries
+  it_behaves_like 'os package', 'st2actions', binaries: shared_binaries
+  it_behaves_like 'os package', 'st2reactor', binaries: shared_binaries
+
+  describe file(spec[:log_dir]) do
+    it { is_expected.to be_directory & be_writable.by('owner') }
   end
-
-  include_examples 'st2common'
-
-  it_behaves_like 'os package', 'st2api'
-  it_behaves_like 'os package', 'st2auth'
-  it_behaves_like 'os package', 'st2actions'
-  it_behaves_like 'os package', 'st2reactor'
 end

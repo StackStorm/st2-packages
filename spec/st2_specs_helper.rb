@@ -11,57 +11,56 @@ set :backend, :ssh
 set :host, ENV['TESTHOST']
 set :ssh_options, SSH_OPTIONS
 
-# ST2Specs helper class
-class ST2Specs
+# ST2Spec
+class ST2Spec
   SPECCONF = {
+    bin_prefix: '/usr/bin',
     conf_dir: '/etc/st2',
     log_dir: '/var/log/st2',
-    service_user: 'st2',
-    stanley_user: 'stanley',
     package_list: (ENV['PACKAGE_LIST'] || '').split,
     available_packages: (ENV['ST2_PACKAGES'] || '').split,
     mistral_disabled: ENV['MISTRAL_DISABLED'] || false,
-    common_dirs: %w(
-      /etc/st2
-      /var/log/st2
-      /etc/logrotate.d
-      /opt/stackstorm/packs
-    )
-  }
 
-  PACKAGE_OPTS = {
-    st2actions: {
-      services: %w(st2actionrunner st2notifier st2resultstracker)
+    service_list: %w(st2api st2auth st2actionrunner st2notifier
+                     st2resultstracker st2rulesengine st2sensorcontainer),
+
+    package_has_services: {
+      st2actions: %w(st2actionrunner st2notifier st2resultstracker)
     },
-    st2reactor: {
-      services: %w(st2rulesengine st2sensorcontainer),
-      binaries: %w(st2-rule-tester st2-trigger-refire)
+
+    package_has_binaries: {
+      st2reactor: %w(st2-rule-tester st2-trigger-refire)
+    },
+
+    package_has_directories: {
+      st2common: %w(
+        /etc/st2
+        /var/log/st2
+        /etc/logrotate.d
+        /opt/stackstorm/packs
+      )
+    },
+
+    package_has_files: {
+      st2common: %w(/etc/st2/st2.conf)
+    },
+
+    package_has_users: {
+      st2common: [
+        'st2',
+        ['stanley', home: true]
+      ]
     }
   }
-
-  SERVICES = %w(
-    st2api
-    st2auth
-  ) + PACKAGE_OPTS.map { |_, opts| opts[:services] }.flatten
 
   class << self
     # spec conf reader
     def [](key)
-      conf[key]
+      spec[key]
     end
 
-    def conf
-      @spec ||= begin
-        mash = Hashie::Mash.new(SPECCONF)
-        mash.merge(services: SERVICES)
-      end
-    end
-
-    def package_opts
-      @package_opts ||= begin
-        mash = Hashie::Mash.new(PACKAGE_OPTS)
-        _set_package_defaults(_fetch_override(mash))
-      end
+    def spec
+      @spec ||= Hashie::Mash.new(SPECCONF)
     end
 
     def backend
@@ -70,28 +69,18 @@ class ST2Specs
         ssh_options: ::SSH_OPTIONS
       )
     end
+  end
 
-    private
-
-    # Meta sugar for PACKAGE_OPTS
-    def _fetch_override(o)
-      class << o; self; end.class_eval %{
-        def [](key)
-          current = fetch(key, nil)
-          defaults = self._package_defaults(key)
-          current.nil? ? defaults : defaults.merge(current)
-        end
-      }
-      o
+  # Helper mixin
+  module Helper
+    def self.included(o)
+      o.class_eval %( def spec; ST2Spec; end )
     end
 
-    def _set_package_defaults(o)
-      class << o; self; end.class_eval %@
-        def _package_defaults(key)
-          Hashie::Mash.new({name: key.to_s, services: [key.to_s], binaries: []})
-        end
-      @
-      o
+    def each_with_options(collection, &block)
+      (collection || []).each do |i|
+        i.is_a?(Array) ? block.call(i) : block.call([i, {}])
+      end
     end
   end
 end
