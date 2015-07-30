@@ -16,7 +16,7 @@ install: wheelhouse changelog
 post_install:
 	# post_install is triggered debian/rules file, don't call it from install target!
 	# We don't want anything like below to be postinst
-	sed -i -r "/args\s*=\s*/s%logs%/var/log/st2%g" $(DESTDIR)/etc/$(ST2_COMPONENT)/logging.conf
+	sed -i -r "/args\s*=\s*/s%logs%/var/log/st2%g" $(DESTDIR)/etc/$(ST2_COMPONENT)/logging.*conf
 
 st2version: install_py_version
 	# Use common component version, by default
