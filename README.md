@@ -51,6 +51,7 @@ Let's describe a few important variables:
  - **ST2_PACKAGES** - specifies a full list of st2 components which defines what components will be built.
  - **ST2_GITURL** - specifies an URL of upstream stackstorm sources.
  - **ST2_GITREV** - specifies a revision or branch which will be checked out.
+ - **ST2_WAITFORSTART** - specifies timeout to wait for st2 services to start.
  - **BUILDHOST** - specifies a node where packages build process happens.
  - **TESTHOSTS** - specifies a list of nodes which the integration tests will be performed upon.
 

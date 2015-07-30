@@ -3,7 +3,7 @@ require 'spec_helper'
 # Bring up all stackstorm services
 #
 shared_examples 'start st2 services' do
-  WAITFORSTART = (ENV['ST2_WAITFORSTART'] || 2).to_i
+  WAITFORSTART = (ENV['ST2_WAITFORSTART'] || 15).to_i
 
   before(:context) do
     puts '===> Starting st2 services...'
