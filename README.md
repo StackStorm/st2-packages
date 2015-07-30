@@ -4,7 +4,7 @@
 
 This whole process of continuous integration bases on docker to provide an easy an configurable way to build, install and test Stackstorm OS packages.
 
-Stackstorm OS packages include a complete pre-built and independent python virtual environments containing a single st2 component. This is that what makes such independent and it can be easily installed/removed or upgraded separately from other stackstorm OS packages.
+Stackstorm OS packages include a complete pre-built and independent python virtual environments containing a single st2 component. This is that what makes such package independent and it can be easily installed/removed or upgraded separately from other stackstorm OS packages.
 
 CI process consist of three phases:
 
@@ -12,13 +12,13 @@ CI process consist of three phases:
  - **Package installation phase**. Built packages are transferred on to a remote test node.
  - **Integration tests phase**. Integration suite is run on a special worker node, but checks happen on a remote test node.
 
-The second and the third phases have multi-node support which makes it possible to build once packages say it for debian system and then repeat phases *2, 3* on different nodes such can be ubuntu trusty, debian jessie, debian wheezy.
+The second and the third phases have multi-node support which makes it possible to run build packages phase once. Say it we build packages for debian family systems and then phases *2, 3* can be repeated on different nodes such as ubuntu trusty, debian jessie, debian wheezy etc.
 
-Suite can be run operate locally using docker-compose or can be enrolled in a drone environment for real CI operation.
+Suite can be run locally using docker-compose or it can be enrolled in a [Drone CI](https://drone.io/) environment to operate in real CI scenarios.
 
 ## Metadata and configuration
 
-We can provide several options to configure our suite, let's take a look at docker-compose yaml data:
+We can provide several options to configure our suite, let's take a look at `docker-compose.yml` file:
 
 ```yaml
 ubuntu:
@@ -44,9 +44,9 @@ ubuntu:
     - /tmp/st2-packages:/root/packages
 ```
 
-This is the configuration of worker machine which is a ruby one and it's able to run rspec tests, integration tests are base on [serverspec](http://serverspec.org) library.
+This is the configuration of ubuntu worker machine which is a ruby one and it's able to run rspec integration tests. These tests use [serverspec](http://serverspec.org) library for testing servers.
 
-Let's describe a few important variables:
+Let's describe a few important configuration variables:
 
  - **ST2_PACKAGES** - specifies a full list of st2 components which defines what components will be built.
  - **ST2_GITURL** - specifies an URL of upstream stackstorm sources.
@@ -57,7 +57,7 @@ Let's describe a few important variables:
 
 ## Running suite with docker compose
 
-Issue the whole suite will be run, after it finishes you can find packages in your `/tmp/st2-packages` directory.
+Issue the command bellow and the whole suite will be run, after it finishes you can find packages in your `/tmp/st2-packages` directory.
 ```
 docker-compose run --rm ubuntu
 ```
