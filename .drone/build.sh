@@ -27,7 +27,7 @@ testhost_setup() {
 
   # Get bundler gem deps
   source /etc/profile.d/rvm.sh
-  bundle install
+  DEBUG=0 bundle install
 }
 
 
@@ -73,9 +73,9 @@ run_rspec() {
   l2=$(echo $ST2_PACKAGES | sed 's/ /\n/' | sort -u)
 
   if [ "$l1" = "$l2" ]; then
-    rspec spec
+    DEBUG=0 rspec spec
   else
-    rspec spec/default/package*_spec.rb
+    DEBUG=0 rspec spec/default/package*_spec.rb
   fi
 }
 

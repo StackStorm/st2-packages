@@ -28,6 +28,7 @@ class ST2Spec
     separate_log_config: %w(st2notifier st2resultstracker
                             st2rulesengine st2sensorcontainer),
 
+    loglines_to_show: 20,
     logdest_pattern: {
       st2actionrunner: 'st2actionrunner.{pid}'
     },
