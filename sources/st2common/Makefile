@@ -3,7 +3,7 @@
 WHEELDIR ?= /tmp/wheelhouse
 ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
-# ST2PKG_VERSION, can be passed via ENV, or it will be evaluated in st2version
+ST2PKG_VERSION ?= 0.1.0
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
@@ -24,29 +24,28 @@ pre_install:
 	install -D -m644 ../conf/st2.prod.conf $(DESTDIR)/etc/st2/st2.conf
 	install -D -m644 ../conf/logrotate.conf $(DESTDIR)/etc/logrotate.d/st2
 
-st2version:
-	# Use common component version, by default
-	$(eval SVER := $(shell python -c 'from $(ST2_COMPONENT) import __version__; print __version__,'))
-	$(eval ST2PKG_VERSION ?= $(SVER))
-	echo '>>>>>>>>>>>>>>>>>>>>>>>'
-	echo $(ST2PKG_VERSION)
+populate_version: .stamp-populate_version
+.stamp-populate_version:
+	# populate version should be run before any pip/setup.py works
+	sh ../scripts/populate-version.sh
+	touch $@
 
 requirements:
 	python ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 
-changelog: st2version
+changelog: populate_version
 ifeq ($(DEBIAN),1)
 	debchange -v $(ST2PKG_VERSION) -M "automated build version: $(ST2PKG_VERSION)"
 endif
 
 wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: st2version requirements
+.stamp-wheelhouse: populate_version requirements
 	# Install wheels into shared location
 	pip wheel --wheel-dir=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
-.stamp-bdist_wheel:
+.stamp-bdist_wheel: populate_version
 	# All other components depend on st2common, so we create st2common
 	# in the shared WHEELHOUSE directory.
 	python setup.py bdist_wheel

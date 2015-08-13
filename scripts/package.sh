@@ -39,6 +39,12 @@ build_package() {
   pushd $1
   echo
   echo "===> Starting package $1 build"
+
+  # We need to extract version or use environment var if it's given
+  make populate_version
+  version=$(python -c "from $1 import __version__; print __version__,")
+  export ST2PKG_VERSION=${ST2PKG_VERSION:-${version}}
+
   if [ "$BUILD_DEB" = 1 ]; then
     dpkg-buildpackage -b -uc -us
   elif [ "$BUILD_RPM" = 1 ]; then
