@@ -8,7 +8,7 @@ env:
   # If given and differs form ST2_PACKAGES, no spec tests are run.
   # Spec tests require all packages to be available.
   - BUILDLIST=st2common
-  - BUILDHOST=buildenv-pkg
+  - BUILDHOST=packagingenv
   # - TESTHOSTS=droneunit
   - DEBUG=1
 script:
