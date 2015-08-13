@@ -1,18 +1,18 @@
 # Macros
 %define version %(echo ${ST2PKG_VERSION:-0.1.0})
 %define release %(echo ${ST2PKG_RELEASE:-1})
-%define _builddir /root/code/st2common
+%define _builddir /root/code/st2client
 %define svc_user st2
 %define stanley_user stanley
 
 %include %{_builddir}/../rpmspec/debian_helpers.spec
 
 # Tags
-Name: st2common
+Name: st2client
 Version: %{version}
 Release: %{release}
 BuildArch: noarch
-Summary: St2Common - StackStorm shared files
+Summary: St2Client - StackStorm CLI utility
 Group: System/Management
 License: Apache
 Url: https://github.com/StackStorm/st2
@@ -20,7 +20,7 @@ Source0: %{_builddir}
 
 # Blocks
 %description
-  Package contains core st2 packs and other common files. 
+  St2Client longer description.
 
 %files
   /*

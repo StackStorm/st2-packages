@@ -10,7 +10,7 @@ if [ "x$BUILDLIST" = "x" -a "x$@" = "x" ]; then
   exit 1
 fi
 
-BUILDLIST="$@"
+BUILDLIST="${BUILDLIST:-${@}}"
 ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 ST2_GITREV="${ST2_GITREV:-master}"
 GITDIR=code                       # code directore
@@ -78,6 +78,10 @@ git clone --depth 1 -b $ST2_GITREV $ST2_GITURL $GITDIR
 
 # Common is the dependency for all packages, so it's always built!
 BUILDLIST="st2common $(echo $BUILDLIST | sed 's/st2common//')"
+
+if [ "$DEBUG" = "1" ]; then
+  echo "DEBUG: Package build list is [${BUILDLIST}]"
+fi
 
 # Enter root and build packages in a loop
 pushd $GITDIR

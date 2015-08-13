@@ -23,7 +23,7 @@ fi
 
 # !!! st2common is always first since others depend on it
 #
-BUILDLIST="$@"
+BUILDLIST="${BUILDLIST:-${@}}"
 BUILDLIST="st2common $(echo $BUILDLIST | sed 's/st2common//')"
 
 if [ "$DEBUG" = "1" ]; then
