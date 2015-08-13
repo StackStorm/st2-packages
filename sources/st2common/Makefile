@@ -29,7 +29,7 @@ st2version:
 	$(eval SVER := $(shell python -c 'from $(ST2_COMPONENT) import __version__; print __version__,'))
 	$(eval ST2PKG_VERSION ?= $(SVER))
 	echo '>>>>>>>>>>>>>>>>>>>>>>>'
-	echo $$ST2PKG_VERSION
+	echo $ST2PKG_VERSION
 
 requirements:
 	python ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
