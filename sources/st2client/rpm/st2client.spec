@@ -7,11 +7,20 @@
 
 %include %{_builddir}/../rpmspec/debian_helpers.spec
 
+# venv
+%define wheel_dir %(echo ${WHEELDIR:-/tmp/wheelhouse})
+%define venv_cmd virtualenv
+%define venv_name st2client
+%define venv_install_dir usr/share/python/%{venv_name}
+%define venv_dir %{buildroot}/%{venv_install_dir}
+%define venv_bin %{venv_dir}/bin
+%define venv_python %{venv_bin}/python
+%define venv_pip %{venv_python} %{venv_bin}/pip install --find-links=%{wheel_dir} --no-index
+
 # Tags
 Name: st2client
 Version: %{version}
 Release: %{release}
-BuildArch: noarch
 Summary: St2Client - StackStorm CLI utility
 Group: System/Management
 License: Apache
@@ -28,24 +37,18 @@ Source0: %{_builddir}
   # We hate duplication right :)?, so let's use debian files
   %debian_dirs
   %debian_install
-%make_install
+  %make_install
+  %{venv_cmd} %{venv_dir}
+  %{venv_pip} .
+
+  # RECORD files are used by wheels for checksum. They contain path names which
+  # match the buildroot and must be removed or the package will fail to build.
+  find %{buildroot} -name "RECORD" -exec rm -rf {} \;
+
+  # Change the virtualenv path to the target installation direcotry.
+  venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir}
 %prep
   rm -rf %{buildroot}
   mkdir -p %{buildroot}
 %clean
   rm -rf %{buildroot}
-
-%pre
-  # handle installation (not upgrade)
-  if [ $1 = 1 ]; then
-    [ -f /etc/logrotate.d/st2.disabled ] && mv -f /etc/logrotate.d/st2.disabled /etc/logrotate.d/st2
-  fi
-  adduser --no-create-home --system %{svc_user}
-  adduser --user-group %{stanley_user}
-
-%post
-  chown %{svc_user}.%{svc_user} /var/log/st2
-
-%postun
-  # rpm has no purge option, so we leave this file
-  [ -f /etc/logrotate.d/st2 ] && mv -f /etc/logrotate.d/st2 /etc/logrotate.d/st2.disabled

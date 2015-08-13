@@ -28,7 +28,7 @@ Source0: %{_builddir}
   # We hate duplication right :)?, so let's use debian files
   %debian_dirs
   %debian_install
-%make_install
+  %make_install
 %prep
   rm -rf %{buildroot}
   mkdir -p %{buildroot}

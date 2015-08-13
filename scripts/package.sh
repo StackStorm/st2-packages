@@ -16,7 +16,7 @@ ST2_GITREV="${ST2_GITREV:-master}"
 GITDIR=code                       # code directore
 GITUPDATE="${GITUPDATE:-sources}"   # updateable sources for st2 repository
 BUILD_ARTIFACT=${BUILD_ARTIFACT:-~/build}
-RPMS=/root/rpmbuild/RPMS/noarch
+RPMS=/root/rpmbuild/RPMS
 
 # Take care about artifacts dir creation
 [ -d $BUILD_ARTIFACT ] || mkdir -p $BUILD_ARTIFACT
@@ -60,7 +60,7 @@ copy_artifact() {
   if [ "$BUILD_DEB" = 1 ]; then
     sudo cp -v $1{*.deb,*.changes,*.dsc} $BUILD_ARTIFACT || true
   elif [ "$BUILD_RPM" = 1 ]; then
-    sudo cp -v $RPMS/$1*.rpm $BUILD_ARTIFACT
+    sudo cp -v $RPMS/*/$1*.rpm $BUILD_ARTIFACT
   fi
 }
 
