@@ -69,7 +69,7 @@ run_rspec() {
   echo -e "\n..... Executing integration tests on $desc"
 
   # If all packages are available, we can do full integration tests.
-  l1=$(echo $PACKAGE_LIST | sed 's/ /\n/' | sort -u)
+  l1=$(echo $BUILDLIST | sed 's/ /\n/' | sort -u)
   l2=$(echo $ST2_PACKAGES | sed 's/ /\n/' | sort -u)
 
   if [ "$l1" = "$l2" ]; then
@@ -82,7 +82,11 @@ run_rspec() {
 
 # --- Go!
 set -e
-export PACKAGE_LIST="${@:-${ST2_PACKAGES}}"
+
+# Priority of BUILDLIST: command args > $BUILDLIST > $ST2_PACKAGES
+BUILDLIST="${@:-${BUILDLIST}}"
+BUILDLIST="${BUILDLIST:-${ST2_PACKAGES}}"
+export BUILDLIST
 export MISTRAL_DISABLED=${MISTRAL_DISABLED:-0}
 
 # Define environment of remote services
@@ -103,7 +107,7 @@ export ST2_WAITFORSTART
 REMOTEENV=$(cat <<SCH
 export DEBUG=${DEBUG:-0}
 export MISTRAL_DISABLED=$MISTRAL_DISABLED
-export PACKAGE_LIST="$PACKAGE_LIST"
+export BUILDLIST="$BUILDLIST"
 export ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 export ST2_GITREV="${ST2_GITREV:-master}"
 export BUILD_ARTIFACT=~/build

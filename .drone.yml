@@ -5,13 +5,16 @@ env:
   - ST2_GITURL=https://github.com/dennybaa/st2.git
   - ST2_GITREV=setuptools_packaging_improvements
   - ST2_WAITFORSTART=20
+  # If given and differs form ST2_PACKAGES, no spec tests are run.
+  # Spec tests require all packages to be available.
+  - BUILDLIST=st2common
   - BUILDHOST=buildenv-pkg
-  - TESTHOSTS=droneunit
+  # - TESTHOSTS=droneunit
   - DEBUG=1
 script:
   - ./.drone/build.sh
 services:
-  - quay.io/dennybaa/droneunit:trusty-upstart
-  - quay.io/stackstorm/buildenv-pkg:deb
+  # - quay.io/dennybaa/droneunit:trusty-upstart
+  - quay.io/stackstorm/packagingenv:rpm
   - rabbitmq
   - mongodb

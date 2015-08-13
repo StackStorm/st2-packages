@@ -12,4 +12,4 @@ Package: st2common
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: St2Common - StackStorm shared files.
- Package contains examples and standart packs for st2.
+ Package contains examples and standard packs for st2.

@@ -18,7 +18,7 @@ class ST2Spec
     etc_dir: '/etc',
     conf_dir: '/etc/st2',
     log_dir: '/var/log/st2',
-    package_list: (ENV['PACKAGE_LIST'] || '').split,
+    package_list: (ENV['BUILDLIST'] || '').split,
     available_packages: (ENV['ST2_PACKAGES'] || '').split,
     mistral_disabled: ENV['MISTRAL_DISABLED'] || false,
 

@@ -16,22 +16,22 @@ else
   exit 1
 fi
 
-if [ "x$PACKAGE_LIST" = "x" -a "x$@" = "x" ]; then
-  echo "ERROR: ./package.sh requires arguments or \$PACKAGE_LIST to be set."
+if [ "x$BUILDLIST" = "x" -a "x$@" = "x" ]; then
+  echo "ERROR: ./package.sh requires arguments or \$BUILDLIST to be set."
   exit 1
 fi
 
 # !!! st2common is always first since others depend on it
 #
-PACKAGE_LIST=${@:-$PACKAGE_LIST}
-PACKAGE_LIST="st2common $(echo $PACKAGE_LIST | sed 's/st2common//')"
+BUILDLIST="$@"
+BUILDLIST="st2common $(echo $BUILDLIST | sed 's/st2common//')"
 
 if [ "$DEBUG" = "1" ]; then
-  echo "DEBUG: Package installation list is [${PACKAGE_LIST}]"
+  echo "DEBUG: Package installation list is [${BUILDLIST}]"
   echo "DEBUG: Package directory is \`${PACKAGES_DIR}'"
 fi
 
-for name in $PACKAGE_LIST; do
+for name in $BUILDLIST; do
   # pickup latest build
   package_path=$(ls -1t ${PACKAGES_DIR}/${name}*.${PKGEXT} | head -n1)
   [ -z $package_path ] && echo "ERROR: Couldn't find \`${PACKAGES_DIR}/${name}*'"

@@ -5,18 +5,18 @@
 set -e
 export WHEELDIR=/tmp/wheelhouse
 
-if [ "x$PACKAGE_LIST" = "x" -a "x$@" = "x" ]; then
-  echo "ERROR: ./package.sh requires arguments or \$PACKAGE_LIST to be set."
+if [ "x$BUILDLIST" = "x" -a "x$@" = "x" ]; then
+  echo "ERROR: ./package.sh requires arguments or \$BUILDLIST to be set."
   exit 1
 fi
 
-PACKAGE_LIST="${@:-$PACKAGE_LIST}"
-BUILD_LIST="${PACKAGE_LIST}"
+BUILDLIST="$@"
 ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 ST2_GITREV="${ST2_GITREV:-master}"
 GITDIR=code                       # code directore
 GITUPDATE="${GITUPDATE:-sources}"   # updateable sources for st2 repository
 BUILD_ARTIFACT=${BUILD_ARTIFACT:-~/build}
+RPMS=/root/rpmbuild/RPMS/noarch
 
 # Take care about artifacts dir creation
 [ -d $BUILD_ARTIFACT ] || mkdir -p $BUILD_ARTIFACT
@@ -31,8 +31,8 @@ fi
 # Package build function
 build_package() {
   # check package directory
-  if [ ! -d $pkg ]; then
-    echo "Package directory ${pkg} not found (at $(pwd))"
+  if [ ! -d $1 ]; then
+    echo "Package directory $1 not found (at $(pwd))"
     exit 1
   fi
 
@@ -41,6 +41,8 @@ build_package() {
   echo "===> Starting package $1 build"
   if [ "$BUILD_DEB" = 1 ]; then
     dpkg-buildpackage -b -uc -us
+  elif [ "$BUILD_RPM" = 1 ]; then
+    rpmbuild -bb rpm/$1.spec
   fi
   echo "===> Finished package $1 build sucessfully"
   popd
@@ -51,6 +53,8 @@ build_package() {
 copy_artifact() {
   if [ "$BUILD_DEB" = 1 ]; then
     sudo cp -v $1{*.deb,*.changes,*.dsc} $BUILD_ARTIFACT || true
+  elif [ "$BUILD_RPM" = 1 ]; then
+    sudo cp -v $RPMS/$1*.rpm $BUILD_ARTIFACT
   fi
 }
 
@@ -67,15 +71,11 @@ git clone --depth 1 -b $ST2_GITREV $ST2_GITURL $GITDIR
 [ -z $GITUPDATE ] || cp -r $GITUPDATE/. $GITDIR
 
 # Common is the dependency for all packages, so it's always built!
-BUILD_LIST="st2common $(echo $BUILD_LIST | sed 's/st2common//')"
-
-# Populate wheel house with st2common wheel since other packages require it!
-pushd $GITDIR/st2common && make wheelhouse && \
-  python setup.py bdist_wheel -d $WHEELDIR && popd
+BUILDLIST="st2common $(echo $BUILDLIST | sed 's/st2common//')"
 
 # Enter root and build packages in a loop
 pushd $GITDIR
-for pkg in $BUILD_LIST; do
+for pkg in $BUILDLIST; do
   build_package $pkg
   copy_artifact $pkg
 done

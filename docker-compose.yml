@@ -1,7 +1,24 @@
 # docker-compose >= 1.3.0rc3
 
+rabbitmq:
+  image: rabbitmq:management
+  hostname: rabbit
+  ports:
+    - "15672:15672"  # managment plugin port
+    - "5672:5672"
+
+mongodb:
+  image: mongo
+  ports:
+    - "27017:27017"
+
 buildenvdeb: 
-  image: quay.io/stackstorm/buildenv-pkg:deb
+  image: quay.io/stackstorm/packagingenv:deb
+  volumes:
+    - /tmp/st2-packages:/root/build
+
+buildenvrpm:
+  image: quay.io/stackstorm/packagingenv:rpm
   volumes:
     - /tmp/st2-packages:/root/build
 
@@ -20,6 +37,7 @@ ubuntu:
     - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor
     - ST2_GITURL=https://github.com/dennybaa/st2.git
     - ST2_GITREV=setuptools_packaging_improvements
+    # - BUILDLIST=
     - BUILDHOST=buildenvdeb
     - TESTHOSTS=trusty
     - DEBUG=1
@@ -32,14 +50,23 @@ ubuntu:
     - .:/root/workdir
     - /tmp/st2-packages:/root/packages
 
-rabbitmq:
-  image: rabbitmq:management
-  hostname: rabbit
-  ports:
-    - "15672:15672"  # managment plugin port
-    - "5672:5672"
-
-mongodb:
-  image: mongo
-  ports:
-    - "27017:27017"
+centos:
+  image: quay.io/dennybaa/droneruby
+  working_dir: /root/workdir
+  entrypoint: ["/bin/bash", "/root/workdir/.drone/build.sh"]
+  # entrypoint: ["/bin/bash", "-c", "sleep infinity"]
+  environment:
+    # Full list of st2 packages configures the default build
+    - COMPOSE=1
+    - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor
+    - ST2_GITURL=https://github.com/dennybaa/st2.git
+    - ST2_GITREV=setuptools_packaging_improvements
+    - BUILDLIST=st2common
+    - BUILDHOST=buildenvrpm
+    - TESTHOSTS=trusty
+    - DEBUG=1
+  links:
+    - buildenvrpm
+  volumes:
+    - .:/root/workdir
+    - /tmp/st2-packages:/root/packages
