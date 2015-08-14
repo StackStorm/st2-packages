@@ -1,14 +1,15 @@
 # Macros
+%define package st2common
 %define version %(echo ${ST2PKG_VERSION:-0.1.0})
 %define release %(echo ${ST2PKG_RELEASE:-1})
-%define _builddir /root/code/st2common
+%define _builddir /root/code/%{package}
 %define svc_user st2
 %define stanley_user stanley
 
 %include %{_builddir}/../rpmspec/debian_helpers.spec
 
 # Tags
-Name: st2common
+Name: %{package}
 Version: %{version}
 Release: %{release}
 BuildArch: noarch
@@ -22,16 +23,22 @@ Source0: %{_builddir}
 %description
   Package contains core st2 packs and other common files. 
 
+%config
+  /etc/*
+
 %files
   /*
+
 %install
   # We hate duplication right :)?, so let's use debian files
   %debian_dirs
   %debian_install
   %make_install
+
 %prep
   rm -rf %{buildroot}
   mkdir -p %{buildroot}
+
 %clean
   rm -rf %{buildroot}
 

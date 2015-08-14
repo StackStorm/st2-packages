@@ -7,7 +7,7 @@ env:
   - ST2_WAITFORSTART=20
   # If given and differs form ST2_PACKAGES, no spec tests are run.
   # Spec tests require all packages to be available.
-  - BUILDLIST=st2common st2client
+  - BUILDLIST=st2common st2client st2actions
   - BUILDHOST=packagingenv
   # - TESTHOSTS=droneunit
   - DEBUG=1
