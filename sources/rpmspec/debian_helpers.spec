@@ -17,5 +17,5 @@
 %define debian_install cat debian/install | grep -v '^\s*#' | sed -r 's~ +~ %{buildroot}/~' | \
           while read copy_rule; do \
             parent=$(echo "$copy_rule" | cut -f2 -d' ') \
-            [ -d "$parent" ] || install -d "$parent" && echo cp -r $copy_rule \
+            [ -d "$parent" ] || install -d "$parent" && cp -r $copy_rule \
           done
