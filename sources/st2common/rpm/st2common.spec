@@ -1,12 +1,13 @@
 # Macros
 %define package st2common
+%define specs_dir /root/code/rpmspec
 %define version %(echo ${ST2PKG_VERSION:-0.1.0})
 %define release %(echo ${ST2PKG_RELEASE:-1})
 %define _builddir /root/code/%{package}
 %define svc_user st2
 %define stanley_user stanley
 
-%include %{_builddir}/../rpmspec/debian_helpers.spec
+%include %{specs_dir}/debian_helpers.spec
 
 # Tags
 Name: %{package}

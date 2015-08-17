@@ -19,6 +19,8 @@ all: install
 
 install: wheelhouse changelog pre_install bdist_wheel
 
+post_install: ;
+
 pre_install:
 	# Write temp files which will be processed by debhelpers
 	install -D -m644 ../conf/st2.prod.conf $(DESTDIR)/etc/st2/st2.conf

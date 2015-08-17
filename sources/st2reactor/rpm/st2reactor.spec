@@ -1,4 +1,4 @@
-%define package st2actions
+%define package st2reactor
 %define specs_dir /root/code/rpmspec
 %define _builddir /root/code/%{package}
 
