@@ -9,7 +9,7 @@ env:
   # If BUILDLIST differs form ST2_PACKAGES, no spec tests are run.
   # Spec tests require all packages to be available. Tests also can be disabled
   # by emptying TESTHOSTS.
-  # - BUILDLIST=
+  - BUILDLIST=st2api
   - BUILDHOST=packagingenv
   # - TESTHOSTS=droneunit
 script:
