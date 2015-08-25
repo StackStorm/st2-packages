@@ -23,7 +23,7 @@ post_install: ;
 
 pre_install:
 	# Write temp files which will be processed by debhelpers
-	install -D -m644 ../conf/st2.prod.conf $(DESTDIR)/etc/st2/st2.conf
+	install -D -m644 ../conf/st2.package.conf $(DESTDIR)/etc/st2/st2.conf
 	install -D -m644 ../conf/logrotate.conf $(DESTDIR)/etc/logrotate.d/st2
 
 populate_version: .stamp-populate_version

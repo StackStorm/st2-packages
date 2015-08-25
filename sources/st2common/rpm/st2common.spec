@@ -28,6 +28,11 @@ Summary: St2Common - StackStorm shared files
   fi
   adduser --no-create-home --system %{svc_user} 2>/dev/null
   adduser --user-group %{stanley_user} 2>/dev/null
+  if [ ! -f /etc/st2/htpasswd ]; then
+    touch /etc/st2/htpasswd
+    chown %{svc_user}.%{svc_user} /etc/st2/htpasswd
+    chmod 640 /etc/st2/htpasswd
+  fi
   exit 0
 
 %post

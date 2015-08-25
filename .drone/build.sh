@@ -67,16 +67,7 @@ run_rspec() {
   testhost="$1"
   desc="${2:-$1}"
   echo -e "\n..... Executing integration tests on $desc"
-
-  # If all packages are available, we can do full integration tests.
-  l1=$(echo $BUILDLIST | sed 's/ /\n/' | sort -u)
-  l2=$(echo $ST2_PACKAGES | sed 's/ /\n/' | sort -u)
-
-  if [ "$l1" = "$l2" ]; then
-    DEBUG=0 rspec spec
-  else
-    DEBUG=0 rspec spec/default/package*_spec.rb
-  fi
+  DEBUG=0 rspec spec
 }
 
 
@@ -142,6 +133,13 @@ if [ "$DEBUG" = 1  ]; then
 fi
 
 build_packages                        # - 1
+current=$(echo "$BUILDLIST" | sed -r 's/\s+/\n/g' | sort -u)
+available=$(echo $ST2_PACKAGES | sed -r 's/\s+/\n/g' | sort -u)
+
+if [ "$current" != "$available" ]; then
+  >&2 echo "Non-full package list has been built. NOT PROCEEDING to integration testing!"
+  exit 0
+fi
 
 for testhost in $TESTHOSTS; do
   desc="host $testhost"

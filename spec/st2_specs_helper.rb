@@ -39,7 +39,8 @@ class ST2Spec
     },
 
     package_has_binaries: {
-      st2reactor: %w(st2-rule-tester st2-trigger-refire)
+      st2reactor: %w(st2-rule-tester st2-trigger-refire),
+      st2client: %w(st2)
     },
 
     package_has_directories: {

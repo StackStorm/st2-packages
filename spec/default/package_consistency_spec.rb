@@ -83,12 +83,12 @@ shared_examples 'os package' do |name, opts|
     if service_list
       each_with_options service_list do |service_name, _|
         prefix = File.join(spec[:bin_prefix], '')
-        describe file("#{prefix}#{service_name}") do
+        describe file("/usr/share/python/#{name}/bin/#{service_name}") do
           it_behaves_like 'script or binary'
         end
 
         describe file("/etc/default/#{service_name}"),
-                 if: %w(debian ubuntu).include?(os[:family]) do
+                    if: %w(debian ubuntu).include?(os[:family]) do
           it { is_expected.to exist }
         end
 

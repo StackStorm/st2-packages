@@ -11,8 +11,8 @@ fi
 
 # Create st2 users
 adduser --group --disabled-password --no-create-home --system st2 >/dev/null 2>&1
-adduser --group --disabled-password stanley >/dev/null 2>&1
-
+adduser --group stanley >/dev/null 2>&1
+adduser --disabled-password --ingroup stanley stanley >/dev/null 2>&1
 
 # case "$1" in
 #     install|upgrade)
