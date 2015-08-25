@@ -18,7 +18,7 @@ Requires: st2common = %{version}-%{release}
 
   # systemd service file
   mkdir -p %{buildroot}%{_unitdir}
-  install -m0644 %{SOURCE0}/rpm/st2api.service %{buildroot}%{_unitdir}/st2api.service
+  install -m0644 %{SOURCE0}/rpm/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
   make post_install DESTDIR=%{?buildroot}
 
 %prep
@@ -32,7 +32,7 @@ Requires: st2common = %{version}-%{release}
   %inst_venv_divertions
 
 %preun
-  %systemd_preun st2api.service
+  %systemd_preun %{name}
 
 %postun
   %uninst_venv_divertions
