@@ -46,4 +46,5 @@ Requires: st2common = %{version}-%{release}
   %{_bindir}/*
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/%{name}/*
-  %{_unitdir}/%{name}.service
+  %{_unitdir}/st2rulesengine.service
+  %{_unitdir}/st2sensorcontainer.service
