@@ -18,7 +18,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2actionrunner"
 NAME=st2actionrunner
-DAEMON=/usr/bin/$NAME
+DAEMON=/usr/share/python/st2actions/bin/$NAME
 SCRIPTNAME=/etc/init.d/$NAME
 WORKERSNUM=$(/usr/bin/nproc)
 

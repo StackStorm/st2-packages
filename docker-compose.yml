@@ -33,6 +33,15 @@ icentos7:
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup
 
+
+# Suite runners, build -> install -> test
+# -----------------------------------------------------------------------------
+#
+# 1) BUILDLIST defines package list which is going to be processed if it
+# differs form ST2_PACKAGES (the default - full list), no spec tests will be run.
+# 2) Integration tests can be ALSO DISABLED if you set TESTHOSTS to an empty string.
+#
+
 ubuntu:
   image: quay.io/dennybaa/droneruby
   working_dir: /root/workdir
@@ -66,7 +75,7 @@ centos:
     - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor
     - ST2_GITURL=https://github.com/dennybaa/st2.git
     - ST2_GITREV=setuptools_packaging_improvements
-    # - BUILDLIST=
+    - BUILDLIST=
     - BUILDHOST=buildenvrpm
     # - TESTHOSTS=trusty
     - DEBUG=1

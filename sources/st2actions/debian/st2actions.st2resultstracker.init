@@ -18,7 +18,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2resultstracker"
 NAME=st2resultstracker
-DAEMON=/usr/bin/$NAME
+DAEMON=/usr/share/python/st2actions/bin/$NAME
 DAEMON_ARGS="--config-file /etc/st2/st2.conf"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

@@ -42,7 +42,6 @@ Requires: st2common = %{version}-%{release}
   %systemd_postun
 
 %files
-  %{_bindir}/*
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/%{name}/*
   %{_unitdir}/%{name}.service

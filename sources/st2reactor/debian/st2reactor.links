@@ -1,4 +1,2 @@
 usr/share/python/st2reactor/bin/st2-rule-tester usr/bin/st2-rule-tester
 usr/share/python/st2reactor/bin/st2-trigger-refire usr/bin/st2-trigger-refire
-usr/share/python/st2reactor/bin/st2rulesengine usr/bin/st2rulesengine
-usr/share/python/st2reactor/bin/st2sensorcontainer usr/bin/st2sensorcontainer

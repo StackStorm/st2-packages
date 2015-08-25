@@ -18,5 +18,5 @@ script
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-  /usr/bin/$NAME ${DEFAULT_ARGS}
+  /usr/share/python/st2actions/bin/$NAME ${DEFAULT_ARGS}
 end script

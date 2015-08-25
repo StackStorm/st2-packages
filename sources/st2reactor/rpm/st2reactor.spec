@@ -18,7 +18,8 @@ Requires: st2common = %{version}-%{release}
 
   # systemd service file
   mkdir -p %{buildroot}%{_unitdir}
-  install -m0644 %{SOURCE0}/rpm/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
+  install -m0644 %{SOURCE0}/rpm/st2rulesengine.service %{buildroot}%{_unitdir}/st2rulesengine.service
+  install -m0644 %{SOURCE0}/rpm/st2sensorcontainer.service %{buildroot}%{_unitdir}/st2sensorcontainer.service
   make post_install DESTDIR=%{?buildroot}
 
 %prep
@@ -32,10 +33,10 @@ Requires: st2common = %{version}-%{release}
   %inst_venv_divertions
 
 %post
-  %systemd_post %{name}
+  %systemd_post st2rulesengine st2sensorcontainer
 
 %preun
-  %systemd_preun %{name}
+  %systemd_preun st2rulesengine st2sensorcontainer
 
 %postun
   %uninst_venv_divertions
