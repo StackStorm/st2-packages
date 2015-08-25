@@ -34,10 +34,11 @@ Requires: st2common = %{version}-%{release}
 %pre
   %inst_venv_divertions
 
+%post
+  %systemd_post st2actionrunner st2actionrunner@ st2notifier st2resultstracker
+
 %preun
-  %systemd_preun st2actionrunner
-  %systemd_preun st2notifier
-  %systemd_preun st2resultstracker
+  %systemd_preun st2actionrunner st2actionrunner@ st2notifier st2resultstracker
 
 %postun
   %uninst_venv_divertions

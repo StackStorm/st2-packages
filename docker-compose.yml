@@ -22,10 +22,16 @@ buildenvrpm:
   volumes:
     - /tmp/st2-packages:/root/build
 
-trusty:
+# Test innstances
+itrusty:
   image: quay.io/dennybaa/droneunit:trusty-upstart
   volumes_from:
     - buildenvdeb
+
+icentos7:
+  image: quay.io/dennybaa/droneunit:centos7-systemd
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup
 
 ubuntu:
   image: quay.io/dennybaa/droneruby
@@ -39,13 +45,13 @@ ubuntu:
     - ST2_GITREV=setuptools_packaging_improvements
     # - BUILDLIST=
     - BUILDHOST=buildenvdeb
-    - TESTHOSTS=trusty
+    - TESTHOSTS=itrusty
     - DEBUG=1
   links:
     - buildenvdeb
     - rabbitmq
     - mongodb
-    - trusty
+    - itrusty
   volumes:
     - .:/root/workdir
     - /tmp/st2-packages:/root/packages
@@ -54,19 +60,21 @@ centos:
   image: quay.io/dennybaa/droneruby
   working_dir: /root/workdir
   entrypoint: ["/bin/bash", "/root/workdir/.drone/build.sh"]
-  # entrypoint: ["/bin/bash", "-c", "sleep infinity"]
   environment:
     # Full list of st2 packages configures the default build
     - COMPOSE=1
     - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor
     - ST2_GITURL=https://github.com/dennybaa/st2.git
     - ST2_GITREV=setuptools_packaging_improvements
-    - BUILDLIST=st2common
+    # - BUILDLIST=
     - BUILDHOST=buildenvrpm
     # - TESTHOSTS=trusty
     - DEBUG=1
   links:
     - buildenvrpm
+    # - rabbitmq
+    # - mongodb
+    # - icentos7
   volumes:
     - .:/root/workdir
     # - /sys/fs/cgroup:/sys/fs/cgroup

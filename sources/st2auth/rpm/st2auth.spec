@@ -31,6 +31,9 @@ Requires: st2common = %{version}-%{release}
 %pre
   %inst_venv_divertions
 
+%post
+  %systemd_post %{name}
+
 %preun
   %systemd_preun %{name}
 
