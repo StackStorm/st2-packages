@@ -1,5 +1,6 @@
 require 'serverspec'
 require 'st2_specs_helper'
+include ST2Spec::Helper
 
 # Tests binary or script, in later case checks interpreater.
 shared_examples 'script or binary' do

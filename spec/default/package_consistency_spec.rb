@@ -1,5 +1,4 @@
 require 'spec_helper'
-include ST2Spec::Helper
 
 # OS package shared example group
 #
