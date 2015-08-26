@@ -34,7 +34,7 @@ testhost_setup() {
 # Build packages on a remote node (providing customized build environment)
 #
 build_packages() {
-  if [ -z "$BUILDHOST" ]; then
+  if [ ! -z "$BUILDHOST" ]; then
     echo -e "\n..... Starting packages build on $BUILDHOST"
     # Merge upstream st2 sources (located on the build host) with updates
     # from the current repository and perform packages build.
