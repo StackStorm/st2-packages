@@ -9,13 +9,13 @@ env:
   # If BUILDLIST differs form ST2_PACKAGES, no spec tests are run.
   # Spec tests require all packages to be available. Tests also can be disabled
   # by emptying TESTHOSTS.
-  # - BUILDLIST=
+  - BUILDLIST=
   - BUILDHOST=packagingenv
-  # - TESTHOSTS=droneunit
+  - TESTHOSTS=droneunit
 script:
   - ./.drone/build.sh
 services:
-  # - quay.io/dennybaa/droneunit:trusty-upstart
-  - quay.io/stackstorm/packagingenv:rpm
+  - quay.io/dennybaa/droneunit:trusty-upstart
+  - quay.io/stackstorm/packagingenv:deb
   - rabbitmq
   - mongodb
