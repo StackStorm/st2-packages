@@ -34,12 +34,16 @@ testhost_setup() {
 # Build packages on a remote node (providing customized build environment)
 #
 build_packages() {
-  echo -e "\n..... Starting packages build on $BUILDHOST"
-  # Merge upstream st2 sources (located on the build host) with updates
-  # from the current repository and perform packages build.
-  scp -r scripts sources $BUILDHOST: 1>/dev/null
+  if [ -z "$BUILDHOST" ]; then
+    echo -e "\n..... Starting packages build on $BUILDHOST"
+    # Merge upstream st2 sources (located on the build host) with updates
+    # from the current repository and perform packages build.
+    scp -r scripts sources $BUILDHOST: 1>/dev/null
 
-  ssh_cmd $BUILDHOST /bin/bash scripts/package.sh
+    ssh_cmd $BUILDHOST /bin/bash scripts/package.sh
+  else
+    >&2 echo -e "\n..... Packages build is skipped, BUILDHOST is not specified!"
+  fi
 }
 
 
@@ -55,9 +59,11 @@ install_packages() {
   [ "$COMPOSE" != "1" ] && scp -3 -r $BUILDHOST:build $testhost:
 
   # install st2 packages
+  [ "$DEBUG" = 1 ] && echo "===> Invoking remote install on $testhost"
   ssh_cmd $testhost /bin/bash scripts/install.sh
 
   # substitute varibles into the st2.conf configuration file
+  [ "$DEBUG" = 1 ] && echo "===> Invoking remote config (st2.conf) substitution on $testhost"
   ssh_cmd $testhost /bin/bash scripts/config.sh
 }
 
@@ -70,6 +76,17 @@ run_rspec() {
   DEBUG=0 rspec spec
 }
 
+# Exit if can not run integration tests
+#
+check_list_or_exit() {
+  current=$(echo "$BUILDLIST" | sed -r 's/\s+/\n/g' | sort -u)
+  available=$(echo $ST2_PACKAGES | sed -r 's/\s+/\n/g' | sort -u)
+
+  if [ "$current" != "$available" ]; then
+    >&2 echo "Non-full package list has been built. NOT PROCEEDING to integration testing!"
+    exit 0
+  fi
+}
 
 # --- Go!
 set -e
@@ -133,13 +150,7 @@ if [ "$DEBUG" = 1  ]; then
 fi
 
 build_packages                        # - 1
-current=$(echo "$BUILDLIST" | sed -r 's/\s+/\n/g' | sort -u)
-available=$(echo $ST2_PACKAGES | sed -r 's/\s+/\n/g' | sort -u)
-
-if [ "$current" != "$available" ]; then
-  >&2 echo "Non-full package list has been built. NOT PROCEEDING to integration testing!"
-  exit 0
-fi
+check_list_or_exit
 
 for testhost in $TESTHOSTS; do
   desc="host $testhost"

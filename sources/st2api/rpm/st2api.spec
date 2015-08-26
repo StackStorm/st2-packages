@@ -33,6 +33,7 @@ Requires: st2common = %{version}-%{release}
 
 %post
   %systemd_post %{name}
+  /usr/bin/systemctl --no-reload enable %{name} >/dev/null 2>&1 || :
 
 %preun
   %systemd_preun %{name}

@@ -25,13 +25,14 @@ buildenvrpm:
 # Test innstances
 itrusty:
   image: quay.io/dennybaa/droneunit:trusty-upstart
-  volumes_from:
-    - buildenvdeb
+  volumes:
+    - /tmp/st2-packages:/root/build
 
 icentos7:
   image: quay.io/dennybaa/droneunit:centos7-systemd
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup
+    - /tmp/st2-packages:/root/build
 
 
 # Suite runners, build -> install -> test
@@ -75,16 +76,15 @@ centos:
     - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor
     - ST2_GITURL=https://github.com/dennybaa/st2.git
     - ST2_GITREV=setuptools_packaging_improvements
-    - BUILDLIST=st2common
+    - BUILDLIST=
     - BUILDHOST=buildenvrpm
-    # - TESTHOSTS=trusty
+    - TESTHOSTS=icentos7
     - DEBUG=1
   links:
     - buildenvrpm
-    # - rabbitmq
-    # - mongodb
-    # - icentos7
+    - rabbitmq
+    - mongodb
+    - icentos7
   volumes:
     - .:/root/workdir
-    # - /sys/fs/cgroup:/sys/fs/cgroup
     - /tmp/st2-packages:/root/packages

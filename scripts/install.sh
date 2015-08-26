@@ -11,9 +11,8 @@ if [ -f /etc/debian_version ]; then
   INSTALLCMD="sudo gdebi -nq"
   PKGEXT=deb
 else
-  INSTALLCMD=
+  INSTALLCMD="sudo yum -y install"
   PKGEXT=rpm
-  exit 1
 fi
 
 if [ "x$BUILDLIST" = "x" -a "x$@" = "x" ]; then
