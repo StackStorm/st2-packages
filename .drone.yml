@@ -16,6 +16,6 @@ script:
   - ./.drone/build.sh
 services:
   - quay.io/dennybaa/droneunit:trusty-upstart
-  - quay.io/stackstorm/packagingenv:deb
+  - quay.io/stackstorm/packagingenv:trusty
   - rabbitmq
   - mongodb

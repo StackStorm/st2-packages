@@ -5,5 +5,30 @@
 #DPKG_EXPORT_BUILDFLAGS = 1
 #include /usr/share/dpkg/default.mk
 
+# Virtualenv and pip should be updated (better not to use the distro defaults).
+# Updated ones can be found under /use/local.
+PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+WHEELDIR ?= /tmp/wheelhouse
+
 %:
-	dh $@
+	dh $@ --with python-virtualenv
+
+
+override_dh_installdirs:
+	dh_installdirs
+	# Restore dh_auto_install behaviour, because it was removed by dh_virtualenv
+	# dh_auto_install same with:
+	$(MAKE) install
+
+override_dh_installinit:
+	# So far don't start services
+	dh_installinit --no-start
+
+override_dh_installdeb:
+	$(MAKE) post_install
+	dh_installdeb
+
+override_dh_virtualenv:
+	dh_virtualenv --extra-pip-arg '--no-index' \
+								--extra-pip-arg '--find-links=$(WHEELDIR)' \
+								--no-test

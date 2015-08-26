@@ -5,44 +5,47 @@
 #   - Integration tests are not run if BUILDLIST differs from ST2_PACKAGES (all available packages).
 #   - Integration tests can be DISABLED if you set TESTHOSTS to an empty string.
 #
+
+# wheezy (previous), light one, number one to be containerized.
 debian:
   image: quay.io/dennybaa/droneruby
   extends:
     file: compose-suite.yml
     service: suite
   environment:
-    - BUILDHOST=buildenvdeb
+    - BUILDHOST=bwheezy
     - TESTHOSTS=iwheezy
   links:
-    - buildenvdeb
+    - bwheezy
     - iwheezy
     - rabbitmq
     - mongodb
 
+# 14.04
 ubuntu:
   image: quay.io/dennybaa/droneruby
   extends:
     file: compose-suite.yml
     service: suite
   environment:
-    - BUILDHOST=buildenvdeb
+    - BUILDHOST=btrusty
     - TESTHOSTS=itrusty
   links:
-    - buildenvdeb
+    - btrusty
     - itrusty
     - rabbitmq
     - mongodb
 
-centos:
+centos7:
   image: quay.io/dennybaa/droneruby
   extends:
     file: compose-suite.yml
     service: suite
   environment:
-    - BUILDHOST=buildenvrpm
+    - BUILDHOST=bcentos7
     - TESTHOSTS=icentos7
   links:
-    - buildenvrpm
+    - bcentos7
     - icentos7
     - rabbitmq
     - mongodb
@@ -65,13 +68,18 @@ mongodb:
 
 # Build Instances
 #
-buildenvdeb: 
-  image: quay.io/stackstorm/packagingenv:deb
+bwheezy:
+  image: quay.io/stackstorm/packagingenv:wheezy
   volumes:
     - /tmp/st2-packages:/root/build
 
-buildenvrpm:
-  image: quay.io/stackstorm/packagingenv:rpm
+btrusty:
+  image: quay.io/stackstorm/packagingenv:trusty
+  volumes:
+    - /tmp/st2-packages:/root/build
+
+bcentos7:
+  image: quay.io/stackstorm/packagingenv:centos7
   volumes:
     - /tmp/st2-packages:/root/build
 
