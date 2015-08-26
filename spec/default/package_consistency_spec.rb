@@ -113,14 +113,12 @@ describe 'packages consistency' do
     end
   end
 
-  shared_binaries = %w(st2-bootstrap-rmq st2-register-content)
-
   it_behaves_like 'os package', 'st2common', config_dir: false
   it_behaves_like 'os package', 'st2client', config_dir: false
-  it_behaves_like 'os package', 'st2api',  binaries: shared_binaries
-  it_behaves_like 'os package', 'st2auth', binaries: shared_binaries
-  it_behaves_like 'os package', 'st2actions', binaries: shared_binaries
-  it_behaves_like 'os package', 'st2reactor', binaries: shared_binaries
+  it_behaves_like 'os package', 'st2api'
+  it_behaves_like 'os package', 'st2auth'
+  it_behaves_like 'os package', 'st2actions'
+  it_behaves_like 'os package', 'st2reactor'
 
   describe file(spec[:log_dir]) do
     it { is_expected.to be_directory & be_writable.by('owner') }

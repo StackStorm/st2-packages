@@ -24,12 +24,6 @@ Requires: st2common = %{version}-%{release}
 %clean
   rm -rf %{buildroot}
 
-%pre
-  %inst_venv_divertions
-
-%postun
-  %uninst_venv_divertions
-
 %files
   %{_bindir}/*
   %{_datadir}/python/%{name}

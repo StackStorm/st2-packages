@@ -31,9 +31,6 @@ Requires: st2common = %{version}-%{release}
 %clean
   rm -rf %{buildroot}
 
-%pre
-  %inst_venv_divertions
-
 %post
   %systemd_post st2actionrunner st2actionrunner@ st2notifier st2resultstracker
   /usr/bin/systemctl --no-reload enable st2actionrunner st2notifier st2resultstracker >/dev/null 2>&1 || :
@@ -42,7 +39,6 @@ Requires: st2common = %{version}-%{release}
   %systemd_preun st2actionrunner st2actionrunner@ st2notifier st2resultstracker
 
 %postun
-  %uninst_venv_divertions
   %systemd_postun
 
 %files

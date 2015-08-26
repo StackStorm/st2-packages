@@ -1,0 +1,19 @@
+# 1) BUILDLIST defines package list which is going to be processed if it
+# differs form ST2_PACKAGES (the default - full list), no spec tests will be run.
+# 2) 
+#
+
+suite:
+  working_dir: /root/workdir
+  entrypoint: ["/bin/bash", "/root/workdir/.drone/build.sh"]
+  environment:
+    - DEBUG=1
+    - COMPOSE=1
+    # Full list of st2 packages configures the default build
+    - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor
+    - ST2_GITURL=https://github.com/dennybaa/st2.git
+    - ST2_GITREV=setuptools_packaging_improvements
+    - BUILDLIST=
+  volumes:
+    - .:/root/workdir
+    - /tmp/st2-packages:/root/packages

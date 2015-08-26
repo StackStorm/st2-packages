@@ -39,6 +39,7 @@ class ST2Spec
     },
 
     package_has_binaries: {
+      st2common: %w(st2-bootstrap-rmq st2-register-content),
       st2reactor: %w(st2-rule-tester st2-trigger-refire),
       st2client: %w(st2)
     },

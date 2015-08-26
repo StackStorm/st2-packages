@@ -99,8 +99,10 @@ export MISTRAL_DISABLED=${MISTRAL_DISABLED:-0}
 
 # Define environment of remote services
 #
-BUILDHOST_IP=$(getent hosts $BUILDHOST | awk '{ print $1 }')
-BUILDHOST=${BUILDHOST_IP:-$BUILDHOST}
+if [ ! -z "$BUILDHOST" ]; then
+  BUILDHOST_IP=$(getent hosts $BUILDHOST | awk '{ print $1 }')
+  BUILDHOST=${BUILDHOST_IP:-$BUILDHOST}
+fi
 RABBITMQHOST=${RABBITMQHOST:-rabbitmq}
 MONGODBHOST=${MONGODBHOST:-mongodb}
 

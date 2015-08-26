@@ -10,8 +10,6 @@ ifneq (,$(wildcard /etc/debian_version))
 	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
 else
 	REDHAT := 1
-	RPM_SPECS_DIR := $(HOME)/rpmbuild/SPECS
-	RPM_SOURCES_DIR := $(HOME)/rpmbuild/SOURCES
 endif
 
 

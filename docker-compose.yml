@@ -1,5 +1,56 @@
-# docker-compose >= 1.3.0rc3
+# Suite runners prefrom build -> install -> test
+# see also compose-suite.yml
+#
+#   - Build is not run if BUILDHOST is an empty string.
+#   - Integration tests are not run if BUILDLIST differs from ST2_PACKAGES (all available packages).
+#   - Integration tests can be DISABLED if you set TESTHOSTS to an empty string.
+#
+debian:
+  image: quay.io/dennybaa/droneruby
+  extends:
+    file: compose-suite.yml
+    service: suite
+  environment:
+    - BUILDHOST=buildenvdeb
+    - TESTHOSTS=iwheezy
+  links:
+    - buildenvdeb
+    - iwheezy
+    - rabbitmq
+    - mongodb
 
+ubuntu:
+  image: quay.io/dennybaa/droneruby
+  extends:
+    file: compose-suite.yml
+    service: suite
+  environment:
+    - BUILDHOST=buildenvdeb
+    - TESTHOSTS=itrusty
+  links:
+    - buildenvdeb
+    - itrusty
+    - rabbitmq
+    - mongodb
+
+centos:
+  image: quay.io/dennybaa/droneruby
+  extends:
+    file: compose-suite.yml
+    service: suite
+  environment:
+    - BUILDHOST=buildenvrpm
+    - TESTHOSTS=icentos7
+  links:
+    - buildenvrpm
+    - icentos7
+    - rabbitmq
+    - mongodb
+
+# -----------------------------------------------------------------------------
+
+# External Services
+#
 rabbitmq:
   image: rabbitmq:management
   hostname: rabbit
@@ -12,6 +63,8 @@ mongodb:
   ports:
     - "27017:27017"
 
+# Build Instances
+#
 buildenvdeb: 
   image: quay.io/stackstorm/packagingenv:deb
   volumes:
@@ -22,9 +75,16 @@ buildenvrpm:
   volumes:
     - /tmp/st2-packages:/root/build
 
-# Test innstances
+# Test Instances
+#
 itrusty:
   image: quay.io/dennybaa/droneunit:trusty-upstart
+  volumes:
+    - /tmp/st2-packages:/root/build
+
+iwheezy:
+  image: quay.io/dennybaa/droneunit:wheezy
+  command: /usr/sbin/sshd -D
   volumes:
     - /tmp/st2-packages:/root/build
 
@@ -33,58 +93,3 @@ icentos7:
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup
     - /tmp/st2-packages:/root/build
-
-
-# Suite runners, build -> install -> test
-# -----------------------------------------------------------------------------
-#
-# 1) BUILDLIST defines package list which is going to be processed if it
-# differs form ST2_PACKAGES (the default - full list), no spec tests will be run.
-# 2) Integration tests can be ALSO DISABLED if you set TESTHOSTS to an empty string.
-#
-
-ubuntu:
-  image: quay.io/dennybaa/droneruby
-  working_dir: /root/workdir
-  entrypoint: ["/bin/bash", "/root/workdir/.drone/build.sh"]
-  environment:
-    # Full list of st2 packages configures the default build
-    - COMPOSE=1
-    - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor
-    - ST2_GITURL=https://github.com/dennybaa/st2.git
-    - ST2_GITREV=setuptools_packaging_improvements
-    - BUILDLIST=
-    - BUILDHOST=buildenvdeb
-    - TESTHOSTS=itrusty
-    - DEBUG=1
-  links:
-    - buildenvdeb
-    - rabbitmq
-    - mongodb
-    - itrusty
-  volumes:
-    - .:/root/workdir
-    - /tmp/st2-packages:/root/packages
-
-centos:
-  image: quay.io/dennybaa/droneruby
-  working_dir: /root/workdir
-  entrypoint: ["/bin/bash", "/root/workdir/.drone/build.sh"]
-  environment:
-    # Full list of st2 packages configures the default build
-    - COMPOSE=1
-    - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor
-    - ST2_GITURL=https://github.com/dennybaa/st2.git
-    - ST2_GITREV=setuptools_packaging_improvements
-    - BUILDLIST=
-    - BUILDHOST=buildenvrpm
-    - TESTHOSTS=icentos7
-    - DEBUG=1
-  links:
-    - buildenvrpm
-    - rabbitmq
-    - mongodb
-    - icentos7
-  volumes:
-    - .:/root/workdir
-    - /tmp/st2-packages:/root/packages

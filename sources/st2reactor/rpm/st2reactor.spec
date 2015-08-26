@@ -29,9 +29,6 @@ Requires: st2common = %{version}-%{release}
 %clean
   rm -rf %{buildroot}
 
-%pre
-  %inst_venv_divertions
-
 %post
   %systemd_post st2rulesengine st2sensorcontainer
   /usr/bin/systemctl --no-reload enable st2rulesengine st2sensorcontainer >/dev/null 2>&1 || :
@@ -40,7 +37,6 @@ Requires: st2common = %{version}-%{release}
   %systemd_preun st2rulesengine st2sensorcontainer
 
 %postun
-  %uninst_venv_divertions
   %systemd_postun
 
 %files

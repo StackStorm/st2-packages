@@ -3,16 +3,18 @@
 %define specdir /root/code/rpmspec
 %include %{specdir}/package_top.spec
 
-BuildArch: noarch
 Summary: St2Common - StackStorm shared files
+
+%include %{specdir}/package_venv.spec
 %include %{specdir}/helpers.spec
 
-# Blocks
 %description
-  Package contains core st2 packs and other common files. 
+  <insert long description, indented with spaces>
 
 %install
   %default_install
+  %pip_install_venv
+  make post_install DESTDIR=%{?buildroot}
 
 %prep
   rm -rf %{buildroot}
@@ -46,9 +48,11 @@ Summary: St2Common - StackStorm shared files
 
 %files
   %defattr(-,root,root,-)
+  %{_bindir}/*
   %doc %{_datadir}/doc/st2/docs
   %config(noreplace) %{_sysconfdir}/st2/st2.conf
   %config(noreplace) %{_sysconfdir}/logrotate.d/st2
+  %{_datadir}/python/%{name}
   %{_datadir}/doc/st2/examples
   %{_localstatedir}/log/st2
   /opt/stackstorm/packs/core
