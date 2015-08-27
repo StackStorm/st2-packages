@@ -1,19 +1,45 @@
 require 'spec_helper'
-require 'remote_logs_helper'
 
 # Bring up all stackstorm services
 #
 shared_examples 'start st2 services' do
-  WAITFORSTART = (ENV['ST2_WAITFORSTART'] || 15).to_i
-
   before(:context) do
     puts '===> Starting st2 services...'
-    spec[:service_list].each do |name|
-      cmd = spec.backend.command.get(:start_service, name)
-      spec.backend.run_command(cmd)
+    remote_start_services(spec[:service_list])
+
+    puts "===> Wait for st2 services to start #{spec[:wait_for_start]} sec..."
+    sleep spec[:wait_for_start]
+  end
+end
+
+# Share example showing remote logs of failed st2 services
+#
+shared_examples 'show service log on failure' do
+  before(:context) { @failed_services = [] }
+
+  after(:each, prompt_on_failure: true) do |example|
+    @failed_services << example if example.exception
+  end
+
+  after(:all) do
+    unless @failed_services.empty?
+      puts '===> Showing output from log files of the failed services'
+      @failed_services.each do |example|
+        service = example.metadata[:described_class]
+        lines_num = spec[:loglines_to_show]
+
+        unless service.is_a? Serverspec::Type::Service
+          fail 'Serverspec service is required to be described class!'
+        end
+
+        output = remote_grab_service_logs(service.name, lines_num)
+        unless output.empty?
+          puts "\nlast #{lines_num} lines from log file of service " \
+               "#{service.name}"
+          puts '>>>', output
+        end
+      end
     end
-    puts "===> Wait for st2 services to start #{WAITFORSTART} sec..."
-    sleep WAITFORSTART
   end
 end
 
