@@ -13,7 +13,7 @@ debian:
     file: compose-suite.yml
     service: suite
   environment:
-    # - BUILDHOST=bwheezy
+    - BUILDHOST=bwheezy
     - TESTHOSTS=iwheezy
   links:
     - bwheezy
