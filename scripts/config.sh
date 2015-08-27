@@ -19,7 +19,8 @@ EHD
 MONGO=$(echo "$MONGO" | sed -r 's/^\s+//')
 
 # Specify rabbitmq host
-sed -i "/\[messaging\]/ {n; /\[.*\]/!{ s#url.*=.*#url = $AMQP# } }" $CONF
+sed -i "/\[messaging\]/,/\[.*\]\|url/ {n; s#url.*=.*#url = $AMQP#}" $CONF
+sed -i "/\[auth\]/,/\[.*\]\|enable/ {n; s#enable.*=.*#enable = False#}" $CONF
 
 # Create database section, st2.conf ships without it
 (grep "\[database\]" $CONF &>/dev/null) || echo "$MONGO" >> /etc/st2/st2.conf

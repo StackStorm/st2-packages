@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'pp'
 
 module OSPkgHelpers
   attr_reader :name, :opts

@@ -2,20 +2,23 @@ require 'spec_helper'
 
 # Bring up all stackstorm services
 #
-shared_examples 'start st2 services' do
-  before(:context) do
+shared_examples 'prepare st2 services' do
+  before(:all) do
     puts '===> Starting st2 services...'
     remote_start_services(spec[:service_list])
 
     puts "===> Wait for st2 services to start #{spec[:wait_for_start]} sec..."
     sleep spec[:wait_for_start]
+
+    puts "===> Register st2 content"
+    remote_register_content
   end
 end
 
 # Share example showing remote logs of failed st2 services
 #
 shared_examples 'show service log on failure' do
-  before(:context) { @failed_services = [] }
+  before(:all) { @failed_services = [] }
 
   after(:each, prompt_on_failure: true) do |example|
     @failed_services << example if example.exception
@@ -43,10 +46,14 @@ shared_examples 'show service log on failure' do
   end
 end
 
-# Main services check up
-#
+# Prepare
+describe 'st2 prepare' do
+  include_examples 'prepare st2 services'
+end
+
+# Services check up
 describe 'st2 services check' do
-  include_examples 'start st2 services'
+  include_examples 'prepare st2 services'
   include_examples 'show service log on failure'
 
   context 'external' do
@@ -67,6 +74,14 @@ describe 'st2 services check' do
     describe service(name), prompt_on_failure: true do
       it { is_expected.to be_enabled }
       it { is_expected.to be_running }
+    end
+  end
+end
+
+describe 'st2 simple checks' do
+  context 'actions' do
+    describe command("st2 run core.local -- hostname") do
+      its(:exit_status) { is_expected.to eq 0 }
     end
   end
 end

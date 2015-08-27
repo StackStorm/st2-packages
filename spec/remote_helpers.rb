@@ -9,12 +9,20 @@ module RemoteHelpers
     end
   end
 
+  # Run register content
+  def remote_register_content
+    cmd = spec.backend.run_command("/usr/bin/st2-register-content --register-all --config-dir #{spec[:conf_dir]}")
+    puts cmd.stdout
+    # FIX FIX
+    #
+  end
+
   # Use different ways to grab logs on a remote spec instance.
   def remote_init_type
     probe_cmd = <<-EOS
-      (ls -1 /etc/debian_version && dpkg -l upstart) &>/dev/null && echo upstart && exit
-      (ls -1 /etc/debian_version) &>/dev/null && echo debian && exit
-      (ls -1 /usr/bin/systemctl) &>/dev/null && echo systemd && exit
+      ls -1 /etc/debian_version 1>/dev/null 2>&1 && dpkg -l upstart 1>/dev/null 2>&1 && echo upstart && exit
+      ls -1 /etc/debian_version 1>/dev/null 2>&1 && echo debian && exit
+      ls -1 /usr/bin/systemctl 1>/dev/null 2>&1 && echo systemd && exit
     EOS
     svtype = spec.backend.run_command(probe_cmd).stdout
     svtype.empty? ? nil : svtype.strip.to_sym
@@ -33,7 +41,7 @@ module RemoteHelpers
                 ''
               end
     if output.empty?
-      puts "!!! Couldn't locate #{service_name} #{init_type} service stdout logs"
+      "!!! Couldn't locate #{service_name} #{init_type} service stdout logs"
     else
       output
     end
