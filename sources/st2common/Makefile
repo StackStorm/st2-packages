@@ -15,9 +15,9 @@ endif
 
 all: install
 
-install: wheelhouse changelog pre_install bdist_wheel
+install: wheelhouse changelog pre_install
 
-post_install: ;
+post_install: bdist_wheel
 
 pre_install:
 	# Write temp files which will be processed by debhelpers
