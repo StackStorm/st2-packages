@@ -1,11 +1,5 @@
 require 'spec_helper'
 
-# Bring up all stackstorm services
-#
-shared_examples 'prepare st2 services' do
-
-end
-
 # Share example showing remote logs of failed st2 services
 #
 shared_examples 'show service log on failure' do
