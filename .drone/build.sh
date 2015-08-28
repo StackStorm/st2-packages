@@ -73,19 +73,21 @@ run_rspec() {
   testhost="$1"
   desc="${2:-$1}"
   echo -e "\n..... Executing integration tests on $desc"
-  DEBUG=0 rspec spec
+
+  if ( can_run_full_testsuite ); then
+    rspec spec
+  else
+    >&2 echo "Runing only package specific tests!"
+    rspec -P '**/package_*_spec.rb' spec
+  fi
 }
 
 # Exit if can not run integration tests
 #
-check_list_or_exit() {
+can_run_full_testsuite() {
   current=$(echo "$BUILDLIST" | sed -r 's/\s+/\n/g' | sort -u)
   available=$(echo $ST2_PACKAGES | sed -r 's/\s+/\n/g' | sort -u)
-
-  if [ "$current" != "$available" ]; then
-    >&2 echo "Non-full package list has been built. NOT PROCEEDING to integration testing!"
-    exit 0
-  fi
+  [ "$current" = "$available" ]
 }
 
 # --- Go!
@@ -152,7 +154,6 @@ if [ "$DEBUG" = 1  ]; then
 fi
 
 build_packages                        # - 1
-check_list_or_exit
 
 for testhost in $TESTHOSTS; do
   desc="host $testhost"

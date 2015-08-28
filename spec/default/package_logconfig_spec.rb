@@ -35,6 +35,9 @@ describe 'logs configuration' do
   extend LogHelpers
 
   spec[:service_list].each do |svc_name|
+    # Don't test logging configuration for a service if its package is not installed
+    next unless spec[:package_list].include?(package_name(svc_name))
+
     describe file(config_path(svc_name)) do
       let(:content) { described_class.content }
       re_list = dest_re_list(svc_name)

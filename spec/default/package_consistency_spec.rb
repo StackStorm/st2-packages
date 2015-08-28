@@ -137,12 +137,15 @@ describe 'packages consistency' do
     end
   end
 
-  it_behaves_like 'os package', 'st2common', config_dir: false
-  it_behaves_like 'os package', 'st2client', config_dir: false
-  it_behaves_like 'os package', 'st2api'
-  it_behaves_like 'os package', 'st2auth'
-  it_behaves_like 'os package', 'st2actions'
-  it_behaves_like 'os package', 'st2reactor'
+  os_package_opts = {
+    'st2common' => {config_dir: false},
+    'st2client' => {config_dir: false}
+  }
+
+  spec[:package_list].each do |pkg_name|
+    pkg_opts = os_package_opts[pkg_name] || {}
+    it_behaves_like 'os package', pkg_name, pkg_opts
+  end
 
   describe file(spec[:log_dir]) do
     it { is_expected.to be_directory & be_writable.by('owner') }
