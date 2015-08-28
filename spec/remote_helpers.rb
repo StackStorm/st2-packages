@@ -9,14 +9,6 @@ module RemoteHelpers
     end
   end
 
-  # Run register content
-  def remote_register_content
-    cmd = spec.backend.run_command("/usr/bin/st2-register-content --register-all --config-dir #{spec[:conf_dir]}")
-    puts cmd.stdout
-    # FIX FIX
-    #
-  end
-
   # Use different ways to grab logs on a remote spec instance.
   def remote_init_type
     probe_cmd = <<-EOS
