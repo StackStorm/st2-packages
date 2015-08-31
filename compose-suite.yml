@@ -9,7 +9,7 @@ suite:
     - ST2_WAITFORSTART=10
     - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor
     - ST2_GITURL=https://github.com/dennybaa/st2.git
-    - ST2_GITREV=setuptools_packaging_improvements
+    - ST2_GITREV=updates_for_st2_packaging
     - BUILDLIST=
   volumes:
     - .:/root/workdir
