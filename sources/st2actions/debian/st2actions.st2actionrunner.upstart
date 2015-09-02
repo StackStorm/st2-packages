@@ -6,13 +6,25 @@ author          "StackStorm Engineering <opsadmin@stackstorm.com>"
 
 start on filesystem and net-device-up IFACE!=lo
 stop on starting rc RUNLEVEL=[016]
-task
  
-script
+pre-start script
+  SPAWNER=/usr/share/python/st2actions/bin/runners.sh
   WORKERSNUM=$(/usr/bin/nproc 2>/dev/null)
-  WORKERSNUM=${WORKERSNUM:-2}
-  for i in $(seq 1 $WORKERSNUM)
-  do
-    start st2actionrunner-worker WORKERID=$i
-  done
+  NAME=st2actionrunner
+  DEFAULT_ARGS="--config-file /etc/st2/st2.conf"
+
+  # Read configuration variable file if it is present
+  [ -r /etc/default/$NAME ] && . /etc/default/$NAME
+  $SPAWNER start
+end script
+
+post-stop script
+  SPAWNER=/usr/share/python/st2actions/bin/runners.sh
+  WORKERSNUM=$(/usr/bin/nproc 2>/dev/null)
+  NAME=st2actionrunner
+  DEFAULT_ARGS="--config-file /etc/st2/st2.conf"
+
+  # Read configuration variable file if it is present
+  [ -r /etc/default/$NAME ] && . /etc/default/$NAME
+  $SPAWNER stop
 end script
