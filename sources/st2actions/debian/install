@@ -1,1 +1,2 @@
-conf/* etc/st2actions/
+conf/logging.*.conf etc/st2/
+conf/syslog.*.conf etc/st2/

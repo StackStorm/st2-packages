@@ -11,12 +11,10 @@ module LogHelpers
 
   # Get config path of st2 service
   def config_path(svc_name)
-    if spec[:separate_log_config].include?(svc_name)
-      # Set suffix if required
-      service_suffix = svc_name.sub(/^st2/, '')
-    end
-    config_name = ['logging', service_suffix, 'conf'].compact.join('.')
-    File.join([spec[:etc_dir], package_name(svc_name), config_name])
+    # strip st2 prefix
+    noprefix_name = svc_name.sub(/^st2/, '')
+    config_name = ['logging', noprefix_name, 'conf'].compact.join('.')
+    File.join([spec[:conf_dir], config_name])
   end
 
   # Get log destination regex list

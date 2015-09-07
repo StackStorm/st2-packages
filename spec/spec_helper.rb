@@ -17,7 +17,6 @@ set :ssh_options, SSH_OPTIONS
 class ST2Spec
   SPECCONF = {
     bin_prefix: '/usr/bin',
-    etc_dir: '/etc',
     conf_dir: '/etc/st2',
     log_dir: '/var/log/st2',
     package_list: (ENV['BUILDLIST'] || '').split,
@@ -28,19 +27,12 @@ class ST2Spec
     service_list: %w(st2api st2auth st2actionrunner st2notifier
                      st2resultstracker st2rulesengine st2sensorcontainer st2exporter),
 
-    separate_log_config: %w(st2notifier st2resultstracker
-                            st2rulesengine st2sensorcontainer),
-
     loglines_to_show: 20,
     logdest_pattern: {
       st2actionrunner: 'st2actionrunner.{pid}'
     },
 
-    package_opts: {
-      'st2common' => {config_dir: false},
-      'st2client' => {config_dir: false},
-      'st2debug' => {config_dir: false}
-    },
+    package_opts: {},
 
     package_has_services: {
       st2actions: %w(st2actionrunner st2notifier st2resultstracker),
