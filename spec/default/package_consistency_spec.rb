@@ -5,7 +5,7 @@ module OSPkgHelpers
 
   def set_context_vars(name, opts)
     @name = name
-    @opts = default_options.merge(opts || {})
+    @opts = Hashie::Mash.new.merge(opts || {})
   end
 
   # Collection iterating methods over spec lists
@@ -28,12 +28,6 @@ module OSPkgHelpers
         end
       end
     end_eval
-  end
-
-  def default_options
-    @default_options ||= Hashie::Mash.new({
-      config_dir: true
-    })
   end
 end
 
@@ -62,13 +56,10 @@ shared_examples 'os package' do |name, _opts|
 
   context 'files' do
     set_context_vars(name, _opts)
-    unless self.opts[:config_dir]
-      no_config_dir_msg = 'no services, no configuration directory is needed'
-    end
 
-    # Check component etc directory
+    # Check /etc/st2 directory
     #
-    describe file("/etc/#{name}"), skip: no_config_dir_msg do
+    describe file(spec[:conf_dir]) do
       it { is_expected.to be_directory }
     end
 

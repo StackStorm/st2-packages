@@ -40,5 +40,5 @@ Requires: st2common = %{version}-%{release}
 
 %files
   %{_datadir}/python/%{name}
-  %config(noreplace) %{_sysconfdir}/%{name}/*
+  %config(noreplace) %{_sysconfdir}/st2/*
   %{_unitdir}/%{name}.service
