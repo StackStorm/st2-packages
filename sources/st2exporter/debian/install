@@ -1,0 +1,2 @@
+conf/logging.*.conf etc/st2/
+conf/syslog.*.conf etc/st2/
