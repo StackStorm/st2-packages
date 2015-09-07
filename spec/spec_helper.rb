@@ -26,7 +26,7 @@ class ST2Spec
     wait_for_start: (ENV['ST2_WAITFORSTART'] || 15).to_i,
 
     service_list: %w(st2api st2auth st2actionrunner st2notifier
-                     st2resultstracker st2rulesengine st2sensorcontainer),
+                     st2resultstracker st2rulesengine st2sensorcontainer st2exporter),
 
     separate_log_config: %w(st2notifier st2resultstracker
                             st2rulesengine st2sensorcontainer),
@@ -34,6 +34,12 @@ class ST2Spec
     loglines_to_show: 20,
     logdest_pattern: {
       st2actionrunner: 'st2actionrunner.{pid}'
+    },
+
+    package_opts: {
+      'st2common' => {config_dir: false},
+      'st2client' => {config_dir: false},
+      'st2debug' => {config_dir: false}
     },
 
     package_has_services: {
@@ -44,7 +50,8 @@ class ST2Spec
     package_has_binaries: {
       st2common: %w(st2-bootstrap-rmq st2-register-content),
       st2reactor: %w(st2-rule-tester st2-trigger-refire),
-      st2client: %w(st2)
+      st2client: %w(st2),
+      st2debug: %w(st2-submit-debug-info)
     },
 
     package_has_directories: {

@@ -137,13 +137,8 @@ describe 'packages consistency' do
     end
   end
 
-  os_package_opts = {
-    'st2common' => {config_dir: false},
-    'st2client' => {config_dir: false}
-  }
-
   spec[:package_list].each do |pkg_name|
-    pkg_opts = os_package_opts[pkg_name] || {}
+    pkg_opts = spec[:package_opts][pkg_name] || {}
     it_behaves_like 'os package', pkg_name, pkg_opts
   end
 
