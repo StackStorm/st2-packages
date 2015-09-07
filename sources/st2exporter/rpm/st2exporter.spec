@@ -42,3 +42,4 @@ Requires: st2common = %{version}-%{release}
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/%{name}/*
   %{_unitdir}/%{name}.service
+  %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports

@@ -1,4 +1,4 @@
-%define package st2auth
+%define package st2debug
 %define _sourcedir /root/code
 %define specdir /root/code/rpmspec
 %include %{specdir}/package_top.spec
