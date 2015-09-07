@@ -74,7 +74,7 @@ run_rspec() {
   desc="${2:-$1}"
   echo -e "\n..... Executing integration tests on $desc"
 
-  if ( can_run_full_testsuite ); then
+  if ( all_packages_available ); then
     rspec spec
   else
     >&2 echo "Runing only package specific tests!"
@@ -84,7 +84,7 @@ run_rspec() {
 
 # Exit if can not run integration tests
 #
-can_run_full_testsuite() {
+all_packages_available() {
   current=$(echo "$BUILDLIST" | sed -r 's/\s+/\n/g' | sort -u)
   available=$(echo $ST2_PACKAGES | sed -r 's/\s+/\n/g' | sort -u)
   [ "$current" = "$available" ]
@@ -98,6 +98,7 @@ BUILDLIST="${@:-${BUILDLIST}}"
 BUILDLIST="${BUILDLIST:-${ST2_PACKAGES}}"
 export BUILDLIST
 export MISTRAL_DISABLED=${MISTRAL_DISABLED:-0}
+export ST2_BUNDLE=$(all_packages_available && echo 1)
 
 # Define environment of remote services
 #
@@ -122,6 +123,7 @@ export MISTRAL_DISABLED=$MISTRAL_DISABLED
 export BUILDLIST="$BUILDLIST"
 export ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 export ST2_GITREV="${ST2_GITREV:-master}"
+export ST2_BUNDLE="$ST2_BUNDLE"
 export BUILD_ARTIFACT=~/build
 export RABBITMQHOST=$RABBITMQHOST
 export MONGODBHOST=$MONGODBHOST

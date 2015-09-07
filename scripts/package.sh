@@ -83,6 +83,11 @@ if [ "$DEBUG" = "1" ]; then
   echo "DEBUG: Package build list is [${BUILDLIST}]"
 fi
 
+# Create bundle package if all components have been built
+if [ "$ST2_BUNDLE" = "1" ]; then
+  BUILDLIST="st2bundle"
+fi
+
 # Enter root and build packages in a loop
 pushd $GITDIR
 for pkg in $BUILDLIST; do

@@ -1,0 +1,2 @@
+usr/share/python/st2/bin/st2-bootstrap-rmq usr/bin/st2-bootstrap-rmq
+usr/share/python/st2/bin/st2-register-content usr/bin/st2-register-content
