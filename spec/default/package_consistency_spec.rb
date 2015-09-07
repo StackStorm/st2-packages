@@ -31,9 +31,9 @@ module OSPkgHelpers
   end
 
   def default_options
-    @default_options ||= {
+    @default_options ||= Hashie::Mash.new({
       config_dir: true
-    }
+    })
   end
 end
 
@@ -62,7 +62,6 @@ shared_examples 'os package' do |name, _opts|
 
   context 'files' do
     set_context_vars(name, _opts)
-
     unless self.opts[:config_dir]
       no_config_dir_msg = 'no services, no configuration directory is needed'
     end
@@ -138,8 +137,7 @@ describe 'packages consistency' do
   end
 
   spec[:package_list].each do |pkg_name|
-    pkg_opts = spec[:package_opts][pkg_name] || {}
-    it_behaves_like 'os package', pkg_name, pkg_opts
+    it_behaves_like 'os package', pkg_name, spec[:package_opts][pkg_name]
   end
 
   describe file(spec[:log_dir]) do
