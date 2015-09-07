@@ -25,5 +25,5 @@ Requires: st2common = %{version}-%{release}
   rm -rf %{buildroot}
 
 %files
+  %{_bindir}/*
   %{_datadir}/python/%{name}
-  %config(noreplace) %{_sysconfdir}/%{name}/*
