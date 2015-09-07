@@ -15,7 +15,7 @@ env:
 script:
   - ./.drone/build.sh
 services:
-  - quay.io/dennybaa/droneunit:centos7-systemd
-  - quay.io/stackstorm/packagingenv:centos7
+  - quay.io/dennybaa/droneunit:trusty-upstart
+  - quay.io/stackstorm/packagingenv:trusty
   - rabbitmq
   - mongodb
