@@ -1,11 +1,13 @@
 require 'spec_helper'
 
 module OSPkgHelpers
-  attr_reader :name, :opts
+  attr_reader :name, :venv_name, :opts
 
   def set_context_vars(name, opts)
     @name = name
     @opts = Hashie::Mash.new.merge(opts || {})
+    # we use different venv name for st2bundle package
+    @venv_name = (name == 'st2bundle' ? 'st2' : name)
   end
 
   # Collection iterating methods over spec lists
@@ -98,7 +100,7 @@ shared_examples 'os package' do |name, _opts|
     # Check services
     #
     get_services do |service_name, _|
-      describe file("/usr/share/python/#{name}/bin/#{service_name}") do
+      describe file("/usr/share/python/#{venv_name}/bin/#{service_name}") do
         it_behaves_like 'script or binary'
       end
 
