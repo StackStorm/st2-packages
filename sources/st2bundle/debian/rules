@@ -22,7 +22,15 @@ override_dh_installdirs:
 
 override_dh_installinit:
 	# So far don't start services
-	dh_installinit --no-start
+	dh_installinit --no-start --name=st2actionrunner-worker
+	dh_installinit --no-start --name=st2actionrunner
+	dh_installinit --no-start --name=st2api
+	dh_installinit --no-start --name=st2auth
+	dh_installinit --no-start --name=st2exporter
+	dh_installinit --no-start --name=st2notifier
+	dh_installinit --no-start --name=st2resultstracker
+	dh_installinit --no-start --name=st2rulesengine
+	dh_installinit --no-start --name=st2sensorcontainer
 
 override_dh_installdeb:
 	$(MAKE) post_install

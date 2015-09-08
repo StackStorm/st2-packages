@@ -11,6 +11,7 @@ Homepage: http://stackstorm.com/
 Package: st2bundle
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: st2common
 Description: st2bundle - StackStorm all components bundle.
  Package is full standalone stackstorm installation including
  all components
