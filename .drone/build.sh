@@ -75,6 +75,7 @@ run_rspec() {
   echo -e "\n..... Executing integration tests on $desc"
 
   if ( all_packages_available ); then
+    [ "$ST2_TESTMODE" = "bundle" ] && export BUILDLIST=st2bundle
     rspec spec
   else
     >&2 echo "Runing only package specific tests!"

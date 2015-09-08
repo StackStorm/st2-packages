@@ -25,6 +25,11 @@ fi
 BUILDLIST="${BUILDLIST:-${@}}"
 BUILDLIST="st2common $(echo $BUILDLIST | sed 's/st2common//')"
 
+# Bundle testing is invoked and st2bundle package is available
+if [ "$ST2_TESTMODE" = "bundle" ] && [ "$ST2_BUNDLE" = 1 ]; then
+  BUILDLIST="st2bundle"
+fi
+
 if [ "$DEBUG" = "1" ]; then
   echo "DEBUG: Package installation list is [${BUILDLIST}]"
   echo "DEBUG: Package directory is \`${PACKAGES_DIR}'"
