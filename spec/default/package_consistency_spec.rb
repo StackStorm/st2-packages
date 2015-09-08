@@ -102,11 +102,6 @@ shared_examples 'os package' do |name, _opts|
         it_behaves_like 'script or binary'
       end
 
-      describe file("/etc/default/#{service_name}"),
-               if: %w(debian ubuntu).include?(os[:family]) do
-        it { is_expected.to exist }
-      end
-
       describe service(service_name) do
         it { is_expected.to be_enabled }
       end

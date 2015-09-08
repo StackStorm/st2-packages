@@ -31,4 +31,4 @@ override_dh_installdeb:
 override_dh_virtualenv:
 	dh_virtualenv --extra-pip-arg '--no-index' \
 								--extra-pip-arg '--find-links=$(WHEELDIR)' \
-								'--package=st2' --no-test
+								--install-suffix st2 --no-test

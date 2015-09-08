@@ -123,6 +123,7 @@ export MISTRAL_DISABLED=$MISTRAL_DISABLED
 export BUILDLIST="$BUILDLIST"
 export ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
 export ST2_GITREV="${ST2_GITREV:-master}"
+export ST2_TESTMODE="${ST2_TESTMODE:-components}"
 export ST2_BUNDLE="$ST2_BUNDLE"
 export BUILD_ARTIFACT=~/build
 export RABBITMQHOST=$RABBITMQHOST
