@@ -1,3 +1,4 @@
-/etc/st2
 /etc/logrotate.d
+/etc/st2
+/opt/stackstorm/exports
 /var/log/st2
