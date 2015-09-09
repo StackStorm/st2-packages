@@ -1,4 +1,3 @@
-
 # Cat debian/package.dirs, set buildroot prefix and create directories.
 %define debian_dirs cat debian/%{name}.dirs | grep -v '^\\s*#' | sed 's~^~%{buildroot}/~' | \
           while read dir_path; do \

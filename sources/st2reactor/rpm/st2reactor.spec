@@ -31,7 +31,7 @@ Requires: st2common = %{version}-%{release}
 
 %post
   %systemd_post st2rulesengine st2sensorcontainer
-  /usr/bin/systemctl --no-reload enable st2rulesengine st2sensorcontainer >/dev/null 2>&1 || :
+  systemctl --no-reload enable st2rulesengine st2sensorcontainer >/dev/null 2>&1 || :
 
 %preun
   %systemd_preun st2rulesengine st2sensorcontainer

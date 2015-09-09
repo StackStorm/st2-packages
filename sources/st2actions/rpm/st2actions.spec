@@ -33,7 +33,7 @@ Requires: st2common = %{version}-%{release}
 
 %post
   %systemd_post st2actionrunner st2actionrunner@ st2notifier st2resultstracker
-  /usr/bin/systemctl --no-reload enable st2actionrunner st2notifier st2resultstracker >/dev/null 2>&1 || :
+  systemctl --no-reload enable st2actionrunner st2notifier st2resultstracker >/dev/null 2>&1 || :
 
 %preun
   %systemd_preun st2actionrunner st2actionrunner@ st2notifier st2resultstracker

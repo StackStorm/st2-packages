@@ -31,6 +31,7 @@ ubuntu:
     - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor
     - ST2_GITURL=https://github.com/dennybaa/st2.git
     - ST2_GITREV=setuptools_packaging_improvements
+    - ST2_TESTMODE=bundle
     - BUILDHOST=buildenvdeb
     - TESTHOSTS=trusty
     - DEBUG=1
@@ -45,6 +46,7 @@ ubuntu:
 ```
 
 This is the configuration of ubuntu worker machine which is a ruby one and it's able to run rspec integration tests. These tests use [serverspec](http://serverspec.org) library for testing servers.
+For up to date schema details, have a look into the metadata file [docker-compose.yml](docker-compose.yml).
 
 Let's describe a few important configuration variables:
 
@@ -52,6 +54,7 @@ Let's describe a few important configuration variables:
  - **ST2_GITURL** - specifies an URL of upstream stackstorm sources.
  - **ST2_GITREV** - specifies a revision or branch which will be checked out.
  - **ST2_WAITFORSTART** - specifies timeout to wait for st2 services to start.
+ - **ST2_TESTMODE** - specifies what integration tests to perform there're two options are available: **bundle** and **components** (*the former is the default*). In case full package list has been built and the test mode is bundle, integration testing will be invoke for **st2bundle** package.
  - **BUILDHOST** - specifies a node where packages build process happens.
  - **TESTHOSTS** - specifies a list of nodes which the integration tests will be performed upon.
 
@@ -59,7 +62,7 @@ Let's describe a few important configuration variables:
 
 Issue the command bellow and the whole suite will be run, after it finishes you can find packages in your `/tmp/st2-packages` directory.
 ```
-docker-compose run --rm ubuntu
+docker-compose run ubuntu
 ```
 
 ## License and Authors

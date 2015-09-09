@@ -1,5 +1,4 @@
-
-{!?venv_name: %define venv_name %{package}}
+%{!?venv_name: %define venv_name %{package}}
 %define div_links bin/st2-bootstrap-rmq bin/st2-register-content
 %define wheel_dir %(echo ${WHEELDIR:-/tmp/wheelhouse})
 %define venv_cmd virtualenv

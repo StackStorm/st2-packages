@@ -104,8 +104,10 @@ shared_examples 'os package' do |name, _opts|
         it_behaves_like 'script or binary'
       end
 
-      describe service(service_name) do
-        it { is_expected.to be_enabled }
+      if name != 'st2bundle'
+        describe service(service_name) do
+          it { is_expected.to be_enabled }
+        end
       end
     end
   end
