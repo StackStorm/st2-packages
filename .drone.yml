@@ -1,16 +1,11 @@
 image: quay.io/dennybaa/droneruby
 env:
-  # List of available st2 packages (must have correct installation order)
-  - ST2_PACKAGES=st2common st2actions st2api st2auth st2client st2reactor st2debug st2exporter
+  - DEBUG=1
   - ST2_GITURL=https://github.com/StackStorm/st2
   - ST2_GITREV=master
   - ST2_WAITFORSTART=20
   - ST2_TESTMODE=bundle
-  - DEBUG=1
-  # If BUILDLIST differs form ST2_PACKAGES, no spec tests are run.
-  # Spec tests require all packages to be available. Tests also can be disabled
-  # by emptying TESTHOSTS.
-  - BUILDLIST=
+  - ST2_BUILDLIST=
   - BUILDHOST=packagingenv
   - TESTHOSTS=droneunit
 script:

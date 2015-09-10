@@ -19,9 +19,8 @@ class ST2Spec
     bin_prefix: '/usr/bin',
     conf_dir: '/etc/st2',
     log_dir: '/var/log/st2',
-    package_list: (ENV['BUILDLIST'] || '').split,
+    package_list: (ENV['TESTLIST'] || '').split,
     available_packages: (ENV['ST2_PACKAGES'] || '').split,
-    mistral_disabled: ENV['MISTRAL_DISABLED'] || false,
     wait_for_start: (ENV['ST2_WAITFORSTART'] || 15).to_i,
 
     service_list: %w(st2api st2auth st2actionrunner st2notifier

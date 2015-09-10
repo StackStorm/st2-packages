@@ -3,45 +3,38 @@
 # Script installs packages on to the host system
 #
 set -e
-PACKAGES_DIR=${BUILD_ARTIFACT:-build}
+set -o pipefail
+. $(dirname ${BASH_SOURCE[0]})/helpers.sh
 
-# DEB / RPM
-if [ -f /etc/debian_version ]; then
-  # noninteractive and quiet
-  INSTALLCMD="sudo gdebi -nq"
-  PKGEXT=deb
-else
-  INSTALLCMD="sudo yum -y install"
-  PKGEXT=rpm
-fi
+install_debian() { sudo gdebi -nq "$1"; }
+install_rhel() { sudo yum -y install "$1"; }
 
-if [ "x$BUILDLIST" = "x" -a "x$@" = "x" ]; then
-  echo "ERROR: ./package.sh requires arguments or \$BUILDLIST to be set."
-  exit 1
-fi
+package_ext() { [ $(platform) = 'debian' ] && echo -n 'deb' || echo -n 'rpm'; }
+package_path() {
+  path=$(ls -1t ${ARTIFACTS_PATH}/$1*.$(package_ext) | head -n1)
+  [ -z $path ] && _errexit=1 error "Couldn't find any package"
+  echo $path
+}
 
-# !!! st2common is always first since others depend on it
-#
-BUILDLIST="${BUILDLIST:-${@}}"
-BUILDLIST="st2common $(echo $BUILDLIST | sed 's/st2common//')"
+install_package() {
+  package_path $1
+  path="$(package_path $1)"
+  pkgname=$(basename $path)
+  pkgname=${pkgname%%.$(package_ext)}
 
-# Bundle testing is invoked and st2bundle package is available
-if [ "$ST2_TESTMODE" = "bundle" ] && [ "$ST2_BUNDLE" = 1 ]; then
-  BUILDLIST="st2bundle"
-fi
+  msg_proc "Staring installation of package: $pkgname"
+  install_$(platform) "$path"
+}
 
-if [ "$DEBUG" = "1" ]; then
-  echo "DEBUG: Package installation list is [${BUILDLIST}]"
-  echo "DEBUG: Package directory is \`${PACKAGES_DIR}'"
-fi
+# --- Go!
+debug "$0 has been invoked!"
 
-for name in $BUILDLIST; do
-  # pickup latest build
-  package_path=$(ls -1t ${PACKAGES_DIR}/${name}*.${PKGEXT} | head -n1)
-  [ -z $package_path ] && echo "ERROR: Couldn't find \`${PACKAGES_DIR}/${name}*'"
+export WHEELDIR=/tmp/wheelhouse
+ARTIFACTS_PATH="${ARTIFACTS_PATH:-/root/build}"
 
-  fullname=$(basename $package_path)
-  fullname=${fullname%%.$PKGEXT}
-  echo "===> Installing package $fullname"
-  $INSTALLCMD $package_path
+# Check inputs
+[ $# -eq 0 ] && _errexit=1 error "$0 expect non-empty argument list of packages"
+
+for name in "$@"; do
+  install_package $name
 done

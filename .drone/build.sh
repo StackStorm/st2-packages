@@ -4,168 +4,71 @@
 # build -> install -> configure -> test
 #
 
-# Run ssh command on a remote host
+set -e
+set -o pipefail
+
+. $(dirname ${BASH_SOURCE[0]})/pipeline.sh
+
+# Build pipeline environment
 #
-ssh_cmd() {
-  host="$1" && shift
-  ssh "$host" "$(echo -e "${REMOTEENV}\n$@")"
-}
+DEBUG="${DEBUG:-0}"
 
+ST2_PACKAGES="st2common st2actions st2api st2auth st2client st2reactor st2exporter st2debug"
+ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
+ST2_GITREV="${ST2_GITREV:-master}"
+ST2_TESTMODE="${ST2_TESTMODE:-components}"
+ST2_WAITFORSTART="${ST2_WAITFORSTART:-10}"
 
-# Preapre test host for running tests
-#
-testhost_setup() {
-  testhost="$1"
-  desc="${2:-$1}"
-  echo -e "\n..... Preparing for tests on $desc"
+MISTRAL_ENABLE="${MISTRAL_ENABLE:-1}"
+MISTRAL_GITURL="${MISTRAL_GITURL:-https://github.com/StackStorm/mistral}"
+MISTRAL_GITREV="${MISTRAL_GITREV:-st2-0.13.1}"
 
-  # Make docker links available to the remote test host
-  cat /etc/hosts | sed -n '1,2d;/172.17./p' | \
-    ssh $testhost "cat >> /etc/hosts"
-  # Copy scripts
-  scp -r scripts $testhost: 1>/dev/null
-
-  # Get bundler gem deps
-  source /etc/profile.d/rvm.sh
-  DEBUG=0 bundle install
-}
-
-
-# Build packages on a remote node (providing customized build environment)
-#
-build_packages() {
-  if [ ! -z "$BUILDHOST" ]; then
-    echo -e "\n..... Starting packages build on $BUILDHOST"
-    # Merge upstream st2 sources (located on the build host) with updates
-    # from the current repository and perform packages build.
-    scp -r scripts sources $BUILDHOST: 1>/dev/null
-
-    ssh_cmd $BUILDHOST /bin/bash scripts/package.sh
-  else
-    >&2 echo -e "\n..... Packages build is skipped, BUILDHOST is not specified!"
-  fi
-}
-
-
-# Install stactorm packages on to remote test host
-#
-install_packages() {
-  testhost="$1"
-  desc="${2:-$1}"
-  echo -e "\n..... Starting packages installation to $desc"
-
-  # We can't use volumes_from in Drone, that's why perform scp
-  # inside drone environment.
-  [ "$COMPOSE" != "1" ] && scp -3 -r $BUILDHOST:build $testhost:
-
-  # install st2 packages
-  [ "$DEBUG" = 1 ] && echo "===> Invoking remote install on $testhost"
-  ssh_cmd $testhost /bin/bash scripts/install.sh
-
-  # substitute varibles into the st2.conf configuration file
-  [ "$DEBUG" = 1 ] && echo "===> Invoking remote config (st2.conf) substitution on $testhost"
-  ssh_cmd $testhost /bin/bash scripts/config.sh
-}
-
-# Start rspec on a remote test hosts
-#
-run_rspec() {
-  testhost="$1"
-  desc="${2:-$1}"
-  echo -e "\n..... Executing integration tests on $desc"
-
-  if ( all_packages_available ); then
-    [ "$ST2_TESTMODE" = "bundle" ] && export BUILDLIST=st2bundle
-    rspec spec
-  else
-    >&2 echo "Runing only package specific tests!"
-    rspec -P '**/package_*_spec.rb' spec
-  fi
-}
-
-# Exit if can not run integration tests
-#
-all_packages_available() {
-  current=$(echo "$BUILDLIST" | sed -r 's/\s+/\n/g' | sort -u)
-  available=$(echo $ST2_PACKAGES | sed -r 's/\s+/\n/g' | sort -u)
-  [ "$current" = "$available" ]
-}
+RABBITMQHOST="$(hosts_resolve_ip ${RABBITMQHOST:-rabbitmq})"
+MONGODBHOST="$(hosts_resolve_ip ${MONGODBHOST:-mongodb})"
 
 # --- Go!
-set -e
+pipe_env DEBUG WAITFORSTART MONGODBHOST RABBITMQHOST
 
-# Priority of BUILDLIST: command args > $BUILDLIST > $ST2_PACKAGES
-BUILDLIST="${@:-${BUILDLIST}}"
-BUILDLIST="${BUILDLIST:-${ST2_PACKAGES}}"
-export BUILDLIST
-export MISTRAL_DISABLED=${MISTRAL_DISABLED:-0}
-export ST2_BUNDLE=$(all_packages_available && echo 1)
+print_details
+setup_busybee_sshenv
 
-# Define environment of remote services
-#
+pipe_env GITURL=$ST2_GITURL GITREV=$ST2_GITREV GITDIR=$(mktemp -ud) \
+         PRE_PACKAGE_HOOK=/root/scripts/st2pkg_version.sh
+
+debug "Remote environment >>>" "`pipe_env`"
+
+# Invoke st2* components build
 if [ ! -z "$BUILDHOST" ]; then
-  BUILDHOST_IP=$(getent hosts $BUILDHOST | awk '{ print $1 }')
-  BUILDHOST=${BUILDHOST_IP:-$BUILDHOST}
-fi
-RABBITMQHOST=${RABBITMQHOST:-rabbitmq}
-MONGODBHOST=${MONGODBHOST:-mongodb}
+  build_list="$(components_list)"
+  buildhost_addr="$(hosts_resolve_ip $BUILDHOST)"
 
-# --- Localy needed exports
-#
-export RABBITMQHOST
-export MONGODBHOST
-export ST2_WAITFORSTART
-
-# --- Remote environment passthrough
-#
-REMOTEENV=$(cat <<SCH
-export DEBUG=${DEBUG:-0}
-export MISTRAL_DISABLED=$MISTRAL_DISABLED
-export BUILDLIST="$BUILDLIST"
-export ST2_GITURL="${ST2_GITURL:-https://github.com/StackStorm/st2}"
-export ST2_GITREV="${ST2_GITREV:-master}"
-export ST2_TESTMODE="${ST2_TESTMODE:-components}"
-export ST2_BUNDLE="$ST2_BUNDLE"
-export BUILD_ARTIFACT=~/build
-export RABBITMQHOST=$RABBITMQHOST
-export MONGODBHOST=$MONGODBHOST
-SCH
-)
-
-if [ "$DEBUG" = 1 ]; then
-  echo "DEBUG: Remote environment passed through >>>"
-  echo "$REMOTEENV"
+  ssh_copy scripts $buildhost_addr:
+  checkout_repo
+  ssh_copy st2/* $buildhost_addr:$GITDIR
+  build_packages "$build_list"
+  TESTLIST="$build_list"
+else
+  # should be given, when run against an already built list
+  TESTLIST="$(components_list)"
 fi
 
-# --- SSH agent and config settings
-#
-if [ -z "$SSH_AUTH_SOCK" ] && [ -z "$SSH_AGENT_PID" ]; then
-  eval $(ssh-agent)
-fi
-ssh-add /root/.ssh/busybee
-
-cat > /root/.ssh/config <<SCH
-Host *
-  StrictHostKeyChecking no
-  UserKnownHostsFile /dev/null
-SCH
-
-# --- Start packaging life-cycle
-#
-if [ "$DEBUG" = 1  ]; then
-  echo "DEBUG: Docker linked hosts >>>"
-  cat /etc/hosts | grep '172.17'
+# Test list choosing, since st2bundle conflicts with other components
+if [[ "$TESTLIST" == *st2bundle* && "$ST2_TESTMODE" == "bundle" ]]; then
+  TESTLIST="st2bundle"
+else
+  TESTLIST="$(echo $TESTLIST | sed s'/st2bundle//')"
 fi
 
-build_packages                        # - 1
+# Invoke mistral package build
+if [ "$MISTRAL_ENABLE" = x ]; then
+  :
+fi
 
-for testhost in $TESTHOSTS; do
-  desc="host $testhost"
-  ip_addr=$(getent hosts $testhost | awk '{ print $1 }')
-  export TESTHOST=${ip_addr:-$testhost}
+# Integration loop, test over different platforms
+msg_info "\n..... ST2 test mode is \`$ST2_TESTMODE'"
 
-  testhost_setup $TESTHOST "$desc"    # - 2
-  install_packages $TESTHOST "$desc"  # - 3
-  source /etc/profile.d/rvm.sh
-  run_rspec $TESTHOST "$desc"         # - 4
+for host in $TESTHOSTS; do
+  testhost_setup $host
+  install_packages $host $TESTLIST
+  run_rspec $host
 done

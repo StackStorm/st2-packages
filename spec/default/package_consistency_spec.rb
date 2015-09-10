@@ -121,7 +121,7 @@ describe 'packages consistency' do
       expect(spec[:available_packages]).not_to be_empty
     end
 
-    it 'BUILDLIST is non-empty' do
+    it 'TESTLIST is non-empty' do
       expect(spec[:package_list]).not_to be_empty
     end
   end

@@ -4,6 +4,10 @@
 # the configuration file.
 #
 set -e
+set -o pipefail
+. $(dirname ${BASH_SOURCE[0]})/helpers.sh
+
+debug "$0 has been invoked!"
 
 CONF=/etc/st2/st2.conf
 AMQP="amqp://guest:guest@${RABBITMQHOST}:5672/"
