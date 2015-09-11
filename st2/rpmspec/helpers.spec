@@ -1,3 +1,6 @@
+# !!! Following list of variables must be defined before this file is included.
+#   - package
+
 # Cat debian/package.dirs, set buildroot prefix and create directories.
 %define debian_dirs cat debian/%{name}.dirs | grep -v '^\\s*#' | sed 's~^~%{buildroot}/~' | \
           while read dir_path; do \
@@ -29,3 +32,7 @@
   %debian_links \
   %make_install \
 %{nil}
+
+# St2 package version parsing
+%define st2_component %(echo $ST2_PACKAGES st2 bundle | grep -q %{package} && echo -n 1 || :)
+%{?st2_component: %define st2pkg_version %(make populate_version 1>/dev/null 2>&1; python -c "from %{package} import __version__; print __version__,")}

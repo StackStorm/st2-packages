@@ -34,6 +34,7 @@ copy_artifact() {
 # ---- Go!
 export WHEELDIR=/tmp/wheelhouse
 ARTIFACTS_PATH="${ARTIFACTS_PATH:-/root/build}"
+RPMS="/root/rpmbuild/RPMS"
 
 # Check inputs
 [ $# -eq 0 ] && _errexit=1 error "$0 expect non-empty argument list of packages"

@@ -1,13 +1,8 @@
 %define package st2actions
-%define _sourcedir /root/code
-%define specdir /root/code/rpmspec
-%include %{specdir}/package_top.spec
+%include ../rpmspec/package_top.spec
 
 Summary: st2actions - StackStorm API component
 Requires: st2common = %{version}-%{release}
-
-%include %{specdir}/package_venv.spec
-%include %{specdir}/helpers.spec
 
 %description
   <insert long description, indented with spaces>

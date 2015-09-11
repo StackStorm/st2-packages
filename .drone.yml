@@ -4,7 +4,7 @@ env:
   - ST2_GITURL=https://github.com/StackStorm/st2
   - ST2_GITREV=master
   - ST2_WAITFORSTART=20
-  - ST2_TESTMODE=bundle
+  - ST2_TESTMODE=
   - ST2_BUILDLIST=
   - BUILDHOST=packagingenv
   - TESTHOSTS=droneunit

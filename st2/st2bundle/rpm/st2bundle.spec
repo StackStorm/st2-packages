@@ -1,14 +1,9 @@
 %define package st2bundle
-%define _sourcedir /root/code
-%define specdir /root/code/rpmspec
 %define venv_name st2
-%include %{specdir}/package_top.spec
+%include ../rpmspec/package_top.spec
 
 Summary: StackStorm all components bundle
 Conflicts: st2common
-
-%include %{specdir}/package_venv.spec
-%include %{specdir}/helpers.spec
 
 %description
   Package is full standalone stackstorm installation including
