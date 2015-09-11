@@ -42,8 +42,6 @@ RPMS="/root/rpmbuild/RPMS"
 
 [ -d $ARTIFACTS_PATH ] || mkdir -p $ARTIFACTS_PATH
 
-debug "Packages build list: [$(echo \"$@\" | xargs)]"
-
 # Enter repo directory
 pushd $GITDIR
 for pkg in $@; do

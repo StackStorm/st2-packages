@@ -32,15 +32,13 @@ pipe_env DEBUG WAITFORSTART MONGODBHOST RABBITMQHOST
 print_details
 setup_busybee_sshenv
 
-pipe_env GITURL=$ST2_GITURL GITREV=$ST2_GITREV GITDIR=$(mktemp -ud) \
-         PRE_PACKAGE_HOOK=/root/scripts/st2pkg_version.sh
-
-debug "Remote environment >>>" "`pipe_env`"
-
 # Invoke st2* components build
 if [ ! -z "$BUILDHOST" ]; then
   build_list="$(components_list)"
   buildhost_addr="$(hosts_resolve_ip $BUILDHOST)"
+
+  pipe_env GITURL=$ST2_GITURL GITREV=$ST2_GITREV GITDIR=$(mktemp -ud) ST2PKG_VERSION
+  debug "Remote environment >>>" "`pipe_env`"
 
   ssh_copy scripts $buildhost_addr:
   checkout_repo

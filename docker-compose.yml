@@ -13,10 +13,10 @@ debian:
     file: compose-suite.yml
     service: suite
   environment:
-    # - BUILDHOST=bwheezy
+    - BUILDHOST=bwheezy
     - TESTHOSTS=iwheezy
   links:
-    # - bwheezy
+    - bwheezy
     - iwheezy
     - rabbitmq
     - mongodb
@@ -28,7 +28,7 @@ ubuntu:
     file: compose-suite.yml
     service: suite
   environment:
-    # - BUILDHOST=btrusty
+    - BUILDHOST=btrusty
     - TESTHOSTS=itrusty
   links:
     - btrusty

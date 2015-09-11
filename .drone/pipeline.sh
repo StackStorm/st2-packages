@@ -97,7 +97,7 @@ checkout_repo() {
 #
 build_packages() {
   if [ ! -z "$BUILDHOST" ]; then
-    msg_proc "Starting packages build on" "- $BUILDHOST"
+    msg_proc "Starting build on $BUILDHOST" "package list: [$(echo \"$@\" | xargs)]"
     ssh_cmd $BUILDHOST bash scripts/package.sh "$@"
   else
     warn "Skipping the build stage, BUILDHOST is not specified!"
