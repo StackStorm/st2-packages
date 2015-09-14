@@ -34,7 +34,7 @@ end
 # Prepare
 describe 'st2 prepare' do
   before(:all) do
-    puts '===> Starting st2 services...'
+    puts "===> Starting st2 services #{spec[:service_list].join(', ')}..."
     remote_start_services(spec[:service_list])
 
     puts "===> Wait for st2 services to start #{spec[:wait_for_start]} sec..."
@@ -54,6 +54,13 @@ describe 'st2 prepare' do
   describe host(ENV['MONGODBHOST']) do
     it { is_expected.to be_reachable }
     # it { is_expected.to be_reachable.with(port: 27_017) }
+  end
+
+  if spec[:mistral_enabled]
+    describe host(ENV['POSTGRESHOST']) do
+      it { is_expected.to be_reachable }
+      # it { is_expected.to be_reachable.with(port: 27_017) }
+    end
   end
 
   describe command(register_content) do

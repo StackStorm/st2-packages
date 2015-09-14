@@ -47,49 +47,42 @@ shared_examples 'os package' do |name, _opts|
   #
   get_users do |u, opts|
     describe user(u) do
-      if opts[:home]
-        home_dir = (opts[:home] == true ? "/home/#{u}" : "#{opts[:home]}")
-      end
-
       it { is_expected.to exist }
-      it { is_expected.to have_home_directory home_dir if home_dir }
+      it { is_expected.to instance_eval(&opts[:example])} if opts[:example]
     end
   end
 
   context 'files' do
     set_context_vars(name, _opts)
 
-    # Check /etc/st2 directory
-    #
-    describe file(spec[:conf_dir]) do
-      it { is_expected.to be_directory }
-    end
-
     # Check for presences of directories
     #
-    get_directories do |path, _|
+    get_directories do |path, opts|
       describe file(path) do
         it { is_expected.to be_directory }
+        it { is_expected.to instance_eval(&opts[:example])} if opts[:example]
       end
     end
 
     # Check files
     #
-    get_files do |path, _|
+    get_files do |path, opts|
       describe file(path) do
         it { is_expected.to be_file }
+        it { is_expected.to instance_eval(&opts[:example])} if opts[:example]
       end
     end
 
     # Check binaries
     #
-    get_binaries do |bin_name, _|
+    get_binaries do |bin_name, opts|
       unless bin_name.start_with? '/'
         prefix = File.join(spec[:bin_prefix], '')
       end
 
       describe file("#{prefix}#{bin_name}") do
         it_behaves_like 'script or binary'
+        it { is_expected.to instance_eval(&opts[:example])} if opts[:example]
       end
     end
   end
@@ -99,8 +92,9 @@ shared_examples 'os package' do |name, _opts|
 
     # Check services
     #
-    get_services do |service_name, _|
-      describe file("/usr/share/python/#{venv_name}/bin/#{service_name}") do
+    get_services do |service_name, opts|
+      binary_name = opts[:binary_name] || service_name
+      describe file("/usr/share/python/#{venv_name}/bin/#{binary_name}") do
         it_behaves_like 'script or binary'
       end
 
@@ -128,9 +122,5 @@ describe 'packages consistency' do
 
   spec[:package_list].each do |pkg_name|
     it_behaves_like 'os package', pkg_name, spec[:package_opts][pkg_name]
-  end
-
-  describe file(spec[:log_dir]) do
-    it { is_expected.to be_directory & be_writable.by('owner') }
   end
 end

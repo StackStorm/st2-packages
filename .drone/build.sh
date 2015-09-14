@@ -19,25 +19,29 @@ ST2_GITREV="${ST2_GITREV:-master}"
 ST2_TESTMODE="${ST2_TESTMODE:-components}"
 ST2_WAITFORSTART="${ST2_WAITFORSTART:-10}"
 
-MISTRAL_ENABLE="${MISTRAL_ENABLE:-1}"
+MISTRAL_ENABLED="${MISTRAL_ENABLED:-1}"
 MISTRAL_GITURL="${MISTRAL_GITURL:-https://github.com/StackStorm/mistral}"
 MISTRAL_GITREV="${MISTRAL_GITREV:-st2-0.13.1}"
 
 RABBITMQHOST="$(hosts_resolve_ip ${RABBITMQHOST:-rabbitmq})"
 MONGODBHOST="$(hosts_resolve_ip ${MONGODBHOST:-mongodb})"
+POSTGRESHOST="$(hosts_resolve_ip ${POSTGRESHOST:-postgres})"
 
 # --- Go!
-pipe_env DEBUG WAITFORSTART MONGODBHOST RABBITMQHOST
+pipe_env DEBUG WAITFORSTART MONGODBHOST RABBITMQHOST POSTGRESHOST MISTRAL_ENABLED
 
 print_details
 setup_busybee_sshenv
 
-# Invoke st2* components build
-if [ ! -z "$BUILDHOST" ]; then
-  build_list="$(components_list)"
-  buildhost_addr="$(hosts_resolve_ip $BUILDHOST)"
+buildhost_addr="$(hosts_resolve_ip $BUILDHOST)"
 
-  pipe_env GITURL=$ST2_GITURL GITREV=$ST2_GITREV GITDIR=$(mktemp -ud) ST2PKG_VERSION
+# Invoke st2* components build
+if [ ! -z "$BUILDHOST" ] && [ "$ST2_BUILDLIST" != " " ]; then
+  build_list="$(components_list)"
+
+  pipe_env  GITURL=$ST2_GITURL GITREV=$ST2_GITREV GITDIR=$(mktemp -ud) \
+            MAKE_PRERUN=changelog \
+            ST2PKG_VERSION ST2PKG_RELEASE
   debug "Remote environment >>>" "`pipe_env`"
 
   ssh_copy scripts $buildhost_addr:
@@ -58,12 +62,25 @@ else
 fi
 
 # Invoke mistral package build
-if [ "$MISTRAL_ENABLE" = x ]; then
-  :
+if [ ! -z "$BUILDHOST" ] && [ "$MISTRAL_ENABLED" = 1 ]; then
+  pipe_env  GITURL=$MISTRAL_GITURL GITREV=$MISTRAL_GITREV GITDIR=$(mktemp -ud) \
+            NOCHANGEDIR=1 MAKE_PRERUN=populate_version \
+            MISTRAL_VERSION MISTRAL_RELEASE
+  debug "Remote environment >>>" "`pipe_env`"
+
+  ssh_copy scripts $buildhost_addr:
+  checkout_repo
+  ssh_copy mistral/* $buildhost_addr:$GITDIR
+  build_packages mistral
+  TESTLIST="$TESTLIST mistral"
+elif [ "$MISTRAL_ENABLED" = 1 ]; then
+  # no build but test, can be when packages are already prebuilt...
+  TESTLIST="$TESTLIST mistral"
 fi
 
 # Integration loop, test over different platforms
 msg_info "\n..... ST2 test mode is \`$ST2_TESTMODE'"
+debug "Remote environment >>>" "`pipe_env`"
 
 for host in $TESTHOSTS; do
   testhost_setup $host

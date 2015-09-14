@@ -20,6 +20,7 @@ debian:
     - iwheezy
     - rabbitmq
     - mongodb
+    - postgres
 
 # 14.04
 ubuntu:
@@ -35,6 +36,7 @@ ubuntu:
     - itrusty
     - rabbitmq
     - mongodb
+    - postgres
 
 centos7:
   image: quay.io/dennybaa/droneruby
@@ -49,6 +51,7 @@ centos7:
     - icentos7
     - rabbitmq
     - mongodb
+    - postgres
 
 # -----------------------------------------------------------------------------
 
@@ -65,6 +68,14 @@ mongodb:
   image: mongo
   ports:
     - "27017:27017"
+
+postgres:
+  image: postgres
+  ports:
+    - "5432:5432"
+  environment:
+    - POSTGRES_USER=mistral
+    - POSTGRES_PASSWORD=StackStorm
 
 # Build Instances
 #

@@ -9,22 +9,30 @@ set -o pipefail
 build_debian() { dpkg-buildpackage -b -uc -us; }
 build_rhel() { rpmbuild -bb rpm/$1.spec; }
 
-copy_debian() { sudo cp -v $1{*.deb,*.changes,*.dsc} $ARTIFACTS_PATH || true; }
+copy_debian() {
+  [ "$NOCHANGEDIR" = "1" ] && _up='../'
+  sudo cp -v $_up$1{*.deb,*.changes,*.dsc} $ARTIFACTS_PATH || true;
+}
 copy_rhel() { sudo cp -v $RPMS/*/$1*.rpm $ARTIFACTS_PATH; }
 
 build_package() {
-  [ -d $1 ] || _errexit=1 error "Package directory $1 not found (at $(pwd))"
+  if [ ! -d "$1" ] && [ "$NOCHANGEDIR" != 1 ]; then
+    _errexit=1 error "Package directory $1 not found (at $(pwd))"
+  fi
 
   msg_proc "Starting package $1 build"
-  pushd $1
 
-  # source prebuild hook scenario
-  [ -z "$PRE_PACKAGE_HOOK" ] || . $PRE_PACKAGE_HOOK
+  [ "$NOCHANGEDIR" = "1" ] || pushd $1
+
+  # Pre-run make rules if needed. For example we need it for debian builds
+  # to invoke changelog and populate_version
+  for rule in $MAKE_PRERUN; do
+    make "$rule"
+  done
+
   build_$(platform) $1
-
   msg_proc "Finished package $1 build sucessfully"
-
-  popd
+  [ "$NOCHANGEDIR" = "1" ] || popd
 }
 
 copy_artifact() {

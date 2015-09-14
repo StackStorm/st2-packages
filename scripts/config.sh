@@ -7,12 +7,14 @@ set -e
 set -o pipefail
 . $(dirname ${BASH_SOURCE[0]})/helpers.sh
 
+
+# --- Go!
+
 debug "$0 has been invoked!"
 
 CONF=/etc/st2/st2.conf
 AMQP="amqp://guest:guest@${RABBITMQHOST}:5672/"
 MONGO=$(cat <<EHD
-
     [database]
     host = $MONGODBHOST
     port = 27017
@@ -29,7 +31,8 @@ sed -i "/\[auth\]/,/\[.*\]\|enable/ {n; s#enable.*=.*#enable = False#}" $CONF
 # Create database section, st2.conf ships without it
 (grep "\[database\]" $CONF &>/dev/null) || echo "$MONGO" >> /etc/st2/st2.conf
 
-if [ "$DEBUG" = 1 ]; then
-  echo "DEBUG: resulting $CONF >>>"
-  cat $CONF
+if debug_enabled; then
+  debug "Resulting $CONF >>>" "$(cat $CONF)"
 fi
+
+[ "$MISTRAL_ENABLED" = 1 ] && . /root/scripts/mistral_setup.sh

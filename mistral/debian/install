@@ -1,0 +1,2 @@
+conf/mistral.conf /etc/mistral
+etc/wf_trace_logging.conf.sample /etc/mistral

@@ -107,8 +107,9 @@ build_packages() {
 # Preapre test host for running tests
 #
 testhost_setup() {
+  host_addr=$(hosts_resolve_ip $1)
   msg_proc "Preparing for tests on" "- $1"
-  ssh_copy scripts "$(hosts_resolve_ip $1)":
+  ssh_copy scripts $host_addr:
 
   source /etc/profile.d/rvm.sh
   bundle install
@@ -142,7 +143,7 @@ run_rspec() {
   source /etc/profile.d/rvm.sh
 
   # exporting env for rspec
-  export {ST2_PACKAGES,ST2_WAITFORSTART,MONGODBHOST,RABBITMQHOST}
+  export {ST2_PACKAGES,ST2_WAITFORSTART,MONGODBHOST,RABBITMQHOST,POSTGRESHOST}
 
   if ( is_full_build "$TESTLIST") || [ "$TESTLIST" = "st2bundle" ]; then
     TESTLIST="$TESTLIST" TESTHOST="$1" rspec spec
@@ -154,9 +155,12 @@ run_rspec() {
 # Exit if can not run integration tests
 #
 is_full_build() {
-  current=$(echo "$@" | xargs -n1 | sed '/st2debug/d' | sort -u)
-  available=$(echo $ST2_PACKAGES | xargs -n1 | sed '/st2debug/d' | sort -u)
-  [ "$current" = "$available" ]
+  required=$(echo $ST2_PACKAGES | xargs -n1 | sed '/st2debug/d' | sort -u | xargs)
+  given=$(echo "$@" | xargs -n1 | sort -u | xargs)
+  for package in $required; do
+    [[ "$given" == *"$package"* ]] || return 1
+  done
+  return 0
 }
 
 # Evaluate ordered list of components

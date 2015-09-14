@@ -6,12 +6,17 @@ env:
   - ST2_WAITFORSTART=20
   - ST2_TESTMODE=
   - ST2_BUILDLIST=
+  - MISTRAL_ENABLED=
+  - MISTRAL_GITURL=https://github.com/StackStorm/mistral
+  - MISTRAL_GITREV=st2-0.13.2
+  - MISTRAL_VERSION=0.13.2
   - BUILDHOST=packagingenv
   - TESTHOSTS=droneunit
 script:
   - ./.drone/build.sh
 services:
   - quay.io/dennybaa/droneunit:trusty-upstart
-  - quay.io/stackstorm/packagingenv:trusty
+  - quay.io/stackstorm/packagingenv:jessie
   - rabbitmq
   - mongodb
+  - postgres

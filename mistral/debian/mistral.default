@@ -1,0 +1,13 @@
+# Defaults for mistral initscript
+# sourced by /etc/init.d/mistral
+# installed at /etc/default/mistral by the maintainer scripts
+
+## Logging config the following are defaults
+#
+## MISTRAL_LOGS is space separated list of files mistral logs to
+# MISTRAL_LOGS="/var/log/mistral.log" 
+# MISTRAL_LOGS_PERM="644"
+# MISTRAL_LOGS_CRED="mistral:mistral"
+
+## Default daemon args, redefine if needed
+# DAEMON_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral.log"

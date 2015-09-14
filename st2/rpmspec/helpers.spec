@@ -35,4 +35,4 @@
 
 # St2 package version parsing
 %define st2_component %(echo $ST2_PACKAGES st2 bundle | grep -q %{package} && echo -n 1 || :)
-%{?st2_component: %define st2pkg_version %(make populate_version 1>/dev/null 2>&1; python -c "from %{package} import __version__; print __version__,")}
+%{?st2_component: %define st2pkg_version %(python -c "from %{package} import __version__; print __version__,")}
