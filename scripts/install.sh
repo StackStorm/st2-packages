@@ -11,13 +11,7 @@ install_rhel() { sudo yum -y install "$1"; }
 
 package_ext() { [ $(platform) = 'debian' ] && echo -n 'deb' || echo -n 'rpm'; }
 package_path() {
-  if [ "$1" = 'mistral' ]; then
-    version_string="$MISTRAL_VERSION-$MISTRAL_RELEASE"
-  else
-    version_string="$ST2PKG_VERSION-$ST2PKG_RELEASE"
-  fi
-
-  path=$(ls -1t ${ARTIFACTS_PATH}/$1*$version_string*.$(package_ext) | head -n1)
+  path=$(ls -1t ${ARTIFACTS_PATH}/$1*.$(package_ext) | head -n1)
   [ -z $path ] && _errexit=1 error "Couldn't find any package"
   echo $path
 }

@@ -16,13 +16,7 @@ copy_debian() {
 copy_rhel() { sudo cp -v $RPMS/*/$1*.rpm $ARTIFACTS_PATH; }
 
 build_package() {
-  if [ ! -d "$1" ] && [ "$NOCHANGEDIR" != 1 ]; then
-    _errexit=1 error "Package directory $1 not found (at $(pwd))"
-  fi
-
   msg_proc "Starting package $1 build"
-
-  [ "$NOCHANGEDIR" = "1" ] || pushd $1
 
   # Pre-run make rules if needed. For example we need it for debian builds
   # to invoke changelog and populate_version
@@ -32,7 +26,6 @@ build_package() {
 
   build_$(platform) $1
   msg_proc "Finished package $1 build sucessfully"
-  [ "$NOCHANGEDIR" = "1" ] || popd
 }
 
 copy_artifact() {
@@ -52,10 +45,15 @@ RPMS="/root/rpmbuild/RPMS"
 
 # Enter repo directory
 pushd $GITDIR
+
 for pkg in $@; do
+  # st2* components are sub directories of one git project
+  [[ "$pkg" == st2* ]] && pushd $pkg || :
   build_package $pkg
   copy_artifact $pkg
+  [[ "$pkg" == st2* ]] && popd || :
 done
+
 popd
 
 # Some debug info

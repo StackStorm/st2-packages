@@ -129,7 +129,12 @@ install_packages() {
 
   # invoke packages installation
   ssh_cmd $host /bin/bash scripts/install.sh $@
+}
 
+# Runs configuration script, ment to be executed after install
+#
+post_install_setup() {
+  host="$1"; shift
   # invoke config rewrite on the test host, only when needed
   if [[ "$@" == *"st2common"* || "$@" == *"st2bundle"* ]]; then
     ssh_cmd $host /bin/bash scripts/config.sh
@@ -148,7 +153,7 @@ run_rspec() {
   if ( is_full_build "$TESTLIST") || [ "$TESTLIST" = "st2bundle" ]; then
     TESTLIST="$TESTLIST" TESTHOST="$1" rspec spec
   else
-    TESTLIST="$TESTLIST" TESTHOST="$1" rspec -P '**/package_*_spec.rb' spec
+    TESTLIST="$TESTLIST" TESTHOST="$1" rspec -P '**/*package_st2-*_spec.rb' spec
   fi
 }
 
@@ -174,7 +179,7 @@ components_list() {
   done
 
   _components="$(echo "$_components" | xargs -n1 | sort -u | grep -v st2common | xargs)"
-  [ -z "$_components" ] || _components="st2common $_components"
+  _components="st2common $_components"
 
   if ( is_full_build "$_components" ); then
     _components="$_components st2bundle"

@@ -28,8 +28,8 @@ MONGODBHOST="$(hosts_resolve_ip ${MONGODBHOST:-mongodb})"
 POSTGRESHOST="$(hosts_resolve_ip ${POSTGRESHOST:-postgres})"
 
 # --- Go!
-pipe_env DEBUG WAITFORSTART MONGODBHOST RABBITMQHOST POSTGRESHOST MISTRAL_ENABLED \
-         ARTIFACTS_PATH="/root/build$(mktemp -ud -p /)"
+pipe_env DEBUG COMPOSE WAITFORSTART MONGODBHOST RABBITMQHOST POSTGRESHOST \
+         MISTRAL_ENABLED ARTIFACTS_PATH="/root/build$(mktemp -ud -p /)"
 
 print_details
 setup_busybee_sshenv
@@ -48,6 +48,7 @@ if [ ! -z "$BUILDHOST" ] && [ "$ST2_BUILDLIST" != " " ]; then
   ssh_copy scripts $buildhost_addr:
   checkout_repo
   ssh_copy st2/* $buildhost_addr:$GITDIR
+  ssh_copy rpmspec $buildhost_addr:$GITDIR
   build_packages "$build_list"
   TESTLIST="$build_list"
 else
@@ -65,13 +66,13 @@ fi
 # Invoke mistral package build
 if [ ! -z "$BUILDHOST" ] && [ "$MISTRAL_ENABLED" = 1 ]; then
   pipe_env  GITURL=$MISTRAL_GITURL GITREV=$MISTRAL_GITREV GITDIR=$(mktemp -ud) \
-            NOCHANGEDIR=1 MAKE_PRERUN=populate_version \
-            MISTRAL_VERSION MISTRAL_RELEASE
+            MISTRAL_VERSION MISTRAL_RELEASE MAKE_PRERUN=populate_version
   debug "Remote environment >>>" "`pipe_env`"
 
   ssh_copy scripts $buildhost_addr:
   checkout_repo
   ssh_copy mistral/* $buildhost_addr:$GITDIR
+  ssh_copy rpmspec $buildhost_addr:$GITDIR
   build_packages mistral
   TESTLIST="$TESTLIST mistral"
 elif [ "$MISTRAL_ENABLED" = 1 ]; then
@@ -86,5 +87,6 @@ debug "Remote environment >>>" "`pipe_env`"
 for host in $TESTHOSTS; do
   testhost_setup $host
   install_packages $host $TESTLIST
+  post_install_setup $host $TESTLIST
   run_rspec $host
 done

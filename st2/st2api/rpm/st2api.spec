@@ -1,5 +1,5 @@
 %define package st2api
-%include ../rpmspec/package_top.spec
+%include ../rpmspec/st2pkg_toptags.spec
 
 Summary: St2Api - StackStorm API component
 Requires: st2common = %{version}-%{release}

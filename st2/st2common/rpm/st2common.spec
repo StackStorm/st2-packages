@@ -1,5 +1,7 @@
 %define package st2common
-%include ../rpmspec/package_top.spec
+%define svc_user st2
+%define stanley_user stanley
+%include ../rpmspec/st2pkg_toptags.spec
 
 Summary: St2Common - StackStorm shared files
 
@@ -28,7 +30,6 @@ Summary: St2Common - StackStorm shared files
   exit 0
 
 %post
-  chown %{svc_user}.%{svc_user} /var/log/st2
   if [ ! -f /etc/st2/htpasswd ]; then
     touch /etc/st2/htpasswd
     chown %{svc_user}.%{svc_user} /etc/st2/htpasswd
@@ -49,7 +50,7 @@ Summary: St2Common - StackStorm shared files
   %config(noreplace) %{_sysconfdir}/logrotate.d/st2
   %{_datadir}/python/%{name}
   %{_datadir}/doc/st2/examples
-  %{_localstatedir}/log/st2
+  %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/st2
   /opt/stackstorm/packs/core
   /opt/stackstorm/packs/linux
   /opt/stackstorm/packs/packs

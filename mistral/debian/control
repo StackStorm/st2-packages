@@ -1,7 +1,7 @@
 Source: mistral
 Section: Python
 Priority: optional
-Maintainer: StackStorm Engineering <<opsadmin@stackstorm.com>>
+Maintainer: StackStorm Engineering <opsadmin@stackstorm.com>
 Build-Depends: debhelper (>= 9), python, dh-virtualenv (>= 0.8)
 Standards-Version: 3.9.5
 Homepage: <insert the upstream URL, if relevant>
@@ -12,5 +12,5 @@ Package: mistral
 Architecture: any
 Pre-Depends: dpkg (>= 1.16.16), python2.7
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
+Description: Mistral workflow service
  <insert long description, indented with spaces>

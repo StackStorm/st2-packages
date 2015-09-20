@@ -1,5 +1,5 @@
 %define package st2client
-%include ../rpmspec/package_top.spec
+%include ../rpmspec/st2pkg_toptags.spec
 
 Summary: St2Client - StackStorm CLI utility
 Requires: st2common = %{version}-%{release}

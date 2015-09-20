@@ -1,7 +1,7 @@
 %define package st2exporter
-%include ../rpmspec/package_top.spec
+%include ../rpmspec/st2pkg_toptags.spec
 
-Summary: St2Export - StackStorm exporter component
+Summary: St2Exporter - StackStorm exporter component
 Requires: st2common = %{version}-%{release}
 
 %description

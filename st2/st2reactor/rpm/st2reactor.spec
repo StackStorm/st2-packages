@@ -1,5 +1,5 @@
 %define package st2reactor
-%include ../rpmspec/package_top.spec
+%include ../rpmspec/st2pkg_toptags.spec
 
 Summary: St2Reactor - StackStorm sensors component
 Requires: st2common = %{version}-%{release}

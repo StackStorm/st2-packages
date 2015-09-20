@@ -11,6 +11,8 @@ env:
   - MISTRAL_GITREV=st2-0.13.2
   - MISTRAL_VERSION=2015.2
   - MISTRAL_RELEASE=1
+  - POSTGRES_USER=mistral
+  - POSTGRES_PASSWORD=StackStorm
   - BUILDHOST=packagingenv
   - TESTHOSTS=droneunit
 script:
@@ -20,4 +22,4 @@ services:
   - quay.io/stackstorm/packagingenv:trusty
   - rabbitmq
   - mongodb
-  - postgres
+  - library/postgres

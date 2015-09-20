@@ -1,5 +1,5 @@
 %define package st2auth
-%include ../rpmspec/package_top.spec
+%include ../rpmspec/st2pkg_toptags.spec
 
 Summary: St2Auth - StackStorm authentication service component
 Requires: st2common = %{version}-%{release}

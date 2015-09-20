@@ -1,5 +1,5 @@
 %define package st2debug
-%include ../rpmspec/package_top.spec
+%include ../rpmspec/st2pkg_toptags.spec
 
 Summary: St2Debug - StackStorm Debug tool
 Requires: st2common = %{version}-%{release}
