@@ -35,4 +35,6 @@ if debug_enabled; then
   debug "Resulting $CONF >>>" "$(cat $CONF)"
 fi
 
-[ "$MISTRAL_ENABLED" = 1 ] && . /root/scripts/mistral_setup.sh
+if [ "$MISTRAL_ENABLED" = 1 ]; then
+  . /root/scripts/mistral_setup.sh
+fi

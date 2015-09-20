@@ -19,14 +19,11 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="mistral"
 NAME=mistral-server
 DAEMON=/usr/share/python/mistral/bin/$NAME
-DAEMON_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral.log"
+DAEMON_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral.log"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 RUNAS_USER="mistral"
 RUNAS_GROUP="mistral"
-MISTRAL_LOGS="/var/log/mistral.log"
-MISTRAL_LOGS_PERM="644"
-MISTRAL_LOGS_CRED="$RUNAS_USER:$RUNAS_GROUP"
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -41,14 +38,6 @@ MISTRAL_LOGS_CRED="$RUNAS_USER:$RUNAS_GROUP"
 # Depend on lsb-base (>= 3.2-14) to ensure that this file is present
 # and status_of_proc is working.
 . /lib/lsb/init-functions
-
-set_logs_permissions() {
-  for file in $MISTRAL_LOGS; do
-    if [ ! -f "$file" ]; then
-      touch "$file" && chmod $MISTRAL_LOGS_PERM "$file" && chown $MISTRAL_LOGS_CRED "$file"
-    fi
-  done
-}
 
 #
 # Function that starts the daemon/service

@@ -1,0 +1,23 @@
+description     "Mistral workflow service"
+author          "StackStorm Engineering <opsadmin@stackstorm.com>"
+
+start on filesystem and net-device-up IFACE!=lo
+stop on starting rc RUNLEVEL=[016]
+
+setuid mistral
+setgid mistral
+respawn
+respawn limit 2 5
+
+umask 007
+kill timeout 60
+
+script
+  NAME=mistral
+  DEFAULT_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral.log"
+
+  # Read configuration variable file if it is present
+  [ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+  /usr/share/python/mistral/bin/mistral-server ${DEFAULT_ARGS}
+end script

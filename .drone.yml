@@ -9,14 +9,15 @@ env:
   - MISTRAL_ENABLED=
   - MISTRAL_GITURL=https://github.com/StackStorm/mistral
   - MISTRAL_GITREV=st2-0.13.2
-  - MISTRAL_VERSION=0.13.2
+  - MISTRAL_VERSION=2015.2
+  - MISTRAL_RELEASE=1
   - BUILDHOST=packagingenv
   - TESTHOSTS=droneunit
 script:
   - ./.drone/build.sh
 services:
   - quay.io/dennybaa/droneunit:trusty-upstart
-  - quay.io/stackstorm/packagingenv:jessie
+  - quay.io/stackstorm/packagingenv:trusty
   - rabbitmq
   - mongodb
   - postgres

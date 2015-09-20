@@ -16,21 +16,21 @@ EHD
 )
 
 DEBIAN_DEFAULT=$(cat <<EHD
-    MISTRAL_LOGS="/var/log/mistral.log /var/log/mistral_wf_trace.log"
-    DAEMON_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral.log --log-config-append /etc/mistral/wf_trace_logging.conf"
+    DAEMON_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral.log --log-config-append /etc/mistral/wf_trace_logging.conf"
 EHD
 )
 
 MISTRAL=$(echo "$MISTRAL" | sed -r 's/^\s+//')
 DEBIAN_DEFAULT=$(echo "$DEBIAN_DEFAULT" | sed -r 's/^\s+//')
 
-# wf logging
-mv $MISTRAL_ETCDIR/wf_trace_logging.conf.sample $MISTRAL_ETCDIR/wf_trace_logging.conf || :
-
 # mistral config
 echo "$MISTRAL" > $MISTRAL_CONF || :
 
 # debian default
-[ -f /etc/debian/default ] && echo "$DEBIAN_DEFAULT" > /etc/debian/default
+if [ "$(platform)" = debian ]; then
+  echo "$DEBIAN_DEFAULT" > /etc/default/mistral
+fi
 
-( debug_enabled ) && debug "Resulting $MISTRAL_CONF >>>" "$(cat $MISTRAL_CONF)"
+if debug_enabled; then
+  debug "Resulting $MISTRAL_CONF >>>" "$(cat $MISTRAL_CONF)"
+fi
