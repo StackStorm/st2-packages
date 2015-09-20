@@ -7,7 +7,7 @@ suite:
     - COMPOSE=1
     # Full list of st2 packages configures the default build
     - ST2_WAITFORSTART=10
-    - ST2_GITURL=https://github.com/StackStorm/st2
+    - ST2_GITURL=https://github.com/dennybaa/st2
     - ST2_GITREV=master
     - ST2_TESTMODE=
     - ST2_BUILDLIST=
@@ -15,7 +15,8 @@ suite:
     - MISTRAL_ENABLED=
     - MISTRAL_GITURL=https://github.com/StackStorm/mistral
     - MISTRAL_GITREV=st2-0.13.2
-    - MISTRAL_VERSION=0.13.2
+    - MISTRAL_VERSION=2015.2
+    - MISTRAL_RELEASE=1
   volumes:
     - .:/root/workdir
     - /tmp/st2-packages:/root/packages

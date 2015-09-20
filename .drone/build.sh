@@ -28,7 +28,8 @@ MONGODBHOST="$(hosts_resolve_ip ${MONGODBHOST:-mongodb})"
 POSTGRESHOST="$(hosts_resolve_ip ${POSTGRESHOST:-postgres})"
 
 # --- Go!
-pipe_env DEBUG WAITFORSTART MONGODBHOST RABBITMQHOST POSTGRESHOST MISTRAL_ENABLED
+pipe_env DEBUG WAITFORSTART MONGODBHOST RABBITMQHOST POSTGRESHOST MISTRAL_ENABLED \
+         ARTIFACTS_PATH="/root/build$(mktemp -ud -p /)"
 
 print_details
 setup_busybee_sshenv

@@ -23,7 +23,7 @@ pre_install:
 
 changelog: populate_version
 ifeq ($(DEBIAN),1)
-	debchange -v $(MISTRAL_VERSION) -M "automated build version: $(MISTRAL_VERSION)"
+	debchange -v $(MISTRAL_VERSION)-$(MISTRAL_RELEASE) -M "automated build version: $(MISTRAL_VERSION)"
 endif
 
 populate_version: .stamp-populate_version
