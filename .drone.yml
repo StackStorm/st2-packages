@@ -1,7 +1,7 @@
 image: quay.io/dennybaa/droneruby
 env:
   - DEBUG=1
-  - ST2_GITURL=https://github.com/dennybaa/st2
+  - ST2_GITURL=https://github.com/StackStorm/st2
   - ST2_GITREV=master
   - ST2_WAITFORSTART=20
   - ST2_TESTMODE=

@@ -10,8 +10,8 @@ build_debian() { dpkg-buildpackage -b -uc -us; }
 build_rhel() { rpmbuild -bb rpm/$1.spec; }
 
 copy_debian() {
-  [ "$NOCHANGEDIR" = "1" ] && _up='../'
-  sudo cp -v $_up$1{*.deb,*.changes,*.dsc} $ARTIFACTS_PATH || true;
+  sudo cp -v $1*.deb $ARTIFACTS_PATH;
+  sudo cp -v $1{*.changes,*.dsc} $ARTIFACTS_PATH || :;
 }
 copy_rhel() { sudo cp -v $RPMS/*/$1*.rpm $ARTIFACTS_PATH; }
 
@@ -47,11 +47,17 @@ RPMS="/root/rpmbuild/RPMS"
 pushd $GITDIR
 
 for pkg in $@; do
-  # st2* components are sub directories of one git project
-  [[ "$pkg" == st2* ]] && pushd $pkg || :
-  build_package $pkg
-  copy_artifact $pkg
-  [[ "$pkg" == st2* ]] && popd || :
+  if [[ "$pkg" == st2* ]]; then
+    # st2* components are sub directories of one git project
+    # artifacts are found in top-level, ie git directory
+    pushd $pkg && build_package $pkg && popd
+    copy_artifact $pkg
+  else
+    # in other case artifacts is found level-up from the current
+    # package git directory.
+    build_package $pkg
+    pushd ../ && copy_artifact $pkg && popd
+  fi
 done
 
 popd

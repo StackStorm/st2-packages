@@ -124,7 +124,8 @@ install_packages() {
   # inside drone environment.
   if [ "$COMPOSE" != "1" ]; then
     msg_proc "Transfer build artifacts to" "- $host"
-    ssh_copy -3 "$(hosts_resolve_ip $BUILDHOST)":build $(hosts_resolve_ip $host):
+    ssh_copy -3 "$(hosts_resolve_ip $BUILDHOST)":build $(hosts_resolve_ip $host): ||\
+        _errexit 1 "Coulnd't ssh copy: buildhost=\`$BUILDHOST', remote: \`$host'"
   fi
 
   # invoke packages installation
