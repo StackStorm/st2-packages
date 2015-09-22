@@ -28,12 +28,20 @@ describe 'start st2 components and services' do
 
     puts "===> Wait for st2 services to start #{spec[:wait_for_start]} sec..."
     sleep spec[:wait_for_start]
-  end
-  register_content = ::File.join(spec[:bin_prefix],
-                                 'st2-register-content --register-all ' \
-                                 "--config-dir #{spec[:conf_dir]}")
 
-  describe command(register_content) do
+    # Populate mistral db tables with initial data.
+    # We don't test this invocation, due to docker-compose up actually DOES NOT
+    # start clean postgres (so command fails on the second up invocation %-).
+    #
+    if spec[:mistral_enabled]
+      puts "===> Invoking mistral-db-manage populate..."
+      spec.backend.run_command(spec[:mistral_db_populate_command])
+    end
+    puts
+  end
+
+  # Run register content
+  describe command(spec[:register_content_command]) do
     after(:all) do
       if described_class.exit_status > 0
         puts "\nRegister content has failed (:", '>>>>>',

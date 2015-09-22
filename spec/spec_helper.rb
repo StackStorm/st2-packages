@@ -31,6 +31,11 @@ class ST2Spec
     logdest_pattern: {
       st2actionrunner: 'st2actionrunner.{pid}'
     },
+    register_content_command: '/usr/bin/st2-register-content' \
+                              ' --register-all' \
+                              ' --config-dir /etc/st2',
+    mistral_db_populate_command: '/usr/share/python/mistral/bin/mistral-db-manage' \
+                                 ' --config-file /etc/mistral/mistral.conf populate',
 
     st2_services: ST2_SERVICES,
     package_opts: {},
@@ -63,7 +68,10 @@ class ST2Spec
       ],
       st2bundle: %w(/etc/st2 /var/log/st2 /etc/logrotate.d
                     /opt/stackstorm/packs),
-      mistral: %w(/etc/mistral)
+      mistral: [
+        '/etc/mistral',
+        [ '/var/log/mistral', example: Proc.new {|_| be_writable.by('owner')} ]
+      ]
     },
 
     package_has_files: {
