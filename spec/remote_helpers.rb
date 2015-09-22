@@ -21,14 +21,14 @@ module RemoteHelpers
   end
 
   # Grab remote service stdout logs
-  def remote_grab_service_stdout(service_name, lines_num = 20)
+  def remote_grab_service_stdout(service_name, lines_num = 30)
     init_type = remote_init_type
     output =  case init_type
               when :upstart
                 path = File.join('/var/log/upstart', service_name)
                 remote_tail_logfile(path, lines_num)
               when :systemd
-                spec.backend.run_command("systemctl status -n #{lines_num} #{service_name}").stdout
+                spec.backend.run_command("journalctl -n #{lines_num} -u #{service_name}").stdout
               else
                 ''
               end
