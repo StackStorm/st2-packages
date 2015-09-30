@@ -93,6 +93,25 @@ checkout_repo() {
   fi
 }
 
+# Build st2python packages for outdated OSes, to build it set ST2_PYTHON to 1.
+#
+build_st2python() {
+PyFromSpec=$(cat <<EHD
+mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+echo curl -L http://www.python.org/ftp/python/${ST2_PYTHON_VERSION}/Python-${ST2_PYTHON_VERSION}.tar.xz
+curl -L http://www.python.org/ftp/python/${ST2_PYTHON_VERSION}/Python-${ST2_PYTHON_VERSION}.tar.xz -o \
+  ~/rpmbuild/SOURCES/Python-${ST2_PYTHON_VERSION}.tar.xz
+rpmbuild -bb st2python.spec
+EHD
+)
+
+  if [ ! -z "$BUILDHOST" ] && [ "$ST2_PYTHON" = 1 ]; then
+    ssh_copy python/st2python.spec $BUILDHOST:
+    msg_proc "Building python $ST2_PYTHON_VERSION on $BUILDHOST"
+    ssh_cmd $BUILDHOST "$PyFromSpec"
+  fi
+}
+
 # Build packages on a remote node (providing customized build environment)
 #
 build_packages() {
@@ -187,4 +206,15 @@ components_list() {
     pipe_env BUNDLE=1
   fi
   echo -n "$_components"
+}
+
+# Cleanup testlist, we build test
+#
+cleanup_testlist() {
+  # Test list choosing, since st2bundle conflicts with other components
+  if [[ "$@" == *st2bundle* && "$ST2_TESTMODE" == "bundle" ]]; then
+    echo st2bundle
+  else
+    echo "$@" | sed 's/st2bundle//'
+  fi
 }

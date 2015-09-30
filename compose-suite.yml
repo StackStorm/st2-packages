@@ -11,6 +11,7 @@ suite:
     - ST2_GITREV=master
     - ST2_TESTMODE=
     - ST2_BUILDLIST=
+    - ST2_PYTHON=
     - ST2PKG_VERSION=
     - MISTRAL_ENABLED=
     - MISTRAL_GITURL=https://github.com/StackStorm/mistral

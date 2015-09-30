@@ -19,6 +19,11 @@ ST2_GITREV="${ST2_GITREV:-master}"
 ST2_TESTMODE="${ST2_TESTMODE:-components}"
 ST2_WAITFORSTART="${ST2_WAITFORSTART:-10}"
 
+# Create st2python package for outdated OSes (ex. centos6)
+ST2_PYTHON="${ST2_PYTHON:-0}"
+ST2_PYTHON_VERSION="${ST2_PYTHON_VERSION:-2.7.10}"
+ST2_PYTHON_RELEASE="${ST2_PYTHON_VERSION:-1}"
+
 MISTRAL_ENABLED="${MISTRAL_ENABLED:-1}"
 MISTRAL_GITURL="${MISTRAL_GITURL:-https://github.com/StackStorm/mistral}"
 MISTRAL_GITREV="${MISTRAL_GITREV:-st2-0.13.1}"
@@ -27,14 +32,20 @@ RABBITMQHOST="$(hosts_resolve_ip ${RABBITMQHOST:-rabbitmq})"
 MONGODBHOST="$(hosts_resolve_ip ${MONGODBHOST:-mongodb})"
 POSTGRESHOST="$(hosts_resolve_ip ${POSTGRESHOST:-postgres})"
 
+
 # --- Go!
 pipe_env DEBUG COMPOSE WAITFORSTART MONGODBHOST RABBITMQHOST POSTGRESHOST \
+         ST2_PYTHON ST2_PYTHON_VERSION ST2_PYTHON_RELEASE \
          MISTRAL_ENABLED ARTIFACTS_PATH="/root/build$(mktemp -ud -p /)"
 
 print_details
 setup_busybee_sshenv
 
 buildhost_addr="$(hosts_resolve_ip $BUILDHOST)"
+
+# Create python package
+#
+build_st2python
 
 # Invoke st2* components build
 if [ ! -z "$BUILDHOST" ] && [ "$ST2_BUILDLIST" != " " ]; then
@@ -56,12 +67,8 @@ else
   TESTLIST="$(components_list)"
 fi
 
-# Test list choosing, since st2bundle conflicts with other components
-if [[ "$TESTLIST" == *st2bundle* && "$ST2_TESTMODE" == "bundle" ]]; then
-  TESTLIST="st2bundle"
-else
-  TESTLIST="$(echo $TESTLIST | sed s'/st2bundle//')"
-fi
+# We need to choose bundle or common!
+TESTLIST="$(cleanup_testlist $TESTLIST)"
 
 # Invoke mistral package build
 if [ ! -z "$BUILDHOST" ] && [ "$MISTRAL_ENABLED" = 1 ]; then

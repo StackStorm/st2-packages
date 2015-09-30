@@ -53,6 +53,22 @@ centos7:
     - mongodb
     - postgres
 
+centos6:
+  image: quay.io/dennybaa/droneruby
+  extends:
+    file: compose-suite.yml
+    service: suite
+  environment:
+    - ST2_PYTHON=1
+    - BUILDHOST=bcentos6
+    - TESTHOSTS=icentos6
+  links:
+    - bcentos6
+    - icentos6
+    - rabbitmq
+    - mongodb
+    - postgres
+
 # -----------------------------------------------------------------------------
 
 # External Services
@@ -89,10 +105,16 @@ btrusty:
   volumes:
     - /tmp/st2-packages:/root/build
 
+bcentos6:
+  image: quay.io/stackstorm/packagingenv:centos6
+  volumes:
+    - /tmp/st2-packages:/root/build
+
 bcentos7:
   image: quay.io/stackstorm/packagingenv:centos7
   volumes:
     - /tmp/st2-packages:/root/build
+
 
 # Test Instances
 #
@@ -104,6 +126,11 @@ itrusty:
 iwheezy:
   image: quay.io/dennybaa/droneunit:wheezy
   command: /usr/sbin/sshd -D
+  volumes:
+    - /tmp/st2-packages:/root/build
+
+icentos6:
+  image: quay.io/dennybaa/droneunit:centos7-systemd
   volumes:
     - /tmp/st2-packages:/root/build
 

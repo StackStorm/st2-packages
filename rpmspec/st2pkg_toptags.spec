@@ -1,6 +1,8 @@
 # package must be defined before inclusion!
 
 %define _sourcedir ../
+%define _builddir %{SOURCE0}
+
 %include ../rpmspec/helpers.spec
 %include ../rpmspec/package_venv.spec
 
@@ -14,5 +16,3 @@ Group: System/Management
 License: Apache
 Url: https://github.com/StackStorm/st2
 Source0: %{package}
-
-%define _builddir %{SOURCE0}
