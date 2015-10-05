@@ -5,8 +5,8 @@ env:
   - ST2_GITREV=master
   - ST2_WAITFORSTART=20
   - ST2_TESTMODE=
-  - ST2_BUILDLIST=
-  - MISTRAL_ENABLED=
+  - ST2_BUILDLIST=st2auth
+  - MISTRAL_ENABLED=0
   - MISTRAL_GITURL=https://github.com/StackStorm/mistral
   - MISTRAL_GITREV=st2-0.13.2
   - MISTRAL_VERSION=2015.2
@@ -18,8 +18,8 @@ env:
 script:
   - ./.drone/build.sh
 services:
-  - quay.io/dennybaa/droneunit:trusty-upstart
-  - quay.io/stackstorm/packagingenv:trusty
+  - quay.io/dennybaa/droneunit:centos6-sshd
+  - quay.io/stackstorm/packagingenv:centos6
   - rabbitmq
   - mongodb
   - library/postgres

@@ -130,7 +130,8 @@ iwheezy:
     - /tmp/st2-packages:/root/build
 
 icentos6:
-  image: quay.io/dennybaa/droneunit:centos7-systemd
+  image: quay.io/dennybaa/droneunit:centos6
+  command: /usr/sbin/sshd -D
   volumes:
     - /tmp/st2-packages:/root/build
 

@@ -22,7 +22,7 @@ ST2_WAITFORSTART="${ST2_WAITFORSTART:-10}"
 # Create st2python package for outdated OSes (ex. centos6)
 ST2_PYTHON="${ST2_PYTHON:-0}"
 ST2_PYTHON_VERSION="${ST2_PYTHON_VERSION:-2.7.10}"
-ST2_PYTHON_RELEASE="${ST2_PYTHON_VERSION:-1}"
+ST2_PYTHON_RELEASE="${ST2_PYTHON_RELEASE:-1}"
 
 MISTRAL_ENABLED="${MISTRAL_ENABLED:-1}"
 MISTRAL_GITURL="${MISTRAL_GITURL:-https://github.com/StackStorm/mistral}"
@@ -42,10 +42,12 @@ print_details
 setup_busybee_sshenv
 
 buildhost_addr="$(hosts_resolve_ip $BUILDHOST)"
+ssh_copy scripts $buildhost_addr:
 
-# Create python package
+# Create and install python package onto the build host
 #
 build_st2python
+install_st2python
 
 # Invoke st2* components build
 if [ ! -z "$BUILDHOST" ] && [ "$ST2_BUILDLIST" != " " ]; then
@@ -56,7 +58,6 @@ if [ ! -z "$BUILDHOST" ] && [ "$ST2_BUILDLIST" != " " ]; then
             ST2PKG_VERSION ST2PKG_RELEASE
   debug "Remote environment >>>" "`pipe_env`"
 
-  ssh_copy scripts $buildhost_addr:
   checkout_repo
   ssh_copy st2/* $buildhost_addr:$GITDIR
   ssh_copy rpmspec $buildhost_addr:$GITDIR
@@ -76,7 +77,6 @@ if [ ! -z "$BUILDHOST" ] && [ "$MISTRAL_ENABLED" = 1 ]; then
             MISTRAL_VERSION MISTRAL_RELEASE MAKE_PRERUN=populate_version
   debug "Remote environment >>>" "`pipe_env`"
 
-  ssh_copy scripts $buildhost_addr:
   checkout_repo
   ssh_copy mistral/* $buildhost_addr:$GITDIR
   ssh_copy rpmspec $buildhost_addr:$GITDIR
@@ -93,6 +93,9 @@ debug "Remote environment >>>" "`pipe_env`"
 
 for host in $TESTHOSTS; do
   testhost_setup $host
+  if [ "$ST2_PYTHON" = 1 ]; then
+    install_packages $host st2python
+  fi
   install_packages $host $TESTLIST
   post_install_setup $host $TESTLIST
   run_rspec $host

@@ -10,10 +10,10 @@ suite:
     - ST2_GITURL=https://github.com/StackStorm/st2
     - ST2_GITREV=master
     - ST2_TESTMODE=
-    - ST2_BUILDLIST=
+    - ST2_BUILDLIST=st2auth
     - ST2_PYTHON=
     - ST2PKG_VERSION=
-    - MISTRAL_ENABLED=
+    - MISTRAL_ENABLED=0
     - MISTRAL_GITURL=https://github.com/StackStorm/mistral
     - MISTRAL_GITREV=st2-0.13.2
     - MISTRAL_VERSION=2015.2

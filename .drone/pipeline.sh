@@ -102,6 +102,8 @@ echo curl -L http://www.python.org/ftp/python/${ST2_PYTHON_VERSION}/Python-${ST2
 curl -L http://www.python.org/ftp/python/${ST2_PYTHON_VERSION}/Python-${ST2_PYTHON_VERSION}.tar.xz -o \
   ~/rpmbuild/SOURCES/Python-${ST2_PYTHON_VERSION}.tar.xz
 rpmbuild -bb st2python.spec
+mkdir -p ${ARTIFACTS_PATH}
+cp ~/rpmbuild/RPMS/$(arch)/st2python*-${ST2_PYTHON_VERSION}-${ST2_PYTHON_RELEASE}*.rpm ${ARTIFACTS_PATH}/
 EHD
 )
 
@@ -109,6 +111,15 @@ EHD
     ssh_copy python/st2python.spec $BUILDHOST:
     msg_proc "Building python $ST2_PYTHON_VERSION on $BUILDHOST"
     ssh_cmd $BUILDHOST "$PyFromSpec"
+  fi
+}
+
+# Install st2python package onto the build host
+#
+install_st2python() {
+  if [ ! -z "$BUILDHOST" ] && [ "$ST2_PYTHON" = 1 ]; then
+    msg_proc "Installing python $ST2_PYTHON_VERSION on $BUILDHOST"
+    ssh_cmd $BUILDHOST /bin/bash scripts/install.sh st2python
   fi
 }
 
@@ -135,7 +146,7 @@ testhost_setup() {
 }
 
 
-# Install stactorm packages on to remote test host
+# Install stacktorm packages on to remote test host
 #
 install_packages() {
   host="$1"; shift
@@ -150,6 +161,7 @@ install_packages() {
   # invoke packages installation
   ssh_cmd $host /bin/bash scripts/install.sh $@
 }
+
 
 # Runs configuration script, ment to be executed after install
 #
