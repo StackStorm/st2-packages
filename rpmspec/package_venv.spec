@@ -1,7 +1,14 @@
 %{!?venv_name: %define venv_name %{package}}
 %define div_links bin/st2-bootstrap-rmq bin/st2-register-content
 %define wheel_dir %(echo ${WHEELDIR:-/tmp/wheelhouse})
-%define venv_cmd virtualenv
+
+# Use specific python, not distro's default but ours - st2python.
+%if %{use_st2python}
+  %define venv_cmd virtualenv -p /usr/share/python/st2python/bin/python
+%else
+  %define venv_cmd virtualenv
+%endif
+
 %define venv_install_dir usr/share/python/%{venv_name}
 %define venv_dir %{buildroot}/%{venv_install_dir}
 %define venv_bin %{venv_dir}/bin

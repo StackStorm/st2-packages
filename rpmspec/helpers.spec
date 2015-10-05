@@ -36,3 +36,30 @@
 # St2 package version parsing
 %define st2_component %(echo $ST2_PACKAGES st2 bundle | grep -q %{package} && echo -n 1 || :)
 %{?st2_component: %define st2pkg_version %(python -c "from %{package} import __version__; print __version__,")}
+
+# Define use_systemd to know if we on a systemd system
+%global use_systemd %{!?_unitdir:0}%{?_unitdir:1}
+
+# Redefine and set some macroses to do proper bytecompile
+# (/usr/lib/rpm/brp-python-bytecompile)
+#
+# We ship python into /usr/local, since we need updated on OSes < rhel7
+%if "%([ -x /usr/local/bin/python ] && echo -n 1)" == "1"
+  %define __python /usr/local/bin/python
+  %define __os_install_post() \
+      /usr/lib/rpm/redhat/brp-compress \
+      %{!?__debug_package:/usr/lib/rpm/redhat/brp-strip %{__strip}} \
+      /usr/lib/rpm/redhat/brp-strip-static-archive %{__strip} \
+      /usr/lib/rpm/redhat/brp-strip-comment-note %{__strip} %{__objdump} \
+      /usr/lib/rpm/brp-python-bytecompile %{__python} \
+      /usr/lib/rpm/redhat/brp-python-hardlink \
+      %{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars} \
+  %{nil}
+%endif
+
+# Set variable indicating that we use our python
+%if "%(echo -n $ST2_PYTHON)" == "1"
+  %global use_st2python 1
+%else
+  %global use_st2python 0
+%endif
