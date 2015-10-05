@@ -11,7 +11,7 @@ install_rhel() { sudo yum -y install "$1"; }
 
 package_ext() { [ $(platform) = 'debian' ] && echo -n 'deb' || echo -n 'rpm'; }
 package_path() {
-  path=$(ls -1t ${ARTIFACTS_PATH}/$1*.$(package_ext) | head -n1)
+  path=$(ls -1t ${ARTIFACTS_PATH}/$1*.$(package_ext) | grep "$1-[0-9].*"| head -n1)
   [ -z $path ] && _errexit=1 error "Couldn't find any package"
   echo $path
 }
