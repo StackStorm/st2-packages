@@ -22,7 +22,7 @@ install_package() {
   pkgname=$(basename $path)
   pkgname=${pkgname%%.$(package_ext)}
 
-  msg_proc "Staring installation of package: $pkgname"
+  msg_proc "Starting installation of package: $pkgname"
   install_$(platform) "$path"
 }
 
