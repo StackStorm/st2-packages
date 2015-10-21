@@ -62,7 +62,7 @@ Let's describe a few important configuration variables:
 
 Issue the command bellow and the whole suite will be run, after it finishes you can find packages in your `/tmp/st2-packages` directory.
 ```
-docker-compose run ubuntu
+docker-compose up ubuntu
 ```
 
 ## License and Authors
