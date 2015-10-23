@@ -93,6 +93,36 @@ checkout_repo() {
   fi
 }
 
+# Build st2python packages for outdated OSes, to build it set ST2_PYTHON to 1.
+#
+build_st2python() {
+PyFromSpec=$(cat <<EHD
+mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+echo curl -L http://www.python.org/ftp/python/${ST2_PYTHON_VERSION}/Python-${ST2_PYTHON_VERSION}.tar.xz
+curl -L http://www.python.org/ftp/python/${ST2_PYTHON_VERSION}/Python-${ST2_PYTHON_VERSION}.tar.xz -o \
+  ~/rpmbuild/SOURCES/Python-${ST2_PYTHON_VERSION}.tar.xz
+rpmbuild -bb st2python.spec
+mkdir -p ${ARTIFACTS_PATH}
+cp ~/rpmbuild/RPMS/$(arch)/st2python*-${ST2_PYTHON_VERSION}-${ST2_PYTHON_RELEASE}*.rpm ${ARTIFACTS_PATH}/
+EHD
+)
+
+  if [ ! -z "$BUILDHOST" ] && [ "$ST2_PYTHON" = 1 ]; then
+    ssh_copy python/st2python.spec $BUILDHOST:
+    msg_proc "Building python $ST2_PYTHON_VERSION on $BUILDHOST"
+    ssh_cmd $BUILDHOST "$PyFromSpec"
+  fi
+}
+
+# Install st2python package onto the build host
+#
+install_st2python() {
+  if [ ! -z "$BUILDHOST" ] && [ "$ST2_PYTHON" = 1 ]; then
+    msg_proc "Installing python $ST2_PYTHON_VERSION on $BUILDHOST"
+    ssh_cmd $BUILDHOST /bin/bash scripts/install.sh st2python
+  fi
+}
+
 # Build packages on a remote node (providing customized build environment)
 #
 build_packages() {
@@ -116,7 +146,7 @@ testhost_setup() {
 }
 
 
-# Install stactorm packages on to remote test host
+# Install stacktorm packages on to remote test host
 #
 install_packages() {
   host="$1"; shift
@@ -131,6 +161,7 @@ install_packages() {
   # invoke packages installation
   ssh_cmd $host /bin/bash scripts/install.sh $@
 }
+
 
 # Runs configuration script, ment to be executed after install
 #
@@ -187,4 +218,15 @@ components_list() {
     pipe_env BUNDLE=1
   fi
   echo -n "$_components"
+}
+
+# Cleanup testlist, we build test
+#
+cleanup_testlist() {
+  # Test list choosing, since st2bundle conflicts with other components
+  if [[ "$@" == *st2bundle* && "$ST2_TESTMODE" == "bundle" ]]; then
+    echo st2bundle
+  else
+    echo "$@" | sed 's/st2bundle//'
+  fi
 }
