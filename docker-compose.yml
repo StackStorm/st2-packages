@@ -8,19 +8,19 @@
 
 # wheezy (previous), light one, number one to be containerized.
 debian:
-  image: quay.io/dennybaa/droneruby
+  image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose-suite.yml
     service: suite
   environment:
-    - BUILDHOST=bwheezy
-    - TESTHOSTS=iwheezy
+    - BUILDNODE=bwheezy
+    - TESTNODES=iwheezy
   links:
     - bwheezy
-    - iwheezy
-    - rabbitmq
-    - mongodb
-    - postgres
+    # - iwheezy
+    # - rabbitmq
+    # - mongodb
+    # - postgres
 
 # 14.04
 ubuntu:

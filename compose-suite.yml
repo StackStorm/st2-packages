@@ -1,7 +1,9 @@
 
 suite:
-  working_dir: /root/workdir
-  entrypoint: ["/bin/bash", "/root/workdir/.drone/build.sh"]
+  working_dir: /root/st2-packages
+  # We copy Gemfile.* since they are bundled into packagingrunner
+  # this save us from bundler rebuild what gives us a small speedup.
+  command: bash -c "cp /root/Gemfile* /root/st2-packages; bundle exec rake"
   environment:
     - DEBUG=1
     - COMPOSE=1
@@ -19,5 +21,5 @@ suite:
     - MISTRAL_VERSION=2015.2
     - MISTRAL_RELEASE=1
   volumes:
-    - .:/root/workdir
-    - /tmp/st2-packages:/root/packages
+    - .:/root/st2-packages
+    - /tmp/st2-build:/root/st2-build

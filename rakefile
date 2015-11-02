@@ -1,0 +1,39 @@
+require 'rake'
+require './rake/remote'
+
+ssh_options = {
+   keys: %w(/root/.ssh/busybee),
+   auth_methods: %w(publickey)
+}
+
+
+buildnode = ENV['BUILDNODE']
+# testnodes = ENV['TESTNODES']
+
+Remote.output_verbosity = :debug
+remote = Remote.new(ssh_options)
+
+# =============================================================================
+
+# Run shellout dispatcher thread
+ShellOut.run
+
+# Flushes shellout when tasks are finished, finalization is required
+# to write out any messages left in the queue.
+multitask :build => [:first, :second] { ShellOut.finalize }
+task default: :build
+
+task :first do
+  remote.ssh hostname: buildnode do
+    options label: 'build st2common'
+    execute :bash, '-c', %q("ls -l /bin | head -n15")
+  end
+end
+
+task :second do
+  remote.ssh hostname: buildnode do
+    options label: 'build st2auth'
+    execute :bash, '-c', %q("ls -l /bin | head -n15") 
+    execute :true
+  end
+end

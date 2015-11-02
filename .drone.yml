@@ -1,25 +1,25 @@
-image: quay.io/dennybaa/droneruby
+image: quay.io/stackstorm/packagingrunner
 env:
   - DEBUG=1
-  - ST2_GITURL=https://github.com/dennybaa/st2
-  - ST2_GITREV=fixate-reqs-update
-  - ST2_WAITFORSTART=20
-  - ST2_TESTMODE=
-  - ST2_BUILDLIST=st2auth
-  - MISTRAL_ENABLED=0
-  - MISTRAL_GITURL=https://github.com/StackStorm/mistral
-  - MISTRAL_GITREV=st2-0.13.2
-  - MISTRAL_VERSION=2015.2
-  - MISTRAL_RELEASE=1
-  - POSTGRES_USER=mistral
-  - POSTGRES_PASSWORD=StackStorm
-  - BUILDHOST=packagingenv
-  - TESTHOSTS=droneunit
+  # - ST2_GITURL=https://github.com/dennybaa/st2
+  # - ST2_GITREV=fixate-reqs-update
+  # - ST2_WAITFORSTART=20
+  # - ST2_TESTMODE=
+  # - ST2_BUILDLIST=st2auth
+  # - MISTRAL_ENABLED=0
+  # - MISTRAL_GITURL=https://github.com/StackStorm/mistral
+  # - MISTRAL_GITREV=st2-0.13.2
+  # - MISTRAL_VERSION=2015.2
+  # - MISTRAL_RELEASE=1
+  # - POSTGRES_USER=mistral
+  # - POSTGRES_PASSWORD=StackStorm
+  - BUILDNODE=packagingenv
+  # - TESTHOSTS=droneunit
 script:
-  - ./.drone/build.sh
+  - bash -c "cp /root/Gemfile* ./; bundle exec rake"
 services:
   - quay.io/dennybaa/droneunit:centos6-sshd
   - quay.io/stackstorm/packagingenv:centos6
-  - rabbitmq
-  - mongodb
-  - library/postgres
+  # - rabbitmq
+  # - mongodb
+  # - library/postgres
