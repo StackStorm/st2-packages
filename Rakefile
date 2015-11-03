@@ -14,18 +14,19 @@ pipeopts do
     keys: %w(/root/.ssh/busybee),
     auth_methods: %w(publickey)
   })
-  env   :buildnode
-  set   :debug_level, 1
-  set   :compose, 1
-  set   :artifact_dir, '/root/build'
-  set   :st2_giturl,   'https://github.com/StackStorm/st2'
-  set   :st2_gitrev,   'master'
-  set   :st2_gitdir,    make_tmpname('st2-')
-  set   :st2pkg_version
-  set   :st2pkg_release, 1
-  set   :st2_python, 0
-  set   :st2_python_version, '2.7.10'
-  set   :st2_python_relase, 1
+  env     :buildnode
+  env     :testnodes
+  passenv :debug_level, 1
+  passenv :compose, 1
+  passenv :artifact_dir, '/root/build'
+  passenv :st2_giturl,   'https://github.com/StackStorm/st2'
+  passenv :st2_gitrev,   'master'
+  passenv :st2_gitdir,    make_tmpname('st2-')
+  passenv :st2pkg_version
+  passenv :st2pkg_release, 1
+  passenv :st2_python, 0
+  passenv :st2_python_version, '2.7.10'
+  passenv :st2_python_relase, 1
 end
 
 task :st2python do |this|

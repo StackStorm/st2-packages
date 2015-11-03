@@ -8,14 +8,14 @@ module Pipeline
 
       # Sets option from env
       def env(var, default=nil, opts=nil)
-        value = parse_setenv_value(var, default, opts)
+        value = parse_passenv_value(var, default, opts)
         value.tap do
           context.assign_property(var, value) if value
         end
       end
 
       # Sets option from env as well as corresponding options env[var]
-      def set(var, default=nil, opts=nil)
+      def passenv(var, default=nil, opts=nil)
         value = env(var, default, opts)
         value.tap do
           if value
@@ -46,8 +46,8 @@ module Pipeline
       private
       attr_reader :context, :global
 
-      # Parse arguments for env, set methods
-      def parse_setenv_value(var, default, opts)
+      # Parse arguments for env, passenv methods
+      def parse_passenv_value(var, default, opts)
         opts, default = default, nil if default.is_a?(Hash)
         defs = {upcase: true}
         opts = defs.merge(opts || {})
