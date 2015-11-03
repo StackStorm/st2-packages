@@ -1,84 +1,57 @@
 require 'hashie'
 require 'logger'
+require 'rake'
+require './rake/pipeline_options'
 require './rake/remote'
 
-class PipeLine
-  attr_reader :basedir, :scripts, :env
-  attr_accessor :default_env_select
-  attr_writer :ssh_options
-
-  def initialize(basedir, scripts, env)
-    @env = fetch_env(env)
-    @basedir, @scripts = basedir, Hashie::Mash.new(scripts)
-    @default_env_select = [
-      :compose,
-      :debug_level,
-      :artifact_dir
-    ]
-    Remote.output_verbosity = logger(self.env.debug_level)
-  end
-
-  def ssh_options
-    @ssh_options ||= {
-      keys: %w(/root/.ssh/busybee),
-      auth_methods: %w(publickey)
-    }
-  end
-
-  # exec provide Remote instance which actually provides 
-  # Netssh and Local backends.
-  def exec
-    @exec ||= Remote.new(ssh_options)
-  end
-
-  # Selected environment to pass to the remotes
-  def env_select(*args)
-    list = default_env_select + args
-    selection = {}
-    env.keys.each do |k|
-      selection[k.to_s.upcase] = env[k] if list.include?(k.to_sym)
+module Pipeline
+  module Rake
+    module TaskDSL
+      def short_name
+        name.split(':').pop
+      end
     end
-    selection
   end
+end
 
-  # Fetch script options
-  def script_options(script)
-    mash = script_defaults.merge(scripts[script])
-    mash.tap do |m|
-      m[:path] = File.join(basedir, m[:script])
-      m[:within] = File.join(basedir, m[:package])
-      m[:env]  = env_select(*m[:use_env])
+module Pipeline
+  include Pipeline::Options
+
+  # Invoke our sshkit remote wrapper with merged options
+  def pipeline(context_name=nil, &block)
+    if block
+      options = pipe_options.dup
+      context_options = context_pipe_options[context_name]
+      options.merge!(context_options) unless context_name.nil?
+      ssh_options = _ssh_options(options.ssh_options)
+      sshkit_wrapper(options, ssh_options).instance_exec(&block)
     end
   end
 
-  def script_defaults
-    @script_defaults ||= Hashie::Mash.new({
-      args: [],
-      use_env: []
-    })
+  def self.included(includer)
+    ::Rake::Task.send(:include, Rake::TaskDSL)
   end
 
   private
 
-  # Creates env mash instance, which is accessible like env['key'],
-  # env[:key] or env.key.
-  def fetch_env(env)
-    env.inject(Hashie::Mash.new) do |ac, var|
-      var, defv = Array(var)
-      val = ENV[var.to_s.upcase]
-      ac[var] = val.to_s.empty? ? defv : val
-      ac
+  # somehow bothering method missing, using dash
+  def _ssh_options(mash)
+    (mash || {}).inject({}) {|hash, (k, v)| hash[k.to_sym] = v; hash}
+  end
+
+  # Get our sshkit wrapper (sshkit methods are accessible in ssh method DSL)
+  def sshkit_wrapper(options, ssh_options)
+    Remote.new(options, ssh_options).tap do
+      Remote.output_verbosity = logger(options.debug_level)
     end
   end
 
   def logger(verbosity)
-    case verbosity
-    when String
-      verbosity.match(/^\d/) ? verbosity.to_i : Logger.const_get(verbosity.upcase)
-    when Integer
-      verbosity
-    else
-      Logger.const_get(verbosity.upcase)
+    if verbosity.is_a?(String) && verbosity.match(/^\d/)
+      verbosity = verbosity.to_i
     end
+    verbosity.is_a?(Integer) ? verbosity : Logger.const_get(verbosity.upcase)
   end
 end
+
+include Pipeline
