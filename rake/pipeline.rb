@@ -61,6 +61,13 @@ class PipeLine
   private
 
   def logger(verbosity)
-    verbosity.is_a?(Integer) ? verbosity : Logger.const_get(verbosity.upcase)
+    case verbosity
+    when String
+      verbosity.match(/^\d/) ? verbosity.to_i : Logger.const_get(verbosity.upcase)
+    when Integer
+      verbosity
+    else
+      Logger.const_get(verbosity.upcase)
+    end
   end
 end
