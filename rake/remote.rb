@@ -1,6 +1,7 @@
 require 'sshkit'
 require 'forwardable'
 require './rake/formatter'
+require './rake/shellout'
 
 class Remote
   # SSHkit mimic backend DSL with a bit reduced interface,
@@ -19,7 +20,10 @@ class Remote
       define_method method_name do |*args|
         options_hash = args.extract_options!.merge!(options)
         backend.send(method_name, *args, options_hash).tap do |success|
-          exit(1) if options_hash[:finish_on_non_zero_exit] && !success
+          if options_hash[:finish_on_non_zero_exit] && !success
+            ShellOut.finalize
+            exit(1)
+          end
         end
       end
     end
@@ -34,7 +38,7 @@ class Remote
         raise_on_non_zero_exit: false,
         show_exit_status: true,
         show_start_message: true,
-        show_uuid: false
+        show_uuid: true
       }
     end
 
@@ -79,7 +83,8 @@ class Remote
       SSHKit.config.use_format(:shellout)
       host.ssh_options = ssh_options
       host.user ||= 'root' # figure this out, current user?
-      @@backend_cache[host] = SSHKit::Backend::Netssh.new(host)
+      klass = host.local? ? :Local : :Netssh
+      @@backend_cache[host] = SSHKit::Backend.const_get(klass).new(host)
     end
   end
 end

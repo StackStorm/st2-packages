@@ -14,7 +14,6 @@ debian:
     service: suite
   environment:
     - BUILDNODE=bwheezy
-    - TESTNODES=iwheezy
   links:
     - bwheezy
     # - iwheezy
@@ -54,20 +53,19 @@ centos7:
     - postgres
 
 centos6:
-  image: quay.io/dennybaa/droneruby
+  image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose-suite.yml
     service: suite
   environment:
     - ST2_PYTHON=1
-    - BUILDHOST=bcentos6
-    - TESTHOSTS=icentos6
+    - BUILDNODE=bcentos6
   links:
     - bcentos6
-    - icentos6
-    - rabbitmq
-    - mongodb
-    - postgres
+    # - icentos6
+    # - rabbitmq
+    # - mongodb
+    # - postgres
 
 # -----------------------------------------------------------------------------
 
