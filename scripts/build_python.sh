@@ -12,11 +12,6 @@ if [ "$build" != 1 ]; then
   exit 0
 fi
 
-if [ -z "$buildroot" ]; then
-  echo  "Python build failed. Invoke as $0 buildroot!"
-  exit 1
-fi
-
 # create bro dirs for rpmbuild
 mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 
@@ -25,7 +20,6 @@ curl -sSL http://www.python.org/ftp/python/$pyver/Python-$pyver.tar.xz -o \
   ~/rpmbuild/SOURCES/Python-$pyver.tar.xz
 
 # invoke build
-cd $buildroot
 rpmbuild -bb st2python.spec
 
 # copy artifact

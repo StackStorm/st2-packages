@@ -3,26 +3,19 @@ require 'logger'
 require './rake/remote'
 
 class PipeLine
+  attr_reader :basedir, :scripts, :env
   attr_accessor :default_env_select
   attr_writer :ssh_options
 
-  USE_ENVIRONMENT = [
-    :buildnode,
-    :compose,
-    [:artifact_dir, '/root/build'],       # later change with mktmp ?
-    [:debug_level, 1],
-    [:st2_python, 0],
-    [:st2_python_version, '2.7.10'],
-    [:st2_python_relase, '1'],
-  ].freeze
-
-  def initialize
+  def initialize(basedir, scripts, env)
+    @env = fetch_env(env)
+    @basedir, @scripts = basedir, Hashie::Mash.new(scripts)
     @default_env_select = [
       :compose,
       :debug_level,
       :artifact_dir
     ]
-    Remote.output_verbosity = logger(env.debug_level)
+    Remote.output_verbosity = logger(self.env.debug_level)
   end
 
   def ssh_options
@@ -38,16 +31,6 @@ class PipeLine
     @exec ||= Remote.new(ssh_options)
   end
 
-  # Pipeline env hash (mash), ie accessible like env['key'], env[:key] or env.key
-  def env
-    @env ||= USE_ENVIRONMENT.inject(Hashie::Mash.new) do |ac, var|
-      var, defv = Array(var)
-      val = ENV[var.to_s.upcase]
-      ac[var] = val.to_s.empty? ? defv : val
-      ac
-    end
-  end
-
   # Selected environment to pass to the remotes
   def env_select(*args)
     list = default_env_select + args
@@ -58,7 +41,35 @@ class PipeLine
     selection
   end
 
+  # Fetch script options
+  def script_options(script)
+    mash = script_defaults.merge(scripts[script])
+    mash.tap do |m|
+      m[:path] = File.join(basedir, m[:script])
+      m[:within] = File.join(basedir, m[:package])
+      m[:env]  = env_select(*m[:use_env])
+    end
+  end
+
+  def script_defaults
+    @script_defaults ||= Hashie::Mash.new({
+      args: [],
+      use_env: []
+    })
+  end
+
   private
+
+  # Creates env mash instance, which is accessible like env['key'],
+  # env[:key] or env.key.
+  def fetch_env(env)
+    env.inject(Hashie::Mash.new) do |ac, var|
+      var, defv = Array(var)
+      val = ENV[var.to_s.upcase]
+      ac[var] = val.to_s.empty? ? defv : val
+      ac
+    end
+  end
 
   def logger(verbosity)
     case verbosity

@@ -3,11 +3,30 @@ require './rake/pipeline'
 
 task :default => 'packages:build'
 
+BASEDIR = '/root'
+SCRIPTS = {
+  build_python: {
+    package: 'packages/python',
+    script:  'scripts/build_python.sh',
+    use_env: [ :st2_python, :st2_python_version, :st2_python_release ]
+  }
+}.freeze
+
+USE_ENVIRONMENT = [
+  :buildnode,
+  :compose,
+  [:artifact_dir, '/root/build'],       # later change with mktmp ?
+  [:debug_level, 1],
+  [:st2_python, 0],
+  [:st2_python_version, '2.7.10'],
+  [:st2_python_relase, '1'],
+].freeze
+
 # Packages namespace build related tasks
 namespace :packages do
 
-  # CI pipeline helper and parallel output dispatcher
-  ci = PipeLine.new
+  # CI pipeline helper initialization and parallel output dispatcher startup
+  ci = PipeLine.new(BASEDIR, SCRIPTS, USE_ENVIRONMENT)
   ShellOut.run
 
   desc "Main entry packages build task"
@@ -30,25 +49,28 @@ namespace :packages do
   end
 
   multitask :packages => [
-    :st2python
+    :st2python,
+    :st2common
   ]
+
   desc "Build python task"
   task :st2python do
     ci.exec.ssh hostname: ci.env.buildnode do
+      opts = ci.script_options :build_python
       options label: 'package: st2python', show_uuid: false
+
       execute :mkdir, "-p #{ci.env.artifact_dir}"
 
-
-      with(ci.env_select  :st2_python,
-                            :st2_python_version,
-                            :st2_python_release) do
-
-                
-        execute :bash, '/root/scripts/build_python.sh ./packages/python'
+      with(opts.env) do
+        within(opts.within) do
+          execute :bash, opts.path, *opts.args
+        end
       end
     end
   end
 
-  # hhhhhh
+  desc "Build st2common task"
+  task :st2common do
+  end
 
 end
