@@ -1,4 +1,4 @@
-[![Build Status](http://drone.vos.io/api/badge/github.com/dennybaa/st2-packages/status.svg?branch=master)](http://drone.vos.io/github.com/dennybaa/st2-packages)
+[![Build Status](http://drone.noops.tk/api/badge/github.com/dennybaa/st2-packages/status.svg?branch=rake-remake)](http://drone.noops.tk/github.com/dennybaa/st2-packages)
 
 # Stackstorm CI environment for building OS packages
 

@@ -1,8 +1,9 @@
 image: quay.io/stackstorm/packagingrunner
 env:
-  - DEBUG_LEVEL=0
+  - DEBUG_LEVEL=debug
   - ST2_GITURL=https://github.com/dennybaa/st2
   - ST2_GITREV=fixate-reqs-update
+  - ST2_PYTHON=1
   # - ST2_WAITFORSTART=20
   # - ST2_TESTMODE=
   # - ST2_BUILDLIST=st2auth
