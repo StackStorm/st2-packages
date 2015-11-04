@@ -80,22 +80,24 @@ class ShellOut
       end
     end
 
-    # Write out what is left in the output queue
-    def finalize
-      @stopping = true
-      thread.join unless output_queue.empty?
+    # Flush the output queue
+    def flush
+      Thread.exclusive do
+        while !output_queue.empty? do
+          write_message(output_queue.pop)
+        end
+      end
     end
 
     # Consume ShellOut output queue
     def run
       @thread = Thread.new do
-        while !stopping do
-          write_message(output_queue.pop)
-        end
-        if stopping
-          while !output_queue.empty? do
-            write_message(output_queue.pop)
+        while true do
+          if thread.status == 'aborting'
+            flush
+            break
           end
+          write_message(output_queue.pop)
         end
       end.run
     end
@@ -139,6 +141,7 @@ class ShellOut
           inject_headers!(obj)
           writer_for(obj).trailing = obj.trailing
           output << obj.message + "\n"
+          output.flush
         end
       end
     end
@@ -167,3 +170,7 @@ class ShellOut
     end
   end
 end
+
+# We have to run and finalize threaded output dispatcher.
+# Otherwise we won't see any output :)
+ShellOut.run

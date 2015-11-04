@@ -18,11 +18,12 @@ class Remote
     [:test, :capture, :execute].each do |method_name|
       define_method method_name do |*args|
         command_options = args.extract_options!.merge!(command)
-        backend.send(method_name, *args, command_options).tap do |success|
-          if command_options[:finish_on_non_zero_exit] && !success
-            ShellOut.finalize
-            exit(1)
-          end
+        begin
+          backend.send(method_name, *args, command_options)
+        rescue SSHKit::Command::Failed
+          Thread.main.send(:raise, SystemExit.new(false))
+        ensure
+          ShellOut.flush
         end
       end
     end
@@ -41,8 +42,6 @@ class Remote
 
     def default_command_options
       @default_command_options ||= {
-        finish_on_non_zero_exit: true,
-        raise_on_non_zero_exit: false,
         show_exit_status: true,
         show_start_message: true,
         show_uuid: true
