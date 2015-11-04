@@ -8,7 +8,7 @@ module Pipeline
   module Rake
     module TaskDSL
       def short_name
-        name.split(':').pop
+        name.split(':', 2).pop
       end
     end
   end

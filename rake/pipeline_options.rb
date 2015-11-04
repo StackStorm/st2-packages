@@ -8,17 +8,21 @@ module Pipeline
 
       # Sets option from env
       def env(var, default=nil, opts=nil)
-        value = parse_passenv_value(var, default, opts)
+        value, _ = parse_envpass_value(var, default, opts)
         value.tap do
           context.assign_property(var, value) if value
         end
       end
 
       # Sets option from env as well as corresponding options env[var]
-      def passenv(var, default=nil, opts=nil)
-        value = env(var, default, opts)
+      def envpass(var, default=nil, opts=nil)
+        value, opts = parse_envpass_value(var, default, opts)
         value.tap do
           if value
+            # Set context option as
+            context.assign_property(var, value)
+            # well as populate context[:env]
+            var = var.upcase if opts[:upcase]
             context[:env] ||= Hashie::Mash.new
             context[:env].merge!({var => value})
           end
@@ -34,7 +38,8 @@ module Pipeline
         if global && global.respond_to?(method_name)
           global.send(method_name)
         else
-          context.assign_property(method_name, *args)
+          value = args.size < 2 ? args.pop : args
+          context.assign_property(method_name, value)
         end
       end
 
@@ -46,8 +51,8 @@ module Pipeline
       private
       attr_reader :context, :global
 
-      # Parse arguments for env, passenv methods
-      def parse_passenv_value(var, default, opts)
+      # Parse arguments for env, envpass methods
+      def parse_envpass_value(var, default, opts)
         opts, default = default, nil if default.is_a?(Hash)
         defs = {upcase: true}
         opts = defs.merge(opts || {})
@@ -55,7 +60,7 @@ module Pipeline
         value = opts[:upcase] ? ENV[var.to_s.upcase] : ENV[var.to_s]
         # set value nil for an empty env var
         value = nil if value.to_s.empty?
-        value || default
+        [value || default, opts]
       end
     end
 
@@ -71,11 +76,6 @@ module Pipeline
       else
         args.first
       end
-    end
-
-    # Merged options global with context specific
-    def options
-      pipe_options.merge(context_pipe_options)
     end
 
     private
