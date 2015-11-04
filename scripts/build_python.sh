@@ -6,8 +6,8 @@ pyver="${ST2_PYTHON_VERSION}"
 pyrel="${ST2_PYTHON_RELEASE}"
 artifact_dir="${ARTIFACT_DIR}"
 
-if [ "$build" != 1 ]; then
-  echo "Python build skipped. If you want st2_python, set ST2_PYTHON to 1."
+if [ "$build" != "1" ]; then
+  echo "Python build skipped. If you want st2python package, set ST2_PYTHON to 1."
   exit 0
 fi
 

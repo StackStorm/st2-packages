@@ -27,25 +27,26 @@ pipeopts do
   envpass :st2_python_relase, 1
 
   # target directory for intermidiate files (on the remotes)
-  basedir '/root'
+  envpass :basedir,  '/root'
+  envpass :wheeldir, '/tmp/wheelhouse'
 
   ssh_options({
     keys: %w(/root/.ssh/busybee),
     auth_methods: %w(publickey)
   })
 
-  upload_onbuild 'packages', 'scripts'
+  upload_onbuild 'packages', 'scripts', 'rpmspec'
 end
 
 
 namespace :packages do
   desc 'Packages build entry task'
-  task :build => [:upload, :build_packages]
+  task :build => [:upload, :checkout, :packages]
 
-  syntheticdeps = pipeopts[:upload_onbuild].map {|s| "_uponbuild_#{s}"}
+  synthetic_deps = pipeopts[:upload_onbuild].map {|s| "_uponbuild_#{s}"}
 
   desc 'Parallely upload given sources onto the remotes'
-  multitask :upload => syntheticdeps
+  multitask :upload => synthetic_deps
 
   rule %r/_uponbuild_/ do |task|
     pipeline do
@@ -56,9 +57,32 @@ namespace :packages do
     end
   end
 
+  desc "Checkout st2 source from github.com"
+  task :checkout do |this|
+    pipeline this.name do
+      run hostname: opts[:buildnode] do |opts|
+        command label: 'checkout: st2', show_uuid: false
+
+        with opts.env do
+          execute :mkdir, '-p $ARTIFACT_DIR'
+
+          within opts.basedir do
+            execute :git, :clone, '--depth 1 -b $ST2_GITREV $ST2_GITURL $ST2_GITDIR'
+            execute :cp,  "-r rpmspec/ packages/st2* $ST2_GITDIR"
+          end
+        end
+      end
+    end
+  end
+
+  packages_deps = [:build_packages]
+  packages_deps.unshift(:st2python) if pipeopts[:st2_python].to_i == 1
+
+  desc 'Build packages, st2python goes first since it is needed during build'
+  task :packages => packages_deps
+
   desc 'Packages build task, each package build is executed parallely'
   multitask :build_packages => [
-    :st2python,
     :st2common
   ]
 
@@ -68,10 +92,13 @@ namespace :packages do
       run hostname: opts[:buildnode] do |opts|
         command label: "package: #{this.short_name}", show_uuid: false
 
-        execute :mkdir, "-p #{opts[:artifact_dir]}"
-        with(opts.env) do
-          within("#{opts[:basedir]}/packages/python") do
-            execute :bash, "#{opts[:basedir]}/scripts/build_python.sh"
+        with opts.env do
+          within "#{opts[:basedir]}/packages/python" do
+            execute :bash, "$BASEDIR/scripts/build_python.sh"
+          end
+
+          within "#{opts[:artifact_dir]}" do
+            execute :bash, "$BASEDIR/scripts/install_os_package.sh st2python"
           end
         end
       end
@@ -80,5 +107,17 @@ namespace :packages do
 
   desc 'Build st2common package'
   task :st2common do |this|
+    pipeline this.name do
+      run hostname: opts[:buildnode] do |opts|
+        command label: "package: #{this.short_name}", show_uuid: false
+
+        with opts.env do
+          within "#{opts[:st2_gitdir]}/#{this.short_name}" do
+            execute :ls, "-l #{opts[:st2_gitdir]}/#{this.short_name}"
+            execute :bash, "$BASEDIR/scripts/build_os_package.sh #{this.short_name}"
+          end
+        end
+      end
+    end
   end
 end
