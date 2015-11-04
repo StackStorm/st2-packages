@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-buildroot="$1"
 build="${ST2_PYTHON}"
 pyver="${ST2_PYTHON_VERSION}"
 pyrel="${ST2_PYTHON_RELEASE}"
