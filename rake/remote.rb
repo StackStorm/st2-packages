@@ -11,8 +11,7 @@ class Remote
     attr_reader :backend, :default_command_options
 
     # Methods which are passed as is
-    def_delegators  :backend, :make, :rake, :as, :with, :within,
-                    :upload!, :download!
+    def_delegators  :backend, :as, :with, :within, :upload!, :download!
 
     # Customized delegated methods, they automatically inject
     # options into the call argument list.
@@ -26,6 +25,14 @@ class Remote
           end
         end
       end
+    end
+
+    def make(commands=[], options={})
+      execute :make, commands, options
+    end
+
+    def rake(commands=[], options={})
+      execute :rake, commands, options
     end
 
     def initialize(backend)
