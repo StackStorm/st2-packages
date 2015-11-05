@@ -19,8 +19,8 @@ env:
 script:
   - bash -c "cp /root/Gemfile ./; bundle exec rake"
 services:
-  - quay.io/dennybaa/droneunit:centos6-sshd
-  - quay.io/stackstorm/packagingenv:centos6
+  - quay.io/dennybaa/droneunit:wheezy-sshd
+  - quay.io/stackstorm/packagingenv:wheezy
   # - rabbitmq
   # - mongodb
   # - library/postgres
