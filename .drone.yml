@@ -3,7 +3,7 @@ env:
   - DEBUG_LEVEL=debug
   - ST2_GITURL=https://github.com/stackstorm/st2
   - ST2_GITREV=master
-  - ST2_PYTHON=0
+  - ST2_PYTHON=1
   # - ST2_WAITFORSTART=20
   # - ST2_TESTMODE=
   # - ST2_BUILDLIST=st2auth
@@ -19,8 +19,8 @@ env:
 script:
   - bash -c "cp /root/Gemfile ./; bundle exec rake"
 services:
-  - quay.io/dennybaa/droneunit:wheezy-sshd
-  - quay.io/stackstorm/packagingenv:wheezy
+  - quay.io/dennybaa/droneunit:centos6-sshd
+  - quay.io/stackstorm/packagingenv:centos6
   # - rabbitmq
   # - mongodb
   # - library/postgres
