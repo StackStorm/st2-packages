@@ -22,7 +22,6 @@ class Remote
           backend.send(method_name, *args, command_options)
         rescue SSHKit::Command::Failed
           Thread.main.send(:raise, SystemExit.new(false))
-        ensure
           ShellOut.flush
         end
       end

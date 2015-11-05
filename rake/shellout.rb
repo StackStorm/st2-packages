@@ -35,7 +35,7 @@ class ShellOut
   end
 
   class << self
-    attr_reader :thread, :stopping
+    attr_reader :thread
 
     def update_data(id, hash)
       if hash.is_a?(Hash) && !hash.empty?
@@ -80,6 +80,11 @@ class ShellOut
       end
     end
 
+    def stop
+      flush
+      thread.exit
+    end
+
     # Flush the output queue
     def flush
       Thread.exclusive do
@@ -91,18 +96,22 @@ class ShellOut
 
     # Consume ShellOut output queue
     def run
-      @thread = Thread.new do
-        while true do
-          if thread.status == 'aborting'
-            flush
-            break
-          end
-          write_message(output_queue.pop)
-        end
-      end.run
+      start_processing
+      at_exit { ShellOut.stop }
     end
 
     private
+
+    attr_reader :thread
+
+    def start_processing
+      return if @thread
+      @thread = Thread.new do
+        while true do
+          write_message(output_queue.pop)
+        end
+      end
+    end
 
     # Custom user data, for holding various user information
     def userdata
@@ -170,6 +179,7 @@ class ShellOut
     end
   end
 end
+
 
 # We have to run and finalize threaded output dispatcher.
 # Otherwise we won't see any output :)
