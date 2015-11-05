@@ -3,9 +3,9 @@ suite:
   working_dir: /root/st2-packages
   # We copy Gemfile.* since they are bundled into packagingrunner
   # this save us from bundler rebuild what gives us a small speedup.
-  command: bash -c "cp /root/Gemfile* /root/st2-packages; bundle exec rake"
+  command: bash -c "cp /root/Gemfile* /root/st2-packages; bundle exec rake -j4"
   environment:
-    - DEBUG_LEVEL=
+    - DEBUG_LEVEL=0
     - COMPOSE=1
     - ST2_PYTHON=
     - ST2_GITURL=https://github.com/StackStorm/st2

@@ -23,34 +23,32 @@ debian:
 
 # 14.04
 ubuntu:
-  image: quay.io/dennybaa/droneruby
+  image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose-suite.yml
     service: suite
   environment:
-    - BUILDHOST=btrusty
-    - TESTHOSTS=itrusty
+    - BUILDNODE=btrusty
   links:
     - btrusty
-    - itrusty
-    - rabbitmq
-    - mongodb
-    - postgres
+    # - itrusty
+    # - rabbitmq
+    # - mongodb
+    # - postgres
 
 centos7:
-  image: quay.io/dennybaa/droneruby
+  image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose-suite.yml
     service: suite
   environment:
-    - BUILDHOST=bcentos7
-    - TESTHOSTS=icentos7
+    - BUILDNODE=bcentos7
   links:
     - bcentos7
-    - icentos7
-    - rabbitmq
-    - mongodb
-    - postgres
+    # - icentos7
+    # - rabbitmq
+    # - mongodb
+    # - postgres
 
 centos6:
   image: quay.io/stackstorm/packagingrunner

@@ -1,9 +1,9 @@
 image: quay.io/stackstorm/packagingrunner
 env:
   - DEBUG_LEVEL=debug
-  - ST2_GITURL=https://github.com/dennybaa/st2
-  - ST2_GITREV=fixate-reqs-update
-  - ST2_PYTHON=1
+  - ST2_GITURL=https://github.com/stackstorm/st2
+  - ST2_GITREV=master
+  - ST2_PYTHON=0
   # - ST2_WAITFORSTART=20
   # - ST2_TESTMODE=
   # - ST2_BUILDLIST=st2auth
@@ -17,10 +17,11 @@ env:
   - BUILDNODE=packagingenv
   # - TESTHOSTS=droneunit
 script:
-  - bash -c "cp /root/Gemfile* ./; bundle exec rake"
+  # don't spinup concurrency yet, there's locking bug
+  - bash -c "cp /root/Gemfile* ./; bundle exec rake -j4"
 services:
-  - quay.io/dennybaa/droneunit:centos6-sshd
-  - quay.io/stackstorm/packagingenv:centos6
+  - quay.io/dennybaa/droneunit:wheezy
+  - quay.io/stackstorm/packagingenv:wheezy
   # - rabbitmq
   # - mongodb
   # - library/postgres

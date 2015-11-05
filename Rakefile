@@ -2,13 +2,7 @@
 require './rake/pipeline'
 require 'pp'
 
-# We have to run and finalize threaded output dispatcher.
-# Otherwise we won't see any output :)
-ShellOut.run
-
-task :default => 'packages:build' do
-  ShellOut.finalize
-end
+task :default => 'packages:build'
 
 # Set global pipeline options
 pipeopts do
@@ -36,12 +30,23 @@ pipeopts do
   })
 
   upload_onbuild 'packages', 'scripts', 'rpmspec'
+
+  st2_packages  :st2common, :st2actions, :st2api, :st2auth, :st2client,
+                :st2reactor, :st2exporter, :st2debug
 end
 
 
 namespace :packages do
   desc 'Packages build entry task'
-  task :build => [:upload, :checkout, :packages]
+  task :build => [:upload, :checkout, :packages] do
+    pipeline do
+      run hostname: opts[:buildnode] do |opts|
+        with opts.env do
+          execute :ls, '-l $ARTIFACT_DIR', verbosity: :debug
+        end
+      end
+    end
+  end
 
   synthetic_deps = pipeopts[:upload_onbuild].map {|s| "_uponbuild_#{s}"}
 
@@ -58,8 +63,8 @@ namespace :packages do
   end
 
   desc "Checkout st2 source from github.com"
-  task :checkout do |this|
-    pipeline this.name do
+  task :checkout do |task|
+    pipeline task.name do
       run hostname: opts[:buildnode] do |opts|
         command label: 'checkout: st2', show_uuid: false
 
@@ -75,22 +80,11 @@ namespace :packages do
     end
   end
 
-  packages_deps = [:build_packages]
-  packages_deps.unshift(:st2python) if pipeopts[:st2_python].to_i == 1
-
-  desc 'Build packages, st2python goes first since it is needed during build'
-  task :packages => packages_deps
-
-  desc 'Packages build task, each package build is executed parallely'
-  multitask :build_packages => [
-    :st2common
-  ]
-
   desc 'Build python package (st2python)'
-  task :st2python do |this|
-    pipeline this.name do
+  task :st2python do |task|
+    pipeline task.name do
       run hostname: opts[:buildnode] do |opts|
-        command label: "package: #{this.short_name}", show_uuid: false
+        command label: "package: #{task.short_name}", show_uuid: false
 
         with opts.env do
           within "#{opts[:basedir]}/packages/python" do
@@ -105,16 +99,42 @@ namespace :packages do
     end
   end
 
-  desc 'Build st2common package'
-  task :st2common do |this|
-    pipeline this.name do
+  desc 'Create st2common wheel in the wheelhouse (needed for all packages to proceed)'
+  task :st2common_bdist do
+    pipeline do
       run hostname: opts[:buildnode] do |opts|
-        command label: "package: #{this.short_name}", show_uuid: false
+        command label: 'bdist: st2common', show_uuid: false
 
         with opts.env do
-          within "#{opts[:st2_gitdir]}/#{this.short_name}" do
-            execute :ls, "-l #{opts[:st2_gitdir]}/#{this.short_name}"
-            execute :bash, "$BASEDIR/scripts/build_os_package.sh #{this.short_name}"
+          within "#{opts[:st2_gitdir]}/st2common" do
+            make :wheelhouse
+            make :bdist_wheel
+          end
+        end
+      end
+    end
+  end
+
+  packages_deps = [:st2common_bdist, :build_packages]
+  packages_deps.unshift(:st2python) if pipeopts[:st2_python].to_i == 1
+
+  desc 'Build packages, st2python goes first since it is needed during build'
+  task :packages => packages_deps
+
+  desc 'Packages build task, each package build is executed parallely'
+  multitask :build_packages => pipeopts.st2_packages
+  longsize = pipeopts.st2_packages.max {|a, b| a.length <=> b.length}.length
+
+  desc 'St2 package build task generation rule (st2 packages use the same scenario)'
+  rule %r/st2*/ do |task|
+    pipeline task.name do
+      run hostname: opts[:buildnode] do |opts|
+        command label: "package: %#{longsize}s" % task.short_name, show_uuid: false
+
+        with opts.env do
+          within "#{opts[:st2_gitdir]}/#{task.short_name}" do
+            make :changelog
+            execute :bash, "$BASEDIR/scripts/build_os_package.sh #{task.short_name}"
           end
         end
       end
