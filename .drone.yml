@@ -5,7 +5,6 @@ env:
   - ST2_GITREV=master
   - ST2_PYTHON=1
   # - ST2_WAITFORSTART=20
-  # - ST2_TESTMODE=
   # - ST2_BUILDLIST=st2auth
   # - MISTRAL_ENABLED=0
   # - MISTRAL_GITURL=https://github.com/StackStorm/mistral
