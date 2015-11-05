@@ -1,8 +1,7 @@
 
 suite:
   working_dir: /root/st2-packages
-  # don't spinup concurrency yet, there's locking bug
-  command: bash -c "cp /root/Gemfile ./; bundle exec rake -j4"
+  command: bash -c "cp /root/Gemfile ./; bundle exec rake"
   environment:
     - DEBUG_LEVEL=0
     - COMPOSE=1

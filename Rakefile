@@ -35,6 +35,9 @@ pipeopts do
                 :st2reactor, :st2exporter, :st2debug
 end
 
+# Set max package name length
+pipeopts[:name_maxlen] = Array(pipeopts.st2_packages).max {|a, b| a.size <=> b.size}.size
+
 
 namespace :packages do
   desc 'Packages build entry task'
@@ -99,23 +102,32 @@ namespace :packages do
     end
   end
 
-  desc 'Create st2common wheel in the wheelhouse (needed for all packages to proceed)'
-  task :st2common_bdist do
+  # pip showed dead locks on parallel execution
+  desc 'Wheelhouse pre-population'
+  task :wheelhouse do
     pipeline do
       run hostname: opts[:buildnode] do |opts|
-        command label: 'bdist: st2common', show_uuid: false
+        command show_uuid: false
 
         with opts.env do
+          # Populate wheelhouse
+          Array(opts.st2_packages).each do |package_name|
+            within "#{opts[:st2_gitdir]}/#{package_name}" do
+              make :wheelhouse, label: "wheelhouse: %#{opts[:name_maxlen]}s" % package_name
+            end
+          end
+
+          # Create st2common wheel into the wheelhouse
           within "#{opts[:st2_gitdir]}/st2common" do
-            make :wheelhouse
-            make :bdist_wheel
+            make :requirements, label: "wheelhouse: %#{opts[:name_maxlen]}s" % ['st2common']
+            make :bdist_wheel, label: "wheelhouse: %#{opts[:name_maxlen]}s" % ['st2common']
           end
         end
       end
     end
   end
 
-  packages_deps = [:st2common_bdist, :build_packages]
+  packages_deps = [:wheelhouse, :build_packages]
   packages_deps.unshift(:st2python) if pipeopts[:st2_python].to_i == 1
 
   desc 'Build packages, st2python goes first since it is needed during build'
@@ -123,13 +135,13 @@ namespace :packages do
 
   desc 'Packages build task, each package build is executed parallely'
   multitask :build_packages => pipeopts.st2_packages
-  longsize = Array(pipeopts.st2_packages).max {|a, b| a.length <=> b.length}.length
+
 
   desc 'St2 package build task generation rule (st2 packages use the same scenario)'
   rule %r/st2*/ do |task|
     pipeline task.name do
       run hostname: opts[:buildnode] do |opts|
-        command label: "package: %#{longsize}s" % task.short_name, show_uuid: false
+        command label: "package: %#{opts[:name_maxlen]}s" % task.short_name, show_uuid: false
 
         with opts.env do
           within "#{opts[:st2_gitdir]}/#{task.short_name}" do

@@ -17,8 +17,7 @@ env:
   - BUILDNODE=packagingenv
   # - TESTHOSTS=droneunit
 script:
-  # don't spinup concurrency yet, there's locking bug
-  - bash -c "cp /root/Gemfile ./; bundle exec rake -j4"
+  - bash -c "cp /root/Gemfile ./; bundle exec rake"
 services:
   - quay.io/dennybaa/droneunit:wheezy-sshd
   - quay.io/stackstorm/packagingenv:wheezy
