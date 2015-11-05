@@ -7,7 +7,7 @@
 #
 
 # wheezy (previous), light one, number one to be containerized.
-debian:
+wheezy:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose-suite.yml
@@ -22,7 +22,7 @@ debian:
     # - postgres
 
 # 14.04
-ubuntu:
+trusty:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose-suite.yml
@@ -120,14 +120,12 @@ itrusty:
     - /tmp/st2-packages:/root/build
 
 iwheezy:
-  image: quay.io/dennybaa/droneunit:wheezy
-  command: /usr/sbin/sshd -D
+  image: quay.io/dennybaa/droneunit:wheezy-sshd
   volumes:
     - /tmp/st2-packages:/root/build
 
 icentos6:
-  image: quay.io/dennybaa/droneunit:centos6
-  command: /usr/sbin/sshd -D
+  image: quay.io/dennybaa/droneunit:centos6-sshd
   volumes:
     - /tmp/st2-packages:/root/build
 

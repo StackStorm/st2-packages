@@ -1,9 +1,8 @@
 
 suite:
   working_dir: /root/st2-packages
-  # We copy Gemfile.* since they are bundled into packagingrunner
-  # this save us from bundler rebuild what gives us a small speedup.
-  command: bash -c "cp /root/Gemfile* /root/st2-packages; bundle exec rake -j4"
+  # don't spinup concurrency yet, there's locking bug
+  command: bash -c "cp /root/Gemfile ./; bundle exec rake -j4"
   environment:
     - DEBUG_LEVEL=0
     - COMPOSE=1

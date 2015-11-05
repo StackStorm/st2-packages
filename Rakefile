@@ -20,7 +20,7 @@ pipeopts do
   envpass :st2_python_version, '2.7.10'
   envpass :st2_python_relase, 1
 
-  # target directory for intermidiate files (on the remotes)
+  # Target directory for intermidiate files (on the remotes!)
   envpass :basedir,  '/root'
   envpass :wheeldir, '/tmp/wheelhouse'
 
@@ -123,7 +123,7 @@ namespace :packages do
 
   desc 'Packages build task, each package build is executed parallely'
   multitask :build_packages => pipeopts.st2_packages
-  longsize = pipeopts.st2_packages.max {|a, b| a.length <=> b.length}.length
+  longsize = Array(pipeopts.st2_packages).max {|a, b| a.length <=> b.length}.length
 
   desc 'St2 package build task generation rule (st2 packages use the same scenario)'
   rule %r/st2*/ do |task|
