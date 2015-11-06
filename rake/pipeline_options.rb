@@ -1,3 +1,5 @@
+require 'tempfile'
+
 module Pipeline
   module Options
     # Environment loader and Pipeline options setter
@@ -34,18 +36,15 @@ module Pipeline
       end
 
       def method_missing(method_name, *args)
-        # Substitute values from global context
-        if global && global.respond_to?(method_name)
-          global.send(method_name)
-        else
+        # setter invoked
+        unless args.empty?
           value = args.size < 2 ? args.pop : args
           context.assign_property(method_name, value)
+        else
+          if global && global.respond_to?(method_name)
+            global.send(method_name)
+          end
         end
-      end
-
-      # There's only context saved in @mash, this means our context is global.
-      def global_context?
-        global.nil?
       end
 
       private
@@ -56,7 +55,7 @@ module Pipeline
         opts, default = default, nil if default.is_a?(Hash)
         defs = {upcase: true}
         opts = defs.merge(opts || {})
-        var  = opts[:var] if opts[:var]
+        var  = opts[:from] if opts[:from]
         value = opts[:upcase] ? ENV[var.to_s.upcase] : ENV[var.to_s]
         # set value nil for an empty env var
         value = nil if value.to_s.empty?
@@ -69,7 +68,6 @@ module Pipeline
       global = pipe_options
       context = context_pipe_options[context_name]
       args = context_name.nil? ? [global] : [context, global]
-
       # Assign or return pipe options
       unless block.nil?
         SetEnvLoaderDSL.new(*args).instance_exec(&block)
@@ -85,7 +83,7 @@ module Pipeline
     end
 
     def context_pipe_options
-      @context_pipe_options ||= Hash.new(Hashie::Mash.new)
+      @context_pipe_options ||= Hash.new {|h, k| h[k] =  Hashie::Mash.new}
     end
   end
 end
