@@ -1,11 +1,10 @@
 #!/usr/bin/env ruby
 #
 require './rake/pipeline'
-import 'rake/build/environment'
+import 'environment'
 Dir.glob('rake/build/*.rake').each { |r| import r }
 
 task :default => 'build:build'
-
 
 namespace :build do
   desc 'Packages build entry task'

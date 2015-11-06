@@ -21,12 +21,11 @@ pipeopts do
   # Target directory for intermidiate files (on the remotes!)
   envpass :wheeldir, '/tmp/wheelhouse'
 
-  uploads 'packages', 'scripts', 'rpmspec'
-  checkout :st2, :mistral
-  package_max_name 12
-
   # Single package in a gitdir is standalone
   standalone true
+  checkout :st2, :mistral
+  package_max_name 12
+  uploads 'packages', 'scripts', 'rpmspec'
 
   # This that what we want to build
   packages  :st2common, :st2actions, :st2api, :st2auth, :st2client,

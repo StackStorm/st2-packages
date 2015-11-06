@@ -18,7 +18,7 @@ namespace :build do
   desc 'Parallely checkout sources from github.com'
   multitask :checkout => pipeopts[:checkout]
 
-  rule %r/(st2|mistral)/ do |task|
+  rule %r/^(st2|mistral)$/ do |task|
     # Load specific context for a package name or 'st2'
     package_name = task.short_name.sub(/^wheelhouse_/, '')
     context = pipeopts(package_name).empty? ? 'st2' : package_name
@@ -32,7 +32,6 @@ namespace :build do
 
         with opts.env do
           execute :mkdir, '-p $ARTIFACT_DIR'
-
           within opts.basedir do
             execute :git, :clone, '--depth 1 -b $GITREV $GITURL $GITDIR'
             execute :cp,  "-r rpmspec/ #{package_updates}* $GITDIR"
