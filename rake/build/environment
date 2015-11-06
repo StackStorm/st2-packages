@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+require 'hashie'
+
+# Defines options for the build pipeline
+#
+
+# Set global pipeline options
+pipeopts do
+  ssh_options({
+    keys: %w(/root/.ssh/busybee),
+    auth_methods: %w(publickey)
+  })
+
+  env     :buildnode
+  env     :testnodes
+  envpass :basedir,  '/root'
+  envpass :debug_level, 1
+  envpass :compose, 1
+  envpass :artifact_dir, '/root/build'    # make it temp??
+
+  # Target directory for intermidiate files (on the remotes!)
+  envpass :wheeldir, '/tmp/wheelhouse'
+
+  uploads 'packages', 'scripts', 'rpmspec'
+  checkout :st2, :mistral
+  package_max_name 12
+
+  # Single package in a gitdir is standalone
+  standalone true
+
+  # This that what we want to build
+  packages  :st2common, :st2actions, :st2api, :st2auth, :st2client,
+            :st2reactor, :st2exporter, :st2debug, :mistral
+end
+
+pipeopts 'st2python' do
+  envpass :st2_python, 0
+  envpass :st2_python_version, '2.7.10'
+  envpass :st2_python_relase, 1
+end
+
+pipeopts 'st2' do
+  # st2 packages are not standalone (ie. there are many $gitdir/st2*)
+  standalone false
+  envpass :giturl,   'https://github.com/StackStorm/st2', from: 'ST2_GITURL'
+  envpass :gitrev,   'master',                            from: 'ST2_GITREV'
+  envpass :gitdir,    make_tmpname('st2-'),               from: 'ST2_GITDIR'
+  envpass :st2pkg_version
+  envpass :st2pkg_release, 1
+end
+
+pipeopts 'mistral' do
+  envpass :giturl,  'https://github.com/StackStorm/mistral', from: 'MISTRAL_GITURL'
+  envpass :gitrev,  'st2-1.1.0',                             from: 'MISTRAL_GITREV'
+  envpass :gitdir,  make_tmpname('mistral-')
+  envpass :mistral_version, '1.1.0'
+  envpass :mistral_release, 1
+end
