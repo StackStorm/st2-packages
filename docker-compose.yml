@@ -1,40 +1,22 @@
-# Suite runners prefrom build -> install -> test
-# see also compose-suite.yml
-#
-#   - Build is not run if BUILDHOST is an empty string.
-#   - Integration tests are not run if BUILDLIST differs from ST2_PACKAGES (all available packages).
-#   - Integration tests can be DISABLED if you set TESTHOSTS to an empty string.
-#
-
-# wheezy (previous), light one, number one to be containerized.
 wheezy:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose-suite.yml
     service: suite
   environment:
-    - BUILDNODE=bwheezy
+    - BUILDNODE=wheezybuild
   links:
-    - bwheezy
-    # - iwheezy
-    # - rabbitmq
-    # - mongodb
-    # - postgres
+    - wheezybuild
 
-# 14.04
 trusty:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose-suite.yml
     service: suite
   environment:
-    - BUILDNODE=btrusty
+    - BUILDNODE=trustybuild
   links:
-    - btrusty
-    # - itrusty
-    # - rabbitmq
-    # - mongodb
-    # - postgres
+    - trustybuild
 
 centos7:
   image: quay.io/stackstorm/packagingrunner
@@ -42,13 +24,9 @@ centos7:
     file: compose-suite.yml
     service: suite
   environment:
-    - BUILDNODE=bcentos7
+    - BUILDNODE=centos7build
   links:
-    - bcentos7
-    # - icentos7
-    # - rabbitmq
-    # - mongodb
-    # - postgres
+    - centos7build
 
 centos6:
   image: quay.io/stackstorm/packagingrunner
@@ -57,18 +35,10 @@ centos6:
     service: suite
   environment:
     - ST2_PYTHON=1
-    - BUILDNODE=bcentos6
+    - BUILDNODE=centos6build
   links:
-    - bcentos6
-    # - icentos6
-    # - rabbitmq
-    # - mongodb
-    # - postgres
+    - centos6build
 
-# -----------------------------------------------------------------------------
-
-# External Services
-#
 rabbitmq:
   image: rabbitmq:management
   hostname: rabbit
@@ -89,47 +59,45 @@ postgres:
     - POSTGRES_USER=mistral
     - POSTGRES_PASSWORD=StackStorm
 
-# Build Instances
-#
-bwheezy:
+# Package build nodes
+wheezybuild:
   image: quay.io/stackstorm/packagingenv:wheezy
   volumes:
     - /tmp/st2-packages:/root/build
 
-btrusty:
+trustybuild:
   image: quay.io/stackstorm/packagingenv:trusty
   volumes:
     - /tmp/st2-packages:/root/build
 
-bcentos6:
+centos6build:
   image: quay.io/stackstorm/packagingenv:centos6
   volumes:
     - /tmp/st2-packages:/root/build
 
-bcentos7:
+centos7build:
   image: quay.io/stackstorm/packagingenv:centos7
   volumes:
     - /tmp/st2-packages:/root/build
 
 
-# Test Instances
-#
-itrusty:
-  image: quay.io/dennybaa/droneunit:trusty-upstart
-  volumes:
-    - /tmp/st2-packages:/root/build
-
-iwheezy:
+# Package testing nodes
+wheezytest:
   image: quay.io/dennybaa/droneunit:wheezy-sshd
   volumes:
     - /tmp/st2-packages:/root/build
 
-icentos6:
+trustytest:
+  image: quay.io/dennybaa/droneunit:trusty-upstart
+  volumes:
+    - /tmp/st2-packages:/root/build
+
+centos6test:
   image: quay.io/dennybaa/droneunit:centos6-sshd
   volumes:
     - /tmp/st2-packages:/root/build
 
-icentos7:
+centos7test:
   image: quay.io/dennybaa/droneunit:centos7-systemd
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup

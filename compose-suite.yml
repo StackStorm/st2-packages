@@ -6,18 +6,6 @@ suite:
     - DEBUG_LEVEL=0
     - COMPOSE=1
     - ST2_PYTHON=
-    - ST2_GITURL=https://github.com/StackStorm/st2
-    - ST2_GITREV=master
-    # # Full list of st2 packages configures the default build
-    # - ST2_WAITFORSTART=10
-    # - ST2_TESTMODE=
-    # - ST2_BUILDLIST=st2auth
-    # - ST2PKG_VERSION=
-    # - MISTRAL_ENABLED=0
-    # - MISTRAL_GITURL=https://github.com/StackStorm/mistral
-    # - MISTRAL_GITREV=st2-0.13.2
-    # - MISTRAL_VERSION=2015.2
-    # - MISTRAL_RELEASE=1
   volumes:
     - .:/root/st2-packages
     - /tmp/st2-build:/root/st2-build

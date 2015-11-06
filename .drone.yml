@@ -3,7 +3,8 @@ env:
   - DEBUG_LEVEL=debug
   - ST2_GITURL=https://github.com/stackstorm/st2
   - ST2_GITREV=master
-  - ST2_PYTHON=1
+  - ST2_PYTHON=0
+  - BUILDNODE=packagingenv
   # - ST2_WAITFORSTART=20
   # - ST2_BUILDLIST=st2auth
   # - MISTRAL_ENABLED=0
@@ -13,8 +14,6 @@ env:
   # - MISTRAL_RELEASE=1
   # - POSTGRES_USER=mistral
   # - POSTGRES_PASSWORD=StackStorm
-  - BUILDNODE=packagingenv
-  # - TESTHOSTS=droneunit
 script:
   - bash -c "cp /root/Gemfile ./; bundle exec rake"
 services:
