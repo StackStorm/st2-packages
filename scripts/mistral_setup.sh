@@ -1,14 +1,19 @@
 #!/bin/bash
 
+platform() {
+  [ -f /etc/debian_version ] && { echo 'deb'; return 0; }
+  echo 'rpm'
+}
+
 MISTRAL_CONFSRC=/root/mistral-conf
 MISTRAL_ETCDIR=/etc/mistral
 MISTRAL_CONF=$MISTRAL_ETCDIR/mistral.conf
 
 MISTRAL=$(cat <<EHD
     [DEFAULT]
-    transport_url = rabbit://guest:guest@$RABBITMQHOST:5672
+    transport_url = rabbit://guest:guest@rabbitmq:5672
     [database]
-    connection = postgresql://mistral:StackStorm@$POSTGRESHOST/mistral
+    connection = postgresql://mistral:StackStorm@postgres/mistral
     max_pool_size = 50
     [pecan]
     auth_enable = false
@@ -17,7 +22,7 @@ EHD
 
 CREATE_MISTRAL_ROLE=$(cat <<EHD
 import psycopg2
-conn = psycopg2.connect("user=postgres host=$POSTGRESHOST password=")
+conn = psycopg2.connect("user=postgres host=postgres password=")
 conn.autocommit = True
 cur = conn.cursor()
 cur.execute("CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD 'StackStorm';")
@@ -41,7 +46,7 @@ DEFAULT_ENV=$(echo "$DEFAULT_ENV" | sed -r 's/^\s+//')
 echo "$MISTRAL" > $MISTRAL_CONF || :
 
 # set up default env
-if [ "$(platform)" = debian ]; then
+if [ "$(platform)" = deb ]; then
   echo "$DEFAULT_ENV" > /etc/default/mistral
 else
   echo "$DEFAULT_ENV" > /etc/sysconfig/mistral
@@ -58,6 +63,4 @@ fi
 # 1) mistral should be started
 # 2) mistral-db-manage populate should be invoked
 
-if debug_enabled; then
-  debug "Resulting $MISTRAL_CONF >>>" "$(cat $MISTRAL_CONF)"
-fi
+echo "Resulting $MISTRAL_CONF >>>" "$(cat $MISTRAL_CONF)"
