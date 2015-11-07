@@ -2,6 +2,7 @@ require 'hashie'
 require 'specinfra'
 require 'serverspec'
 require 'remote_helpers'
+require './rake/pipeline_options'
 
 SSH_OPTIONS = {
   user: 'root',
@@ -10,11 +11,14 @@ SSH_OPTIONS = {
 }
 
 set :backend, :ssh
-set :host, ENV['TESTHOST']
+set :host, ENV['TESTNODE']
 set :ssh_options, SSH_OPTIONS
 
 # ST2Spec
 class ST2Spec
+  extend Pipeline::Options
+  instance_eval(File.read('rake/build/environment'))
+
   ST2_SERVICES = %w(st2api st2auth st2actionrunner st2notifier
                     st2resultstracker st2rulesengine st2sensorcontainer
                     st2exporter)
@@ -23,9 +27,9 @@ class ST2Spec
     bin_prefix: '/usr/bin',
     conf_dir: '/etc/st2',
     log_dir: '/var/log/st2',
-    mistral_enabled: (ENV['MISTRAL_ENABLED'] || 1).to_i == 1,
-    package_list: (ENV['TESTLIST'] || '').split,
-    available_packages: (ENV['ST2_PACKAGES'] || '').split,
+    mistral_enabled: Array(pipeopts.packages).include?(:st2mistral),
+    package_list: Array(pipeopts.packages).map {|p| p.to_s},
+    available_packages: Array(pipeopts.packages).map {|p| p.to_s},
     wait_for_start: (ENV['ST2_WAITFORSTART'] || 15).to_i,
     loglines_to_show: 20,
     logdest_pattern: {
