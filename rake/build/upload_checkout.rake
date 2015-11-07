@@ -3,14 +3,20 @@
 
 namespace :build do
 
-  desc 'Parallely upload given sources onto the remotes'
-  multitask :upload => pipeopts[:uploads].map {|s| "upload_#{s}"}
+  [:buildnode, :testnode].each do |node|
+    next unless pipeopts[node]
 
-  rule %r/upload_/ do |task|
-    pipeline do
-      run hostname: opts[:buildnode] do |opts|
-        source = task.short_name.sub(/upload_/, '')
-        upload! source, opts[:basedir], recursive: true
+    source_reqs = pipeopts[:upload_sources].map {|s| "upload_to_#{node}.#{s}"}
+
+    desc 'Parallely upload given sources onto a remote node'
+    multitask :"upload_to_#{node}" => source_reqs
+
+    rule %r/upload_to_#{node}./ do |task|
+      pipeline do
+        run hostname: opts[node] do |opts|
+          source = task.short_name.sub(/^upload_to_#{node}.*\./, '')
+          upload! source, opts[:basedir], recursive: true
+        end
       end
     end
   end

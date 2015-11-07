@@ -11,7 +11,7 @@ version_delemiter() {
 }
 
 install_rpm() { sudo yum -y install $(lookup_fullnames "$@"); }
-install_deb() { gdebi -nq $(lookup_fullnames "$@"); }
+install_deb() { dpkg -i $(lookup_fullnames "$@"); }
 
 lookup_fullnames() {
   list=""

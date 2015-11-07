@@ -13,6 +13,7 @@ pipeopts do
 
   env     :buildnode
   env     :testnode
+  envpass :testmode, 'packages' # packages || bundle
   envpass :basedir,  '/root'
   envpass :debug_level, 1
   envpass :docker_compose, 1
@@ -25,7 +26,7 @@ pipeopts do
   standalone true
   checkout :st2, :mistral
   package_max_name 12
-  uploads 'packages', 'scripts', 'rpmspec'
+  upload_sources 'packages', 'scripts', 'rpmspec'
 
   # This that what we want to build
   packages  :st2common, :st2actions, :st2api, :st2auth, :st2client,
