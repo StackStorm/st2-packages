@@ -42,7 +42,7 @@ module Pipeline
   # Get our sshkit wrapper (sshkit methods are accessible in ssh method DSL)
   def sshkit_wrapper(options, ssh_options)
     Remote.new(options, ssh_options).tap do
-      Remote.output_verbosity = logger(options.debug_level)
+      Remote.output_verbosity = logger(options.debug_level || :info)
     end
   end
 
