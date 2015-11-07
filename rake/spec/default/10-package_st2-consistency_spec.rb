@@ -78,16 +78,6 @@ end
 # Main example group checking package consistency
 #
 describe 'packages consistency' do
-  context 'environment variable' do
-    it 'ST2_PACKAGES is non-empty' do
-      expect(spec[:available_packages]).not_to be_empty
-    end
-
-    it 'TESTLIST is non-empty' do
-      expect(spec[:package_list]).not_to be_empty
-    end
-  end
-
   spec[:package_list].each do |pkg_name|
     it_behaves_like 'os package', pkg_name, spec[:package_opts][pkg_name]
   end

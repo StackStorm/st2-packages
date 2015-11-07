@@ -27,10 +27,9 @@ class ST2Spec
     bin_prefix: '/usr/bin',
     conf_dir: '/etc/st2',
     log_dir: '/var/log/st2',
-    mistral_enabled: Array(pipeopts.packages).include?(:st2mistral),
-    package_list: Array(pipeopts.packages).map {|p| p.to_s},
-    available_packages: Array(pipeopts.packages).map {|p| p.to_s},
-    wait_for_start: (ENV['ST2_WAITFORSTART'] || 15).to_i,
+    mistral_enabled: Array(pipeopts.packages).include?(:mistral),
+    package_list: Array(pipeopts.testing_list),
+    wait_for_start: (ENV['ST2_WAITFORSTART'] || 7).to_i,
     loglines_to_show: 20,
     logdest_pattern: {
       st2actionrunner: 'st2actionrunner.{pid}'
