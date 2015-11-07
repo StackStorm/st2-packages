@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #
 require './rake/pipeline'
-import 'environment'
+import 'rake/build/environment'
 Dir.glob('rake/build/*.rake').each { |r| import r }
 
 task :default => 'build:build'
