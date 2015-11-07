@@ -4,8 +4,14 @@ suite:
   command: bash -c "cp /root/Gemfile ./; bundle exec rake"
   environment:
     - DEBUG_LEVEL=0
-    - COMPOSE=1
+    - DOCKER_COMPOSE=1
     - ST2_PYTHON=
   volumes:
     - .:/root/st2-packages
-    - /tmp/st2-build:/root/st2-build
+    - /tmp/st2-packages:/root/build
+
+# Host built artifacts directory should
+# match $ARTIFACT_DIR for ease of use in compose
+artifacts_volume:
+  volumes:
+    - /tmp/st2-packages:/root/build

@@ -5,8 +5,10 @@ wheezy:
     service: suite
   environment:
     - BUILDNODE=wheezybuild
+    - TESTNODE=wheezytest
   links:
     - wheezybuild
+    - wheezytest
 
 trusty:
   image: quay.io/stackstorm/packagingrunner
@@ -62,43 +64,52 @@ postgres:
 # Package build nodes
 wheezybuild:
   image: quay.io/stackstorm/packagingenv:wheezy
-  volumes:
-    - /tmp/st2-packages:/root/build
+  extends:
+    file: compose-suite.yml
+    service: artifacts_volume
 
 trustybuild:
   image: quay.io/stackstorm/packagingenv:trusty
-  volumes:
-    - /tmp/st2-packages:/root/build
+  extends:
+    file: compose-suite.yml
+    service: artifacts_volume
 
 centos6build:
   image: quay.io/stackstorm/packagingenv:centos6
-  volumes:
-    - /tmp/st2-packages:/root/build
+  extends:
+    file: compose-suite.yml
+    service: artifacts_volume
 
 centos7build:
   image: quay.io/stackstorm/packagingenv:centos7
-  volumes:
-    - /tmp/st2-packages:/root/build
+  extends:
+    file: compose-suite.yml
+    service: artifacts_volume
 
 
 # Package testing nodes
 wheezytest:
   image: quay.io/dennybaa/droneunit:wheezy-sshd
-  volumes:
-    - /tmp/st2-packages:/root/build
+  extends:
+    file: compose-suite.yml
+    service: artifacts_volume
 
 trustytest:
   image: quay.io/dennybaa/droneunit:trusty-upstart
-  volumes:
-    - /tmp/st2-packages:/root/build
+  extends:
+    file: compose-suite.yml
+    service: artifacts_volume
 
 centos6test:
   image: quay.io/dennybaa/droneunit:centos6-sshd
-  volumes:
-    - /tmp/st2-packages:/root/build
+  extends:
+    file: compose-suite.yml
+    service: artifacts_volume
 
 centos7test:
   image: quay.io/dennybaa/droneunit:centos7-systemd
+  extends:
+    file: compose-suite.yml
+    service: artifacts_volume
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup
-    - /tmp/st2-packages:/root/build

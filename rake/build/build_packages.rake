@@ -40,7 +40,7 @@ namespace :build do
             execute :bash, "$BASEDIR/scripts/build_python.sh"
           end
 
-          within "#{opts[:artifact_dir]}" do
+          within opts.artifact_dir do
             execute :bash, "$BASEDIR/scripts/install_os_packages.sh st2python"
           end
         end
