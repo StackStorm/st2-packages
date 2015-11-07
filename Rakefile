@@ -5,18 +5,20 @@ require './rake/pipeline'
 import 'rake/build/environment'
 Dir.glob('rake/build/*.rake').each { |r| import r }
 
-task :default => ['build:build', 'setup:all']
+task :default => ['build:all', 'setup:all']
 task :spec => 'spec:all'
 
 namespace :build do
   desc 'Packages build entry task'
-  task :build => [:upload_to_buildnode, :nproc, :checkout, :packages] do |task|
+  task :all => [:upload_to_buildnode, :nproc, :checkout, :packages] do |task|
     pipeline do
+      # Download artifacts to packagingrunner
       run hostname: opts[:buildnode] do |opts|
-        with opts.env do
-          execute :ls, '-l $ARTIFACT_DIR', verbosity: :debug
-        end
-      end
+        rule = [ opts.artifact_dir, File.dirname(opts.artifact_dir) ]
+        download!(*rule, recursive: true)
+      end unless pipeopts[:docker_compose].to_i == 1
+
+      run(:local) {|o| execute :ls, "-l #{o[:artifact_dir]}", verbosity: :debug}
     end
   end
 
@@ -40,23 +42,14 @@ namespace :setup do
   # We don't need to upload artifacts on docker-compose,
   # since they are passed through in a volume.
   task :upload_artifacts do
-    unless pipeopts['docker_compose'].to_i == 1
-      pipeline do
-        # download artifacts to packagingrunner
-        run hostname: opts[:buildnode] do
-          within File.dirname(opts.artifact_dir) do
-            download! opts.artifact_dir, './', recursive: true
-          end
-        end
-
-        # upload artifcats to testnode
-        run hostname: opts[:testnode] do
-          within File.dirname(opts.artifact_dir) do
-            upload! opts.artifact_dir, './', recursive: true
-          end
+    pipeline do
+      run hostname: opts[:testnode] do |opts|
+        within File.dirname(opts.artifact_dir) do
+          rule = [ opts.artifact_dir, File.dirname(opts.artifact_dir) ]
+          upload!(*rule, recursive: true)
         end
       end
-    end
+    end unless pipeopts[:docker_compose].to_i == 1
   end
 
   task :install_artifacts => 'build:upload_to_testnode' do
@@ -65,7 +58,7 @@ namespace :setup do
         package_list = Array(opts.packages)
         if opts[:testmode] == 'packages'
           package_list.delete(:st2bundle)
-        elsif origin_list.include?(:st2bundle)
+        elsif package_list.include?(:st2bundle)
           package_list.select! {|p| not p.to_s.start_with?('st2')}
           package_list << :st2bundle
         end

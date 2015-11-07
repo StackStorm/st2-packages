@@ -13,10 +13,10 @@ pipeopts do
 
   env     :buildnode
   env     :testnode
-  envpass :testmode, 'packages' # packages || bundle
+  env     :docker_compose
+  envpass :testmode, 'bundle' # packages || bundle
   envpass :basedir,  '/root'
   envpass :debug_level, 1
-  envpass :docker_compose, 1
   envpass :artifact_dir, '/root/build'    # make it temp??
 
   # Target directory for intermidiate files (on the remotes!)
