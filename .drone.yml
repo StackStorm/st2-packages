@@ -6,15 +6,15 @@ env:
   - ST2_GITURL=https://github.com/stackstorm/st2
   - ST2_GITREV=master
   - ST2_PYTHON=0
-  # - ST2_WAITFORSTART=20
-  # - ST2_BUILDLIST=st2auth
   - POSTGRES_USER=mistral
   - POSTGRES_PASSWORD=StackStorm
-script:
-  - bash -c "cp /root/Gemfile ./; bundle exec rake"
+script: 
+   - cp /root/Gemfile ./
+   - "bundle exec rake && bundle exec rspec"
+
 services:
   - quay.io/dennybaa/droneunit:wheezy-sshd
   - quay.io/stackstorm/packagingenv:wheezy
-  # - rabbitmq
-  # - mongodb
-  # - library/postgres
+  - rabbitmq
+  - mongodb
+  - library/postgres

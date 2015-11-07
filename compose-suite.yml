@@ -1,7 +1,10 @@
 
 suite:
   working_dir: /root/st2-packages
-  command: bash -c "cp /root/Gemfile ./; bundle exec rake"
+  command: >-
+    bash -c "cp /root/Gemfile ./ &&
+              bundle exec rake &&
+              bundle exec rspec"
   environment:
     - DEBUG_LEVEL=0
     - DOCKER_COMPOSE=1

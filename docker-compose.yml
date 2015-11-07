@@ -93,18 +93,30 @@ wheezytest:
   extends:
     file: compose-suite.yml
     service: artifacts_volume
+  links:
+    - rabbitmq
+    - mongodb
+    - postgres
 
 trustytest:
   image: quay.io/dennybaa/droneunit:trusty-upstart
   extends:
     file: compose-suite.yml
     service: artifacts_volume
+  links:
+    - rabbitmq
+    - mongodb
+    - postgres
 
 centos6test:
   image: quay.io/dennybaa/droneunit:centos6-sshd
   extends:
     file: compose-suite.yml
     service: artifacts_volume
+  links:
+    - rabbitmq
+    - mongodb
+    - postgres
 
 centos7test:
   image: quay.io/dennybaa/droneunit:centos7-systemd
@@ -113,3 +125,7 @@ centos7test:
     service: artifacts_volume
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup
+  links:
+    - rabbitmq
+    - mongodb
+    - postgres
