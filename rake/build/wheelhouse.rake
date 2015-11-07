@@ -9,6 +9,7 @@ namespace :build do
   task_list = Array(pipeopts.packages).map {|p| "wheelhouse_#{p}"}
 
   task :wheelhouse => task_list
+
   rule %r/^wheelhouse_/ do |task|
     # Load specific context for a package name or 'st2'
     package_name = task.short_name.sub(/^wheelhouse_/, '')
@@ -21,14 +22,13 @@ namespace :build do
         buildroot = opts.gitdir
         buildroot = File.join(buildroot, package_name) unless opts.standalone
 
-        with opts.env do
+        # Used to speed up make (hopefully) when run under pip
+        env = opts.build_nproc.nil? ? opts.env : opts.env.merge('MAKEFLAGS' => '-j %s' % opts.build_nproc)
+
+        with env do
           within buildroot do
             make :wheelhouse, label: "wheelhouse: %#{opts[:package_max_name]}s" % package_name
-
-            # All st2* require st2common wheel so we put it into the wheelhouse
-            if package_name == 'st2common'
-              make :bdist_wheel, label: "wheelhouse: %#{opts[:package_max_name]}s" % package_name
-            end
+            make :bdist_wheel, label: "wheelhouse: %#{opts[:package_max_name]}s" % package_name
           end
         end
       end

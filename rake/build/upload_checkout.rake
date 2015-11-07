@@ -15,26 +15,31 @@ namespace :build do
     end
   end
 
-  desc 'Parallely checkout sources from github.com'
-  multitask :checkout => pipeopts[:checkout]
-
-  rule %r/^(st2|mistral)$/ do |task|
-    # Load specific context for a package name or 'st2'
-    package_name = task.short_name.sub(/^wheelhouse_/, '')
+  # go throug all packages and get checkout option
+  checkout_contexts = Array(pipeopts.packages).map do |package|
+    package_name = package.to_s
     context = pipeopts(package_name).empty? ? 'st2' : package_name
+    pipeopts(context).checkout
+  end.flatten.uniq
 
-    pipeline context do
-      run hostname: opts[:buildnode] do |opts|
-        command label: "checkout: #{package_name}", show_uuid: false
+  desc 'Parallely checkout sources from github.com'
+  multitask :checkout => checkout_contexts.map {|c| :"checkout_#{c}"}
 
-        package_updates = "packages/#{context}"
-        package_updates << '/' if opts.standalone
+  checkout_contexts.each do |context|
+    task :"checkout_#{context}" do
+      pipeline context.to_s do
+        run hostname: opts[:buildnode] do |opts|
+          command label: "checkout: #{context}", show_uuid: false
 
-        with opts.env do
-          execute :mkdir, '-p $ARTIFACT_DIR'
-          within opts.basedir do
-            execute :git, :clone, '--depth 1 -b $GITREV $GITURL $GITDIR'
-            execute :cp,  "-r rpmspec/ #{package_updates}* $GITDIR"
+          package_updates = "packages/#{context}"
+          package_updates << '/' if opts.standalone
+
+          with opts.env do
+            execute :mkdir, '-p $ARTIFACT_DIR'
+            within opts.basedir do
+              execute :git, :clone, '--depth 1 -b $GITREV $GITURL $GITDIR'
+              execute :cp,  "-r rpmspec/ #{package_updates}* $GITDIR"
+            end
           end
         end
       end

@@ -45,3 +45,6 @@ endif
 wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: populate_version requirements
 	touch $@
+
+# For compatibilty with other packages (since it's a meta package)
+bdist_wheel:

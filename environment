@@ -29,7 +29,7 @@ pipeopts do
 
   # This that what we want to build
   packages  :st2common, :st2actions, :st2api, :st2auth, :st2client,
-            :st2reactor, :st2exporter, :st2debug, :mistral
+            :st2reactor, :st2exporter, :st2debug, :st2bundle, :mistral
 end
 
 pipeopts 'st2python' do
@@ -41,6 +41,7 @@ end
 pipeopts 'st2' do
   # st2 packages are not standalone (ie. there are many $gitdir/st2*)
   standalone false
+  checkout :st2
   envpass :giturl,   'https://github.com/StackStorm/st2', from: 'ST2_GITURL'
   envpass :gitrev,   'master',                            from: 'ST2_GITREV'
   envpass :gitdir,    make_tmpname('st2-'),               from: 'ST2_GITDIR'
@@ -49,6 +50,7 @@ pipeopts 'st2' do
 end
 
 pipeopts 'mistral' do
+  checkout :mistral
   envpass :giturl,  'https://github.com/StackStorm/mistral', from: 'MISTRAL_GITURL'
   envpass :gitrev,  'st2-1.1.0',                             from: 'MISTRAL_GITREV'
   envpass :gitdir,  make_tmpname('mistral-')
