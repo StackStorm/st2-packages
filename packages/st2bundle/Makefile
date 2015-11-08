@@ -35,7 +35,7 @@ populate_version: .stamp-populate_version
 	touch $@
 
 requirements:
-	python ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
+	python ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt -f ../fixed-requirements.txt
 
 changelog: populate_version
 ifeq ($(DEBIAN),1)
