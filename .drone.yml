@@ -15,7 +15,7 @@ env:
 script:
   - cp /root/Gemfile ./
   - bundle exec rake
-  - bundle exec rspec
+  - bundle exec rspec || sleep infinity
 
 services:
   - quay.io/dennybaa/droneunit:wheezy-sshd
