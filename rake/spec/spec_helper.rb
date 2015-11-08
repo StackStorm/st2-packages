@@ -4,6 +4,11 @@ require 'serverspec'
 require 'remote_helpers'
 require './rake/pipeline_options'
 
+# Monkey patch to disable systemd operation on debian v8
+klass = Class.new(::Specinfra::Command::Debian::Base::Service)
+::Specinfra::Command::Debian::V8::Service = klass
+
+
 SSH_OPTIONS = {
   user: 'root',
   keys: ['/root/.ssh/busybee'],

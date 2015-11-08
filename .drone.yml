@@ -3,7 +3,7 @@ env:
   - DEBUG_LEVEL=debug
   - BUILDNODE=packagingenv
   - TESTNODE=droneunit
-  - ST2_WAITFORSTART=15
+  - ST2_WAITFORSTART=7
   - ST2_GITURL=https://github.com/dennybaa/st2
   - ST2_GITREV=master
   - ST2_PYTHON=0

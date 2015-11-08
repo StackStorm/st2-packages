@@ -13,6 +13,22 @@ wheezy:
     - mongodb
     - postgres
 
+jessie:
+  image: quay.io/stackstorm/packagingrunner
+  extends:
+    file: compose-suite.yml
+    service: suite
+  environment:
+    - BUILDNODE=jessiebuild
+    - TESTNODE=jessietest
+  links:
+    - jessiebuild
+    - jessietest
+    - rabbitmq
+    - mongodb
+    - postgres
+
+
 trusty:
   image: quay.io/stackstorm/packagingrunner
   extends:
@@ -20,6 +36,7 @@ trusty:
     service: suite
   environment:
     - BUILDNODE=trustybuild
+    - TESTNODE=trustytest
   links:
     - trustybuild
     - trustytest
@@ -34,6 +51,7 @@ centos7:
     service: suite
   environment:
     - BUILDNODE=centos7build
+    - TESTNODE=centos7test
   links:
     - centos7build
     - centos7test
@@ -49,6 +67,7 @@ centos6:
   environment:
     - ST2_PYTHON=1
     - BUILDNODE=centos6build
+    - TESTNODE=centos6test
   links:
     - centos6build
     - centos6test
@@ -86,6 +105,12 @@ wheezybuild:
     file: compose-suite.yml
     service: artifacts_volume
 
+jessiebuild:
+  image: quay.io/stackstorm/packagingenv:jessie
+  extends:
+    file: compose-suite.yml
+    service: artifacts_volume
+
 trustybuild:
   image: quay.io/stackstorm/packagingenv:trusty
   extends:
@@ -109,6 +134,12 @@ centos7build:
 #
 wheezytest:
   image: quay.io/dennybaa/droneunit:wheezy-sshd
+  extends:
+    file: compose-suite.yml
+    service: artifacts_volume
+
+jessietest:
+  image: quay.io/dennybaa/droneunit:jessie-sshd
   extends:
     file: compose-suite.yml
     service: artifacts_volume

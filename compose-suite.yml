@@ -8,6 +8,7 @@ suite:
   environment:
     - DEBUG_LEVEL=0
     - ST2_PYTHON=
+    - ST2_GITURL=https://github.com/dennybaa/st2
   volumes:
     - .:/root/st2-packages
     - /tmp/st2-packages:/root/build
