@@ -4,15 +4,16 @@
 # the configuration file.
 #
 set -e
-set -o pipefail
 
 # --- Go!
+MONGOHOST="${MONGODBHOST:-mongodb}"
+RABBITMQHOST="${RABBITMQHOST:-rabbitmq}"
 
 CONF=/etc/st2/st2.conf
-AMQP="amqp://guest:guest@rabbitmq:5672/"
+AMQP="amqp://guest:guest@$RABBITMQHOST:5672/"
 MONGO=$(cat <<EHD
     [database]
-    host = mongodb
+    host = $MONGODBHOST
     port = 27017
 EHD
 )

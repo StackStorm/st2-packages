@@ -4,18 +4,18 @@ require 'examples/show-service-log-on-failure'
 describe 'external services' do
   # Buggy buggy netcat vs serverspec!
   describe 'rabbitmq' do
-    subject { host('rabbitmq') }
+    subject { host(ENV['RABBITMQHOST'] || 'rabbitmq') }
     it { is_expected.to be_reachable }
   end
 
   describe 'mongodb' do
-    subject { host('mongodb') }
+    subject { host(ENV['MONGODBHOST'] || 'mongodb') }
     it { is_expected.to be_reachable }
   end
 
   if spec[:mistral_enabled]
     describe 'postgres' do
-      subject { host('postgres') }
+      subject { host(ENV['POSTGRESHOST'] || 'postgres') }
       it { is_expected.to be_reachable }
     end
   end

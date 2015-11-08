@@ -7,7 +7,6 @@ suite:
               bundle exec rspec"
   environment:
     - DEBUG_LEVEL=0
-    - DOCKER_COMPOSE=1
     - ST2_PYTHON=
   volumes:
     - .:/root/st2-packages

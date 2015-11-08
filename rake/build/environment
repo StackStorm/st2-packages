@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require 'hashie'
+require 'resolv'
 
 # Defines options for the build pipeline
 #
@@ -13,7 +14,7 @@ pipeopts do
 
   env     :buildnode
   env     :testnode
-  env     :docker_compose
+  envpass :dronemode, 0
   envpass :testmode, 'bundle' # components || bundle
   envpass :basedir,  '/root'
   envpass :debug_level, 1
@@ -27,6 +28,9 @@ pipeopts do
   checkout :st2, :mistral
   package_max_name 12
   upload_sources 'packages', 'scripts', 'rpmspec'
+
+  # Services host variables
+  [:rabbitmq, :mongodb, :postgres].each {|n| envpass "#{n}host"}
 
   # This that what we want to build
   packages  :st2common, :st2actions, :st2api, :st2auth, :st2client,
@@ -68,4 +72,12 @@ pipeopts.packages.dup.tap do |list|
     list << :st2bundle
   end
   pipeopts[:testing_list] = list
+end
+
+## Configure drone 0.3 variables, we need to resolv remote hostnames,
+#  since services are linked to packagingruner but not testnode!
+if pipeopts.dronemode.to_i == 1
+  [:rabbitmq, :mongodb, :postgres].each do |n|
+    pipeopts.env[:"#{n}host".upcase] = Resolv.getaddress(ENV["#{n}host".upcase])
+  end
 end

@@ -8,13 +8,18 @@ env:
   - ST2_PYTHON=0
   - POSTGRES_USER=mistral
   - POSTGRES_PASSWORD=StackStorm
-script: 
-   - cp /root/Gemfile ./
-   - "bundle exec rake && bundle exec rspec"
+  - DRONEMODE=1
+  - RABBITMQHOST=rabbitmq
+  - POSTGRESHOST=postgres
+  - MONGODBHOST=mongo
+script:
+  - cp /root/Gemfile ./
+  - bundle exec rake
+  - bundle exec rspec
 
 services:
   - quay.io/dennybaa/droneunit:wheezy-sshd
   - quay.io/stackstorm/packagingenv:wheezy
-  - rabbitmq
-  - mongodb
+  - library/rabbitmq
   - library/postgres
+  - library/mongo

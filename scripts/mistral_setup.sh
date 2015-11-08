@@ -5,15 +5,18 @@ platform() {
   echo 'rpm'
 }
 
+RABBITMQHOST="${RABBITMQHOST:-rabbitmq}"
+POSTGRESHOST="${POSTGRESHOST:-postgres}"
+
 MISTRAL_CONFSRC=/root/mistral-conf
 MISTRAL_ETCDIR=/etc/mistral
 MISTRAL_CONF=$MISTRAL_ETCDIR/mistral.conf
 
 MISTRAL=$(cat <<EHD
     [DEFAULT]
-    transport_url = rabbit://guest:guest@rabbitmq:5672
+    transport_url = rabbit://guest:guest@$RABBITMQHOST:5672
     [database]
-    connection = postgresql://mistral:StackStorm@postgres/mistral
+    connection = postgresql://mistral:StackStorm@$POSTGRESHOST/mistral
     max_pool_size = 50
     [pecan]
     auth_enable = false
@@ -54,7 +57,7 @@ fi
 
 # We need to populate mistral so that mistral on drone
 # can connect using mistral:StackStorm.
-if [ "$COMPOSE" != 1 ]; then
+if [ "$DRONEMODE" = 1 ]; then
   echo "$CREATE_MISTRAL_ROLE" | /usr/share/python/mistral/bin/python -
 fi
 

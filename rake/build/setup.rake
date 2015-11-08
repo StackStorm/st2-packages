@@ -5,8 +5,8 @@
 namespace :setup do
   task :all => [:upload_artifacts, :install_artifacts, :configure]
 
-  # We don't need to upload artifacts on docker-compose,
-  # since they are passed through in a volume.
+  # We need to upload artifacts (only for drone 0.3),
+  # in compose they are passed through in a volume.
   task :upload_artifacts do
     pipeline do
       run hostname: opts[:testnode] do |opts|
@@ -15,7 +15,7 @@ namespace :setup do
           upload!(*rule, recursive: true)
         end
       end
-    end unless pipeopts[:docker_compose].to_i == 1
+    end if pipeopts[:dronemode].to_i == 1
   end
 
   task :install_artifacts => 'build:upload_to_testnode' do

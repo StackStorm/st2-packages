@@ -10,17 +10,17 @@ build_files.unshift('rake/build/environment').each do |file|
 end
 
 task :default => ['build:all', 'setup:all']
-task :spec => 'spec:all'
 
 namespace :build do
   desc 'Packages build entry task'
-  task :all => [:upload_to_buildnode, :nproc, :checkout, :packages] do |task|
+  task :all => [:upload_to_buildnode, :nproc, :checkout, :packages] do
     pipeline do
-      # Download artifacts to packagingrunner
+      # Download artifacts to packagingrunner (on drone 0.3),
+      # in compose they are available via volume.
       run hostname: opts[:buildnode] do |opts|
         rule = [ opts.artifact_dir, File.dirname(opts.artifact_dir) ]
         download!(*rule, recursive: true)
-      end unless pipeopts[:docker_compose].to_i == 1
+      end if opts.dronemode.to_i == 1
 
       run(:local) {|o| execute :ls, "-l #{o[:artifact_dir]}", verbosity: :debug}
     end
@@ -53,7 +53,7 @@ namespace :spec do
     targets << File.basename(dir)
   end
 
-  task :all => ['setup:all', *targets]
+  task :all => targets
 
   targets.each do |target|
     RSpec::Core::RakeTask.new(target.to_sym) do |t|
