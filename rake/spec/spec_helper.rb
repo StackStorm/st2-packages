@@ -29,6 +29,9 @@ class ST2Spec
     log_dir: '/var/log/st2',
     mistral_enabled: Array(pipeopts.packages).include?(:mistral),
     package_list: Array(pipeopts.testing_list),
+    rabbitmqhost: pipeopts.rabbitmqhost,
+    postgreshost: pipeopts.postgreshost,
+    mongodbhost:  pipeopts.mongodbhost,
     wait_for_start: (ENV['ST2_WAITFORSTART'] || 7).to_i,
     loglines_to_show: 20,
     logdest_pattern: {

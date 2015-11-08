@@ -9,6 +9,9 @@ wheezy:
   links:
     - wheezybuild
     - wheezytest
+    - rabbitmq
+    - mongodb
+    - postgres
 
 trusty:
   image: quay.io/stackstorm/packagingrunner
@@ -19,6 +22,10 @@ trusty:
     - BUILDNODE=trustybuild
   links:
     - trustybuild
+    - trustytest
+    - rabbitmq
+    - mongodb
+    - postgres
 
 centos7:
   image: quay.io/stackstorm/packagingrunner
@@ -29,6 +36,10 @@ centos7:
     - BUILDNODE=centos7build
   links:
     - centos7build
+    - centos7test
+    - rabbitmq
+    - mongodb
+    - postgres
 
 centos6:
   image: quay.io/stackstorm/packagingrunner
@@ -40,7 +51,13 @@ centos6:
     - BUILDNODE=centos6build
   links:
     - centos6build
+    - centos6test
+    - rabbitmq
+    - mongodb
+    - postgres
 
+## Service used by st2
+#
 rabbitmq:
   image: rabbitmq:management
   hostname: rabbit
@@ -61,7 +78,8 @@ postgres:
     - POSTGRES_USER=mistral
     - POSTGRES_PASSWORD=StackStorm
 
-# Package build nodes
+## Package build nodes
+#
 wheezybuild:
   image: quay.io/stackstorm/packagingenv:wheezy
   extends:
@@ -87,36 +105,25 @@ centos7build:
     service: artifacts_volume
 
 
-# Package testing nodes
+## Package testing nodes
+#
 wheezytest:
   image: quay.io/dennybaa/droneunit:wheezy-sshd
   extends:
     file: compose-suite.yml
     service: artifacts_volume
-  links:
-    - rabbitmq
-    - mongodb
-    - postgres
 
 trustytest:
   image: quay.io/dennybaa/droneunit:trusty-upstart
   extends:
     file: compose-suite.yml
     service: artifacts_volume
-  links:
-    - rabbitmq
-    - mongodb
-    - postgres
 
 centos6test:
   image: quay.io/dennybaa/droneunit:centos6-sshd
   extends:
     file: compose-suite.yml
     service: artifacts_volume
-  links:
-    - rabbitmq
-    - mongodb
-    - postgres
 
 centos7test:
   image: quay.io/dennybaa/droneunit:centos7-systemd
@@ -125,7 +132,3 @@ centos7test:
     service: artifacts_volume
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup
-  links:
-    - rabbitmq
-    - mongodb
-    - postgres

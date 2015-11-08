@@ -30,7 +30,7 @@ pipeopts do
   upload_sources 'packages', 'scripts', 'rpmspec'
 
   # Services host variables
-  [:rabbitmq, :mongodb, :postgres].each {|n| envpass "#{n}host"}
+  [:rabbitmq, :mongodb, :postgres].each {|n| envpass "#{n}host", n.to_s}
 
   # This that what we want to build
   packages  :st2common, :st2actions, :st2api, :st2auth, :st2client,
@@ -74,10 +74,12 @@ pipeopts.packages.dup.tap do |list|
   pipeopts[:testing_list] = list
 end
 
-## Configure drone 0.3 variables, we need to resolv remote hostnames,
-#  since services are linked to packagingruner but not testnode!
-if pipeopts.dronemode.to_i == 1
-  [:rabbitmq, :mongodb, :postgres].each do |n|
-    pipeopts.env[:"#{n}host".upcase] = Resolv.getaddress(ENV["#{n}host".upcase])
+## Serverspec or netcat work in a buggy fashion,
+#  we have to resolve remotes
+[:rabbitmq, :mongodb, :postgres].map{|n| :"#{n}host"}.each do |remote|
+  value = pipeopts[remote].to_s
+  unless value =~ Resolv::AddressRegex
+    pipeopts[remote] = Resolv.getaddress(value)
+    pipeopts.env[remote.upcase] = Resolv.getaddress(value)
   end
 end

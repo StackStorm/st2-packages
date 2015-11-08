@@ -2,20 +2,22 @@ require 'spec_helper'
 require 'examples/show-service-log-on-failure'
 
 describe 'external services' do
-  # Buggy buggy netcat vs serverspec!
+  # Buggy buggy netcat vs serverspec :(
+  # Hostnames have to priorly resolved as addresses.
+
   describe 'rabbitmq' do
-    subject { host(ENV['RABBITMQHOST'] || 'rabbitmq') }
+    subject { host(spec[:rabbitmqhost]) }
     it { is_expected.to be_reachable }
   end
 
   describe 'mongodb' do
-    subject { host(ENV['MONGODBHOST'] || 'mongodb') }
+    subject { host(spec[:mongodbhost]) }
     it { is_expected.to be_reachable }
   end
 
   if spec[:mistral_enabled]
     describe 'postgres' do
-      subject { host(ENV['POSTGRESHOST'] || 'postgres') }
+      subject { host(spec[:postgreshost]) }
       it { is_expected.to be_reachable }
     end
   end
