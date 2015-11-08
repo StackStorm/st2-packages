@@ -3,6 +3,7 @@ env:
   - DEBUG_LEVEL=debug
   - BUILDNODE=packagingenv
   - TESTNODE=droneunit
+  - ST2_WAITFORSTART=15
   - ST2_GITURL=https://github.com/stackstorm/st2
   - ST2_GITREV=master
   - ST2_PYTHON=0
@@ -15,7 +16,7 @@ env:
 script:
   - cp /root/Gemfile ./
   - bundle exec rake
-  - bundle exec rspec || sleep infinity
+  - bundle exec rspec
 
 services:
   - quay.io/dennybaa/droneunit:wheezy-sshd
