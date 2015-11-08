@@ -14,7 +14,7 @@ env:
   - POSTGRESHOST=postgres
   - MONGODBHOST=mongo
 script:
-  - cp /root/Gemfile ./
+  - cp /root/Gemfile* ./
   - bundle exec rake
   - bundle exec rspec
 

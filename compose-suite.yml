@@ -2,7 +2,7 @@
 suite:
   working_dir: /root/st2-packages
   command: >-
-    bash -c "cp /root/Gemfile ./ &&
+    bash -c "cp /root/Gemfile* ./ &&
               bundle exec rake &&
               bundle exec rspec"
   environment:

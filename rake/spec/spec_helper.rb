@@ -8,7 +8,6 @@ require './rake/pipeline_options'
 klass = Class.new(::Specinfra::Command::Debian::Base::Service)
 ::Specinfra::Command::Debian::V8::Service = klass
 
-
 SSH_OPTIONS = {
   user: 'root',
   keys: ['/root/.ssh/busybee'],
@@ -18,6 +17,7 @@ SSH_OPTIONS = {
 set :backend, :ssh
 set :host, ENV['TESTNODE']
 set :ssh_options, SSH_OPTIONS
+
 
 # ST2Spec
 class ST2Spec

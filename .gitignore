@@ -1,3 +1,4 @@
-# Cut out Gemfile, since it's built into packagingrunner container.
-# Gemfile will be copied on runtime.
+# Cut out Gemfile*, since they are built into packagingrunner container.
+# Gemfile* will be copied on runtime.
 Gemfile
+Gemfile.lock
