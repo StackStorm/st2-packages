@@ -25,7 +25,7 @@ EHD
 
 CREATE_MISTRAL_ROLE=$(cat <<EHD
 import psycopg2
-conn = psycopg2.connect("user=postgres host=postgres password=")
+conn = psycopg2.connect("user=postgres host=$POSTGRESHOST password=")
 conn.autocommit = True
 cur = conn.cursor()
 cur.execute("CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD 'StackStorm';")
