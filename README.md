@@ -1,4 +1,4 @@
-[![Build Status](http://drone.noops.tk/api/badge/github.com/dennybaa/st2-packages/status.svg?branch=rake-remake)](http://drone.noops.tk/github.com/dennybaa/st2-packages)
+[![Build Status](http://drone.noops.tk/api/badge/github.com/dennybaa/st2-packages/status.svg?branch=master)](http://drone.noops.tk/github.com/dennybaa/st2-packages)
 
 # Stackstorm packages build environment
 
@@ -13,7 +13,7 @@
 Packages build environment is a *multi-container docker* application defined and managed with [docker-compose](https://github.com/docker/compose). It consists of four types of containers:
 
  - **Packaging runner** (https://quay.io/stackstorm/packagingrunner) - the main entry point, package build and test processing controller container.
- - **Build environment** (https://quay.io/repository/stackstorm/packagingenv) - container where actual artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingenv:centos6*, *packagingenv:wheezy* correspondingly for CentOS 6 and Debian Wheezy.
+ - **Build environment** (https://quay.io/stackstorm/packagingenv) - container where actual artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingenv:centos6*, *packagingenv:wheezy* correspondingly for CentOS 6 and Debian Wheezy.
  - **Test runner** (https://quay.io/dennybaa/droneunit) - containers where built artifacts are tested, i.e. *artifacts are installed, configuration is written and tests are performed*.
  - **Services** - these are different containers required for testing such as *rabbitmq, mongodb and postgress*
 
