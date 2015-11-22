@@ -13,6 +13,6 @@ machine:
   services: 
     - docker
 
-database:
-  pre:
-    - sudo find ~/.cache/pip -name "*.whl"
+test:
+  override:
+    - ".circle/compose.sh run wheezy bash -c 'cp /root/Gemfile* ./ && bundle exec rspec'"
