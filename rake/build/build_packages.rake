@@ -1,13 +1,11 @@
 # Package build tasks.
 #
-# St2 packages are build parallelly. However pip creation of wheelhouse
-# can't be also run in parallel, since pip experincing a deadlock with
-# high concurrency.
-# Execution pattern is the following:
-#   p1 || p2 || p3 etc, package builds are invoked parallely.
+# St2 packages are build parallelly. However pip operation should go
+# sequentially due to cuncurrency issues. So we start :wheelhouse
+# ans :packages task parallelly, but package build is only fired
+# as soon its wheelhouse has been pre-populated.
 #
-# However we must let wheel operations go sequentially, to do so
-# we need the following pattern:
+# We use the follwoing execution pattern:
 #   p1 => [w1], p2 => [w1, w2], p3 => [w1, w2, w3] etc
 #
 
