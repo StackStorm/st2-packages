@@ -7,7 +7,7 @@ dependencies:
     - ".circle/compose.sh run wheezy /bin/true"
     - ".circle/compose.sh run wheezy"
   pre: 
-    - .circle/wheelhouse.sh
+    - .circle/cache-permissions.sh
 
 machine: 
   services: 
