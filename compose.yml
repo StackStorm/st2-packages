@@ -33,16 +33,20 @@ suite-circle:
     - POSTGRESHOST=172.17.42.1
     - MONGODBHOST=172.17.42.1
   volumes:
-    - /home/ubuntu/wheelhouse:/tmp/wheelhouse
     - /home/ubuntu/.cache/pip:/root/.cache/pip
 
-# Host built artifacts directory should
-# match $ARTIFACT_DIR for ease of use in compose
-artifacts_volume:
+## Volumes passed during compose or ci builds
+#
+volumes-compose:
   image: fake
   volumes:
     - /tmp/st2-packages:/root/build
 
+volumes-circle:
+  image: fake
+  volumes:
+    - /tmp/st2-packages:/root/build
+    - /home/ubuntu/wheelhouse:/tmp/wheelhouse
 
 ## Service used by st2
 #
@@ -65,70 +69,3 @@ postgres:
   environment:
     - POSTGRES_USER=mistral
     - POSTGRES_PASSWORD=StackStorm
-
-## Package build nodes
-#
-wheezybuild:
-  image: quay.io/stackstorm/packagingenv:wheezy
-  extends:
-    file: compose.yml
-    service: artifacts_volume
-
-jessiebuild:
-  image: quay.io/stackstorm/packagingenv:jessie
-  extends:
-    file: compose.yml
-    service: artifacts_volume
-
-trustybuild:
-  image: quay.io/stackstorm/packagingenv:trusty
-  extends:
-    file: compose.yml
-    service: artifacts_volume
-
-centos6build:
-  image: quay.io/stackstorm/packagingenv:centos6
-  extends:
-    file: compose.yml
-    service: artifacts_volume
-
-centos7build:
-  image: quay.io/stackstorm/packagingenv:centos7
-  extends:
-    file: compose.yml
-    service: artifacts_volume
-
-
-## Package testing nodes
-#
-wheezytest:
-  image: quay.io/dennybaa/droneunit:wheezy-sshd
-  extends:
-    file: compose.yml
-    service: artifacts_volume
-
-jessietest:
-  image: quay.io/dennybaa/droneunit:jessie-sshd
-  extends:
-    file: compose.yml
-    service: artifacts_volume
-
-trustytest:
-  image: quay.io/dennybaa/droneunit:trusty-upstart
-  extends:
-    file: compose.yml
-    service: artifacts_volume
-
-centos6test:
-  image: quay.io/dennybaa/droneunit:centos6-sshd
-  extends:
-    file: compose.yml
-    service: artifacts_volume
-
-centos7test:
-  image: quay.io/dennybaa/droneunit:centos7-systemd
-  extends:
-    file: compose.yml
-    service: artifacts_volume
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup

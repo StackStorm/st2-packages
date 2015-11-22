@@ -58,3 +58,69 @@ centos6:
   links:
     - centos6build
     - centos6test
+
+## Package build nodes
+#
+wheezybuild:
+  image: quay.io/stackstorm/packagingenv:wheezy
+  extends:
+    file: compose.yml
+    service: volumes-circle
+
+jessiebuild:
+  image: quay.io/stackstorm/packagingenv:jessie
+  extends:
+    file: compose.yml
+    service: volumes-circle
+
+trustybuild:
+  image: quay.io/stackstorm/packagingenv:trusty
+  extends:
+    file: compose.yml
+    service: volumes-circle
+
+centos6build:
+  image: quay.io/stackstorm/packagingenv:centos6
+  extends:
+    file: compose.yml
+    service: volumes-circle
+
+centos7build:
+  image: quay.io/stackstorm/packagingenv:centos7
+  extends:
+    file: compose.yml
+    service: volumes-circle
+
+## Package testing nodes
+#
+wheezytest:
+  image: quay.io/dennybaa/droneunit:wheezy-sshd
+  extends:
+    file: compose.yml
+    service: volumes-circle
+
+jessietest:
+  image: quay.io/dennybaa/droneunit:jessie-sshd
+  extends:
+    file: compose.yml
+    service: volumes-circle
+
+trustytest:
+  image: quay.io/dennybaa/droneunit:trusty-upstart
+  extends:
+    file: compose.yml
+    service: volumes-circle
+
+centos6test:
+  image: quay.io/dennybaa/droneunit:centos6-sshd
+  extends:
+    file: compose.yml
+    service: volumes-circle
+
+centos7test:
+  image: quay.io/dennybaa/droneunit:centos7-systemd
+  extends:
+    file: compose.yml
+    service: volumes-circle
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup
