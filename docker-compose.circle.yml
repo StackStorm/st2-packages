@@ -2,67 +2,55 @@ wheezy:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose.yml
-    service: suite-compose
+    service: suite-circle
   environment:
     - BUILDNODE=wheezybuild
     - TESTNODE=wheezytest
   links:
     - wheezybuild
     - wheezytest
-    - rabbitmq
-    - mongodb
-    - postgres
 
 jessie:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose.yml
-    service: suite-compose
+    service: suite-circle
   environment:
     - BUILDNODE=jessiebuild
     - TESTNODE=jessietest
   links:
     - jessiebuild
     - jessietest
-    - rabbitmq
-    - mongodb
-    - postgres
 
 trusty:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose.yml
-    service: suite-compose
+    service: suite-circle
   environment:
     - BUILDNODE=trustybuild
     - TESTNODE=trustytest
   links:
     - trustybuild
     - trustytest
-    - rabbitmq
-    - mongodb
-    - postgres
 
 centos7:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose.yml
-    service: suite-compose
+    service: suite-circle
   environment:
     - BUILDNODE=centos7build
     - TESTNODE=centos7test
   links:
     - centos7build
     - centos7test
-    - rabbitmq
-    - mongodb
-    - postgres
 
 centos6:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose.yml
-    service: suite-compose
+    service: suite-circle
   environment:
     - ST2_PYTHON=1
     - BUILDNODE=centos6build
@@ -70,6 +58,3 @@ centos6:
   links:
     - centos6build
     - centos6test
-    - rabbitmq
-    - mongodb
-    - postgres
