@@ -33,7 +33,7 @@ namespace :build do
   task :st2python do |task|
     pipeline 'st2python' do
       run hostname: opts[:buildnode] do |opts|
-        command label: "package: %#{opts[:package_max_name]}s" % 'st2python', show_uuid: false
+        command label: 'package: st2python', show_uuid: false
 
         with opts.env do
           within File.join(opts.basedir, 'packages/python') do
@@ -56,7 +56,7 @@ namespace :build do
 
     pipeline context do
       run hostname: opts[:buildnode] do |opts|
-        command label: "package: %#{opts[:package_max_name]}s" % package_name, show_uuid: false
+        command label: "package: #{package_name}", show_uuid: false
 
         buildroot = opts.gitdir
         buildroot = File.join(buildroot, package_name) unless opts.standalone

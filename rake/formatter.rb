@@ -6,7 +6,7 @@ module SSHKit
     class ShellOut < Abstract
       HEADERS_LIST = [:label, :uuid, :debug].freeze
       HEADERS_COLORS = Hash[ HEADERS_LIST.zip([
-        :light_blue, :cyan, :light_black
+        :cyan, :magenta, :light_black
       ])].freeze
 
       Dispatcher = ::ShellOut
