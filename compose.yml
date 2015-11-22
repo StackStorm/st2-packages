@@ -33,6 +33,7 @@ suite-circle:
     - POSTGRESHOST=172.17.42.1
     - MONGODBHOST=172.17.42.1
   volumes:
+    - /home/ubuntu/wheelhouse:/tmp/wheelhouse
     - /home/ubuntu/.cache/pip:/root/.cache/pip
 
 # Host built artifacts directory should

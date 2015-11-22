@@ -1,6 +1,7 @@
 dependencies: 
   cache_directories: 
     - ~/.cache/pip
+    - ~/wheelhouse
   post: 
     - .circle/services.sh
     - ".circle/compose.sh run wheezy /bin/true"
