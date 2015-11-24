@@ -1,18 +1,112 @@
-dependencies: 
+# Setup in CircleCI account the following ENV variables:
+# BINTRAY_ACCOUNT
+# BINTRAY_API_KEY
+# DOCKER_USER
+# DOCKER_EMAIL
+# DOCKER_PASSWORD
+general:
+  branches:
+    only:
+      - master
+      - /v[0-9]+(\.[0-9]+)*/
+  artifacts:
+    - /tmp/st2-packages
+
+machine:
+  services:
+    - docker
+  environment:
+    ST2_GITURL: https://github.com/StackStorm/st2
+    ST2_GITREV: master
+    ST2_DOCKERFILES_REPO: https://github.com/armab/st2-dockerfiles
+  post:
+    # Paswordless SSH between parallel build nodes
+    - sudo cp /home/ubuntu/.ssh/config /root/.ssh/config
+    - circle/cache-permissions.sh
+
+checkout:
+  post:
+    - git clone ${ST2_DOCKERFILES_REPO}
+    - echo 'export DISTROS=(wheezy jessie trusty centos7)' >> ~/.circlerc
+    - echo 'export DISTRO=${DISTROS[$CIRCLE_NODE_INDEX]}' >> ~/.circlerc
+    - echo 'export ST2PKG_VERSION=1.2dev' >> ~/.circlerc
+#    - echo ST2PKG_VERSION=$(python -c 'execfile("../st2common/st2common/__init__.py"); print __version__') >> ~/.circlerc
+    - echo "ST2PKG_RELEASE=$(scripts/bintray.sh next-revision ${DISTRO} ${ST2PKG_VERSION})" >> ~/.circlerc
+    - |
+      echo Get Docker Tag from the current branch name
+      if [ "${ST2_GITREV}" == 'master' ]; then
+        echo 'export DOCKER_TAG=latest' >> ~/.circlerc
+      else
+        echo "export DOCKER_TAG=${ST2_GITREV:1}" >> ~/.circlerc
+      fi
+    - echo "${ST2PKG_VERSION}-${ST2PKG_RELEASE}"
+    - echo "${DOCKER_TAG}"
+
+database:
+  override:
+    - circle/configure-rabbitmq.sh
+    - circle/configure-postgres.sh
+
+dependencies:
   cache_directories: 
     - ~/.cache/pip
     - ~/wheelhouse
-  post: 
-    - .circle/services.sh
-    - ".circle/compose.sh run wheezy /bin/true"
-    - ".circle/compose.sh run wheezy"
-  pre: 
-    - .circle/cache-permissions.sh
-
-machine: 
-  services: 
-    - docker
+  pre:
+    - sudo pip install wheel
+    - sudo pip install docker-compose
+    - docker-compose version
+  override:
+    - circle/compose.sh pull ${DISTRO}:
+        parallel: true
 
 test:
+  pre:
+    - circle/compose.sh build ${DISTRO}:
+        parallel: true
   override:
-    - ".circle/compose.sh run wheezy bash -c 'cp /root/Gemfile* ./ && bundle exec rspec'"
+    - circle/compose.sh test ${DISTRO}:
+        parallel: true
+  post:
+    - |
+      echo Building base Docker Image that will be used by all StackStorm components
+      cp /tmp/st2-packages/st2bundle*.deb st2-dockerfiles/stackstorm/
+      docker build --build-arg ST2_VERSION="${ST2PKG_VERSION}-${ST2PKG_RELEASE}" -t st2bundle st2-dockerfiles/stackstorm/
+    - docker run --name st2bundle -d st2bundle
+    # Verify Container by running `st2` command in it
+    # Same as: docker exec st2docker st2 --version
+    # See: https://circleci.com/docs/docker#docker-exec
+    #- sudo lxc-attach -n "$(docker inspect --format '{{.Id}}' st2bundle)" -- bash -c 'st2 --version'
+    - |
+      echo Building StackStorm components Docker Images
+      cd st2-dockerfiles
+      for dir in st2*/; do
+        docker build -t stackstorm/${dir%*/}:${DOCKER_TAG} ${dir}
+      done
+
+deployment:
+  stable:
+    branch: /v[0-9]+(\.[0-9]+)*/
+    commands:
+      - echo Deploy Stable packages
+      - scripts/bintray.sh deploy debian /tmp/st2-packages
+      - |
+        echo Publishing StackStorm Docker images
+        docker login -e ${DOCKER_EMAIL} -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+        cd st2-dockerfiles
+        for dir in st2*/; do
+          docker push stackstorm/${dir%*/}
+        done
+
+  unstable:
+    branch: master
+    commands:
+      - echo Deploy Unstable packages
+      - scripts/bintray.sh deploy debian /tmp/st2-packages
+      - |
+        echo Publishing StackStorm Docker images
+        docker login -e ${DOCKER_EMAIL} -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+        cd st2-dockerfiles
+        for dir in st2*/; do
+          docker push stackstorm/${dir%*/}
+        done
+
