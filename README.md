@@ -1,4 +1,4 @@
-[![Circle CI](https://circleci.com/gh/StackStorm/st2-packages.svg?style=svg)](https://circleci.com/gh/dennybaa/st2-packages)
+[![Circle CI](https://circleci.com/gh/StackStorm/st2-packages.svg?style=svg)](https://circleci.com/gh/StackStorm/st2-packages)
 
 # Stackstorm packages build environment
 
