@@ -4,8 +4,8 @@ dependencies:
     - ~/wheelhouse
   post: 
     - .circle/services.sh
-    - ".circle/compose.sh run wheezy /bin/true"
-    - ".circle/compose.sh run wheezy"
+    - ".circle/compose.sh run /bin/true"
+    - ".circle/compose.sh run"
   pre: 
     - .circle/cache-permissions.sh
 
@@ -15,4 +15,4 @@ machine:
 
 test:
   override:
-    - ".circle/compose.sh run wheezy bash -c 'cp /root/Gemfile* ./ && bundle exec rspec'"
+    - ".circle/compose.sh run bash -c 'cp /root/Gemfile* ./ && bundle exec rspec'"
