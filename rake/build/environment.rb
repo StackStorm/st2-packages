@@ -14,7 +14,6 @@ pipeopts do
 
   env     :buildnode
   env     :testnode
-  envpass :dronemode, 0
   envpass :testmode, 'bundle' # components || bundle
   envpass :basedir,  '/root'
   envpass :debug_level, 1
@@ -26,7 +25,6 @@ pipeopts do
   # Single package in a gitdir is standalone
   standalone true
   checkout :st2, :mistral
-  package_max_name 12
   upload_sources 'packages', 'scripts', 'rpmspec'
 
   # Services host variables

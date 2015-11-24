@@ -1,0 +1,18 @@
+dependencies: 
+  cache_directories: 
+    - ~/.cache/pip
+    - ~/wheelhouse
+  post: 
+    - .circle/services.sh
+    - ".circle/compose.sh run wheezy /bin/true"
+    - ".circle/compose.sh run wheezy"
+  pre: 
+    - .circle/cache-permissions.sh
+
+machine: 
+  services: 
+    - docker
+
+test:
+  override:
+    - ".circle/compose.sh run wheezy bash -c 'cp /root/Gemfile* ./ && bundle exec rspec'"

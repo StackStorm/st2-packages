@@ -22,7 +22,7 @@ set :ssh_options, SSH_OPTIONS
 # ST2Spec
 class ST2Spec
   extend Pipeline::Options
-  instance_eval(File.read('rake/build/environment'))
+  instance_eval(File.read('rake/build/environment.rb'))
 
   ST2_SERVICES = %w(st2api st2auth st2actionrunner st2notifier
                     st2resultstracker st2rulesengine st2sensorcontainer

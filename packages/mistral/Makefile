@@ -34,7 +34,7 @@ populate_version: .stamp-populate_version
 wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: populate_version
 	# Install wheels into shared location
-	pip wheel --wheel-dir=$(WHEELDIR) -r requirements.txt
+	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel

@@ -2,67 +2,55 @@ wheezy:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose.yml
-    service: suite-compose
+    service: suite-circle
   environment:
     - BUILDNODE=wheezybuild
     - TESTNODE=wheezytest
   links:
     - wheezybuild
     - wheezytest
-    - rabbitmq
-    - mongodb
-    - postgres
 
 jessie:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose.yml
-    service: suite-compose
+    service: suite-circle
   environment:
     - BUILDNODE=jessiebuild
     - TESTNODE=jessietest
   links:
     - jessiebuild
     - jessietest
-    - rabbitmq
-    - mongodb
-    - postgres
 
 trusty:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose.yml
-    service: suite-compose
+    service: suite-circle
   environment:
     - BUILDNODE=trustybuild
     - TESTNODE=trustytest
   links:
     - trustybuild
     - trustytest
-    - rabbitmq
-    - mongodb
-    - postgres
 
 centos7:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose.yml
-    service: suite-compose
+    service: suite-circle
   environment:
     - BUILDNODE=centos7build
     - TESTNODE=centos7test
   links:
     - centos7build
     - centos7test
-    - rabbitmq
-    - mongodb
-    - postgres
 
 centos6:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: compose.yml
-    service: suite-compose
+    service: suite-circle
   environment:
     - ST2_PYTHON=1
     - BUILDNODE=centos6build
@@ -70,9 +58,6 @@ centos6:
   links:
     - centos6build
     - centos6test
-    - rabbitmq
-    - mongodb
-    - postgres
 
 ## Package build nodes
 #
@@ -80,31 +65,31 @@ wheezybuild:
   image: quay.io/stackstorm/packagingenv:wheezy
   extends:
     file: compose.yml
-    service: volumes-compose
+    service: volumes-circle
 
 jessiebuild:
   image: quay.io/stackstorm/packagingenv:jessie
   extends:
     file: compose.yml
-    service: volumes-compose
+    service: volumes-circle
 
 trustybuild:
   image: quay.io/stackstorm/packagingenv:trusty
   extends:
     file: compose.yml
-    service: volumes-compose
+    service: volumes-circle
 
 centos6build:
   image: quay.io/stackstorm/packagingenv:centos6
   extends:
     file: compose.yml
-    service: volumes-compose
+    service: volumes-circle
 
 centos7build:
   image: quay.io/stackstorm/packagingenv:centos7
   extends:
     file: compose.yml
-    service: volumes-compose
+    service: volumes-circle
 
 ## Package testing nodes
 #
@@ -112,30 +97,30 @@ wheezytest:
   image: quay.io/dennybaa/droneunit:wheezy-sshd
   extends:
     file: compose.yml
-    service: volumes-compose
+    service: volumes-circle
 
 jessietest:
   image: quay.io/dennybaa/droneunit:jessie-sshd
   extends:
     file: compose.yml
-    service: volumes-compose
+    service: volumes-circle
 
 trustytest:
   image: quay.io/dennybaa/droneunit:trusty-upstart
   extends:
     file: compose.yml
-    service: volumes-compose
+    service: volumes-circle
 
 centos6test:
   image: quay.io/dennybaa/droneunit:centos6-sshd
   extends:
     file: compose.yml
-    service: volumes-compose
+    service: volumes-circle
 
 centos7test:
   image: quay.io/dennybaa/droneunit:centos7-systemd
   extends:
     file: compose.yml
-    service: volumes-compose
+    service: volumes-circle
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup

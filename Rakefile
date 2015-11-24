@@ -2,12 +2,11 @@
 #
 require 'rspec/core/rake_task'
 require './rake/pipeline'
+require './rake/build/environment'
 
 # Import build tasks
 build_files = Dir.glob('rake/build/*.rake')
-build_files.unshift('rake/build/environment').each do |file|
-  import file
-end
+build_files.each { |file| import file }
 
 task :default => ['build:all', 'setup:all']
 
@@ -15,13 +14,6 @@ namespace :build do
   desc 'Packages build entry task'
   task :all => [:upload_to_buildnode, :nproc, :checkout, :packages] do
     pipeline do
-      # Download artifacts to packagingrunner (on drone 0.3),
-      # in compose they are available via volume.
-      run hostname: opts[:buildnode] do |opts|
-        rule = [ opts.artifact_dir, File.dirname(opts.artifact_dir) ]
-        download!(*rule, recursive: true)
-      end if opts.dronemode.to_i == 1
-
       run(:local) {|o| execute :ls, "-l #{o[:artifact_dir]}", verbosity: :debug}
     end
   end

@@ -27,8 +27,8 @@ namespace :build do
 
         with env do
           within buildroot do
-            make :wheelhouse, label: "wheelhouse: %#{opts[:package_max_name]}s" % package_name
-            make :bdist_wheel, label: "wheelhouse: %#{opts[:package_max_name]}s" % package_name
+            make :wheelhouse,  label: "wheelhouse: #{package_name}"
+            make :bdist_wheel, label: "bdistwheel: #{package_name}"
           end
         end
       end

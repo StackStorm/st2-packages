@@ -1,13 +1,11 @@
 # Package build tasks.
 #
-# St2 packages are build parallelly. However pip creation of wheelhouse
-# can't be also run in parallel, since pip experincing a deadlock with
-# high concurrency.
-# Execution pattern is the following:
-#   p1 || p2 || p3 etc, package builds are invoked parallely.
+# St2 packages are build parallelly. However pip operation should go
+# sequentially due to cuncurrency issues. So we start :wheelhouse
+# ans :packages task parallelly, but package build is only fired
+# as soon its wheelhouse has been pre-populated.
 #
-# However we must let wheel operations go sequentially, to do so
-# we need the following pattern:
+# We use the follwoing execution pattern:
 #   p1 => [w1], p2 => [w1, w2], p3 => [w1, w2, w3] etc
 #
 
@@ -33,7 +31,7 @@ namespace :build do
   task :st2python do |task|
     pipeline 'st2python' do
       run hostname: opts[:buildnode] do |opts|
-        command label: "package: %#{opts[:package_max_name]}s" % 'st2python', show_uuid: false
+        command label: 'package: st2python', show_uuid: false
 
         with opts.env do
           within File.join(opts.basedir, 'packages/python') do
@@ -56,7 +54,7 @@ namespace :build do
 
     pipeline context do
       run hostname: opts[:buildnode] do |opts|
-        command label: "package: %#{opts[:package_max_name]}s" % package_name, show_uuid: false
+        command label: "package: #{package_name}", show_uuid: false
 
         buildroot = opts.gitdir
         buildroot = File.join(buildroot, package_name) unless opts.standalone

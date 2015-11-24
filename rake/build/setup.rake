@@ -3,20 +3,7 @@
 #
 
 namespace :setup do
-  task :all => [:upload_artifacts, :install_artifacts, :configure]
-
-  # We need to upload artifacts (only for drone 0.3),
-  # in compose they are passed through in a volume.
-  task :upload_artifacts do
-    pipeline do
-      run hostname: opts[:testnode] do |opts|
-        within File.dirname(opts.artifact_dir) do
-          rule = [ opts.artifact_dir, File.dirname(opts.artifact_dir) ]
-          upload!(*rule, recursive: true)
-        end
-      end
-    end if pipeopts[:dronemode].to_i == 1
-  end
+  task :all => [:install_artifacts, :configure]
 
   task :install_artifacts => 'build:upload_to_testnode' do
     pipeline do
@@ -35,9 +22,9 @@ namespace :setup do
     pipeline do
       run hostname: opts[:testnode] do |opts|
         with opts.env do
-          execute :bash, "$BASEDIR/scripts/config.sh"
+          execute :bash, "$BASEDIR/scripts/generate_st2_config.sh"
           if opts.packages.include? :mistral
-            execute :bash, "$BASEDIR/scripts/mistral_setup.sh"
+            execute :bash, "$BASEDIR/scripts/generate_mistral_config.sh"
           end
         end
       end

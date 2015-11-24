@@ -1,0 +1,71 @@
+## Suites configuration
+#
+suite:
+  image: fake
+  working_dir: /root/st2-packages
+  command: >-
+    bash -c "cp /root/Gemfile* ./ &&
+              bundle exec rake &&
+              bundle exec rspec"
+  environment:
+    - DEBUG_LEVEL=0
+    - ST2_GITURL=https://github.com/dennybaa/st2
+  volumes:
+    - .:/root/st2-packages
+    - /tmp/st2-packages:/root/build
+
+suite-compose:
+  image: fake
+  extends:
+    file: compose.yml
+    service: suite
+
+suite-circle:
+  image: fake
+  command: >-
+    bash -c "cp /root/Gemfile* ./ &&
+              bundle exec rake -j4"
+  extends:
+    file: compose.yml
+    service: suite
+  environment:
+    - RABBITMQHOST=172.17.42.1
+    - POSTGRESHOST=172.17.42.1
+    - MONGODBHOST=172.17.42.1
+  volumes:
+    - /home/ubuntu/.cache/pip:/root/.cache/pip
+
+## Volumes passed during compose or ci builds
+#
+volumes-compose:
+  image: fake
+  volumes:
+    - /tmp/st2-packages:/root/build
+
+volumes-circle:
+  image: fake
+  volumes:
+    - /tmp/st2-packages:/root/build
+    - /home/ubuntu/wheelhouse:/tmp/wheelhouse
+
+## Service used by st2
+#
+rabbitmq:
+  image: rabbitmq:management
+  hostname: rabbit
+  ports:
+    - "15672:15672"  # managment plugin port
+    - "5672:5672"
+
+mongodb:
+  image: mongo
+  ports:
+    - "27017:27017"
+
+postgres:
+  image: postgres
+  ports:
+    - "5432:5432"
+  environment:
+    - POSTGRES_USER=mistral
+    - POSTGRES_PASSWORD=StackStorm
