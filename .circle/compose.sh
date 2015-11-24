@@ -14,10 +14,6 @@ fi
 
 # Run compose only if args provided, otherwise just the code above
 # will be executed.
-if [ $# -gt 0 ]; then
-  echo "========================"
-  echo docker-compose -f compose.yml -f docker-compose.circle.yml $CMD ${DISTROS[$B_IDX]} "$@"
+if [ ! -z "$CMD" ]; then
   docker-compose -f compose.yml -f docker-compose.circle.yml $CMD ${DISTROS[$B_IDX]} "$@"
 fi
-
-echo "--------------------"
