@@ -1,6 +1,7 @@
-[![Circle CI](https://circleci.com/gh/StackStorm/st2-packages.svg?style=svg)](https://circleci.com/gh/StackStorm/st2-packages)
-
 # Stackstorm packages build environment
+
+[![Circle CI Build Status](https://circleci.com/gh/StackStorm/st2-packages/tree/master.svg?style=shield)](https://circleci.com/gh/StackStorm/st2-packages)
+
 
 ## Highlights
 
