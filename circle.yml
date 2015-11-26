@@ -24,6 +24,9 @@ machine:
   # Don't forget we'll need latest Docker version for some features to work (CircleCI by default installs outdated version)
   services:
     - docker
+    - mongodb
+    - postgresql
+    - rabbitmq-server
   pre:
     # Paswordless SSH between parallel build nodes
     - sudo cp /home/ubuntu/.ssh/config /root/.ssh/config
