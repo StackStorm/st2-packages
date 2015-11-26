@@ -24,6 +24,9 @@ machine:
   # Don't forget we'll need latest Docker version for some features to work (CircleCI by default installs outdated version)
   services:
     - docker
+    - mongodb
+    - postgresql
+    - rabbitmq-server
   pre:
     # Paswordless SSH between parallel build nodes
     - sudo cp /home/ubuntu/.ssh/config /root/.ssh/config
@@ -43,11 +46,9 @@ dependencies:
     - docker-compose version
     - docker version
   override:
-    - .circle/docker-compose.sh pull ${DISTRO}:
-        parallel: true
+    - .circle/docker-compose.sh pull ${DISTRO}
   post:
-    - .circle/docker-compose.sh build ${DISTRO}:
-        parallel: true
+    - .circle/docker-compose.sh build ${DISTRO}
 
 test:
   override:
