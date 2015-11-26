@@ -4,5 +4,6 @@ set -e
 # change into script directory
 cd $(dirname `readlink -f $0`)
 
-sudo bash ./configure-postgres.sh
-sudo bash ./configure-rabbitmq.sh
+set -x
+sudo ./configure-rabbitmq.sh
+sudo ./configure-postgres.sh

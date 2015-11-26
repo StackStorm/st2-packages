@@ -24,7 +24,7 @@ suite-circle:
   image: fake
   command: >-
     bash -c "cp /root/Gemfile* ./ &&
-              bundle exec rake -j4"
+              bundle exec rake -j9"
   extends:
     file: compose.yml
     service: suite
