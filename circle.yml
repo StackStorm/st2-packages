@@ -60,11 +60,8 @@ test:
     - .circle/docker.sh test st2api 'st2 --version'
 
 deployment:
-  bintray:
+  publish:
     branch: master
     commands:
       - .circle/bintray.sh deploy debian /tmp/st2-packages
-  docker-hub:
-    branch: master
-    commands:
       - .circle/docker.sh deploy st2actionrunner st2api st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer
