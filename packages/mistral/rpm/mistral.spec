@@ -25,9 +25,6 @@ Summary: Mistral workflow service
   %default_install
   %pip_install_venv
 
-  # python 3 syntax, delete file so that compilation doesn't fail
-  rm %{buildroot}/usr/share/python/mistral/lib/python2.7/site-packages/linecache2/tests/inspect_fodder2.py
-
   # systemd service file
   mkdir -p %{buildroot}%{_unitdir}
   install -m0644 %{SOURCE0}/rpm/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
