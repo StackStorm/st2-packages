@@ -9,7 +9,10 @@ suite:
               bundle exec rspec"
   environment:
     - DEBUG_LEVEL=0
-    - ST2_GITURL=https://github.com/dennybaa/st2
+    - ST2_GITURL=${ST2_GITURL}
+    - ST2_GITREV=${ST2_GITREV}
+    - ST2PKG_VERSION=${ST2PKG_VERSION}
+    - ST2PKG_RELEASE=${ST2PKG_RELEASE}
   volumes:
     - .:/root/st2-packages
     - /tmp/st2-packages:/root/build
