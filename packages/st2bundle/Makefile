@@ -10,10 +10,10 @@ else
 	REDHAT := 1
 endif
 
-.PHONY: all install wheelhouse
+.PHONY: all install pipcache
 all: install
 
-install: wheelhouse changelog
+install: pipcache changelog
 
 post_install:
 	# post_install is triggered debian/rules file, don't call it from install target!
@@ -42,8 +42,8 @@ ifeq ($(DEBIAN),1)
 	debchange -v $(ST2PKG_VERSION)-$(ST2PKG_RELEASE) -M "automated build version: $(ST2PKG_VERSION)"
 endif
 
-wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: populate_version requirements
+pipcache: .stamp-pipcache
+.stamp-pipcache: populate_version requirements
 	touch $@
 
 # For compatibilty with other packages (since it's a meta package)

@@ -1,28 +1,27 @@
 # Package build tasks.
 #
 # St2 packages are build parallelly. However pip operation should go
-# sequentially due to cuncurrency issues. So we start :wheelhouse
-# ans :packages task parallelly, but package build is only fired
-# as soon its wheelhouse has been pre-populated.
-#
+# sequentially due to cuncurrency issues.
 # We use the follwoing execution pattern:
-#   p1 => [w1], p2 => [w1, w2], p3 => [w1, w2, w3] etc
+#   b1 => [p1], b2 => [p1, p2], b3 => [p1, p2, p3] etc
+#
+# Exp.: For example buil 2 starts after pip dependancies installed for
+# packages 1 and 2
 #
 
 namespace :build do
-  # Get incremental wheeldeps, like [w1], [w1, w2] etc.
-  wheelreq_proc = ->(tn) do
+  pipcachereq_proc = ->(tn) do
     package_name = tn.sub(/^build_/, '')
-    wheelreq_list = Array(pipeopts.packages).take_while {|p| p.to_s != package_name}
-    wheelreq_list << package_name
-    wheelreq_list.map {|r| "wheelhouse_#{r}"}
+    pipcachereq_list = Array(pipeopts.packages).take_while {|p| p.to_s != package_name}
+    pipcachereq_list << package_name
+    pipcachereq_list.map {|r| "pipcache_#{r}"}
   end
 
   package_list = Array(pipeopts.packages).map {|t| "build_#{t}"}
-  multitask :packages => [:wheelhouse, *package_list]
+  multitask :packages => [:pipcache, *package_list]
 
   # We should built custom python for outdated OSes such as CentOS 6.
-  build_dependencies = [ wheelreq_proc ]
+  build_dependencies = [ pipcachereq_proc ]
   if pipeopts('st2python')[:st2_python].to_i == 1
     build_dependencies.unshift('build:st2python')
   end

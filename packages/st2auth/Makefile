@@ -10,10 +10,10 @@ else
 	REDHAT := 1
 endif
 
-.PHONY: all install wheelhouse
+.PHONY: all install pipcache
 all: install
 
-install: wheelhouse injectdeps changelog
+install: pipcache injectdeps changelog
 
 post_install: bdist_wheel
 	# post_install is triggered debian/rules file, don't call it from install target!
@@ -36,15 +36,14 @@ ifeq ($(DEBIAN),1)
 	debchange -v $(ST2PKG_VERSION)-$(ST2PKG_RELEASE) -M "automated build version: $(ST2PKG_VERSION)"
 endif
 
-wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: populate_version requirements
-	# Install wheels into shared location
-	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+pipcache: .stamp-pipcache
+.stamp-pipcache: populate_version requirements
+	pip install --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 injectdeps: .stamp-injectdeps
 .stamp-injectdeps:
-	# We can modify requirements ONLY AFTER wheelhouse has been built
+	# We can modify requirements ONLY AFTER pipcache has been built
 	@echo "st2common" >> requirements.txt
 	touch $@
 

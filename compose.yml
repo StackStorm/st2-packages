@@ -9,10 +9,12 @@ suite:
               bundle exec rspec"
   environment:
     - DEBUG_LEVEL=0
-    - ST2_GITURL=${ST2_GITURL}
-    - ST2_GITREV=${ST2_GITREV}
-    - ST2PKG_VERSION=${ST2PKG_VERSION}
-    - ST2PKG_RELEASE=${ST2PKG_RELEASE}
+    ## For the following variables default values are used
+    #  unless explicitly defined:
+    - ST2_GITURL=https://github.com/dennybaa/st2.git
+    - ST2_GITREV=req-fixes
+    # - ST2PKG_VERSION=
+    # - ST2PKG_RELEASE=
   volumes:
     - .:/root/st2-packages
     - /tmp/st2-packages:/root/build
@@ -35,8 +37,6 @@ suite-circle:
     - RABBITMQHOST=172.17.42.1
     - POSTGRESHOST=172.17.42.1
     - MONGODBHOST=172.17.42.1
-  volumes:
-    - /home/ubuntu/.cache/pip:/root/.cache/pip
 
 ## Volumes passed during compose or ci builds
 #
