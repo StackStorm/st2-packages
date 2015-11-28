@@ -1,7 +1,7 @@
 wheezy:
   image: quay.io/stackstorm/packagingrunner
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: suite-circle
   environment:
     - BUILDNODE=wheezybuild
@@ -13,7 +13,7 @@ wheezy:
 jessie:
   image: quay.io/stackstorm/packagingrunner
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: suite-circle
   environment:
     - BUILDNODE=jessiebuild
@@ -25,7 +25,7 @@ jessie:
 trusty:
   image: quay.io/stackstorm/packagingrunner
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: suite-circle
   environment:
     - BUILDNODE=trustybuild
@@ -37,7 +37,7 @@ trusty:
 centos7:
   image: quay.io/stackstorm/packagingrunner
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: suite-circle
   environment:
     - BUILDNODE=centos7build
@@ -49,7 +49,7 @@ centos7:
 centos6:
   image: quay.io/stackstorm/packagingrunner
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: suite-circle
   environment:
     - ST2_PYTHON=1
@@ -64,31 +64,31 @@ centos6:
 wheezybuild:
   image: quay.io/stackstorm/packagingenv:wheezy
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: volumes-circle
 
 jessiebuild:
   image: quay.io/stackstorm/packagingenv:jessie
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: volumes-circle
 
 trustybuild:
   image: quay.io/stackstorm/packagingenv:trusty
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: volumes-circle
 
 centos6build:
   image: quay.io/stackstorm/packagingenv:centos6
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: volumes-circle
 
 centos7build:
   image: quay.io/stackstorm/packagingenv:centos7
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: volumes-circle
 
 ## Package testing nodes
@@ -96,31 +96,31 @@ centos7build:
 wheezytest:
   image: quay.io/dennybaa/droneunit:wheezy-sshd
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: volumes-circle
 
 jessietest:
   image: quay.io/dennybaa/droneunit:jessie-sshd
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: volumes-circle
 
 trustytest:
   image: quay.io/dennybaa/droneunit:trusty-upstart
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: volumes-circle
 
 centos6test:
   image: quay.io/dennybaa/droneunit:centos6-sshd
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: volumes-circle
 
 centos7test:
   image: quay.io/dennybaa/droneunit:centos7-systemd
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: volumes-circle
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup

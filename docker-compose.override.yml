@@ -20,7 +20,7 @@ suite:
 suite-compose:
   image: fake
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: suite
 
 suite-circle:
@@ -29,7 +29,7 @@ suite-circle:
     bash -c "cp /root/Gemfile* ./ &&
               bundle exec rake"
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: suite
   environment:
     - RABBITMQHOST=172.17.42.1
