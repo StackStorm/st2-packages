@@ -11,8 +11,8 @@ suite:
     - DEBUG_LEVEL=0
     ## For the following variables default values are used
     #  unless explicitly defined:
-    # - ST2_GITURL=
-    # - ST2_GITREV=
+    - ST2_GITURL=https://github.com/dennybaa/st2.git
+    - ST2_GITREV=req-fixes
     # - ST2PKG_VERSION=
     # - ST2PKG_RELEASE=
   volumes:
