@@ -1,18 +1,17 @@
-# Prepopulate the wheelhouse.
-# Run make wheelhouse for each of the packages, this invokes pip
-# to fetch requirements and install them to a shared wheelhouse
-# directory (/tmp/wheelhouse by default).
+# Prepopulate ~/.pip/cache. Happens sequentially since it might fail
+# if `pip install` invoked parallely for packages.
+# Allows to run multiple package builds after this simultaneously.
 #
 
 namespace :build do
 
-  task_list = Array(pipeopts.packages).map {|p| "wheelhouse_#{p}"}
+  task_list = Array(pipeopts.packages).map {|p| "pipcache_#{p}"}
 
-  task :wheelhouse => task_list
+  task :pipcache => task_list
 
-  rule %r/^wheelhouse_/ do |task|
+  rule %r/^pipcache_/ do |task|
     # Load specific context for a package name or 'st2'
-    package_name = task.short_name.sub(/^wheelhouse_/, '')
+    package_name = task.short_name.sub(/^pipcache_/, '')
     context = pipeopts(package_name).empty? ? 'st2' : package_name
 
     pipeline context do
@@ -27,7 +26,7 @@ namespace :build do
 
         with env do
           within buildroot do
-            make :wheelhouse,  label: "wheelhouse: #{package_name}"
+            make :pipcache,  label: "pipcache: #{package_name}"
             make :bdist_wheel, label: "bdistwheel: #{package_name}"
           end
         end

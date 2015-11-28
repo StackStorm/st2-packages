@@ -10,10 +10,10 @@ else
 	REDHAT := 1
 endif
 
-.PHONY: all install wheelhouse
+.PHONY: all install pipcache
 all: install
 
-install: wheelhouse changelog pre_install
+install: pipcache changelog pre_install
 
 post_install: bdist_wheel
 	sed -i "s%/var/log/%/var/log/mistral/%" $(DESTDIR)/etc/mistral/*logging.conf
@@ -31,10 +31,9 @@ populate_version: .stamp-populate_version
 	pip install $(shell cat requirements.txt | grep pbr)
 	touch $@
 
-wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: populate_version
-	# Install wheels into shared location
-	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+pipcache: .stamp-pipcache
+.stamp-pipcache: populate_version
+	pip install --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel

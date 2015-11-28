@@ -10,10 +10,10 @@ else
 	REDHAT := 1
 endif
 
-.PHONY: all install wheelhouse
+.PHONY: all install pipcache
 all: install
 
-install: wheelhouse changelog pre_install
+install: pipcache changelog pre_install
 
 post_install: bdist_wheel
 
@@ -36,10 +36,9 @@ ifeq ($(DEBIAN),1)
 	debchange -v $(ST2PKG_VERSION)-$(ST2PKG_RELEASE) -M "automated build version: $(ST2PKG_VERSION)"
 endif
 
-wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: populate_version requirements
-	# Install wheels into shared location
-	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+pipcache: .stamp-pipcache
+.stamp-pipcache: populate_version requirements
+	pip install --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
