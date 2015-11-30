@@ -2,6 +2,9 @@
 set -e
 set -x
 
+# Used for `RABBITMQHOST` `POSTGRESHOST` `MONGODBHOST`, see docker-compose.override.yml
+export HOST_IP=$(ifconfig docker0 | grep 'inet addr' | awk -F: '{print $2}' | awk '{print $1}')
+
 # Pass these ENV Variables for `docker-compose` to consume:
 # ST2_GITURL - st2 GitHub repository (ex: https://github.com/StackStorm/st2)
 # ST2_GITREV - st2 branch name (ex: master, v1.2.1). This will be used to determine correct Docker Tag: `latest`, `1.2.1`
