@@ -5,10 +5,6 @@ suite:
   working_dir: /root/st2-packages
   environment:
     - DEBUG_LEVEL=0
-    - ST2_GITURL=${ST2_GITURL}
-    - ST2_GITREV=${ST2_GITREV}
-    - ST2PKG_VERSION=${ST2PKG_VERSION}
-    - ST2PKG_RELEASE=${ST2PKG_RELEASE}
   volumes:
     - .:/root/st2-packages
     - /tmp/st2-packages:/root/build
@@ -16,14 +12,14 @@ suite:
 suite-compose:
   image: fake
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: suite
 
 suite-circle:
   image: fake
   command: build
   extends:
-    file: compose.yml
+    file: docker-compose.override.yml
     service: suite
   environment:
     - RABBITMQHOST=172.17.42.1
