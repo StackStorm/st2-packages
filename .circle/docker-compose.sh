@@ -19,10 +19,10 @@ case "$1" in
   ;;
   build)
     echo Starting Packages Build for $2 ...
-    docker-compose -f compose.yml -f docker-compose.circle.yml run $2
+    docker-compose -f compose.yml -f docker-compose.circle.yml run $2 build
   ;;
   test)
     echo Starting Tests for $2 ...
-    docker-compose -f compose.yml -f docker-compose.circle.yml run $2 bash -c 'cp /root/Gemfile* ./ && bundle exec rspec'
+    docker-compose -f compose.yml -f docker-compose.circle.yml run $2 test
   ;;
 esac
