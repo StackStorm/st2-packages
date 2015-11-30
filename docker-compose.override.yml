@@ -28,9 +28,9 @@ suite-circle:
     file: docker-compose.override.yml
     service: suite
   environment:
-    - RABBITMQHOST=172.17.42.1
-    - POSTGRESHOST=172.17.42.1
-    - MONGODBHOST=172.17.42.1
+    - RABBITMQHOST=172.17.0.2
+    - POSTGRESHOST=172.17.0.2
+    - MONGODBHOST=172.17.0.2
   volumes:
     - /home/ubuntu/.cache/pip:/root/.cache/pip
 
