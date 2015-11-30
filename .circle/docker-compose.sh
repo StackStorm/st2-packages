@@ -15,14 +15,14 @@ set -x
 case "$1" in
   pull)
     echo Pulling dependent Docker images for $2 ...
-    docker-compose -f compose.yml -f docker-compose.circle.yml run $2 /bin/true
+    docker-compose -f docker-compose.circle.yml run $2 /bin/true
   ;;
   build)
     echo Starting Packages Build for $2 ...
-    docker-compose -f compose.yml -f docker-compose.circle.yml run $2
+    docker-compose -f docker-compose.circle.yml run -e ST2_GITURL=${ST2_GITURL} -e ST2_GITREV=${ST2_GITREV} -e ST2PKG_VERSION=${ST2PKG_VERSION} -e ST2PKG_RELEASE=${ST2PKG_RELEASE} $2
   ;;
   test)
     echo Starting Tests for $2 ...
-    docker-compose -f compose.yml -f docker-compose.circle.yml run $2 bash -c 'cp /root/Gemfile* ./ && bundle exec rspec'
+    docker-compose -f docker-compose.circle.yml run $2 bash -c 'cp /root/Gemfile* ./ && bundle exec rspec'
   ;;
 esac
