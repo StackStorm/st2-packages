@@ -18,8 +18,8 @@ machine:
     ST2_GITURL: https://github.com/StackStorm/st2
     ST2_GITREV: master
     ST2_DOCKERFILES_REPO: https://github.com/armab/st2-dockerfiles
-    BUILD_DOCKER: 0
-    DEPLOY_DOCKER: 0
+    BUILD_DOCKER: 1
+    DEPLOY_DOCKER: 1
     DEPLOY_PACKAGES: 0
   # Don't forget we'll need latest Docker version for some features to work (CircleCI by default installs outdated version)
   services:
