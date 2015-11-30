@@ -20,7 +20,7 @@ case "$1" in
   ;;
   build)
     echo Starting Packages Build for $2 ...
-    docker-compose -f compose.yml -f docker-compose.circle.yml run \
+    docker-compose -f docker-compose.circle.yml run \
         -e ST2_GITURL=${ST2_GITURL} \
         -e ST2_GITREV=${ST2_GITREV} \
         -e ST2PKG_VERSION=${ST2PKG_VERSION} \
