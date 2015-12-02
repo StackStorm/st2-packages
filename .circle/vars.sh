@@ -2,6 +2,7 @@
 set -e
 
 DISTROS=(wheezy jessie trusty centos7)
+TESTING=(wheezy jessie trusty)
 DISTRO=${DISTROS[$CIRCLE_NODE_INDEX]}
 
 if [ -z "$ST2_GITURL" ]; then
@@ -38,6 +39,7 @@ ST2PKG_RELEASE=1
 
 set -x
 echo "export DISTROS=(${DISTROS[*]})" >> ~/.circlerc
+echo "export TESTING=(${TESTING[*]})" >> ~/.circlerc
 echo "export DISTRO=${DISTRO}" >> ~/.circlerc
 echo "export ST2PKG_VERSION=${ST2PKG_VERSION}" >> ~/.circlerc
 echo "export ST2PKG_RELEASE=${ST2PKG_RELEASE}" >> ~/.circlerc

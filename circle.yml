@@ -18,8 +18,8 @@ machine:
     ST2_GITURL: https://github.com/StackStorm/st2
     ST2_GITREV: master
     ST2_DOCKERFILES_REPO: https://github.com/StackStorm/st2-dockerfiles
-    BUILD_DOCKER: 1
-    DEPLOY_DOCKER: 1
+    BUILD_DOCKER: 0
+    DEPLOY_DOCKER: 0
     DEPLOY_PACKAGES: 0
   pre:
     # Paswordless SSH between parallel build nodes
@@ -41,7 +41,6 @@ checkout:
 dependencies:
   cache_directories:
     - ~/.cache/pip
-#    - ~/wheelhouse
   pre:
     - sudo .circle/configure-services.sh
     - sudo .circle/fix-cache-permissions.sh
