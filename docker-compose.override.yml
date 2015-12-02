@@ -33,7 +33,6 @@ volumes-circle:
   image: fake
   volumes:
     - /tmp/st2-packages:/root/build
-    - /home/ubuntu/wheelhouse:/tmp/wheelhouse
 
 ## Service used by st2
 #
