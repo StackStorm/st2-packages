@@ -18,18 +18,21 @@ machine:
     ST2_GITURL: https://github.com/StackStorm/st2
     ST2_GITREV: master
     ST2_DOCKERFILES_REPO: https://github.com/armab/st2-dockerfiles
-    BUILD_DOCKER: 0
-    DEPLOY_DOCKER: 0
+    BUILD_DOCKER: 1
+    DEPLOY_DOCKER: 1
     DEPLOY_PACKAGES: 0
-  # Don't forget we'll need latest Docker version for some features to work (CircleCI by default installs outdated version)
+  pre:
+    # Paswordless SSH between parallel build nodes
+    - sudo cp /home/ubuntu/.ssh/config /root/.ssh/config
+    # Need latest Docker version for some features to work (CircleCI by default works with outdated version)
+    - |
+      sudo curl -L -o /usr/bin/docker 'http://s3-external-1.amazonaws.com/circle-downloads/docker-1.9.0-circleci'
+      sudo chmod 0755 /usr/bin/docker
   services:
     - docker
     - mongodb
     - postgresql
     - rabbitmq-server
-  pre:
-    # Paswordless SSH between parallel build nodes
-    - sudo cp /home/ubuntu/.ssh/config /root/.ssh/config
 
 checkout:
   post:
