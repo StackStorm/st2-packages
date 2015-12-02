@@ -25,8 +25,6 @@ suite-circle:
     - RABBITMQHOST=${HOST_IP}
     - POSTGRESHOST=${HOST_IP}
     - MONGODBHOST=${HOST_IP}
-  volumes:
-    - /home/ubuntu/.cache/pip:/root/.cache/pip
 
 ## Volumes passed during compose or ci builds
 #
@@ -39,7 +37,6 @@ volumes-circle:
   image: fake
   volumes:
     - /tmp/st2-packages:/root/build
-    - /home/ubuntu/wheelhouse:/tmp/wheelhouse
 
 ## Service used by st2
 #
