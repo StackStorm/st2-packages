@@ -8,16 +8,20 @@ DISTRO=${DISTROS[$CIRCLE_NODE_INDEX]}
 if [ -z "$ST2_GITURL" ]; then
   # Handle pull requests properly
   if [ -z "$CIRCLE_PR_REPONAME" ]; then
-    ST2_GITURL=https://github.com/${CIRCLE_PR_USERNAME}/${CIRCLE_PR_REPONAME}
+    ST2_GITURL=https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
   else
-    ST2_GITURL=https://github.com/StackStorm/st2
+    ST2_GITURL=https://github.com/${CIRCLE_PR_USERNAME}/${CIRCLE_PR_REPONAME}
   fi
+  set -x
   echo "export ST2_GITURL=${ST2_GITURL}" >> ~/.circlerc
+  set +x
 fi
 
-if [ -z "ST2_GITREV" ]; then
+if [ -z "$ST2_GITREV" ]; then
   ST2_GITREV=${CIRCLE_BRANCH}
+  set -x
   echo "export ST2_GITREV=${CIRCLE_BRANCH}" >> ~/.circlerc
+  set +x
 fi
 
 # Get st2 version based on hardcoded string in st2common
@@ -33,12 +37,10 @@ fi
 # TODO: Get revision number based on existing Bintray packages (already uploaded)
 ST2PKG_RELEASE=1
 
+set -x
 echo "export DISTROS=(${DISTROS[*]})" >> ~/.circlerc
 echo "export TESTING=(${TESTING[*]})" >> ~/.circlerc
 echo "export DISTRO=${DISTRO}" >> ~/.circlerc
 echo "export ST2PKG_VERSION=${ST2PKG_VERSION}" >> ~/.circlerc
 echo "export ST2PKG_RELEASE=${ST2PKG_RELEASE}" >> ~/.circlerc
 #    - echo "ST2PKG_RELEASE=$(scripts/bintray.sh next-revision ${DISTRO} ${ST2PKG_VERSION})" >> ~/.circlerc
-
-set -x
-cat ~/.circlerc
