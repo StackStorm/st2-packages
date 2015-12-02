@@ -30,11 +30,16 @@ case "$1" in
         -e ST2PKG_RELEASE=${ST2PKG_RELEASE} $2 build
   ;;
   test)
-    echo Starting Tests for $2 ...
-    docker-compose -f docker-compose.circle.yml run \
-        -e ST2_GITURL=${ST2_GITURL} \
-        -e ST2_GITREV=${ST2_GITREV} \
-        -e ST2PKG_VERSION=${ST2PKG_VERSION} \
-        -e ST2PKG_RELEASE=${ST2PKG_RELEASE} $2 test
+    re="\\b$2\\b"
+    if [[ "${TESTING[@]}" =~ $re ]]; then
+      echo Starting Tests for $2 ...
+      docker-compose -f docker-compose.circle.yml run \
+          -e ST2_GITURL=${ST2_GITURL} \
+          -e ST2_GITREV=${ST2_GITREV} \
+          -e ST2PKG_VERSION=${ST2PKG_VERSION} \
+          -e ST2PKG_RELEASE=${ST2PKG_RELEASE} $2 test
+    else
+      echo Omitting Tests for $2 ...
+    fi
   ;;
 esac

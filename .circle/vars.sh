@@ -2,6 +2,7 @@
 set -e
 
 DISTROS=(wheezy jessie trusty centos7)
+TESTING=(wheezy jessie trusty)
 DISTRO=${DISTROS[$CIRCLE_NODE_INDEX]}
 
 # Get st2 version based on hardcoded string in st2common
@@ -11,6 +12,7 @@ ST2PKG_VERSION=$(python -c 'execfile("/tmp/st2_version.py"); print __version__')
 ST2PKG_RELEASE=1
 
 echo "export DISTROS=(${DISTROS[*]})" >> ~/.circlerc
+echo "export TESTING=(${TESTING[*]})" >> ~/.circlerc
 echo "export DISTRO=${DISTRO}" >> ~/.circlerc
 echo "export ST2PKG_VERSION=${ST2PKG_VERSION}" >> ~/.circlerc
 echo "export ST2PKG_RELEASE=${ST2PKG_RELEASE}" >> ~/.circlerc
