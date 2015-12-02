@@ -30,7 +30,7 @@ if [ -f ../st2common/st2common/__init__.py ]; then
     ST2PKG_VERSION=$(python -c 'execfile("../st2common/st2common/__init__.py"); print __version__')
 # build takes place in `st2-packages` repo
 else
-    curl -L -o /tmp/st2_version.py ${ST2_GITURL}/raw/${ST2_GITREV}/st2common/st2common/__init__.py
+    curl -SL -o /tmp/st2_version.py ${ST2_GITURL}/raw/${ST2_GITREV}/st2common/st2common/__init__.py
     ST2PKG_VERSION=$(python -c 'execfile("/tmp/st2_version.py"); print __version__')
 fi
 
