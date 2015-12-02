@@ -7,7 +7,7 @@ platform() {
 }
 
 version_delemiter() {
-  [ "$(platform)" = "deb" ] && echo '_' || '-'
+  [ "$(platform)" = "deb" ] && echo '_' || echo '-'
 }
 
 install_rpm() { sudo yum -y install $(lookup_fullnames "$@"); }

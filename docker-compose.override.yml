@@ -3,10 +3,6 @@
 suite:
   image: fake
   working_dir: /root/st2-packages
-  command: >-
-    bash -c "cp /root/Gemfile* ./ &&
-              bundle exec rake &&
-              bundle exec rspec"
   environment:
     - DEBUG_LEVEL=0
   volumes:
@@ -21,9 +17,7 @@ suite-compose:
 
 suite-circle:
   image: fake
-  command: >-
-    bash -c "cp /root/Gemfile* ./ &&
-              bundle exec rake"
+  command: build
   extends:
     file: docker-compose.override.yml
     service: suite

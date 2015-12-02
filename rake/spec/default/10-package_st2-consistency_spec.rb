@@ -65,12 +65,6 @@ shared_examples 'os package' do |name, _opts|
       describe file("/usr/share/python/#{venv_name}/bin/#{binary_name}") do
         it_behaves_like 'script or binary'
       end
-
-      if name != 'st2bundle'
-        describe service(service_name) do
-          it { is_expected.to be_enabled }
-        end
-      end
     end
   end
 end

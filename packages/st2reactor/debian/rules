@@ -30,6 +30,5 @@ override_dh_installdeb:
 	dh_installdeb
 
 override_dh_virtualenv:
-	dh_virtualenv --extra-pip-arg '--no-index' \
-								--extra-pip-arg '--find-links=$(WHEELDIR)' \
+	dh_virtualenv --extra-pip-arg '--find-links=$(WHEELDIR)' \
 								--no-test

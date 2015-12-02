@@ -13,7 +13,7 @@
 %define venv_dir %{buildroot}/%{venv_install_dir}
 %define venv_bin %{venv_dir}/bin
 %define venv_python %{venv_bin}/python
-%define venv_pip %{venv_python} %{venv_bin}/pip install --find-links=%{wheel_dir} --no-index
+%define venv_pip %{venv_python} %{venv_bin}/pip install --find-links=%{wheel_dir}
 
 # Install a link to a common binary 
 %define inst_venv_divertions \
@@ -35,8 +35,11 @@
 # 1. RECORD files are used by wheels for checksum. They contain path names which
 # match the buildroot and must be removed or the package will fail to build.
 # 2. Change the virtualenv path to the target installation direcotry.
+# 3. Install dependencies
+# 4. Install package itself
 %define pip_install_venv \
   %{venv_cmd} %{venv_dir} \
+  %{venv_pip} -r requirements.txt \
   %{venv_pip} . \
   find %{buildroot} -name "RECORD" -exec rm -rf {} \\; \
   venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir} \
