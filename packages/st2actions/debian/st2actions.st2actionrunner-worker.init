@@ -37,7 +37,7 @@ SCRIPTNAME=/etc/init.d/$NAME
 # Check if invoked worker service directly
 if [ -z $WORKERID ]; then
   log_action_msg "Can't start this service directly, use /etc/init.d/st2actionrunner instead"
-  exit 3
+  exit 2
 fi
 
 #
@@ -47,7 +47,7 @@ fi
 lsb_running()
 {
   procid=$(cat $PIDFILE 2>/dev/null)
-  [ ! -z $procid ] && [ -d /proc/$procid ] && \
+  [ ! -z "$procid" ] && [ -d /proc/$procid ] && \
       cat /proc/$procid/cmdline | grep -q $DAEMON && return 1
   return 0
 }

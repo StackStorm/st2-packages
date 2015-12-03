@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=mistral
 Group=mistral
-Environment="DEFAULT_ARGS=--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral.log"
+Environment="DAEMON_ARGS=--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral.log"
 EnvironmentFile=-/etc/sysconfig/mistral
 ExecStart=/usr/share/python/mistral/bin/mistral-server $DAEMON_ARGS
 TimeoutSec=60
