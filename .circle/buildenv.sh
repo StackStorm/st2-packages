@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-# buildenv is our exported environment (~/.buildenv)
-buildenv="ST2_GITURL ST2_GITREV ST2PKG_VERSION ST2PKG_RELEASE DISTRO TESTING"
 distros=($DISTROS)
 DISTRO=${distros[$CIRCLE_NODE_INDEX]}
 
