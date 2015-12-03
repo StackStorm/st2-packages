@@ -10,11 +10,11 @@
 set -e
 # Source the build environment defintion (details in buildenv.sh)
 . ~/.buildenv
-set -x
 
 # Used for `RABBITMQHOST` `POSTGRESHOST` `MONGODBHOST`, see docker-compose.override.yml
 HOST_IP=$(ifconfig docker0 | grep 'inet addr' | awk -F: '{print $2}' | awk '{print $1}')
 
+set -x
 case "$1" in
   # Perform fake command invocation, technically provides images "pull" phase.
   pull)
