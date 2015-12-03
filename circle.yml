@@ -15,6 +15,8 @@ general:
 machine:
   # Overwrite these ENV variables in parametrized (manual/API) builds
   environment:
+    DISTROS: "wheezy jessie trusty centos7"
+    NOTESTS: centos7
     ST2_GITURL: https://github.com/StackStorm/st2
     ST2_GITREV: master
     ST2_DOCKERFILES_REPO: https://github.com/StackStorm/st2-dockerfiles
@@ -36,7 +38,7 @@ machine:
 
 checkout:
   post:
-    - .circle/vars.sh
+    - .circle/buildenv.sh
 
 dependencies:
   cache_directories:
@@ -48,13 +50,13 @@ dependencies:
     - docker-compose version
     - docker version
   override:
-    - .circle/docker-compose.sh pull ${DISTRO}
+    - .circle/docker-compose.sh pull
   post:
-    - .circle/docker-compose.sh build ${DISTRO}
+    - .circle/docker-compose.sh build
 
 test:
   override:
-    - .circle/docker-compose.sh test ${DISTRO}:
+    - .circle/docker-compose.sh test:
         parallel: true
   post:
     - .circle/docker.sh build st2bundle
