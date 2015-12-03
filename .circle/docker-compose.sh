@@ -42,7 +42,7 @@ case "$1" in
         $DISTRO build
   ;;
   test)
-    [ "$TESTING" = 0 ] && { echo "Omitting Tests for $DISTRO ..." ; break; }
+    [ "$TESTING" = 0 ] && { echo "Omitting Tests for $DISTRO ..." ; exit 0; }
     echo Starting Tests for $DISTRO ...
     docker-compose -f docker-compose.circle.yml run \
         -e ST2_GITURL=${ST2_GITURL} \
