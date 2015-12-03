@@ -17,7 +17,7 @@ machine:
   environment:
     ST2_GITURL: https://github.com/StackStorm/st2
     ST2_GITREV: master
-    ST2_DOCKERFILES_REPO: https://github.com/armab/st2-dockerfiles
+    ST2_DOCKERFILES_REPO: https://github.com/StackStorm/st2-dockerfiles
     BUILD_DOCKER: 0
     DEPLOY_DOCKER: 0
     DEPLOY_PACKAGES: 0
