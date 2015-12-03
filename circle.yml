@@ -50,13 +50,13 @@ dependencies:
     - docker-compose version
     - docker version
   override:
-    - .circle/docker-compose.sh pull
+    - .circle/docker-compose.sh pull ${DISTRO}
   post:
-    - .circle/docker-compose.sh build
+    - .circle/docker-compose.sh build ${DISTRO}
 
 test:
   override:
-    - .circle/docker-compose.sh test:
+    - .circle/docker-compose.sh test ${DISTRO}:
         parallel: true
   post:
     - .circle/docker.sh build st2bundle
