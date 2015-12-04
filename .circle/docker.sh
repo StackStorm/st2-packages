@@ -91,8 +91,10 @@ case "$1" in
 
     docker login -e ${DOCKER_EMAIL} -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
 
+    echo 'Pushing StackStorm images to Docker Hub in parallel ...'
     for container in "${@:2}"; do
-      docker push stackstorm/${container}:${DOCKER_TAG}
+      docker push stackstorm/${container}:${DOCKER_TAG} &
     done
+    wait
   ;;
 esac

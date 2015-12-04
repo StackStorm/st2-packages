@@ -44,9 +44,7 @@ write_env() {
 ST2_GITURL=${ST2_GITURL:-$(st2_giturl)}
 ST2_GITREV=${ST2_GITREV:-$CIRCLE_BRANCH}
 ST2PKG_VERSION=$(fetch_version)
-# TODO: Get revision number based on existing Bintray packages (already uploaded)
-#    - echo "ST2PKG_RELEASE=$(scripts/bintray.sh next-revision ${DISTRO} ${ST2PKG_VERSION})" >> ~/.buildenv
-ST2PKG_RELEASE=1
+ST2PKG_RELEASE=$(.circle/bintray.sh next-revision ${DISTRO}_staging ${ST2PKG_VERSION})
 
 re="\\b$DISTRO\\b"
 [[ "$NOTESTS" =~ $re ]] && TESTING=0
