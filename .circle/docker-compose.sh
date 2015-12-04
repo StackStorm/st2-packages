@@ -10,15 +10,15 @@
 set -e
 # Source the build environment defintion (details in buildenv.sh)
 . ~/.buildenv
-set -x
 
 # Used for `RABBITMQHOST` `POSTGRESHOST` `MONGODBHOST`, see docker-compose.override.yml
 HOST_IP=$(ifconfig docker0 | grep 'inet addr' | awk -F: '{print $2}' | awk '{print $1}')
 
+set -x
 case "$1" in
   # Perform fake command invocation, technically provides images "pull" phase.
   pull)
-    echo Pulling dependent Docker images for $DISTRO ...
+    echo Pulling dependent Docker images for $2 ...
     docker-compose -f docker-compose.circle.yml run \
         -e ST2_GITURL=${ST2_GITURL} \
         -e ST2_GITREV=${ST2_GITREV} \
@@ -27,10 +27,10 @@ case "$1" in
         -e RABBITMQHOST=${HOST_IP} \
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
-        $DISTRO /bin/true
+        $2 /bin/true
   ;;
   build)
-    echo Starting Packages Build for $DISTRO ...
+    echo Starting Packages Build for $2 ...
     docker-compose -f docker-compose.circle.yml run \
         -e ST2_GITURL=${ST2_GITURL} \
         -e ST2_GITREV=${ST2_GITREV} \
@@ -39,11 +39,11 @@ case "$1" in
         -e RABBITMQHOST=${HOST_IP} \
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
-        $DISTRO build
+        $2 build
   ;;
   test)
-    [ "$TESTING" = 0 ] && { echo "Omitting Tests for $DISTRO ..." ; exit 0; }
-    echo Starting Tests for $DISTRO ...
+    [ "$TESTING" = 0 ] && { echo "Omitting Tests for $2 ..." ; exit 0; }
+    echo Starting Tests for $2 ...
     docker-compose -f docker-compose.circle.yml run \
         -e ST2_GITURL=${ST2_GITURL} \
         -e ST2_GITREV=${ST2_GITREV} \
@@ -52,6 +52,6 @@ case "$1" in
         -e RABBITMQHOST=${HOST_IP} \
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
-        $DISTRO test
+        $2 test
   ;;
 esac
