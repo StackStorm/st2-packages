@@ -61,48 +61,40 @@ function deploy() {
     exit 1
   fi
 
-  for PKG_PATH in ${PKG_DIR}/*.deb; do
+  for PKG_PATH in ${PKG_DIR}/*.{deb,rpm}; do
+    if grep -q '*' <<< "${PKG_PATH}"; then continue; fi
 
+    # Package name
     PKG=`basename ${PKG_PATH}`
-    # Parse metadata from package file name `st2api_0.14dev-20_amd64.deb`
-    # st2api
-    PKG_NAME=${PKG%%_*}
-    # 0.14dev
-    PKG_VERSION=$(echo ${PKG} | awk -F_ '{print $2}' | awk -F- '{print $1}')
-    # 20
-    PKG_RELEASE=$(echo ${PKG} | awk -F_ '{print $2}' | awk -F- '{print $2}')
-    # amd64
-    PKG_ARCH=$(echo ${PKG##*_} | awk -F. '{print $1}')
-    # deb
+    # deb or rpm
     PKG_TYPE=${PKG##*.}
-    # stable/unstable
-    PKG_IS_UNSTABLE=$(echo ${PKG_VERSION} | grep -qv 'dev'; echo $?)
+    # Parse package metadata
+    parse_${PKG_TYPE}
 
     if [ -z "$PKG_NAME" ] || [ -z "$PKG_VERSION" ] || [ -z "$PKG_RELEASE" ]; then
      echo "$PKG_PATH doesn't look like package, skipping..."
      continue
     fi
 
-    echo "[${PKG}] BINTRAY_ACCOUNT:       ${BINTRAY_ACCOUNT}"
-    echo "[${PKG}] BINTRAY_ORGANIZATION:  ${BINTRAY_ORGANIZATION}"
-    echo "[${PKG}] BINTRAY_REPO:          ${BINTRAY_REPO}"
-    echo "[${PKG}] PKG_PATH:              ${PKG_PATH}"
-    echo "[${PKG}] PKG:                   ${PKG}"
-    echo "[${PKG}] PKG_NAME:              ${PKG_NAME}"
-    echo "[${PKG}] PKG_VERSION:           ${PKG_VERSION}"
-    echo "[${PKG}] PKG_RELEASE:           ${PKG_RELEASE}"
-    echo "[${PKG}] PKG_ARCH:              ${PKG_ARCH}"
-    echo "[${PKG}] PKG_TYPE:              ${PKG_TYPE}"
-    echo "[${PKG}] PKG_IS_UNSTABLE:       ${PKG_IS_UNSTABLE}"
+    debug "BINTRAY_ACCOUNT:       ${BINTRAY_ACCOUNT}"
+    debug "BINTRAY_ORGANIZATION:  ${BINTRAY_ORGANIZATION}"
+    debug "BINTRAY_REPO:          ${BINTRAY_REPO}"
+    debug "PKG_PATH:              ${PKG_PATH}"
+    debug "PKG:                   ${PKG}"
+    debug "PKG_NAME:              ${PKG_NAME}"
+    debug "PKG_VERSION:           ${PKG_VERSION}"
+    debug "PKG_RELEASE:           ${PKG_RELEASE}"
+    debug "PKG_ARCH:              ${PKG_ARCH}"
+    debug "PKG_TYPE:              ${PKG_TYPE}"
+    debug "PKG_IS_UNSTABLE:       ${PKG_IS_UNSTABLE}"
 
     init_curl
     if (! check_package_exists); then
-      echo "[${PKG}] The package ${PKG_NAME} does not exit. It will be created"
+      debug "The package ${PKG_NAME} does not exist. It will be created"
       create_package
     fi
 
     deploy_${PKG_TYPE}
-    echo "----------------------------------------------"
   done
 }
 
@@ -110,16 +102,41 @@ function init_curl() {
   CURL="curl -u${BINTRAY_ACCOUNT}:${BINTRAY_API_KEY} -H Content-Type:application/json -H Accept:application/json"
 }
 
+function debug() {
+  echo "[${BINTRAY_REPO} ${PKG}] $1"
+}
+
+# Parse DEB metadata from package file name `st2api_1.2dev-20_amd64.deb`
+function parse_deb() {
+  # st2api
+  PKG_NAME=${PKG%%_*}
+  # 1.2dev
+  PKG_VERSION=$(echo ${PKG} | awk -F_ '{print $2}' | awk -F- '{print $1}')
+  # 20
+  PKG_RELEASE=$(echo ${PKG} | awk -F_ '{print $2}' | awk -F- '{print $2}')
+  # amd64
+  PKG_ARCH=$(echo ${PKG##*_} | awk -F. '{print $1}')
+  # stable/unstable
+  PKG_IS_UNSTABLE=$(echo ${PKG_VERSION} | grep -qv 'dev'; echo $?)
+}
+
+# Parse RPM metadata from package file name `st2client-1.2dev-20.x86_64.rpm`
+# https://fedoraproject.org/wiki/Packaging:NamingGuidelines
+function parse_rpm() {
+  debug "Deploying RPM is still Unsupported ... Skipping"
+  exit 0
+}
+
 function check_package_exists() {
-  echo "[${PKG}] Checking if package ${PKG_NAME} exists..."
+  debug "Checking if package ${PKG_NAME} exists..."
   [ $(${CURL} --write-out %{http_code} --silent --output /dev/null -X GET ${API}/packages/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${PKG_NAME}) -eq ${SUCCESS} ]
   package_exists=$?
-  echo "[${PKG}] Package ${PKG_NAME} exists? y:0/N:1 (${package_exists})"
+  debug "Package ${PKG_NAME} exists? y:0/N:1 (${package_exists})"
   return ${package_exists}
 }
 
 function create_package() {
-  echo "[${PKG}] Creating package ${PKG_NAME}..."
+  debug "Creating package ${PKG_NAME}..."
   data="{
     \"name\": \"${PKG_NAME}\",
     \"desc\": \"Packages for StackStorm event-driven automation platform\",
@@ -139,7 +156,7 @@ function create_package() {
 }
 
 function upload_content() {
-  echo "[${PKG}] Uploading ${PKG_PATH}..."
+  debug "Uploading ${PKG_PATH}..."
   if [ ${PKG_IS_UNSTABLE} -eq 1 ]; then
     DEBIAN_DISTRIBUTION=unstable
     FILE_PATH=/pool/unstable/main/${PKG_NAME:0:1}/${PKG_NAME}/${PKG}
@@ -149,17 +166,17 @@ function upload_content() {
   fi
   [ $(${CURL} --write-out %{http_code} --silent --output /dev/null -T ${PKG_PATH} -H X-Bintray-Package:${PKG_NAME} -H X-Bintray-Version:${PKG_VERSION}-${PKG_RELEASE} -H X-Bintray-Override:1 -H X-Bintray-Debian-Distribution:${DEBIAN_DISTRIBUTION} -H X-Bintray-Debian-Component:main -H X-Bintray-Debian-Architecture:${PKG_ARCH} ${API}/content/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${FILE_PATH}) -eq ${CREATED} ]
   uploaded=$?
-  echo "[${PKG}] DEB ${PKG_PATH} uploaded? y:0/N:1 (${uploaded})"
+  debug "DEB ${PKG_PATH} uploaded? y:0/N:1 (${uploaded})"
   return ${uploaded}
 }
 
 function deploy_deb() {
   if (upload_content); then
-    echo "[${PKG}] Publishing ${PKG_PATH}..."
+    debug "Publishing ${PKG_PATH}..."
     ${CURL} -X POST ${API}/content/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${PKG_NAME}/${PKG_VERSION}-${PKG_RELEASE}/publish -d "{ \"discard\": \"false\" }"
     echo ""
   else
-    echo "[${PKG}] First you should upload your deb ${PKG_PATH}!"
+    debug "First you should upload your deb ${PKG_PATH}!"
     exit 2
   fi
 }
@@ -196,7 +213,7 @@ function latest_revision() {
 }
 
 function deploy_rpm() {
-  echo "[${PKG}] Unsupported"
+  debug "Deploying RPM is still Unsupported ... Skipping"
   exit 0
 }
 
