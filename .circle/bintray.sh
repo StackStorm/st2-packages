@@ -18,11 +18,6 @@ CREATED=201
 # bintray.sh next-revision trusty 0.12dev
 # bintray.sh next-revision wheezy 1.1.2
 function main() {
-  : ${DEPLOY_PACKAGES:=1}
-  if [ ${DEPLOY_PACKAGES} -eq 0 ]; then
-    echo 'Skipping Deploy because DEPLOY_PACKAGES=0'
-    exit
-  fi
   : ${BINTRAY_ACCOUNT:? BINTRAY_ACCOUNT env is required}
   : ${BINTRAY_API_KEY:? BINTRAY_API_KEY env is required}
   : ${BINTRAY_ORGANIZATION:? BINTRAY_ORGANIZATION env is required}
@@ -46,11 +41,15 @@ function main() {
     esac
 }
 
-
 # Arguments
 # $2 BINTRAY_REPO - the targeted repo (could be rpm or deb)
 # $3 PKG_DIR - directory with packages to upload
 function deploy() {
+  : ${DEPLOY_PACKAGES:=1}
+  if [ ${DEPLOY_PACKAGES} -eq 0 ]; then
+    echo 'Skipping Deploy because DEPLOY_PACKAGES=0'
+    exit
+  fi
   BINTRAY_REPO=$1
   PKG_DIR=$2
 
