@@ -15,10 +15,10 @@ machine:
     DISTROS: "wheezy jessie trusty centos7"
     NOTESTS: centos7
     ST2_GITURL: https://github.com/StackStorm/st2
-    ST2_GITREV: v1.1.1
+    ST2_GITREV: master
     ST2_DOCKERFILES_REPO: https://github.com/StackStorm/st2-dockerfiles
-    BUILD_DOCKER: 1
-    DEPLOY_DOCKER: 1
+    BUILD_DOCKER: 0
+    DEPLOY_DOCKER: 0
     DEPLOY_PACKAGES: 1
   pre:
     - mkdir -p ~/packages
@@ -57,7 +57,6 @@ test:
     # Copy all Packages to node0
     - rsync -rv /tmp/st2-packages/ node0:~/packages/${DISTRO}:
         parallel: true
-
   post:
     - .circle/docker.sh build st2bundle
     - .circle/docker.sh build st2actionrunner st2api st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer
