@@ -73,7 +73,7 @@ deployment:
         DISTROS=($DISTROS)
         for i in $(seq 0 $((CIRCLE_NODE_TOTAL-1))); do
           echo Deploying Bintray artifacts for "${DISTROS[$i]}" ...
-          .circle/bintray.sh deploy "${DISTROS[$i]}_staging" "~/packages/${DISTROS[$i]}" &
+          .circle/bintray.sh deploy ${DISTROS[$i]}_staging ~/packages/${DISTROS[$i]} &
         done
         wait
       - echo Web Hook triggering st2 Staging box with build context payload will be here
