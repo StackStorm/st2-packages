@@ -28,7 +28,8 @@ namespace :build do
         with env do
           within buildroot do
             make :wheelhouse,  label: "wheelhouse: #{package_name}"
-            make :bdist_wheel, label: "bdistwheel: #{package_name}"
+            # Do not try to run it manually! left here as a reminder!
+            # make :bdist_wheel, label: "bdistwheel: #{package_name}"
           end
         end
       end

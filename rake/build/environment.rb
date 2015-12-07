@@ -14,7 +14,7 @@ pipeopts do
 
   env     :buildnode
   env     :testnode
-  envpass :testmode, 'bundle' # components || bundle
+  envpass :testmode, 'components' # components || bundle
   envpass :basedir,  '/root'
   envpass :debug_level, 1
   envpass :artifact_dir, '/root/build'    # make it temp??
@@ -64,7 +64,7 @@ end
 ## Choose packages to test
 pipeopts.packages.dup.tap do |list|
   if pipeopts.testmode == 'components'
-    list.delete!(:st2bundle)
+    list.delete(:st2bundle)
   elsif list.include?(:st2bundle)
     list.select! {|p| not p.to_s.start_with?('st2')}
     list << :st2bundle
