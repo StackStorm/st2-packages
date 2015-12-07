@@ -2,9 +2,9 @@
 # TODO: Add VCS TAG metadata for stable version (create version)
 
 # Pass these ENV Variables
-# BINTRAY_ORGANIZATION - Bintray organization
 # BINTRAY_ACCOUNT - your BinTray username
 # BINTRAY_API_KEY - act as a password for REST authentication
+# BINTRAY_ORGANIZATION - Bintray organization (optional, defaults to `stackstorm`)
 
 # API-related Constants
 API=https://api.bintray.com
@@ -18,9 +18,7 @@ CREATED=201
 # bintray.sh next-revision trusty 0.12dev
 # bintray.sh next-revision wheezy 1.1.2
 function main() {
-  : ${BINTRAY_ACCOUNT:? BINTRAY_ACCOUNT env is required}
-  : ${BINTRAY_API_KEY:? BINTRAY_API_KEY env is required}
-  : ${BINTRAY_ORGANIZATION:? BINTRAY_ORGANIZATION env is required}
+  : ${BINTRAY_ORGANIZATION:=stackstorm}
 
     case "$1" in
       deploy)
@@ -45,6 +43,8 @@ function main() {
 # $2 BINTRAY_REPO - the targeted repo (could be rpm or deb)
 # $3 PKG_DIR - directory with packages to upload
 function deploy() {
+  : ${BINTRAY_ACCOUNT:? BINTRAY_ACCOUNT env is required}
+  : ${BINTRAY_API_KEY:? BINTRAY_API_KEY env is required}
   : ${DEPLOY_PACKAGES:=1}
   if [ ${DEPLOY_PACKAGES} -eq 0 ]; then
     echo 'Skipping Deploy because DEPLOY_PACKAGES=0'
