@@ -13,18 +13,17 @@ namespace :build do
   # Get incremental wheeldeps, like [w1], [w1, w2] etc.
   wheelreq_proc = ->(tn) do
     package_name = tn.sub(/^build_/, '')
-    wheelreq_list = Array(pipeopts.packages).take_while {|p| p.to_s != package_name}
+    wheelreq_list = pipeopts.packages.take_while {|p| p.to_s != package_name}
     wheelreq_list << package_name
     wheelreq_list.map {|r| "wheelhouse_#{r}"}
   end
 
-  package_list = Array(pipeopts.packages).map {|t| "build_#{t}"}
+  package_list = pipeopts.packages.map {|t| "build_#{t}"}
   multitask :packages => [:wheelhouse, *package_list]
 
   # We should built custom python for outdated OSes such as CentOS 6.
-  build_dependencies = [ wheelreq_proc ]
-  if pipeopts('st2python')[:st2_python].to_i == 1
-    build_dependencies.unshift('build:st2python')
+  build_dependencies = [ wheelreq_proc ].tap do |list|
+    list.unshift('build:st2python') if pipeopts.st2python_enabled
   end
 
   desc 'Build custom python version (st2python)'
@@ -45,6 +44,9 @@ namespace :build do
       end
     end
   end
+
+  # Auxiliary task, used when ST2_PACKEGES="none", can used to build python only
+  rule %r/^build_none$/ => build_dependencies
 
   # Generate build task for packages
   rule %r/^build_/ => build_dependencies do |task|
