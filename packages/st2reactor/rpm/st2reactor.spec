@@ -10,11 +10,7 @@ Requires: st2common = %{version}-%{release}
 %install
   %default_install
   %pip_install_venv
-
-  # systemd service file
-  mkdir -p %{buildroot}%{_unitdir}
-  install -m0644 %{SOURCE0}/rpm/st2rulesengine.service %{buildroot}%{_unitdir}/st2rulesengine.service
-  install -m0644 %{SOURCE0}/rpm/st2sensorcontainer.service %{buildroot}%{_unitdir}/st2sensorcontainer.service
+  %service_install st2rulesengine st2sensorcontainer
   make post_install DESTDIR=%{?buildroot}
 
 %prep
@@ -25,18 +21,22 @@ Requires: st2common = %{version}-%{release}
   rm -rf %{buildroot}
 
 %post
-  %systemd_post st2rulesengine st2sensorcontainer
-  systemctl --no-reload enable st2rulesengine st2sensorcontainer >/dev/null 2>&1 || :
+  %service_post st2rulesengine st2sensorcontainer
 
 %preun
-  %systemd_preun st2rulesengine st2sensorcontainer
+  %service_preun st2rulesengine st2sensorcontainer
 
 %postun
-  %systemd_postun
+  %service_postun st2rulesengine st2sensorcontainer
 
 %files
   %{_bindir}/*
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/st2/*
+%if %{use_systemd}
   %{_unitdir}/st2rulesengine.service
   %{_unitdir}/st2sensorcontainer.service
+%else
+  %{_sysconfdir}/rc.d/init.d/st2rulesengine
+  %{_sysconfdir}/rc.d/init.d/st2sensorcontainer
+%endif

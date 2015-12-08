@@ -10,14 +10,7 @@ Requires: st2common = %{version}-%{release}
 %install
   %default_install
   %pip_install_venv
-
-# systemd service file
-%if %{use_systemd}
-  install -D -p -m0644 %{SOURCE0}/rpm/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
-%else
-  install -D -p -m0755 %{SOURCE0}/rpm/%{name}.init %{buildroot}%{_sysconfdir}/rc.d/init.d/%{name}
-%endif
-  mkdir -p %{buildroot}%{_unitdir}
+  %service_install %{name}
   make post_install DESTDIR=%{?buildroot}
 
 %prep
@@ -28,30 +21,14 @@ Requires: st2common = %{version}-%{release}
   rm -rf %{buildroot}
 
 %post
-%if %{use_systemd}
-  %systemd_post %{name}
-  # enable to enforce the policy, which seems to be disabled by default
-  systemctl --no-reload enable %{name} >/dev/null 2>&1 || :
-%else
-  /sbin/chkconfig --add %{name} || :
-%endif
+  %service_post %{name}
 
 %preun
-  %systemd_preun %{name}
-%if ! %{use_systemd}
-  /sbin/service %{name} stop &>/dev/null || :
-  /sbin/chkconfig --del %{name} &>/dev/null || :
-%endif
+  %service_preun %{name}
 
 %postun
-%if %{use_systemd}
+  %service_postun %{name}
   %systemd_postun_with_restart
-%else
-  if [ $1 -ge 1 ]; then
-    # package upgrade!
-    /sbin/service %{name} try-restart &>/dev/null || :
-  fi
-%endif
 
 %files
   %{_datadir}/python/%{name}
