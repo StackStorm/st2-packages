@@ -6,14 +6,10 @@ import os
 import sys
 import json
 import re
-import requests
 from itertools import islice
 
-ST2_HOOK_URL = os.environ.get('ST2_HOOK_URL') or sys.exit('ST2_HOOK_URL env variable is required!')
-ST2_API_KEY = os.environ.get('ST2_API_KEY') or sys.exit('ST2_API_KEY env variable is required!')
 DISTROS = (os.environ.get('DISTROS') or sys.exit('DISTROS env variable is required!')).split(' ')
 CIRCLE_NODE_TOTAL = int(os.environ.get('CIRCLE_NODE_TOTAL')) or sys.exit('CIRCLE_NODE_TOTAL env variable is required!')
-requests.packages.urllib3.disable_warnings()
 
 
 def env(var):
@@ -35,6 +31,7 @@ class Payload(object):
         'success': True,
         'reason': [],
         'circle': {
+            'doc': 'https://circleci.com/docs/environment-variables',
             'CIRCLE_PROJECT_USERNAME': env('CIRCLE_PROJECT_USERNAME'),
             'CIRCLE_PROJECT_REPONAME': env('CIRCLE_PROJECT_REPONAME'),
             'CIRCLE_BRANCH': env('CIRCLE_BRANCH'),
@@ -99,12 +96,16 @@ if __name__ == '__main__':
                 Payload.data['success'] = False
                 Payload.data['reason'].append("CircleCI build produced no packages for '{0}'".format(distro))
 
-    headers = {
-        'Content-Type': 'application/json',
-        'St2-Api-Key': ST2_API_KEY
-    }
-    response = requests.post(ST2_HOOK_URL, headers=headers, json=Payload.data, verify=False)
-    if response.status_code != 202:
-        raise Exception("Failed to hook ST2: {0}\n\n{1}".format(response.status_code, response.text))
+    payload_file = os.path.abspath(os.path.join(args.dir, 'payload.json'))
+    with open(payload_file, 'w') as f:
+        f.write(json.dumps(Payload.data))
 
-    print 'OK: {0}\n\n{1}'.format(response.status_code, response.text)
+    print 'Build metadata will be available via URL:'
+    print 'https://circle-artifacts.com/gh/{0}/{1}/{2}/artifacts/0{3}'.format(
+        os.environ.get('CIRCLE_PR_USERNAME') or env('CIRCLE_PROJECT_USERNAME'),
+        os.environ.get('CIRCLE_PR_REPONAME') or env('CIRCLE_PROJECT_REPONAME'),
+        env('CIRCLE_BUILD_NUM'),
+        payload_file
+    )
+    print ""
+    print json.dumps(Payload.data)
