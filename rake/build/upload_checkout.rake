@@ -21,12 +21,13 @@ namespace :build do
     end
   end
 
-  # go throug all packages and get checkout option
-  checkout_contexts = Array(pipeopts.packages).map do |package|
+  # Go throug all packages and get checkout option
+  checkout_contexts = []
+  checkout_contexts = pipeopts.packages.map do |package|
     package_name = package.to_s
     context = pipeopts(package_name).empty? ? 'st2' : package_name
     pipeopts(context).checkout
-  end.flatten.uniq
+  end.flatten.uniq unless pipeopts.packages == ['none']
 
   desc 'Parallely checkout sources from github.com'
   multitask :checkout => checkout_contexts.map {|c| :"checkout_#{c}"}

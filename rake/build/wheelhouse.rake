@@ -6,9 +6,11 @@
 
 namespace :build do
 
-  task_list = Array(pipeopts.packages).map {|p| "wheelhouse_#{p}"}
-
+  task_list = pipeopts.packages.map {|p| "wheelhouse_#{p}"}
   task :wheelhouse => task_list
+
+  # Auxiliary task, used when ST2_PACKEGES="none", can used to build python only
+  rule %r/^wheelhouse_none$/
 
   rule %r/^wheelhouse_/ do |task|
     # Load specific context for a package name or 'st2'

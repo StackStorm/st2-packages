@@ -1,4 +1,5 @@
 %define package st2exporter
+%define svc_user st2
 %include ../rpmspec/st2pkg_toptags.spec
 
 Summary: St2Exporter - StackStorm exporter component
@@ -10,10 +11,7 @@ Requires: st2common = %{version}-%{release}
 %install
   %default_install
   %pip_install_venv
-
-  # systemd service file
-  mkdir -p %{buildroot}%{_unitdir}
-  install -m0644 %{SOURCE0}/rpm/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
+  %service_install %{name}
   make post_install DESTDIR=%{?buildroot}
 
 %prep
@@ -24,17 +22,20 @@ Requires: st2common = %{version}-%{release}
   rm -rf %{buildroot}
 
 %post
-  %systemd_post %{name}
-  systemctl --no-reload enable %{name} >/dev/null 2>&1 || :
+  %service_post %{name}
 
 %preun
-  %systemd_preun %{name}
+  %service_preun %{name}
 
 %postun
-  %systemd_postun
+  %service_postun %{name}
 
 %files
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/st2/*
-  %{_unitdir}/%{name}.service
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
+%if %{use_systemd}
+  %{_unitdir}/%{name}.service
+%else
+  %{_sysconfdir}/rc.d/init.d/%{name}
+%endif

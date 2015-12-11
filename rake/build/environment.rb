@@ -2,10 +2,19 @@
 require 'hashie'
 require 'resolv'
 
-# Defines options for the build pipeline
+## Defines options for the build pipeline.
+#   NB! Should be ordered with st2common going first and
+#   NB! st2bundle going after all st2 components.
 #
+DEFAULT_PACKAGES = [
+  :st2common, :st2api, :st2actions,
+  :st2auth, :st2client, :st2exporter,
+  :st2reactor, :st2debug, :st2bundle,
+  :mistral
+].map { |p| p.to_s }
 
-# Set global pipeline options
+## Set global pipeline options
+#
 pipeopts do
   ssh_options({
     keys: %w(/root/.ssh/busybee),
@@ -23,16 +32,27 @@ pipeopts do
   envpass :wheeldir, '/tmp/wheelhouse'
 
   # Single package in a gitdir is standalone
-  standalone true
   checkout :st2, :mistral
   upload_sources 'packages', 'scripts', 'rpmspec'
 
   # Services host variables
   [:rabbitmq, :mongodb, :postgres].each {|n| envpass "#{n}host", n.to_s}
 
-  # This that what we want to build
-  packages  :st2common, :st2actions, :st2api, :st2auth, :st2client,
-            :st2reactor, :st2exporter, :st2debug, :st2bundle, :mistral
+  # Read build list into var, however later on we use packages, see below!
+  env :package_list, from: 'ST2_PACKAGES'
+end
+
+## Set packages to build and to test
+#
+pipeopts[:packages] = pipeopts.package_list.to_s.split(' ')
+pipeopts[:packages].concat(DEFAULT_PACKAGES) if pipeopts[:packages].empty?
+
+pipeopts[:packages_to_test] = pipeopts.packages.dup.tap do |list|
+  if pipeopts.testmode == 'components'
+    list.delete('st2bundle')
+  else
+    list.select! { |p| p == 'st2bundle' || !p.start_with?('st2') }
+  end
 end
 
 pipeopts 'st2python' do
@@ -40,6 +60,7 @@ pipeopts 'st2python' do
   envpass :st2_python_version, '2.7.10'
   envpass :st2_python_relase, 1
 end
+pipeopts[:st2python_enabled] = pipeopts('st2python')[:st2_python].to_i == 1
 
 pipeopts 'st2' do
   # st2 packages are not standalone (ie. there are many $gitdir/st2*)
@@ -53,6 +74,7 @@ pipeopts 'st2' do
 end
 
 pipeopts 'mistral' do
+  standalone true
   checkout :mistral
   envpass :giturl,  'https://github.com/StackStorm/mistral', from: 'MISTRAL_GITURL'
   envpass :gitrev,  'st2-1.1.0',                             from: 'MISTRAL_GITREV'
@@ -61,19 +83,8 @@ pipeopts 'mistral' do
   envpass :mistral_release, 1
 end
 
-## Choose packages to test
-pipeopts.packages.dup.tap do |list|
-  if pipeopts.testmode == 'components'
-    list.delete(:st2bundle)
-  elsif list.include?(:st2bundle)
-    list.select! {|p| not p.to_s.start_with?('st2')}
-    list << :st2bundle
-  end
-  pipeopts[:testing_list] = list
-end
-
 ## Serverspec or netcat work in a buggy fashion,
-#  we have to resolve remotes
+#  we have to resolve remotes.
 [:rabbitmq, :mongodb, :postgres].map{|n| :"#{n}host"}.each do |remote|
   value = pipeopts[remote].to_s
   unless value =~ Resolv::AddressRegex

@@ -63,3 +63,59 @@
 %else
   %global use_st2python 0
 %endif
+
+# Install systemd or sysv service into the package
+#
+%define service_install() \
+  %if %{use_systemd} \
+    for svc in %{?*}; do \
+      install -D -p -m0644 %{SOURCE0}/rpm/$svc.service %{buildroot}%{_unitdir}/$svc.service \
+    done \
+  %else \
+    for svc in %{?*}; do \
+      install -D -p -m0755 %{SOURCE0}/rpm/$svc.init %{buildroot}%{_sysconfdir}/rc.d/init.d/$svc \
+    done \
+  %endif \
+%{nil}
+
+# Service post stage action
+# enables used to enforce the policy, which seems to be disabled by default
+#
+%define service_post() \
+  %if %{use_systemd} \
+    %{expand: %systemd_post %%{?*}} \
+    systemctl --no-reload enable %{?*} >/dev/null 2>&1 || : \
+  %else \
+    for svc in %{?*}; do \
+      /sbin/chkconfig --add $svc || : \
+    done \
+  %endif \
+%{nil}
+
+# Service preun stage action
+#
+%define service_preun() \
+  %if %{use_systemd} \
+    %{expand: %systemd_preun %%{?*}} \
+  %else \
+    for svc in %{?*}; do \
+      /sbin/service $svc stop &>/dev/null || : \
+      /sbin/chkconfig --del $svc &>/dev/null || : \
+    done \
+  %endif \
+%{nil}
+
+# Service postun stage action
+# ($1 > 1 on package upgrade)
+#
+%define service_postun() \
+  %if %{use_systemd} \
+    %{expand: %systemd_postun_with_restart %%{?*}} \
+  %else \
+    if [ $1 -ge 1 ]; then \
+      for svc in %{?*}; do \
+        /sbin/service $svc try-restart &>/dev/null || : \
+      done \
+    fi \
+  %endif \
+%{nil}

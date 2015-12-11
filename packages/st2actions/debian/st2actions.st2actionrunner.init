@@ -21,7 +21,6 @@ NAME=st2actionrunner
 DAEMON=/usr/share/python/st2actions/bin/$NAME
 SPAWNER=/usr/share/python/st2actions/bin/runners.sh
 SCRIPTNAME=/etc/init.d/$NAME
-WORKERSNUM=$(/usr/bin/nproc)
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0

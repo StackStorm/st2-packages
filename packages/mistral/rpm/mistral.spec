@@ -24,11 +24,8 @@ Summary: Mistral workflow service
 %install
   %default_install
   %pip_install_venv
-
-  # systemd service file
-  mkdir -p %{buildroot}%{_unitdir}
-  install -m0644 %{SOURCE0}/rpm/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
-  make post_install DESTDIR=%{buildroot}
+  %service_install %{name}
+  make post_install DESTDIR=%{?buildroot}
 
 %prep
   rm -rf %{buildroot}
@@ -42,17 +39,20 @@ Summary: Mistral workflow service
   exit 0
 
 %post
-  %systemd_post %{name}
-  systemctl --no-reload enable %{name} >/dev/null 2>&1 || :
+  %service_post %{name}
 
 %preun
-  %systemd_preun %{name}
+  %service_preun %{name}
 
 %postun
-  %systemd_postun
+  %service_postun %{name}
 
 %files
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/mistral/*
-  %{_unitdir}/%{name}.service
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/mistral
+%if %{use_systemd}
+  %{_unitdir}/%{name}.service
+%else
+  %{_sysconfdir}/rc.d/init.d/%{name}
+%endif

@@ -7,16 +7,14 @@ Requires: st2common = %{version}-%{release}
 %description
   <insert long description, indented with spaces>
 
+# Define worker name
+%define worker_name %{!?use_systemd:st2actionrunner-worker}%{?use_systemd:st2actionrunner@}
+
+
 %install
   %default_install
   %pip_install_venv
-
-  # systemd service file
-  mkdir -p %{buildroot}%{_unitdir}
-  install -m0644 %{SOURCE0}/rpm/st2actionrunner.service %{buildroot}%{_unitdir}/st2actionrunner.service
-  install -m0644 %{SOURCE0}/rpm/st2actionrunner@.service %{buildroot}%{_unitdir}/st2actionrunner@.service
-  install -m0644 %{SOURCE0}/rpm/st2notifier.service %{buildroot}%{_unitdir}/st2notifier.service
-  install -m0644 %{SOURCE0}/rpm/st2resultstracker.service %{buildroot}%{_unitdir}/st2resultstracker.service
+  %service_install st2notifier st2resultstracker st2actionrunner %{worker_name}
   make post_install DESTDIR=%{?buildroot}
 
 %prep
@@ -27,19 +25,25 @@ Requires: st2common = %{version}-%{release}
   rm -rf %{buildroot}
 
 %post
-  %systemd_post st2actionrunner st2actionrunner@ st2notifier st2resultstracker
-  systemctl --no-reload enable st2actionrunner st2notifier st2resultstracker >/dev/null 2>&1 || :
+  %service_post st2notifier st2resultstracker st2actionrunner %{worker_name}
 
 %preun
-  %systemd_preun st2actionrunner st2actionrunner@ st2notifier st2resultstracker
+  %service_preun st2notifier st2resultstracker st2actionrunner %{worker_name}
 
 %postun
-  %systemd_postun
+  %service_postun st2notifier st2resultstracker st2actionrunner %{worker_name}
 
 %files
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/st2/*
+%if %{use_systemd}
   %{_unitdir}/st2actionrunner.service
-  %{_unitdir}/st2actionrunner@.service
+  %{_unitdir}/%{worker_name}.service
   %{_unitdir}/st2notifier.service
   %{_unitdir}/st2resultstracker.service
+%else
+  %{_sysconfdir}/rc.d/init.d/st2actionrunner
+  %{_sysconfdir}/rc.d/init.d/%{worker_name}
+  %{_sysconfdir}/rc.d/init.d/st2notifier
+  %{_sysconfdir}/rc.d/init.d/st2resultstracker
+%endif

@@ -5,7 +5,7 @@ module SpecPackageIterables
     @name = name
     @opts = Hashie::Mash.new.merge(opts || {})
     # we use different venv name for st2bundle package
-    @venv_name = (name == :st2bundle ? :st2 : name)
+    @venv_name = (name.to_s == 'st2bundle' ? 'st2' : name).to_s
   end
 
   # Collection iterating methods over spec lists

@@ -4,7 +4,7 @@
 # Provides: st2auth
 # Required-Start: $local_fs $network $named $remote_fs $syslog
 # Required-Stop: $local_fs $network $named $remote_fs $syslog
-# Short-Description: Very Secure Ftp Daemon
+# Short-Description: st2auth component
 # Description: St2Auth - StackStorm authentication service component
 ### END INIT INFO
 
@@ -43,6 +43,8 @@ lockfile=/var/lock/subsys/$NAME
 nohup_start() {
   local nicelevel corelimit
   local pid base= nice= bg=
+  local runas_user="${RUNAS_USER:-root}"
+  local runas_group="${RUNAS_GROUP:-root}"
   nicelevel=0
 
   base=${1##*/}
@@ -59,7 +61,7 @@ nohup_start() {
   [ "${BOOTUP:-}" = "verbose" -a -z "${LSB:-}" ] && echo -n " $base"
 
   # And start it up.
-  $nice runuser -s /bin/bash -g $RUNAS_GROUP $RUNAS_USER -c "$corelimit >/dev/null 2>&1 ; nohup </dev/null >/dev/null 2>&1 $* &"
+  $nice runuser -s /bin/bash -g $runas_group $runas_user -c "$corelimit >/dev/null 2>&1 ; nohup </dev/null >/dev/null 2>&1 $* &"
 }
 
 # Write pid of a running daemon into the pidfile
@@ -69,7 +71,7 @@ write_pidfile() {
   base=${daemon##*/}
   pidfile=${pidfile:-/var/run/$base.pid}
 
-  currentpid=$(ps -Aa -o pid,cmd | grep "\B$1" | awk '{print $1}')
+  currentpid=$(ps -Aa -o pid,cmd | tail -n1 | grep "\B$1" | awk '{print $1}')
   [ -n "$currentpid" ] && echo $currentpid > $pidfile
 }
 
