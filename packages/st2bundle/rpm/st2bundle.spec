@@ -14,6 +14,7 @@ Conflicts: st2common
 # Define worker name
 %define worker_name %{!?use_systemd:st2actionrunner-worker}%{?use_systemd:st2actionrunner@}
 
+
 %install
   %default_install
   %pip_install_venv
@@ -70,7 +71,7 @@ Conflicts: st2common
   /opt/stackstorm/packs/linux
   /opt/stackstorm/packs/packs
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
-%if %{use_systemd}
+%if 0%{?use_systemd}
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
   %{_unitdir}/st2api.service

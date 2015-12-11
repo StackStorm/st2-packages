@@ -36,7 +36,7 @@ Requires: st2common = %{version}-%{release}, git
 %files
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/st2/*
-%if %{use_systemd}
+%if 0%{?use_systemd}
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
   %{_unitdir}/st2notifier.service

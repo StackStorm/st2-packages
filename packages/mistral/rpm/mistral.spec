@@ -51,7 +51,7 @@ Summary: Mistral workflow service
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/mistral/*
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/mistral
-%if %{use_systemd}
+%if 0%{?use_systemd}
   %{_unitdir}/%{name}.service
 %else
   %{_sysconfdir}/rc.d/init.d/%{name}

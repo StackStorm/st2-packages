@@ -34,7 +34,7 @@ Requires: st2common = %{version}-%{release}
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/st2/*
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
-%if %{use_systemd}
+%if 0%{?use_systemd}
   %{_unitdir}/%{name}.service
 %else
   %{_sysconfdir}/rc.d/init.d/%{name}

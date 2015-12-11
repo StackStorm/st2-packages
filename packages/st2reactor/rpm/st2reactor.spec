@@ -33,7 +33,7 @@ Requires: st2common = %{version}-%{release}
   %{_bindir}/*
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/st2/*
-%if %{use_systemd}
+%if 0%{?use_systemd}
   %{_unitdir}/st2rulesengine.service
   %{_unitdir}/st2sensorcontainer.service
 %else
