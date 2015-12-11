@@ -3,7 +3,7 @@
 %define wheel_dir %(echo ${WHEELDIR:-/tmp/wheelhouse})
 
 # Use specific python, not distro's default but ours - st2python.
-%if %{use_st2python}
+%if 0%{?use_st2python}
   %define venv_cmd virtualenv -p /usr/share/python/st2python/bin/python
 %else
   %define venv_cmd virtualenv
