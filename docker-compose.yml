@@ -43,7 +43,7 @@ trusty:
     - mongodb
     - postgres
 
-centos7:
+el7:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: docker-compose.override.yml
@@ -58,7 +58,7 @@ centos7:
     - mongodb
     - postgres
 
-centos6:
+el6:
   image: quay.io/stackstorm/packagingrunner
   extends:
     file: docker-compose.override.yml
