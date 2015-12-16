@@ -202,14 +202,6 @@ function upload_rpm() {
   return ${uploaded}
 }
 
-function latest_version() {
-  return $(curl -Ss -q https://dl.bintray.com/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/pool/unstable/main/s/st2api/ |
-  grep 'amd64.deb' |
-  sed -e "s~.*>st2api_\(.*\)-.*<.*~\1~g" |
-  sort --version-sort -r |
-  uniq | head -n 1)
-}
-
 # Arguments:
 # $1 BINTRAY_REPO - Bintray repository to check for latest revision (debian, ubuntu)
 # $2 PKG_VERSION - Target package version to find latest revision for (1.1, 1.2dev)
@@ -225,10 +217,35 @@ function latest_revision() {
     DL_DIR=stable
   fi
 
+  case "$BINTRAY_REPO" in
+    *'el6'*)
+      REPO_TYPE='rpm'
+    ;;
+    *'el7'*)
+      REPO_TYPE='rpm'
+    ;;
+    *)
+      REPO_TYPE='deb'
+    ;;
+  esac
+
+  ${REPO_TYPE}_revision
+}
+
+deb_revision() {
   curl -Ss -q https://dl.bintray.com/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/pool/${DL_DIR}/main/s/st2api/ |
   grep -v '\.deb\.' |
   grep "st2api_${PKG_VERSION}" |
   sed -e "s~.*>st2api_.*-\(.*\)_amd64.deb<.*~\1~g" |
+  sort --version-sort -r |
+  uniq | head -n 1
+}
+
+rpm_revision() {
+  curl -Ss -q https://dl.bintray.com/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${DL_DIR}/ |
+  grep -v '\.rpm\.' |
+  grep "st2api-${PKG_VERSION}" |
+  sed -e "s~.*>st2api-.*-\(.*\).x86_64.rpm<.*~\1~g" |
   sort --version-sort -r |
   uniq | head -n 1
 }
