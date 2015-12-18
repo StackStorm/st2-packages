@@ -94,7 +94,7 @@ function deploy() {
       create_package
     fi
 
-    deploy_${PKG_TYPE}
+    publish
   done
 }
 
@@ -120,11 +120,19 @@ function parse_deb() {
   PKG_IS_UNSTABLE=$(echo ${PKG_VERSION} | grep -qv 'dev'; echo $?)
 }
 
-# Parse RPM metadata from package file name `st2client-1.2dev-20.x86_64.rpm`
+# Parse RPM metadata from package file name `st2api-1.2dev-20.x86_64.rpm`
 # https://fedoraproject.org/wiki/Packaging:NamingGuidelines
 function parse_rpm() {
-  debug "Deploying RPM is still Unsupported ... Skipping"
-  exit 0
+  # st2api
+  PKG_NAME=${PKG%-*-*}
+  # 1.2dev
+  PKG_VERSION=$(echo ${PKG#${PKG%-*-*}-*} | awk -F- '{print $1}')
+  # 20
+  PKG_RELEASE=$(echo ${PKG#${PKG%-*-*}-*-} | awk -F. '{print $1}')
+  # x86_64
+  PKG_ARCH=$(echo ${PKG#${PKG%-*-*}-*-} | awk -F. '{print $2}')
+  # stable/unstable
+  PKG_IS_UNSTABLE=$(echo ${PKG_VERSION} | grep -qv 'dev'; echo $?)
 }
 
 function check_package_exists() {
@@ -155,7 +163,18 @@ function create_package() {
   echo ""
 }
 
-function upload_content() {
+function publish() {
+  if (upload_${PKG_TYPE}); then
+    debug "Publishing ${PKG_PATH}..."
+    ${CURL} -X POST ${API}/content/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${PKG_NAME}/${PKG_VERSION}-${PKG_RELEASE}/publish -d "{ \"discard\": \"false\" }"
+    echo ""
+  else
+    debug "First you should upload your file ${PKG_PATH}!"
+    exit 2
+  fi
+}
+
+function upload_deb() {
   debug "Uploading ${PKG_PATH}..."
   if [ ${PKG_IS_UNSTABLE} -eq 1 ]; then
     DEBIAN_DISTRIBUTION=unstable
@@ -170,23 +189,17 @@ function upload_content() {
   return ${uploaded}
 }
 
-function deploy_deb() {
-  if (upload_content); then
-    debug "Publishing ${PKG_PATH}..."
-    ${CURL} -X POST ${API}/content/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${PKG_NAME}/${PKG_VERSION}-${PKG_RELEASE}/publish -d "{ \"discard\": \"false\" }"
-    echo ""
+function upload_rpm() {
+  debug "Uploading ${PKG_PATH}..."
+  if [ ${PKG_IS_UNSTABLE} -eq 1 ]; then
+    FILE_PATH=/unstable/${PKG}
   else
-    debug "First you should upload your deb ${PKG_PATH}!"
-    exit 2
+    FILE_PATH=/stable/${PKG}
   fi
-}
-
-function latest_version() {
-  return $(curl -Ss -q https://dl.bintray.com/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/pool/unstable/main/s/st2api/ |
-  grep 'amd64.deb' |
-  sed -e "s~.*>st2api_\(.*\)-.*<.*~\1~g" |
-  sort --version-sort -r |
-  uniq | head -n 1)
+  [ $(${CURL} --write-out %{http_code} --silent --output /dev/null -T ${PKG_PATH} -H X-Bintray-Package:${PKG_NAME} -H X-Bintray-Version:${PKG_VERSION}-${PKG_RELEASE} -H X-Bintray-Override:1 ${API}/content/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${FILE_PATH}) -eq ${CREATED} ]
+  uploaded=$?
+  debug "DEB ${PKG_PATH} uploaded? y:0/N:1 (${uploaded})"
+  return ${uploaded}
 }
 
 # Arguments:
@@ -204,6 +217,22 @@ function latest_revision() {
     DL_DIR=stable
   fi
 
+  case "$BINTRAY_REPO" in
+    *'el6'*)
+      REPO_TYPE='rpm'
+    ;;
+    *'el7'*)
+      REPO_TYPE='rpm'
+    ;;
+    *)
+      REPO_TYPE='deb'
+    ;;
+  esac
+
+  ${REPO_TYPE}_revision
+}
+
+deb_revision() {
   curl -Ss -q https://dl.bintray.com/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/pool/${DL_DIR}/main/s/st2api/ |
   grep -v '\.deb\.' |
   grep "st2api_${PKG_VERSION}" |
@@ -212,9 +241,13 @@ function latest_revision() {
   uniq | head -n 1
 }
 
-function deploy_rpm() {
-  debug "Deploying RPM is still Unsupported ... Skipping"
-  exit 0
+rpm_revision() {
+  curl -Ss -q https://dl.bintray.com/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${DL_DIR}/ |
+  grep -v '\.rpm\.' |
+  grep "st2api-${PKG_VERSION}" |
+  sed -e "s~.*>st2api-.*-\(.*\).x86_64.rpm<.*~\1~g" |
+  sort --version-sort -r |
+  uniq | head -n 1
 }
 
 main "$@"

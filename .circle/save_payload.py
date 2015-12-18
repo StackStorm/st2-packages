@@ -58,11 +58,10 @@ class Payload(object):
     }
 
 
-class DebParse(object):
+class BasePackageParse(object):
     """
-    Parse metadata from .deb file name like: version number, revision number, architecture.
+    Base class for Package name parsers
     """
-    PATTERN = re.compile('^(?P<name>[^/\n_]*)_(?P<version>[^_-]*)-(?P<revision>[^_-]*)_(?P<architecture>[^_]*)\.deb$')
 
     def __init__(self, package_file):
         self.package = os.path.basename(package_file)
@@ -77,6 +76,22 @@ class DebParse(object):
         self.architecture = match.group('architecture')
 
 
+class DebParse(BasePackageParse):
+    """
+    Parse metadata from .deb file name like: version number, revision number, architecture.
+    Ex: st2api_1.2dev-20_amd64.deb
+    """
+    PATTERN = re.compile('^(?P<name>[^\/\n_]*)_(?P<version>[^_-]*)-(?P<revision>[^_-]*)_(?P<architecture>[^_]*)\.deb$')
+
+
+class RpmParse(BasePackageParse):
+    """
+    Parse metadata from .deb file name like: version number, revision number, architecture.
+    Ex: st2api-1.2dev-20.x86_64.rpm
+    """
+    PATTERN = re.compile('^(?P<name>[^\/]*)-(?P<version>[^-]*)-(?P<revision>[^-]*)\.(?P<architecture>[^-]*)\.rpm$')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Send Web Hook with build results to StackStorm")
     parser.add_argument('dir', help='directory tree with created packages')
@@ -85,12 +100,16 @@ if __name__ == '__main__':
     if int(env('DEPLOY_PACKAGES')):
         for distro in islice(DISTROS, CIRCLE_NODE_TOTAL):
             try:
-                filename = glob.glob(os.path.join(args.dir, distro, 'st2api*.deb'))[0]
-                deb = DebParse(filename)
+                filename = (glob.glob(os.path.join(args.dir, distro, 'st2api*.deb')) + glob.glob(os.path.join(args.dir, distro, 'st2api*.rpm')))[0]
+                if filename.endswith('.deb'):
+                    package = DebParse(filename)
+                elif filename.endswith('.rpm'):
+                    package = RpmParse(filename)
+
                 Payload.data['packages'].append({
                     'distro': distro,
-                    'version': deb.version,
-                    'revision': deb.revision
+                    'version': package.version,
+                    'revision': package.revision
                 })
             except IndexError:
                 Payload.data['success'] = False
