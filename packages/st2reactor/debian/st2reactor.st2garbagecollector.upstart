@@ -1,4 +1,4 @@
-description     "StackStorm st2rulesengine service"
+description     "StackStorm st2garbagecollector service"
 author          "StackStorm Engineering <opsadmin@stackstorm.com>"
 
 start on filesystem and net-device-up IFACE!=lo
@@ -13,7 +13,7 @@ umask 007
 kill timeout 60
 
 script
-  NAME=st2rulesengine
+  NAME=st2garbagecollector
   DEFAULT_ARGS="--config-file /etc/st2/st2.conf"
 
   # Read configuration variable file if it is present
