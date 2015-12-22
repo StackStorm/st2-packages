@@ -43,6 +43,7 @@ class ST2Spec
       st2actionrunner: 'st2actionrunner.{pid}'
     },
     register_content_command: '/usr/bin/st2-register-content' \
+                              ' --register-fail-on-failure' \
                               ' --register-all' \
                               ' --config-dir /etc/st2',
     mistral_db_populate_command: '/usr/share/python/mistral/bin/mistral-db-manage' \
