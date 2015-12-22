@@ -10,7 +10,7 @@ Requires: st2common = %{version}-%{release}
 %install
   %default_install
   %pip_install_venv
-  %service_install st2rulesengine st2sensorcontainer
+  %service_install st2rulesengine st2sensorcontainer st2garbagecollector
   make post_install DESTDIR=%{?buildroot}
 
 %prep
