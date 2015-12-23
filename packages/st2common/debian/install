@@ -4,3 +4,4 @@
 ../contrib/examples usr/share/doc/st2/
 #../contrib/tests usr/share/stackstorm/
 ../docs usr/share/doc/st2/
+../tools/st2ctl usr/bin/
