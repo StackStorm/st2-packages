@@ -2,7 +2,7 @@
 %include ../rpmspec/st2pkg_toptags.spec
 
 Summary: st2actions - StackStorm actions component
-Requires: st2common = %{version}-%{release}
+Requires: st2common = %{version}-%{release}, git
 
 %description
   <insert long description, indented with spaces>
