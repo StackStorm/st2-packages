@@ -67,11 +67,11 @@ nohup_start() {
 # Write pid of a running daemon into the pidfile
 #
 write_pidfile() {
-  local currentpid daemon=$1 pidfile base
+  local currentpid daemon=$1 pidfile=$2 base
   base=${daemon##*/}
   pidfile=${pidfile:-/var/run/$base.pid}
 
-  currentpid=$(ps -Aa -o pid,cmd | tail -n1 | grep "\B$1" | awk '{print $1}')
+  currentpid=$(ps -A xo pid,cmd | grep "\bbin/$base\b" | tail -n1 | awk '{print $1}')
   [ -n "$currentpid" ] && echo $currentpid > $pidfile
 }
 

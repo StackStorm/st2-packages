@@ -22,7 +22,7 @@
 
 DESC="st2rulesengine"
 NAME=st2rulesengine
-DAEMON=/usr/share/python/st2rulesengine/bin/$NAME
+DAEMON=/usr/share/python/st2reactor/bin/$NAME
 DAEMON_ARGS="--config-file /etc/st2/st2.conf"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
@@ -67,11 +67,11 @@ nohup_start() {
 # Write pid of a running daemon into the pidfile
 #
 write_pidfile() {
-  local currentpid daemon=$1 pidfile base
+  local currentpid daemon=$1 pidfile=$2 base
   base=${daemon##*/}
   pidfile=${pidfile:-/var/run/$base.pid}
 
-  currentpid=$(ps -Aa -o pid,cmd | tail -n1 | grep "\B$1" | awk '{print $1}')
+  currentpid=$(ps -A xo pid,cmd | grep "\bbin/$base\b" | tail -n1 | awk '{print $1}')
   [ -n "$currentpid" ] && echo $currentpid > $pidfile
 }
 

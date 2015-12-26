@@ -71,14 +71,15 @@ nohup_start() {
 # Write pid of a running daemon into the pidfile
 #
 write_pidfile() {
-  local currentpid daemon=$1 pidfile base
+  local currentpid daemon=$1 pidfile=$2 base
   base=${daemon##*/}
   pidfile=${pidfile:-/var/run/$base.pid}
 
   # Grab latest process, since there are multiple invocations of actionrunner
-  currentpid=$(ps -Aa -o pid,cmd | tail -n1 | grep "\B$1" | awk '{print $1}')
+  currentpid=$(ps -A xo pid,cmd | grep "\bbin/$base\b" | tail -n1 | awk '{print $1}')
   [ -n "$currentpid" ] && echo $currentpid > $pidfile
 }
+
 
 start() {
     echo -n $"Starting $DESC: "
@@ -116,7 +117,7 @@ force_reload() {
 
 rh_status() {
     # run checks to determine if the service is running or use generic status
-    status $DESC
+    status -p $PIDFILE
 }
 
 rh_status_q() {
