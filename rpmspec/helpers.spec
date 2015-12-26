@@ -27,8 +27,8 @@
 
 # We hate duplication right :)?, so let's use debian files
 %define default_install \
-  %{debian_dirs} \
-  %{debian_install} \
+  %debian_dirs \
+  %debian_install \
   %debian_links \
   %make_install \
 %{nil}

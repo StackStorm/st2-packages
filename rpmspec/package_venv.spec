@@ -21,6 +21,9 @@
 # 3. Install dependencies
 # 4. Install package itself
 %define pip_install_venv \
+  if [ -x /usr/share/python/st2python/bin/python ]; then \
+    export PATH=/usr/share/python/st2python/bin:$PATH \
+  fi \
   %{venv_cmd} %{venv_dir} \
   %{venv_pip} -r requirements.txt \
   %{venv_pip} . \
