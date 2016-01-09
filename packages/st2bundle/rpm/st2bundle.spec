@@ -60,7 +60,6 @@ Conflicts: st2common
 %files
   %defattr(-,root,root,-)
   %{_bindir}/*
-  %doc %{_datadir}/doc/st2/docs
   %config(noreplace) %{_sysconfdir}/logrotate.d/st2
   %config(noreplace) %{_sysconfdir}/st2/*
   %{_datadir}/python/%{venv_name}
