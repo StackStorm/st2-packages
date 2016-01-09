@@ -45,7 +45,6 @@ Summary: St2Common - StackStorm shared files
 %files
   %defattr(-,root,root,-)
   %{_bindir}/*
-  %doc %{_datadir}/doc/st2/docs
   %config(noreplace) %{_sysconfdir}/st2/st2.conf
   %config(noreplace) %{_sysconfdir}/logrotate.d/st2
   %{_datadir}/python/%{name}
