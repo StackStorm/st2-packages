@@ -1,18 +1,18 @@
 #!/bin/sh
 #
 ### BEGIN INIT INFO
-# Provides: st2auth
+# Provides: st2exporter
 # Required-Start: $local_fs $network $named $remote_fs $syslog
 # Required-Stop: $local_fs $network $named $remote_fs $syslog
-# Short-Description: st2auth component
-# Description: St2Auth - StackStorm authentication service component
+# Short-Description: st2exporter component
+# Description: St2Exporter - StackStorm service st2exporter
 ### END INIT INFO
 
-# st2auth     This shell script takes care of starting and stopping
-#             st2auth daemon.
+# st2exporter     This shell script takes care of starting and stopping
+#             st2exporter daemon.
 # chkconfig: - 85 15
-# description: St2Auth - StackStorm authentication service component
-# processname: st2auth
+# description: St2Exporter - StackStorm service st2exporter
+# processname: st2exporter
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -20,9 +20,9 @@
 # Source networking configuration.
 . /etc/sysconfig/network
 
-DESC="st2auth"
-NAME=st2auth
-DAEMON=/usr/share/python/st2auth/bin/$NAME
+DESC="st2exporter"
+NAME=st2exporter
+DAEMON=/usr/share/python/st2/bin/$NAME
 DAEMON_ARGS="--config-file /etc/st2/st2.conf"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

@@ -3,7 +3,7 @@
 %define wheel_dir %(echo ${WHEELDIR:-/tmp/wheelhouse})
 
 # Use specific python, not distro's default but ours - st2python.
-%if %{use_st2python}
+%if 0%{?use_st2python}
   %define venv_cmd virtualenv -p /usr/share/python/st2python/bin/python
 %else
   %define venv_cmd virtualenv
@@ -21,6 +21,9 @@
 # 3. Install dependencies
 # 4. Install package itself
 %define pip_install_venv \
+  if [ -x /usr/share/python/st2python/bin/python ]; then \
+    export PATH=/usr/share/python/st2python/bin:$PATH \
+  fi \
   %{venv_cmd} %{venv_dir} \
   %{venv_pip} -r requirements.txt \
   %{venv_pip} . \

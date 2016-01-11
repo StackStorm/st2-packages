@@ -3,14 +3,15 @@
 #
 
 namespace :setup do
-  task :all => [:install_artifacts, :configure]
-  packages_to_install = pipeopts.packages_to_test
-  packages_to_install.unshift('st2python') if pipeopts.st2python_enabled
+  all_deps = [:install_artifacts, :configure]
+  all_deps.unshift(:install_st2_python) if pipeopts.st2python_enabled
+
+  task :all => all_deps
 
   task :install_artifacts => 'build:upload_to_testnode' do
     pipeline do
       run hostname: opts[:testnode] do |opts|
-        package_list = packages_to_install.join(' ')
+        package_list = opts.packages_to_test.join(' ')
         with opts.env do
           within opts.artifact_dir do
             execute :bash, "$BASEDIR/scripts/install_os_packages.sh #{package_list}"
@@ -25,10 +26,21 @@ namespace :setup do
       run hostname: opts[:testnode] do |opts|
         with opts.env do
           execute :bash, "$BASEDIR/scripts/generate_st2_config.sh"
-          if packages_to_install.include? 'mistral'
+          if opts.packages_to_test.include? 'mistral'
             execute :bash, "$BASEDIR/scripts/generate_mistral_config.sh"
           end
         end
+      end
+    end
+  end
+
+  task :install_st2_python do
+    pipeline do
+      run hostname: opts[:testnode] do |opts|
+        repo_path = '/etc/yum.repos.d/stackstorm-el6-stable.repo'
+        execute :wget, "-nv https://bintray.com/stackstorm/el6/rpm -O #{repo_path}"
+        execute :sed, "-ir 's~stackstorm/el6~stackstorm/el6/stable~' #{repo_path}"
+        execute :yum, "-y install st2python"
       end
     end
   end

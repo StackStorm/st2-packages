@@ -21,35 +21,11 @@ namespace :build do
   package_list = pipeopts.packages.map {|t| "build_#{t}"}
   multitask :packages => [:wheelhouse, *package_list]
 
-  # We should built custom python for outdated OSes such as CentOS 6.
-  build_dependencies = [ wheelreq_proc ].tap do |list|
-    list.unshift('build:st2python') if pipeopts.st2python_enabled
-  end
-
-  desc 'Build custom python version (st2python)'
-  task :st2python do |task|
-    pipeline 'st2python' do
-      run hostname: opts[:buildnode] do |opts|
-        command label: 'package: st2python', show_uuid: false
-
-        with opts.env do
-          within File.join(opts.basedir, 'packages/python') do
-            execute :bash, "$BASEDIR/scripts/build_python.sh"
-          end
-
-          within opts.artifact_dir do
-            execute :bash, "$BASEDIR/scripts/install_os_packages.sh st2python"
-          end
-        end
-      end
-    end
-  end
-
   # Auxiliary task, used when ST2_PACKEGES="none", can used to build python only
-  rule %r/^build_none$/ => build_dependencies
+  rule %r/^build_none$/ => wheelreq_proc
 
   # Generate build task for packages
-  rule %r/^build_/ => build_dependencies do |task|
+  rule %r/^build_/ => wheelreq_proc do |task|
     # Load specific context for a package name or 'st2'
     package_name = task.short_name.sub(/^build_/, '')
     context = pipeopts(package_name).empty? ? 'st2' : package_name

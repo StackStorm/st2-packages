@@ -1,18 +1,18 @@
 #!/bin/sh
 #
 ### BEGIN INIT INFO
-# Provides: st2auth
+# Provides: st2actionrunner
 # Required-Start: $local_fs $network $named $remote_fs $syslog
 # Required-Stop: $local_fs $network $named $remote_fs $syslog
-# Short-Description: st2auth component
-# Description: St2Auth - StackStorm authentication service component
+# Short-Description: st2actionrunner component
+# Description: StackStorm st2actionrunner-worker
 ### END INIT INFO
 
-# st2auth     This shell script takes care of starting and stopping
-#             st2auth daemon.
+# st2actionrunner     This shell script takes care of starting and stopping
+#                     st2actionrunner worker daemon.
 # chkconfig: - 85 15
-# description: St2Auth - StackStorm authentication service component
-# processname: st2auth
+# description: StackStorm st2actionrunner-worker
+# processname: st2actionrunner
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -20,14 +20,13 @@
 # Source networking configuration.
 . /etc/sysconfig/network
 
-DESC="st2auth"
-NAME=st2auth
-DAEMON=/usr/share/python/st2auth/bin/$NAME
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="st2actionrunner-worker"
+NAME=st2actionrunner
+DAEMON=/usr/share/python/st2/bin/$NAME
 DAEMON_ARGS="--config-file /etc/st2/st2.conf"
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/var/run/$NAME-${WORKERID}.pid
 SCRIPTNAME=/etc/init.d/$NAME
-RUNAS_USER="st2"
-RUNAS_GROUP="st2"
 
 lockfile=/var/lock/subsys/$NAME
 
@@ -37,6 +36,11 @@ lockfile=/var/lock/subsys/$NAME
 # Read configuration variable file if it is present
 [ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
 
+# Check if invoked worker service directly
+if [ -z $WORKERID ]; then
+  failure "Can't start this service directly, use /etc/init.d/st2actionrunner instead"
+  exit 3
+fi
 
 # Resemble redhatish daemon behaviour but with group and user available
 #
@@ -71,24 +75,25 @@ write_pidfile() {
   base=${daemon##*/}
   pidfile=${pidfile:-/var/run/$base.pid}
 
+  # Grab latest process, since there are multiple invocations of actionrunner
   currentpid=$(ps -A xo pid,cmd | grep "\bbin/$base\b" | tail -n1 | awk '{print $1}')
   [ -n "$currentpid" ] && echo $currentpid > $pidfile
 }
 
 start() {
-    echo -n $"Starting $NAME: "
+    echo -n $"Starting $DESC: "
     nohup_start $DAEMON $DAEMON_ARGS
     write_pidfile $DAEMON $PIDFILE
     rh_status_q
     retval=$?
-    [ $retval -eq 0 ] && success $"$NAME startup" || failure $"$NAME startup"
+    [ $retval -eq 0 ] && success $"$DESC startup" || failure $"$DESC startup"
     echo
     [ $retval -eq 0 ] && touch $lockfile
     return $retval
 }
 
 stop() {
-    echo -n $"Stopping $NAME: "
+    echo -n $"Stopping $DESC: "
     killproc -p $PIDFILE $DAEMON
     retval=$?
     echo
@@ -111,7 +116,7 @@ force_reload() {
 
 rh_status() {
     # run checks to determine if the service is running or use generic status
-    status $NAME
+    status $DESC
 }
 
 rh_status_q() {

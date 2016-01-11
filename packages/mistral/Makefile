@@ -3,6 +3,10 @@ COMPONENT := mistral
 MISTRAL_RELEASE ?= 1
 MISTRAL_VERSION ?= $(shell python -c "from pbr import version; print version.VersionInfo('mistral').version_string(),")
 
+ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
+	PATH := /usr/share/python/st2python/bin:$(PATH)
+endif
+
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	DESTDIR ?= $(CURDIR)/debian/mistral

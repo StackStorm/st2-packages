@@ -22,7 +22,7 @@
 
 DESC="st2auth"
 NAME=st2auth
-DAEMON=/usr/share/python/st2auth/bin/$NAME
+DAEMON=/usr/share/python/st2/bin/$NAME
 DAEMON_ARGS="--config-file /etc/st2/st2.conf"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

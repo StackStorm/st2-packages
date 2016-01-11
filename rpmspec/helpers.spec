@@ -27,18 +27,30 @@
 
 # We hate duplication right :)?, so let's use debian files
 %define default_install \
-  %{debian_dirs} \
-  %{debian_install} \
+  %debian_dirs \
+  %debian_install \
   %debian_links \
   %make_install \
 %{nil}
 
-# St2 package version parsing
-%define st2_component %(echo $ST2_PACKAGES st2 bundle | grep -q %{package} && echo -n 1 || :)
-%{?st2_component: %define st2pkg_version %(python -c "from %{package} import __version__; print __version__,")}
-
 # Define use_systemd to know if we on a systemd system
-%global use_systemd %{!?_unitdir:0}%{?_unitdir:1}
+#
+%if 0%{?_unitdir:1}
+  %define use_systemd 1
+%endif
+
+## St2 package version parsing
+#   if package name starts with st2 then it's st2 component.
+#
+%if %(PKG=%{package}; [ "${PKG##st2}" != "$PKG" ] && echo 1 || echo 0 ) == 1
+  %define st2pkg_version %(python -c "from %{package} import __version__; print __version__,")
+%endif
+
+## Set macro indicating that we're useing our python
+#
+%if %(echo ${ST2_PYTHON:-0}) == 1
+  %define use_st2python 1
+%endif
 
 # Redefine and to drop python brp bytecompile
 #
@@ -49,17 +61,10 @@
     /usr/lib/rpm/redhat/brp-strip-comment-note %{__strip} %{__objdump} \
 %{nil}
 
-# Set variable indicating that we use our python
-%if "%(echo -n $ST2_PYTHON)" == "1"
-  %global use_st2python 1
-%else
-  %global use_st2python 0
-%endif
-
 # Install systemd or sysv service into the package
 #
 %define service_install() \
-  %if %{use_systemd} \
+  %if 0%{?use_systemd} \
     for svc in %{?*}; do \
       install -D -p -m0644 %{SOURCE0}/rpm/$svc.service %{buildroot}%{_unitdir}/$svc.service \
     done \
@@ -74,7 +79,7 @@
 # enables used to enforce the policy, which seems to be disabled by default
 #
 %define service_post() \
-  %if %{use_systemd} \
+  %if 0%{?use_systemd} \
     %{expand: %systemd_post %%{?*}} \
     systemctl --no-reload enable %{?*} >/dev/null 2>&1 || : \
   %else \
@@ -87,7 +92,7 @@
 # Service preun stage action
 #
 %define service_preun() \
-  %if %{use_systemd} \
+  %if 0%{?use_systemd} \
     %{expand: %systemd_preun %%{?*}} \
   %else \
     for svc in %{?*}; do \
@@ -101,7 +106,7 @@
 # ($1 > 1 on package upgrade)
 #
 %define service_postun() \
-  %if %{use_systemd} \
+  %if 0%{?use_systemd} \
     %{expand: %systemd_postun_with_restart %%{?*}} \
   %else \
     if [ $1 -ge 1 ]; then \

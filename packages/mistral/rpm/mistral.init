@@ -1,18 +1,18 @@
 #!/bin/sh
 #
 ### BEGIN INIT INFO
-# Provides: st2auth
+# Provides: mistral
 # Required-Start: $local_fs $network $named $remote_fs $syslog
 # Required-Stop: $local_fs $network $named $remote_fs $syslog
-# Short-Description: st2auth component
-# Description: St2Auth - StackStorm authentication service component
+# Short-Description: mistral service
+# Description: Mistral workflow service
 ### END INIT INFO
 
-# st2auth     This shell script takes care of starting and stopping
-#             st2auth daemon.
+# mistral     This shell script takes care of starting and stopping
+#             mistral daemon.
 # chkconfig: - 85 15
-# description: St2Auth - StackStorm authentication service component
-# processname: st2auth
+# description: Mistral workflow service
+# processname: mistral
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -20,14 +20,14 @@
 # Source networking configuration.
 . /etc/sysconfig/network
 
-DESC="st2auth"
-NAME=st2auth
-DAEMON=/usr/share/python/st2auth/bin/$NAME
-DAEMON_ARGS="--config-file /etc/st2/st2.conf"
+DESC="mistral"
+NAME=mistral
+DAEMON=/usr/share/python/mistral/bin/mistral-server
+DAEMON_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral.log"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
-RUNAS_USER="st2"
-RUNAS_GROUP="st2"
+RUNAS_USER="mistral"
+RUNAS_GROUP="mistral"
 
 lockfile=/var/lock/subsys/$NAME
 

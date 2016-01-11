@@ -32,7 +32,7 @@ Requires: st2common = %{version}-%{release}
 %files
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/st2/*
-%if %{use_systemd}
+%if 0%{?use_systemd}
   %{_unitdir}/%{name}.service
 %else
   %{_sysconfdir}/rc.d/init.d/%{name}

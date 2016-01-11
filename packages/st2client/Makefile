@@ -3,6 +3,10 @@ ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
 ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
 
+ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
+	PATH := /usr/share/python/st2python/bin:$(PATH)
+endif
+
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)

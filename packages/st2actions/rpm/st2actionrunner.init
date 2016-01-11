@@ -1,0 +1,99 @@
+#!/bin/sh
+#
+### BEGIN INIT INFO
+# Provides: st2auth
+# Required-Start: $local_fs $network $named $remote_fs $syslog
+# Required-Stop: $local_fs $network $named $remote_fs $syslog
+# Short-Description: st2auth component
+# Description: St2Auth - StackStorm authentication service component
+### END INIT INFO
+
+# st2auth     This shell script takes care of starting and stopping
+#             st2auth daemon.
+# chkconfig: - 85 15
+# description: St2Auth - StackStorm authentication service component
+# processname: st2auth
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="st2actionrunner"
+NAME=st2actionrunner
+DAEMON=/usr/share/python/st2actions/bin/$NAME
+SPAWNER=/usr/share/python/st2actions/bin/runners.sh
+SCRIPTNAME=/etc/init.d/$NAME
+
+lockfile=/var/lock/subsys/$NAME
+
+# Exit if the package is not installed
+[ -x "$DAEMON" ] || exit 5
+
+# Read configuration variable file if it is present
+[ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
+
+
+start() {
+    $SPAWNER start
+}
+
+stop() {
+    $SPAWNER stop
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    restart
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    $SPAWNER status
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        force_reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        exit 2
+esac
+exit $?
