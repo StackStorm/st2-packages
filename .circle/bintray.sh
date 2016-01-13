@@ -89,11 +89,7 @@ function deploy() {
     debug "PKG_IS_UNSTABLE:       ${PKG_IS_UNSTABLE}"
 
     init_curl
-    if (! check_package_exists); then
-      debug "The package ${PKG_NAME} does not exist. It will be created"
-      create_package
-    fi
-
+    ensure_package
     publish
   done
 }
@@ -143,24 +139,30 @@ function check_package_exists() {
   return ${package_exists}
 }
 
-function create_package() {
-  debug "Creating package ${PKG_NAME}..."
-  data="{
-    \"name\": \"${PKG_NAME}\",
-    \"desc\": \"Packages for StackStorm event-driven automation platform\",
-    \"vcs_url\": \"https://github.com/stackstorm/st2.git\",
-    \"licenses\": [\"Apache-2.0\"],
-    \"labels\": [\"st2\", \"StackStorm\", \"DevOps\", \"automation\", \"auto-remediation\", \"chatops\"],
-    \"website_url\": \"https://stackstorm.com\",
-    \"issue_tracker_url\": \"https://github.com/stackstorm/st2/issues\",
-    \"github_repo\": \"stackstorm/st2\",
-    \"github_release_notes_file\": \"CHANGELOG.rst\",
-    \"public_download_numbers\": false,
-    \"public_stats\": true
-  }"
+function ensure_package() {
+  # The .bintray_package file contains package settings. You can use env variables in the file.
+  # The file should be located in CWD (st2-packages repo for st2, st2web for web ui and so on).
+  # See https://bintray.com/docs/api/#_create_package for format and requirements.
+  if [[ ! -f .bintray_package ]] ; then
+    echo 'File ".bintray_package" is not there, aborting.'
+    exit
+  fi
+  data=$(eval "cat <<EOF
+$(<.bintray_package)
+EOF" 2> /dev/null)
 
-  ${CURL} -X POST -d "${data}" ${API}/packages/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/
-  echo ""
+  if (! check_package_exists); then
+    debug "The package ${PKG_NAME} does not exist"
+    debug "Creating package ${PKG_NAME}..."
+
+    ${CURL} -X POST -d "${data}" ${API}/packages/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/
+    echo ""
+  else
+    debug "Updating package ${PKG_NAME}..."
+
+    ${CURL} -X PATCH -d "${data}" ${API}/packages/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${PKG_NAME}/
+    echo ""
+  fi
 }
 
 function publish() {
