@@ -24,6 +24,8 @@ override_dh_installinit:
 	# So far don't start services
 	dh_installinit --no-start --name=st2rulesengine
 	dh_installinit --no-start --name=st2sensorcontainer
+	dh_installinit --no-start --name=st2rulesengine
+	dh_installinit --no-start --name=st2garbagecollector
 
 override_dh_installdeb:
 	$(MAKE) post_install
