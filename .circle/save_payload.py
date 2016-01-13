@@ -100,7 +100,7 @@ if __name__ == '__main__':
     if int(env('DEPLOY_PACKAGES')):
         for distro in islice(DISTROS, CIRCLE_NODE_TOTAL):
             try:
-                filename = (glob.glob(os.path.join(args.dir, distro, 'st2api*.deb')) + glob.glob(os.path.join(args.dir, distro, 'st2api*.rpm')))[0]
+                filename = (glob.glob(os.path.join(args.dir, distro, 'st2*.deb')) + glob.glob(os.path.join(args.dir, distro, 'st2*.rpm')))[0]
                 if filename.endswith('.deb'):
                     package = DebParse(filename)
                 elif filename.endswith('.rpm'):
