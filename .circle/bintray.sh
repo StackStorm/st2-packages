@@ -15,8 +15,8 @@ CREATED=201
 # Usage:
 # bintray.sh deploy wheezy_staging /tmp/st2-packages
 # bintray.sh deploy trusty /tmp/st2-packages
-# bintray.sh next-revision trusty 0.12dev
-# bintray.sh next-revision wheezy 1.1.2
+# bintray.sh next-revision trusty 0.12dev st2api
+# bintray.sh next-revision wheezy 1.1.2 st2web
 function main() {
   : ${BINTRAY_ORGANIZATION:=stackstorm}
 
@@ -25,7 +25,7 @@ function main() {
         deploy "$2" "$3"
         ;;
       next-revision)
-        LATEST_REVISION=$(latest_revision "$2" "$3")
+        LATEST_REVISION=$(latest_revision "$2" "$3" "$4")
         if [ -n "${LATEST_REVISION}" ]; then
           echo $((LATEST_REVISION+1))
         else
@@ -34,7 +34,7 @@ function main() {
         ;;
       *)
         echo $"Usage: deploy {wheezy_staging|jessie_staging|trusty_staging} /tmp/st2-packages"
-        echo $"Usage: next-revision {wheezy_staging|jessie_staging|trusty_staging} 0.14dev"
+        echo $"Usage: next-revision {wheezy_staging|jessie_staging|trusty_staging} 0.14dev st2api"
         exit 1
     esac
 }
@@ -205,11 +205,14 @@ function upload_rpm() {
 # Arguments:
 # $1 BINTRAY_REPO - Bintray repository to check for latest revision (debian, ubuntu)
 # $2 PKG_VERSION - Target package version to find latest revision for (1.1, 1.2dev)
+# $3 PKG_NAME - Target package name to find latest revision for (st2api, st2web)
 function latest_revision() {
   BINTRAY_REPO=$1
   PKG_VERSION=$2
+  PKG_NAME=$3
   : ${BINTRAY_REPO:? repo (second arg) is required}
   : ${PKG_VERSION:? version (third arg) is required}
+  : ${PKG_NAME:? name (fourth arg) is required}
   PKG_IS_UNSTABLE=$(echo ${PKG_VERSION} | grep -qv 'dev'; echo $?)
   if [ ${PKG_IS_UNSTABLE} -eq 1 ]; then
     DL_DIR=unstable
@@ -233,10 +236,10 @@ function latest_revision() {
 }
 
 deb_revision() {
-  curl -Ss -q https://dl.bintray.com/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/pool/${DL_DIR}/main/s/st2api/ |
+  curl -Ss -q https://dl.bintray.com/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/pool/${DL_DIR}/main/s/${PKG_NAME}/ |
   grep -v '\.deb\.' |
-  grep "st2api_${PKG_VERSION}" |
-  sed -e "s~.*>st2api_.*-\(.*\)_amd64.deb<.*~\1~g" |
+  grep "${PKG_NAME}_${PKG_VERSION}" |
+  sed -e "s~.*>${PKG_NAME}_.*-\(.*\)_amd64.deb<.*~\1~g" |
   sort --version-sort -r |
   uniq | head -n 1
 }
@@ -244,8 +247,8 @@ deb_revision() {
 rpm_revision() {
   curl -Ss -q https://dl.bintray.com/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${DL_DIR}/ |
   grep -v '\.rpm\.' |
-  grep "st2api-${PKG_VERSION}" |
-  sed -e "s~.*>st2api-.*-\(.*\).x86_64.rpm<.*~\1~g" |
+  grep "${PKG_NAME}-${PKG_VERSION}" |
+  sed -e "s~.*>${PKG_NAME}-.*-\(.*\).x86_64.rpm<.*~\1~g" |
   sort --version-sort -r |
   uniq | head -n 1
 }
