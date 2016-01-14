@@ -10,7 +10,8 @@ Homepage: http://stackstorm.com/
 
 Package: st2bundle
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Pre-Depends: dpkg (>= 1.16.16), python2.7, ${misc:Pre-Depends}, adduser
+Depends: ${shlibs:Depends}, ${misc:Depends}, git
 Conflicts: st2common
 Description: st2bundle - StackStorm all components bundle.
  Package is full standalone stackstorm installation including
