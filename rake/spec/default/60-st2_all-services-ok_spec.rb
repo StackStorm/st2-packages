@@ -63,10 +63,4 @@ describe 'st2 services' do
       it { is_expected.to be_running }
     end
   end
-
-  if spec[:mistral_enabled]
-    describe service('mistral'), prompt_on_failure: true do
-      it { is_expected.to be_running }
-    end
-  end
 end
