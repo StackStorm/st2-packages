@@ -10,6 +10,7 @@ Homepage: http://stackstorm.com/
 
 Package: st2common
 Architecture: any
+Pre-Depends: dpkg (>= 1.16.16), python2.7, ${misc:Pre-Depends}, adduser
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: St2Common - StackStorm shared files.
  Package contains examples and standard packs for st2.
