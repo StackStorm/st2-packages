@@ -6,6 +6,10 @@
 # BINTRAY_API_KEY - act as a password for REST authentication
 # BINTRAY_ORGANIZATION - Bintray organization (optional, defaults to `stackstorm`)
 
+# Number of latest revisions to keep for package version
+# Ex: With `MAX_REVISIONS=10`, after uploading `1.3dev-20`, `1.3dev-10` will be deleted during the same run
+MAX_REVISIONS=10
+
 # API-related Constants
 API=https://api.bintray.com
 NOT_FOUND=404
@@ -20,23 +24,23 @@ CREATED=201
 function main() {
   : ${BINTRAY_ORGANIZATION:=stackstorm}
 
-    case "$1" in
-      deploy)
-        deploy "$2" "$3"
-        ;;
-      next-revision)
-        LATEST_REVISION=$(latest_revision "$2" "$3" "$4")
-        if [ -n "${LATEST_REVISION}" ]; then
-          echo $((LATEST_REVISION+1))
-        else
-          echo 1
-        fi
-        ;;
-      *)
-        echo $"Usage: deploy {wheezy_staging|jessie_staging|trusty_staging} /tmp/st2-packages"
-        echo $"Usage: next-revision {wheezy_staging|jessie_staging|trusty_staging} 0.14dev st2api"
-        exit 1
-    esac
+  case "$1" in
+    deploy)
+      deploy "$2" "$3"
+      ;;
+    next-revision)
+      LATEST_REVISION=$(latest_revision "$2" "$3" "$4")
+      if [ -n "${LATEST_REVISION}" ]; then
+        echo $((LATEST_REVISION+1))
+      else
+        echo 1
+      fi
+      ;;
+    *)
+      echo $"Usage: deploy {wheezy_staging|jessie_staging|trusty_staging} /tmp/st2-packages"
+      echo $"Usage: next-revision {wheezy_staging|jessie_staging|trusty_staging} 0.14dev st2api"
+      exit 1
+  esac
 }
 
 # Arguments
@@ -91,6 +95,7 @@ function deploy() {
     init_curl
     ensure_package
     publish
+    prune_old_revision
   done
 }
 
@@ -202,6 +207,37 @@ function upload_rpm() {
   uploaded=$?
   debug "DEB ${PKG_PATH} uploaded? y:0/N:1 (${uploaded})"
   return ${uploaded}
+}
+
+function prune_old_revision() {
+  if [ "$PKG_RELEASE" -gt "$MAX_REVISIONS" ]; then
+    REVISION_TO_DELETE=$((PKG_RELEASE-MAX_REVISIONS))
+    debug "Pruning obsolete revision ${PKG_VERSION}-${REVISION_TO_DELETE} ..."
+    [ $(${CURL} --write-out %{http_code} --silent --output /dev/null -X DELETE ${API}/packages/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${PKG_NAME}/versions/${PKG_VERSION}-${REVISION_TO_DELETE}) -eq ${SUCCESS} ]
+    deleted=$?
+    debug "${PKG_VERSION}-${REVISION_TO_DELETE} deleted? y:0/N:1 (${deleted})"
+  fi
+}
+
+# Helper to delete obsolete Bintray packages in semi-automatic way
+# Keep in mind, that revision numbers are different depending on repository
+# Use precisely, make sure you know what exactly you want to delete
+function mass_delete() {
+  BINTRAY_REPO="el7_staging"
+  packages="st2actions st2api st2auth st2bundle st2client st2common st2debug st2exporter st2reactor"
+  PKG_VERSION="1.3dev"
+  revision_start=1
+  revision_end=50
+
+  init_curl
+  for PKG_RELEASE in $(seq ${revision_start} ${revision_end}); do
+    for PKG_NAME in ${packages}; do
+      PKG="${PKG_NAME}/${PKG_VERSION}-${PKG_RELEASE}"
+      [ $(${CURL} --write-out %{http_code} --silent --output /dev/null -X DELETE ${API}/packages/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${PKG_NAME}/versions/${PKG_VERSION}-${PKG_RELEASE}) -eq ${SUCCESS} ]
+      deleted=$?
+      debug "deleted? y:0/N:1 (${deleted})"
+    done
+  done
 }
 
 # Arguments:
