@@ -211,7 +211,7 @@ function upload_rpm() {
 
 function prune_old_revision() {
   if [ "$PKG_RELEASE" -gt "$MAX_REVISIONS" ]; then
-    REVISION_TO_DELETE=$((PKG_RELEASE-$MAX_REVISIONS))
+    REVISION_TO_DELETE=$((PKG_RELEASE-MAX_REVISIONS))
     debug "Pruning obsolete revision ${PKG_VERSION}-${REVISION_TO_DELETE} ..."
     [ $(${CURL} --write-out %{http_code} --silent --output /dev/null -X DELETE ${API}/packages/${BINTRAY_ORGANIZATION}/${BINTRAY_REPO}/${PKG_NAME}/versions/${PKG_VERSION}-${REVISION_TO_DELETE}) -eq ${SUCCESS} ]
     deleted=$?
