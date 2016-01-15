@@ -31,6 +31,9 @@ post_install:
 	install ../st2auth/conf/logging.conf $(DESTDIR)/etc/st2/logging.auth.conf
 	install ../st2auth/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.auth.conf
 	sed -i -r "/args\s*=\s*/s%logs%/var/log/st2%g" $(DESTDIR)/etc/st2/logging.*conf
+ifeq ($(REDHAT),1)
+	if [ `/root/scripts/platform_major_version.py` = 7 ]; then sed -i -r 's/virtualenv_opts\s*=.*/virtualenv_opts =/' $(DESTDIR)/etc/st2/st2.conf; fi
+endif
 
 populate_version: .stamp-populate_version
 .stamp-populate_version:
