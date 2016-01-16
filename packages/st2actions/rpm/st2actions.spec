@@ -16,6 +16,8 @@ Requires: st2common = %{version}-%{release}, git
   %pip_install_venv
   %service_install st2notifier st2resultstracker st2actionrunner %{worker_name}
   make post_install DESTDIR=%{?buildroot}
+  # clean up absolute path in record file, so that /usr/bin/check-buildroot doesn't fail
+  find /root/rpmbuild/BUILDROOT/%{package}* -name RECORD -exec sed -i '/\/root\/rpmbuild.*$/d' '{}' ';'
 
 %prep
   rm -rf %{buildroot}
