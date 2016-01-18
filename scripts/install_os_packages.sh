@@ -10,8 +10,12 @@ version_delemiter() {
   [ "$(platform)" = "deb" ] && echo '_' || echo '-'
 }
 
-install_rpm() { sudo yum -y install $(lookup_fullnames "$@"); }
-install_deb() { dpkg -i $(lookup_fullnames "$@"); }
+install_rpm() { sudo yum -y install $(lookup_fullnames $@); }
+install_deb() {
+  for fpath in $(lookup_fullnames $@); do
+    gdebi -qn "$fpath"
+  done
+}
 
 lookup_fullnames() {
   list=""
@@ -26,7 +30,7 @@ lookup_fullnames() {
     [ -z "$path" ] && { echo "Couldn't find package: \`'$name_or_path'"; exit 1; }
     [ -z "$list" ] && list="$path" || list="$list $path"
   done
-  echo "$list"
+  echo $list
 }
 
 [ $# -eq 0 ] && { echo "usage: $0 (name | path) ..." && exit 1; }
