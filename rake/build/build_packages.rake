@@ -37,10 +37,13 @@ namespace :build do
         buildroot = opts.gitdir
         buildroot = File.join(buildroot, package_name) unless opts.standalone
 
-        with opts.env do
-          within buildroot do
-            make :changelog
-            execute :bash, "$BASEDIR/scripts/build_os_package.sh #{package_name}"
+        # hardcode to build only st2bundle and mistral
+        if ['mistral', 'st2bundle'].include?(package_name)
+          with opts.env do
+            within buildroot do
+              make :changelog
+              execute :bash, "$BASEDIR/scripts/build_os_package.sh #{package_name}"
+            end
           end
         end
       end

@@ -23,7 +23,7 @@ pipeopts do
 
   env     :buildnode
   env     :testnode
-  envpass :testmode, 'components' # components || bundle
+  envpass :testmode, 'bundle' # components || bundle
   envpass :basedir,  '/root'
   envpass :debug_level, 1
   envpass :artifact_dir, '/root/build'    # make it temp??
