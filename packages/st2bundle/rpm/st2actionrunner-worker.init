@@ -80,6 +80,7 @@ write_pidfile() {
   [ -n "$currentpid" ] && echo $currentpid > $pidfile
 }
 
+
 start() {
     echo -n $"Starting $DESC: "
     nohup_start $DAEMON $DAEMON_ARGS
@@ -116,7 +117,7 @@ force_reload() {
 
 rh_status() {
     # run checks to determine if the service is running or use generic status
-    status $DESC
+    status -p $PIDFILE
 }
 
 rh_status_q() {

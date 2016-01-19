@@ -18,8 +18,8 @@ Conflicts: st2common
 %install
   %default_install
   %pip_install_venv
-  %service_install st2actionrunner %{worker_name} st2api st2auth st2exporter
-  %service_install st2notifier st2resultstracker st2rulesengine st2sensorcontainer
+  %service_install st2actionrunner %{worker_name} st2api st2auth st2exporter st2notifier
+  %service_install st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
   make post_install DESTDIR=%{?buildroot}
   # clean up absolute path in record file, so that /usr/bin/check-buildroot doesn't fail
   find /root/rpmbuild/BUILDROOT/%{package}* -name RECORD -exec sed -i '/\/root\/rpmbuild.*$/d' '{}' ';'
@@ -46,16 +46,16 @@ Conflicts: st2common
     chown %{svc_user}.%{svc_user} /etc/st2/htpasswd
     chmod 640 /etc/st2/htpasswd
   fi
-  %service_post st2actionrunner %{worker_name} st2api st2auth st2exporter
-  %service_post st2notifier st2resultstracker st2rulesengine st2sensorcontainer
+  %service_post st2actionrunner %{worker_name} st2api st2auth st2exporter st2notifier
+  %service_post st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
 
 %preun
-  %service_preun st2actionrunner %{worker_name} st2api st2auth st2exporter
-  %service_preun st2notifier st2resultstracker st2rulesengine st2sensorcontainer
+  %service_preun st2actionrunner %{worker_name} st2api st2auth st2exporter st2notifier
+  %service_preun st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
 
 %postun
-  %service_postun st2actionrunner %{worker_name} st2api st2auth st2exporter
-  %service_postun st2notifier st2resultstracker st2rulesengine st2sensorcontainer
+  %service_postun st2actionrunner %{worker_name} st2api st2auth st2exporter st2notifier
+  %service_postun st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
   # rpm has no purge option, so we leave this file
   [ -f /etc/logrotate.d/st2 ] && mv -f /etc/logrotate.d/st2 /etc/logrotate.d/st2.disabled
   exit 0
@@ -82,6 +82,7 @@ Conflicts: st2common
   %{_unitdir}/st2resultstracker.service
   %{_unitdir}/st2rulesengine.service
   %{_unitdir}/st2sensorcontainer.service
+  %{_unitdir}/st2garbagecollector.service
 %else
   %{_sysconfdir}/rc.d/init.d/st2actionrunner
   %{_sysconfdir}/rc.d/init.d/%{worker_name}
@@ -92,4 +93,5 @@ Conflicts: st2common
   %{_sysconfdir}/rc.d/init.d/st2resultstracker
   %{_sysconfdir}/rc.d/init.d/st2rulesengine
   %{_sysconfdir}/rc.d/init.d/st2sensorcontainer
+  %{_sysconfdir}/rc.d/init.d/st2garbagecollector
 %endif
