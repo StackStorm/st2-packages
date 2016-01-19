@@ -9,7 +9,7 @@ sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
 curl -sS -k -o /tmp/rabbitmq-server.rpm https://www.rabbitmq.com/releases/rabbitmq-server/v3.3.5/rabbitmq-server-3.3.5-1.noarch.rpm
 sudo yum localinstall -y /tmp/rabbitmq-server.rpm
 
-## Install st2 (Fix this to use repo.)
+## Install st2
 sudo touch /etc/yum.repos.d/StackStorm-el6_staging-unstable.repo
 
 Add following lines to /etc/yum.repos.d/StackStorm-el6_staging-unstable.repo
