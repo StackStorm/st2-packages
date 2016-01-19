@@ -9,9 +9,17 @@ sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
 curl -sS -k -o /tmp/rabbitmq-server.rpm https://www.rabbitmq.com/releases/rabbitmq-server/v3.3.5/rabbitmq-server-3.3.5-1.noarch.rpm
 sudo yum localinstall -y /tmp/rabbitmq-server.rpm
 
-## Install st2 (Fix this to use repo.)
-wget https://bintray.com/artifact/download/stackstorm/el7_staging/unstable/st2bundle-1.3dev-67.x86_64.rpm
-sudo yum localinstall -y st2bundle-1.3dev-67.x86_64.rpm
+## Install st2
+sudo touch /etc/yum.repos.d/StackStorm-el7_staging-unstable.repo
+
+Add following lines to /etc/yum.repos.d/StackStorm-el7_staging-unstable.repo
+[StackStorm-el7_staging-unstable]
+name=StackStorm-el7_staging-unstable
+baseurl=https://dl.bintray.com/stackstorm/el7_staging/unstable
+enabled=1
+gpgcheck=0
+
+sudo yum install st2bundle
 
 ## Start mongodb
 sudo systemctl start mongod
