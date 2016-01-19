@@ -2,12 +2,6 @@
 sudo apt-get update
 sudo apt-get install -y software-properties-common
 
-## Install virtualenv
-sudo apt-get install -y python-pip
-sudo -H pip install --upgrade pip
-sudo -H pip install virtualenv
-virtualenv --version (> 13.1.2)
-
 ## Install Mongo
 sudo apt-get install -y mongodb-server
 
@@ -33,4 +27,3 @@ sudo st2ctl start
 ## Basic validation
 export ST2_AUTH_TOKEN=`st2 auth admin -p <PASSWORD> -t`
 st2 action list
-
