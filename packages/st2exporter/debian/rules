@@ -22,7 +22,8 @@ override_dh_installdirs:
 
 override_dh_installinit:
 	# So far don't start services
-	dh_installinit --no-start
+	# disabling installation of exporter service
+	# dh_installinit --no-start
 
 override_dh_installdeb:
 	$(MAKE) post_install
