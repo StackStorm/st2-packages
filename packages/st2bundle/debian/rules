@@ -26,7 +26,6 @@ override_dh_installinit:
 	dh_installinit --no-start --name=st2actionrunner
 	dh_installinit --no-start --name=st2api
 	dh_installinit --no-start --name=st2auth
-	dh_installinit --no-start --name=st2exporter
 	dh_installinit --no-start --name=st2notifier
 	dh_installinit --no-start --name=st2resultstracker
 	dh_installinit --no-start --name=st2rulesengine

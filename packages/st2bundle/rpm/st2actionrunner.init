@@ -37,22 +37,11 @@ lockfile=/var/lock/subsys/$NAME
 
 
 start() {
-    echo -n $"Starting $NAME: "
     $SPAWNER start
-    retval=$?
-    [ $retval -eq 0 ] && success $"$NAME startup" || failure $"$NAME startup"
-    echo
-    [ $retval -eq 0 ] && touch $lockfile
-    return $retval
 }
 
 stop() {
-    echo -n $"Stopping $NAME: "
     $SPAWNER stop
-    retval=$?
-    echo
-    [ $retval -eq 0 ] && rm -f $lockfile
-    return $retval
 }
 
 restart() {
@@ -69,8 +58,7 @@ force_reload() {
 }
 
 rh_status() {
-    # run checks to determine if the service is running or use generic status
-    status $NAME
+    $SPAWNER status
 }
 
 rh_status_q() {
