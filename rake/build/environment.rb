@@ -13,46 +13,41 @@ DEFAULT_PACKAGES = [
   :mistral
 ].map { |p| p.to_s }
 
-## Set global pipeline options
-#
 pipeopts do
   ssh_options({
     keys: %w(/root/.ssh/busybee),
     auth_methods: %w(publickey)
   })
 
+  ## Load the following attributes from corresponding environment variables
+  #
+
   env     :buildnode
   env     :testnode
-  envpass :testmode, 'bundle' # components || bundle
+  # package_lists specifies the list of packages to be built
+  env     :package_list, from: 'ST2_PACKAGES'
+
+  ## Load the following attributes from corresponding environment variables and
+  ## also make the avialable as ENV on remote nodes (such as test and build).
+
+  envpass :testmode, 'bundle' # bundle || component
   envpass :basedir,  '/root'
   envpass :debug_level, 1
   envpass :artifact_dir, '/root/build'    # make it temp??
-
   # Target directory for intermidiate files (on the remotes!)
   envpass :wheeldir, '/tmp/wheelhouse'
 
-  # Single package in a gitdir is standalone
-  checkout :st2, :mistral
-  upload_sources 'packages', 'scripts', 'rpmspec'
-
   # Services host variables
-  [:rabbitmq, :mongodb, :postgres].each {|n| envpass "#{n}host", n.to_s}
+  envpass :rabbitmqhost, 'rabbitmq'
+  envpass :mongodbhost, 'mongodb'
+  envpass :postgreshost, 'postgres'
 
-  # Read build list into var, however later on we use packages, see below!
-  env :package_list, from: 'ST2_PACKAGES'
-end
+  ## Other attributes which set directly (not using env)
 
-## Set packages to build and to test
-#
-pipeopts[:packages] = pipeopts.package_list.to_s.split(' ')
-pipeopts[:packages].concat(DEFAULT_PACKAGES) if pipeopts[:packages].empty?
-
-pipeopts[:packages_to_test] = pipeopts.packages.dup.tap do |list|
-  if pipeopts.testmode == 'components'
-    list.delete('st2bundle')
-  else
-    list.select! { |p| p == 'st2bundle' || !p.start_with?('st2') }
-  end
+  # checkout sets what name contexts git repos should be checkd out.
+  checkout :st2, :mistral
+  # specifies the list of directories to upload to remote nodes.
+  upload_sources 'packages', 'scripts', 'rpmspec'
 end
 
 pipeopts 'st2python' do
@@ -60,7 +55,6 @@ pipeopts 'st2python' do
   envpass :st2_python_version, '2.7.10'
   envpass :st2_python_relase, 1
 end
-pipeopts[:st2python_enabled] = pipeopts('st2python')[:st2_python].to_i == 1
 
 pipeopts 'st2' do
   # st2 packages are not standalone (ie. there are many $gitdir/st2*)
@@ -83,12 +77,31 @@ pipeopts 'mistral' do
   envpass :mistral_release, 1
 end
 
-## Serverspec or netcat work in a buggy fashion,
-#  we have to resolve remotes.
-[:rabbitmq, :mongodb, :postgres].map{|n| :"#{n}host"}.each do |remote|
-  value = pipeopts[remote].to_s
-  unless value =~ Resolv::AddressRegex
-    pipeopts[remote] = Resolv.getaddress(value)
-    pipeopts.env[remote.upcase] = Resolv.getaddress(value)
+## --- Final pipeopts evaluation
+python_enabled = pipeopts('st2python').st2_python.to_i
+
+# packages and packages_to_test
+list = pipeopts.package_list.to_s.split(' ')
+packages = list.empty? ? DEFAULT_PACKAGES.dup : list
+packages_to_test = packages.dup
+
+# In components mode st2bundle package is not installed
+if pipeopts.testmode == 'components'
+  packages_to_test.delete('st2bundle')
+else
+  # otherwise shrink to st2bundle and non st2 packages (such as mistral)
+  packages_to_test.select! { |p| p == 'st2bundle' || !p.start_with?('st2') }
+end
+
+##
+pipeopts do
+  packages packages
+  packages_to_test packages_to_test
+  envpass :st2_python, python_enabled, reset: true
+
+  # Force address resolution workaround (solves serverspec + netcat problems)
+  [:rabbitmq, :mongodb, :postgres].each do |s|
+    host = send(:"#{s}host")
+    envpass(:"#{s}host", Resolv.getaddress(host), reset: true) if host !~ Resolv::AddressRegex
   end
 end
