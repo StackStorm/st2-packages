@@ -3,12 +3,9 @@
 #
 
 namespace :setup do
-  all_deps = [:install_artifacts, :configure]
-  all_deps.unshift(:install_st2_python) if pipeopts.st2python_enabled
+  task :all => [:install_artifacts, :configure]
 
-  task :all => all_deps
-
-  task :install_artifacts => 'build:upload_to_testnode' do
+  task :install_artifacts => [ 'build:upload_to_testnode', :install_st2_python ] do
     pipeline do
       run hostname: opts[:testnode] do |opts|
         package_list = opts.packages_to_test.join(' ')
@@ -35,12 +32,15 @@ namespace :setup do
   end
 
   task :install_st2_python do
-    pipeline do
-      run hostname: opts[:testnode] do |opts|
-        repo_path = '/etc/yum.repos.d/stackstorm-el6-stable.repo'
-        execute :wget, "-nv https://bintray.com/stackstorm/el6/rpm -O #{repo_path}"
-        execute :sed, "-ir 's~stackstorm/el6~stackstorm/el6/stable~' #{repo_path}"
-        execute :yum, "-y install st2python"
+    # Only run if we use st2_python (currently only used on el6)
+    if pipeopts.st2_python == 1
+      pipeline do
+        run hostname: opts[:testnode] do |opts|
+          repo_path = '/etc/yum.repos.d/stackstorm-el6-stable.repo'
+          execute :wget, "-nv https://bintray.com/stackstorm/el6/rpm -O #{repo_path}"
+          execute :sed, "-ir 's~stackstorm/el6~stackstorm/el6/stable~' #{repo_path}"
+          execute :yum, "-y install st2python"
+        end
       end
     end
   end

@@ -20,9 +20,9 @@ module Pipeline
   # Invoke our sshkit remote wrapper with merged options
   def pipeline(context_name=nil, &block)
     if block
-      options = pipe_options.dup
-      context_options = context_pipe_options[context_name]
-      options.merge!(context_options) unless context_name.nil?
+      options = context.fetch
+      current_options = context.fetch(context_name)
+      options.merge!(current_options) unless context_name.nil?
       ssh_options = _ssh_options(options.ssh_options)
       sshkit_wrapper(options, ssh_options).instance_exec(&block)
     end

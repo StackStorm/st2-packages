@@ -2,33 +2,62 @@ require 'tempfile'
 
 module Pipeline
   module Options
-    # Environment loader and Pipeline options setter
-    class SetEnvLoaderDSL
-      def initialize(mash_context, mash_global=nil)
-        @context, @global = mash_context, mash_global
+
+    # This class implements merged mash context.
+    #   Level 1 (named) context merged with level 0 (global).
+    #
+    class MergedContext
+      def initialize
+        @global ||= Hashie::Mash.new
+        @named_context ||= Hash.new {|h, k| h[k] =  Hashie::Mash.new}
+      end
+
+      # Lookup value in the MergedContext.
+      # First try to fetch value from level 1 named context, then fallback
+      # to level 0.
+      def lookup_value(key, context=nil)
+        [named_context[context] || {}, global].map {|c| c[key]}.compact.first
+      end
+
+      # Get global or named context
+      def fetch(context=nil)
+        context.nil? ? global : named_context[context]
+      end
+
+      private
+      attr_reader :global, :named_context
+    end
+
+    # DSL to build up merged context from environment variables.
+    class EnvironmentDSL
+      def initialize(context_name, merged_context)
+        @context_name = context_name
+        @context = merged_context
+        @current = merged_context.fetch(context_name)
       end
 
       # Sets option from env
-      def env(var, default=nil, opts=nil)
-        value, _ = parse_envpass_value(var, default, opts)
+      def env(attribute, default=nil, opts={})
+        _, value, opts = parse_attribute(attribute, default, opts)
         value.tap do
-          context.assign_property(var, value) if value
+          current.assign_property(attribute, value) if value
         end
       end
 
-      # Sets option from env as well as corresponding options env[var]
-      def envpass(var, default=nil, opts=nil)
-        value, opts = parse_envpass_value(var, default, opts)
+      # Sets option from env as well as corresponding options env[attribute]
+      def envpass(attribute, default=nil, opts={})
+        varname, value, opts = parse_attribute(attribute, default, opts)
         value.tap do
           if value
-            # Set context option as
-            context.assign_property(var, value)
-            # well as populate context[:env]
-            var = var.upcase if opts[:upcase]
-            context[:env] ||= Hashie::Mash.new
-            context[:env].merge!({var => value})
+            current.assign_property(attribute, value)
+            current[:env] ||= Hashie::Mash.new
+            current[:env].merge!({varname => value})
           end
         end
+      end
+
+      def pipeopts(context_name=nil)
+        context.fetch(context_name)
       end
 
       def make_tmpname(basename='', tmpdir=Dir.tmpdir)
@@ -36,54 +65,54 @@ module Pipeline
       end
 
       def method_missing(method_name, *args)
-        # setter invoked
-        unless args.empty?
-          value = args.size < 2 ? args.pop : args
-          context.assign_property(method_name, value)
-        else
-          if global && global.respond_to?(method_name)
-            global.send(method_name)
-          end
+        if args.size == 0
+          # act as getter ONLY IF variable was already assigned
+          value = context.lookup_value(method_name, context_name)
+          return value unless value.nil?
         end
+        # Otherwise we act as setter (even if args.size == 0)
+        value = args.size < 2 ? args.pop : args
+        current.assign_property(method_name, value)
+        value
       end
 
       private
-      attr_reader :context, :global
+      attr_reader :context_name, :context, :current
 
-      # Parse arguments for env, envpass methods
-      def parse_envpass_value(var, default, opts)
+
+      # Parse attribute read configuration, to build up [varname, value, opts].
+      # During parsing we fetch values from ENV.
+      def parse_attribute(attribute, default, opts)
         opts, default = default, nil if default.is_a?(Hash)
-        defs = {upcase: true}
-        opts = defs.merge(opts || {})
-        var  = opts[:from] if opts[:from]
-        value = opts[:upcase] ? ENV[var.to_s.upcase] : ENV[var.to_s]
-        # set value nil for an empty env var
-        value = nil if value.to_s.empty?
-        [value || default, opts]
+        # Merge-in default opts!
+        opts = {upcase: true}.merge!(opts)
+        caseattr = opts[:upcase] == true ? attribute.to_s.upcase : attribute.to_s
+        value = ENV[opts[:from] || caseattr]
+        if opts[:reset]
+          # don't parse env variable, just set value
+          [caseattr, default, opts]
+        else
+          [caseattr, value || default, opts]
+        end
       end
     end
 
     # Store options into mash either global or context specific.
     def pipeopts(context_name=nil, &block)
-      global = pipe_options
-      context = context_pipe_options[context_name]
-      args = context_name.nil? ? [global] : [context, global]
-      # Assign or return pipe options
       unless block.nil?
-        SetEnvLoaderDSL.new(*args).instance_exec(&block)
+        # evaluate pipopts DSL
+        EnvironmentDSL.new(context_name, context).instance_exec(&block)
       else
-        args.first
+        # return current context
+        context.fetch(context_name)
       end
     end
 
     private
 
-    def pipe_options
-      @pipe_options ||= Hashie::Mash.new
+    def context
+      @context ||= MergedContext.new
     end
 
-    def context_pipe_options
-      @context_pipe_options ||= Hash.new {|h, k| h[k] =  Hashie::Mash.new}
-    end
   end
 end
