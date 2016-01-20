@@ -71,6 +71,7 @@ write_pidfile() {
   base=${daemon##*/}
   pidfile=${pidfile:-/var/run/$base.pid}
 
+  sleep 0.1
   currentpid=$(ps -A xo pid,cmd | grep "\bbin/$base\b" | tail -n1 | awk '{print $1}')
   [ -n "$currentpid" ] && echo $currentpid > $pidfile
 }

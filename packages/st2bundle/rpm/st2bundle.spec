@@ -4,6 +4,12 @@
 %define stanley_user stanley
 %include ../rpmspec/st2pkg_toptags.spec
 
+%if 0%{?use_st2python}
+Requires: st2python, git
+%else
+Requires: git
+%endif
+
 Summary: StackStorm all components bundle
 Conflicts: st2common
 
