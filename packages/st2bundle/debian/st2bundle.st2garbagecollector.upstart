@@ -9,7 +9,7 @@ setgid st2
 respawn
 respawn limit 2 5
 
-umask 007
+umask 022
 kill timeout 60
 
 script
