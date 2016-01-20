@@ -3,7 +3,6 @@
 %define wheel_dir %(echo ${WHEELDIR:-/tmp/wheelhouse})
 
 # virtualenv macroses
-%define venv_cmd virtualenv
 %define venv_install_dir usr/share/python/%{venv_name}
 %define venv_dir %{buildroot}/%{venv_install_dir}
 %define venv_bin %{venv_dir}/bin
@@ -14,10 +13,10 @@
 #   - Install dependencies
 #   - Install package itself
 %define pip_install_venv \
-  if [ -x /usr/share/python/st2python/bin/python ]; then \
+  %if 0%{?use_st2python} \
     export PATH=/usr/share/python/st2python/bin:$PATH \
-  fi \
-  %{venv_cmd} %{venv_dir} \
+  %endif \
+  virtualenv %{venv_dir} \
   %{venv_pip} -r requirements.txt \
   %{venv_pip} . \
   venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir} \
