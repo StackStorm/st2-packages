@@ -1,5 +1,0 @@
-../contrib/core opt/stackstorm/packs/
-../contrib/packs opt/stackstorm/packs/
-../contrib/linux opt/stackstorm/packs/
-../contrib/examples usr/share/doc/st2/
-#../contrib/tests usr/share/stackstorm/
