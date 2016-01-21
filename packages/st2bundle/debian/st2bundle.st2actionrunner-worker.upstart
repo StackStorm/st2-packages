@@ -6,7 +6,7 @@ description     "StackStorm actionrunner worker task"
 respawn
 respawn limit 2 5
 
-umask 007
+umask 022
 kill timeout 60
 
 instance $WORKERID
