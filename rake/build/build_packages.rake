@@ -38,7 +38,7 @@ namespace :build do
         buildroot = File.join(buildroot, package_name) unless opts.standalone
 
         # hardcode to build only st2bundle and mistral
-        if ['mistral', 'st2bundle'].include?(package_name)
+        if %w(st2mistral mistral st2bundle).include?(package_name)
           with opts.env do
             within buildroot do
               make :changelog
