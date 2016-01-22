@@ -22,7 +22,7 @@ install: changelog bdist_wheel populate_package
 
 changelog:
 ifeq ($(DEBIAN),1)
-	debchange -v $(ST2PKG_VERSION)-$(ST2PKG_RELEASE) -M "automated build version: $(ST2PKG_VERSION)"
+	debchange -v $(MISTRAL_VERSION)-$(MISTRAL_RELEASE) -M "automated build version: $(MISTRAL_VERSION)"
 endif
 
 wheelhouse:
