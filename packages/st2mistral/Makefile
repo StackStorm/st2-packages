@@ -18,7 +18,7 @@ endif
 .PHONY: all install wheelhouse
 all: install
 
-install: changelog bdist_wheel copy_wheel
+install: changelog bdist_wheel populate_package
 
 changelog:
 ifeq ($(DEBIAN),1)
@@ -34,5 +34,7 @@ bdist_wheel: .stamp-bdist_wheel
 	python setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@
 
-copy_wheel:
-	install -D -m644 $(WHEELDIR)/st2mistral*.whl $(DESTDIR)/usr/share/st2mistral
+populate_package:
+	install -d $(DESTDIR)/usr/share/st2mistral/helpers
+	install -m644 $(WHEELDIR)/st2mistral*.whl $(DESTDIR)/usr/share/st2mistral
+	install -m755 ./helpers/setup_with_pip.sh $(DESTDIR)/usr/share/st2mistral/helpers
