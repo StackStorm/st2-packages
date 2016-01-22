@@ -6,7 +6,6 @@
 set -e
 USER=st2
 chown $USER.$USER /var/log/st2
-chown $USER.$USER /opt/stackstorm
 if [ ! -f /etc/st2/htpasswd ]; then
   touch /etc/st2/htpasswd
   chown $USER.$USER /etc/st2/htpasswd
