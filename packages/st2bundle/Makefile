@@ -20,16 +20,17 @@ all: install
 install: wheelhouse changelog
 
 post_install:
-	# post_install is triggered debian/rules file, don't call it from install target!
-	# We don't want anything like below to be postinst
-	install -D -m644 ../conf/st2.package.conf $(DESTDIR)/etc/st2/st2.conf
-	install -D -m644 ../conf/logrotate.conf $(DESTDIR)/etc/logrotate.d/st2
-	install ../st2actions/conf/logging.conf $(DESTDIR)/etc/st2/logging.actionrunner.conf
-	install ../st2actions/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.actionrunner.conf
-	install ../st2api/conf/logging.conf $(DESTDIR)/etc/st2/logging.api.conf
-	install ../st2api/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.api.conf
-	install ../st2auth/conf/logging.conf $(DESTDIR)/etc/st2/logging.auth.conf
-	install ../st2auth/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.auth.conf
+	# post_install is triggered from debian/rules file.
+	# Don't call it from makefile install target!
+	install -m640 /dev/null $(DESTDIR)/etc/st2/htpasswd
+	install -m644 ../conf/st2.package.conf $(DESTDIR)/etc/st2/st2.conf
+	install -m644 ../conf/logrotate.conf $(DESTDIR)/etc/logrotate.d/st2
+	install -m644 ../st2actions/conf/logging.conf $(DESTDIR)/etc/st2/logging.actionrunner.conf
+	install -m644 ../st2actions/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.actionrunner.conf
+	install -m644 ../st2api/conf/logging.conf $(DESTDIR)/etc/st2/logging.api.conf
+	install -m644 ../st2api/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.api.conf
+	install -m644 ../st2auth/conf/logging.conf $(DESTDIR)/etc/st2/logging.auth.conf
+	install -m644 ../st2auth/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.auth.conf
 	sed -i -r "/args\s*=\s*/s%logs%/var/log/st2%g" $(DESTDIR)/etc/st2/logging.*conf
 ifeq ($(REDHAT),1)
 	if [ `/root/scripts/platform_major_version.py` = 7 ]; then sed -i -r 's/virtualenv_opts\s*=.*/virtualenv_opts =/' $(DESTDIR)/etc/st2/st2.conf; fi
