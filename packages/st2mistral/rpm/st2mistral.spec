@@ -1,7 +1,7 @@
 %define package st2mistral
 # version is hardcoded so far
-%define version 0.1.0
-%define release %(echo -n "${ST2PKG_RELEASE:-1}")
+%define version %(echo -n "${MISTRAL_VERSION:-0.1}")
+%define release %(echo -n "${MISTRAL_RELEASE:-1}")
 
 %define _sourcedir ./
 %include rpmspec/helpers.spec
