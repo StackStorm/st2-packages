@@ -14,12 +14,14 @@ Group: System/Management
 License: Apache
 Url: https://github.com/StackStorm/mistral
 Source0: .
+Provides: openstack-mistral
 Summary: Mistral workflow service
 
-%define _builddir %{SOURCE0}
 
 %description
   <insert long description, indented with spaces>
+
+%define _builddir %{SOURCE0}
 
 %install
   %default_install

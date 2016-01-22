@@ -11,16 +11,23 @@ ST2PIP=/usr/share/python/mistral/bin/pip
 
 # Locate binary (even on shells which don't support which)
 # ps. it doesn't return 1 status as original which does.
-which() { 
-  find $(echo $PATH | sed 's/:/ /g') -type f -perm +111 -name $@ -print -quit
+_which() { # it should not have which name!
+  binpaths=$(echo $PATH | sed 's/:/ /g')
+  which=$(find $binpaths -type f -name which -print -quit)
+  if [ -z $which ]; then
+    find $(echo $PATH | sed 's/:/ /g') -type f -name $@ -print -quit
+  else
+    echo $which
+  fi
 }
+
 
 locate_pip() {
   if [ -x $ST2PIP ]; then
     echo $ST2PIP
   else
     # Fallback to pip found in system paths.  
-    which pip
+    _which pip
   fi 
 }
 
@@ -46,10 +53,10 @@ st2mistral() {
     if [ $pip = "$ST2PIP" ]; then
       PIPOPTS="${PIPOPTS} --no-index"
     fi
-    $pip install $PIPOPTS st2mistral
+    $pip install $PIPOPTS st2mistral &>/dev/null
   elif [ $1 = uninstall ]; then
     # Don't fail if no pip and if no st2mistral
     [ -z $pip ] && return 0
-    yes | $pip uninstall st2mistral || :
+    yes | $pip uninstall st2mistral &>/dev/null || :
   fi
 }
