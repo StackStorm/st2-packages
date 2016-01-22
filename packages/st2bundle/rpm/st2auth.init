@@ -22,7 +22,7 @@
 
 DESC="st2auth"
 NAME=st2auth
-DAEMON=/usr/share/python/st2auth/bin/uwsgi
+DAEMON=/usr/share/python/st2/bin/uwsgi
 DAEMON_ARGS="--ini /etc/uwsgi.d/st2auth.ini"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

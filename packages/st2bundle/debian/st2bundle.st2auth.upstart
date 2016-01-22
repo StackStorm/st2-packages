@@ -18,5 +18,5 @@ script
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-  /usr/share/python/st2auth/bin/uwsgi --ini /etc/uwsgi.d/st2auth.ini
+  /usr/share/python/st2/bin/uwsgi --ini /etc/uwsgi.d/st2auth.ini
 end script
