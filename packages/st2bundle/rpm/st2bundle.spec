@@ -47,11 +47,6 @@ Conflicts: st2common
   exit 0
 
 %post
-  if [ ! -f /etc/st2/htpasswd ]; then
-    touch /etc/st2/htpasswd
-    chown %{svc_user}.%{svc_user} /etc/st2/htpasswd
-    chmod 640 /etc/st2/htpasswd
-  fi
   %service_post st2actionrunner %{worker_name} st2api st2auth st2notifier
   %service_post st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
 
@@ -77,6 +72,7 @@ Conflicts: st2common
   /opt/stackstorm/packs/core
   /opt/stackstorm/packs/linux
   /opt/stackstorm/packs/packs
+  %attr(640, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
 %if 0%{?use_systemd}
   %{_unitdir}/st2actionrunner.service

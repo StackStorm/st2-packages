@@ -6,12 +6,12 @@ require 'resolv'
 #   NB! Should be ordered with st2common going first and
 #   NB! st2bundle going after all st2 components.
 #
-DEFAULT_PACKAGES = [
-  :st2common, :st2api, :st2actions,
-  :st2auth, :st2client, :st2exporter,
-  :st2reactor, :st2debug, :st2bundle,
-  :mistral
-].map { |p| p.to_s }
+DEFAULT_PACKAGES = %w(
+  st2common st2api st2actions
+  st2auth st2client st2exporter
+  st2reactor st2debug st2bundle
+  st2mistral mistral
+)
 
 pipeopts do
   ssh_options({
@@ -45,7 +45,7 @@ pipeopts do
   ## Other attributes which set directly (not using env)
 
   # checkout sets what name contexts git repos should be checkd out.
-  checkout :st2, :mistral
+  checkout :st2, :mistral, :st2mistral
   # specifies the list of directories to upload to remote nodes.
   upload_sources 'packages', 'scripts', 'rpmspec'
 end
@@ -76,6 +76,17 @@ pipeopts 'mistral' do
   envpass :mistral_version, '1.2.0'
   envpass :mistral_release, 1
 end
+
+pipeopts 'st2mistral' do
+  standalone true
+  checkout :st2mistral
+  envpass :giturl,  'https://github.com/StackStorm/st2mistral', from: 'ST2MISTRAL_GITURL'
+  envpass :gitrev,  'st2-1.2.0',                                from: 'ST2MISTRAL_GITREV'
+  envpass :gitdir,  make_tmpname('st2mistral-')
+  envpass :mistral_version, '1.2.0'
+  envpass :mistral_release, 1
+end
+
 
 ## --- Final pipeopts evaluation
 python_enabled = pipeopts('st2python').st2_python.to_i
