@@ -81,10 +81,10 @@ pipeopts 'st2mistral' do
   standalone true
   checkout :st2mistral
   envpass :giturl,  'https://github.com/StackStorm/st2mistral', from: 'ST2MISTRAL_GITURL'
-  envpass :gitrev,  'master',                                   from: 'ST2MISTRAL_GITREV'
+  envpass :gitrev,  'st2-1.2.0',                                from: 'ST2MISTRAL_GITREV'
   envpass :gitdir,  make_tmpname('st2mistral-')
-  envpass :st2pkg_version
-  envpass :st2pkg_release, 1
+  envpass :mistral_version, '1.2.0'
+  envpass :mistral_release, 1
 end
 
 

@@ -1,8 +1,8 @@
 WHEELDIR ?= /tmp/wheelhouse
 ST2_COMPONENT := $(notdir $(CURDIR))
-ST2PKG_RELEASE ?= 1
+MISTRAL_RELEASE ?= 1
 # hardcode it for now since st2mistral doesn't have it's version
-ST2PKG_VERSION = 0.1.0
+MISTRAL_VERSION ?= 1.2.0
 
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
