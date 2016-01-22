@@ -18,8 +18,8 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2auth"
 NAME=st2auth
-DAEMON=/usr/share/python/st2auth/bin/$NAME
-DAEMON_ARGS="--config-file /etc/st2/st2.conf"
+DAEMON=/usr/share/python/st2auth/bin/uwsgi
+DAEMON_ARGS="--ini /etc/uwsgi.d/st2auth.ini"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 RUNAS_USER="st2"

@@ -14,10 +14,9 @@ kill timeout 60
 
 script
   NAME=st2auth
-  DEFAULT_ARGS="--config-file /etc/st2/st2.conf"
 
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-  /usr/share/python/st2/bin/$NAME ${DEFAULT_ARGS}
+  /usr/share/python/st2auth/bin/uwsgi --ini /etc/uwsgi.d/st2auth.ini
 end script

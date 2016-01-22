@@ -69,11 +69,13 @@ Conflicts: st2common
   %{_datadir}/python/%{venv_name}
   %{_datadir}/doc/st2/examples
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/st2
+  %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm
   /opt/stackstorm/packs/core
   /opt/stackstorm/packs/linux
   /opt/stackstorm/packs/packs
   %attr(640, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
+  %config(noreplace) %{_sysconfdir}/uwsgi.d/*
 %if 0%{?use_systemd}
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
