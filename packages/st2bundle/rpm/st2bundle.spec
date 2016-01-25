@@ -69,9 +69,9 @@ Conflicts: st2common
   %{_datadir}/python/%{venv_name}
   %{_datadir}/doc/st2/examples
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/st2
-  %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/packs/core
-  %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/packs/linux
-  %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/packs/packs
+  /opt/stackstorm/packs/core
+  /opt/stackstorm/packs/linux
+  /opt/stackstorm/packs/packs
   %attr(640, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
 %if 0%{?use_systemd}
