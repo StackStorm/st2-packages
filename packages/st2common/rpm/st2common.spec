@@ -52,6 +52,6 @@ Summary: St2Common - StackStorm shared files
   %{_datadir}/python/%{name}
   %{_datadir}/doc/st2/examples
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/st2
-  /opt/stackstorm/packs/core
-  /opt/stackstorm/packs/linux
-  /opt/stackstorm/packs/packs
+  %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/packs/core
+  %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/packs/linux
+  %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/packs/packs
