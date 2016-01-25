@@ -6,4 +6,3 @@
 ../st2actions/conf/syslog.*.conf etc/st2/
 ../st2reactor/conf/logging.*.conf etc/st2/
 ../st2reactor/conf/syslog.*.conf etc/st2/
-conf/uwsgi/st2auth.ini etc/uwsgi.d

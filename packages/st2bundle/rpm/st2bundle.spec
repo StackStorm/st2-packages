@@ -74,7 +74,6 @@ Conflicts: st2common
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/packs/packs
   %attr(640, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
-  %config(noreplace) %{_sysconfdir}/uwsgi.d/*
 %if 0%{?use_systemd}
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
