@@ -18,8 +18,8 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2api"
 NAME=st2api
-DAEMON=/usr/share/python/st2api/bin/$NAME
-DAEMON_ARGS="--config-file /etc/st2/st2.conf"
+DAEMON=/usr/share/python/st2api/bin/gunicorn_pecan
+DAEMON_ARGS="/usr/share/python/st2api/lib/python2.7/site-packages/st2api/gunicorn_config.py -k eventlet -b 127.0.0.1:9101 --threads 10 --workers 1"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 RUNAS_USER="st2"
