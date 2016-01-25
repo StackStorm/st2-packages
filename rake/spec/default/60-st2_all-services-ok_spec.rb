@@ -63,4 +63,21 @@ describe 'st2 services' do
       it { is_expected.to be_running }
     end
   end
+
+  describe 'st2auth', prompt_on_failure: true do
+    subject { port(9100) }
+    it { should be_listening }
+  end
+
+  describe 'st2api', prompt_on_failure: true do
+    subject { port(9101) }
+    it { should be_listening }
+  end
+
+  if spec[:mistral_enabled]
+    describe 'mistral', prompt_on_failure: true do
+      subject { port(8989) }
+      it { should be_listening }
+    end
+  end
 end
