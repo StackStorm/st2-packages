@@ -36,7 +36,7 @@ class ST2Spec
     rabbitmqhost: pipeopts.rabbitmqhost,
     postgreshost: pipeopts.postgreshost,
     mongodbhost:  pipeopts.mongodbhost,
-    wait_for_start: (ENV['ST2_WAITFORSTART'] || 7).to_i,
+    wait_for_start: (ENV['ST2_WAITFORSTART'] || 10).to_i,
     loglines_to_show: 20,
     logdest_pattern: {
       st2actionrunner: 'st2actionrunner.{pid}'
