@@ -18,8 +18,8 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2auth"
 NAME=st2auth
-DAEMON=/usr/share/python/st2/bin/uwsgi
-DAEMON_ARGS="--ini /etc/uwsgi.d/st2auth.ini"
+DAEMON=/usr/share/python/st2/bin/gunicorn_pecan
+DAEMON_ARGS="/usr/share/python/st2/lib/python2.7/site-packages/st2auth/gunicorn_config.py -k eventlet -b 127.0.0.1:9100 --threads 10 --workers 1"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 RUNAS_USER="st2"

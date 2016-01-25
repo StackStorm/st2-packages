@@ -18,5 +18,5 @@ script
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-  /usr/share/python/st2/bin/uwsgi --ini /etc/uwsgi.d/st2auth.ini
+  /usr/share/python/st2/bin/gunicorn_pecan /usr/share/python/st2/lib/python2.7/site-packages/st2auth/gunicorn_config.py -k eventlet -b 127.0.0.1:9100 --threads 10 --workers 1
 end script
