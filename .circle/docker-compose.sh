@@ -49,6 +49,7 @@ case "$1" in
         -e ST2_GITREV=${ST2_GITREV} \
         -e ST2PKG_VERSION=${ST2PKG_VERSION} \
         -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
+        -e ST2_WAITFORSTART=${ST2_WAITFORSTART} \
         -e RABBITMQHOST=${HOST_IP} \
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
