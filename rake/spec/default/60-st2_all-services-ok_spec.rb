@@ -8,17 +8,20 @@ describe 'external services' do
   describe 'rabbitmq' do
     subject { host(spec[:rabbitmqhost]) }
     it { is_expected.to be_reachable }
+    it { is_expected.to be_reachable.with :port => 5672, :timeout => 1 }
   end
 
   describe 'mongodb' do
     subject { host(spec[:mongodbhost]) }
     it { is_expected.to be_reachable }
+    it { is_expected.to be_reachable.with :port => 27017, :timeout => 1 }
   end
 
   if spec[:mistral_enabled]
     describe 'postgres' do
       subject { host(spec[:postgreshost]) }
       it { is_expected.to be_reachable }
+      it { is_expected.to be_reachable.with :port => 5432, :timeout => 1 }
     end
   end
 end
@@ -61,6 +64,23 @@ describe 'st2 services' do
   spec[:service_list].each do |name|
     describe service(name), prompt_on_failure: true do
       it { is_expected.to be_running }
+    end
+  end
+
+  describe 'st2auth', prompt_on_failure: true do
+    subject { port(9100) }
+    it { should be_listening }
+  end
+
+  describe 'st2api', prompt_on_failure: true do
+    subject { port(9101) }
+    it { should be_listening }
+  end
+
+  if spec[:mistral_enabled]
+    describe 'mistral', prompt_on_failure: true do
+      subject { port(8989) }
+      it { should be_listening }
     end
   end
 end
