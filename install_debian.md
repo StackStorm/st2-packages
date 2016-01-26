@@ -49,20 +49,6 @@ sudo apt-get install -y postgresql st2mistral
 sudo service postgresql start
 ```
 
-Populate mistral configuration file:
-```
-## Create config
-cat << EHD | sudo tee /etc/mistral/mistral.conf
-[DEFAULT]
-transport_url = rabbit://guest:guest@localhost:5672
-[database]
-connection = postgresql://mistral:StackStorm@localhost/mistral
-max_pool_size = 50
-[pecan]
-auth_enable = false
-EHD
-```
-
 Create mistral user and database in postgres:
 ```
 cat << EHD | sudo -u postgres psql
