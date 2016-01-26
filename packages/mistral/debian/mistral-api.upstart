@@ -16,14 +16,12 @@ kill timeout 60
 
 script
   NAME=mistral
-  DEFAULT_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral.log"
+  API_LISTEN="127.0.0.1:8989"
+  API_WORKERS=2
+  DEFAULT_ARGS="--log-file /var/log/mistral/mistral-api.log -b $API_LISTEN -w $API_WORKERS mistral.api.wsgi"
 
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-  # Environment options can be set in the default file (/etc/default/mistral)
-  API_LISTEN=${API_LISTEN:-"127.0.0.1:8989"}
-  API_WORKERS=${API_WORKERS:-2}
-
-  exec /usr/share/python/mistral/bin/gunicorn -b $API_LISTEN -w $API_WORKERS mistral.api.wsgi
+  exec /usr/share/python/mistral/bin/gunicorn $DEFAULT_ARGS
 end script

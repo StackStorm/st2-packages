@@ -16,7 +16,7 @@ kill timeout 60
 
 script
   NAME=mistral
-  DEFAULT_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral.log"
+  DEFAULT_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral-server.log"
 
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME

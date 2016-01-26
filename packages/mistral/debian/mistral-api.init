@@ -23,6 +23,9 @@ PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 RUNAS_USER="mistral"
 RUNAS_GROUP="mistral"
+API_LISTEN="127.0.0.1:8989"
+API_WORKERS=2
+DAEMON_ARGS="--log-file /var/log/mistral/mistral-api.log -b ${API_LISTEN} -w ${API_WORKERS} mistral.api.wsgi"
 UMASK=022
 
 # Exit if the package is not installed
@@ -30,11 +33,6 @@ UMASK=022
 
 # Read configuration variable file if it is present
 [ -r /etc/default/mistral ] && . /etc/default/mistral
-
-# Environment options can be set in the default file (/etc/default/mistral)
-API_LISTEN=${API_LISTEN:-"127.0.0.1:8989"}
-API_WORKERS=${API_WORKERS:-2}
-DAEMON_ARGS="-b ${API_LISTEN} -w ${API_WORKERS} mistral.api.wsgi"
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
