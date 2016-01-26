@@ -7,7 +7,7 @@ Follow this guide and we'll lead through the basic installation and setup steps.
 First let's update the system and fetch software which will be required during installation and setup process:
 ```shell
 sudo apt-get update
-sudo apt-get install -y wget apache2-utils software-properties-common apt-transport-https sysvinit-utils
+sudo apt-get install -y wget apache2-utils apt-transport-https sysvinit-utils
 ```
 
 Second, add repositories and install st2.
@@ -18,7 +18,7 @@ export DISTRO=trusty
 
 wget -qO - https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
 
-sudo -E add-apt-repository "deb https://dl.bintray.com/stackstorm/${DISTRO}_staging stable main"
+echo "deb https://dl.bintray.com/stackstorm/${DISTRO}_staging stable main" | sudo tee /etc/apt/sources.list.d/st2-stable.list
 unset DISTRO
 
 # Update repo and install st2
@@ -45,8 +45,7 @@ If you are planning to use mistral workflows follow the provided instructions ot
 
 Install postgres database and mistral:
 ```shell
-# st2mistral package provides st2 plugin for mistral
-sudo apt-get install -y postgresql mistral st2mistral
+sudo apt-get install -y postgresql st2mistral
 sudo service postgresql start
 ```
 
