@@ -1,0 +1,28 @@
+description     "Mistral workflow engine and executor job"
+author          "StackStorm Engineering <opsadmin@stackstorm.com>"
+
+# This doesn't start/stop by itself (AND SHOULD NOT!),
+# use mistral job instead.
+start on mistral-server
+stop on mistral-server
+
+setuid mistral
+setgid mistral
+respawn
+respawn limit 2 5
+
+umask 022
+kill timeout 60
+
+script
+  NAME=mistral
+  DEFAULT_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral.log"
+
+  # Read configuration variable file if it is present
+  [ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+  COMPONENTS=${COMPONENTS:-api,engine,executor}
+  COMPONENTS=$(echo $COMPONENTS | sed 's/,\?api,\?//')
+
+  exec /usr/share/python/mistral/bin/mistral-server --server ${COMPONENTS} ${DEFAULT_ARGS}
+end script

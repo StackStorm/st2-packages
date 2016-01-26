@@ -22,7 +22,9 @@ override_dh_installdirs:
 
 override_dh_installinit:
 	# So far don't start services
-	dh_installinit --no-start
+	dh_installinit --no-start --name=mistral
+	dh_installinit --no-start --name=mistral-api
+	dh_installinit --no-start --name=mistral-server
 
 override_dh_installdeb:
 	$(MAKE) post_install

@@ -36,12 +36,18 @@ populate_version: .stamp-populate_version
 	touch $@
 
 wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: populate_version
+.stamp-wheelhouse: inject-deps populate_version
 	# Install wheels into shared location
 	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
-.stamp-bdist_wheel: populate_version
+.stamp-bdist_wheel: inject-deps populate_version
 	python setup.py bdist_wheel -d $(WHEELDIR)
+	touch $@
+
+inject-deps: .inject-deps
+.inject-deps:
+	# We use gunicorn in our bundle!
+	echo "gunicorn" >> requirements.txt
 	touch $@
