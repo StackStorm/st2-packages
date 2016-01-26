@@ -11,4 +11,4 @@ Also we ship packages for rpm-based distros such as *el6* and *el7* *-compatible
 
 ### For ubuntu/debian installation
 
-Follow instructions from [debian_install.md](debian_install.md).
+Follow instructions from [install_debian.md](install_debian.md).
