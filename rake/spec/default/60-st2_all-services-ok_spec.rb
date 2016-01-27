@@ -39,7 +39,8 @@ describe 'start st2 components and services' do
     # start clean postgres (so command fails on the second up invocation %-).
     #
     if spec[:mistral_enabled]
-      puts "===> Invoking mistral-db-manage populate..."
+      puts "===> Invoking mistral-db-manage migration commands..."
+      spec.backend.run_command(spec[:mistral_db_head_command])
       spec.backend.run_command(spec[:mistral_db_populate_command])
     end
     puts
