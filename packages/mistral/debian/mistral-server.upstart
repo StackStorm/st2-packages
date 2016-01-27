@@ -16,7 +16,7 @@ kill timeout 60
 
 script
   NAME=mistral
-  DEFAULT_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral-server.log"
+  SERVER_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral-server.log"
 
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
@@ -24,5 +24,5 @@ script
   COMPONENTS=${COMPONENTS:-api,engine,executor}
   COMPONENTS=$(echo $COMPONENTS | sed 's/,\?api,\?//')
 
-  exec /usr/share/python/mistral/bin/mistral-server --server ${COMPONENTS} ${DEFAULT_ARGS}
+  exec /usr/share/python/mistral/bin/mistral-server --server ${COMPONENTS} ${SERVER_ARGS}
 end script
