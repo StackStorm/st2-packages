@@ -64,23 +64,16 @@ describe 'st2 services' do
   spec[:service_list].each do |name|
     describe service(name), prompt_on_failure: true do
       it { is_expected.to be_running }
-    end
-  end
-
-  describe 'st2auth' do
-    subject { port(9100) }
-    it { is_expected.to be_listening }
-  end
-
-  describe 'st2api' do
-    subject { port(9101) }
-    it { is_expected.to be_listening }
-  end
-
-  if spec[:mistral_enabled]
-    describe 'mistral' do
-      subject { port(8989) }
-      it { is_expected.to be_listening }
+      if service(name) == 'st2auth'
+        subject { port(9100) }
+        it { is_expected.to be_listening }
+      elsif service(name) == 'st2api'
+        subject { port(9101) }
+        it { is_expected.to be_listening }
+      elsif service(name) == 'mistral'
+        subject { port(8989) }
+        it { is_expected.to be_listening }
+      end
     end
   end
 end
