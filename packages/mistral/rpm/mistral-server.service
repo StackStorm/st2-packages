@@ -1,0 +1,15 @@
+[Unit]
+Description=Mistral workflow service (engine/executor)
+After=network.target
+
+[Service]
+Type=simple
+User=mistral
+Group=mistral
+Environment="SERVER_ARGS=--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral-server.log"
+Environment="COMPONENTS=api,engine,executor"
+EnvironmentFile=-/etc/sysconfig/mistral
+ExecStart=/bin/sh -c "COMPLIST=`echo ${COMPONENTS} | sed 's:,\?api,\?::'`; [ -z $COMPLIST ] && echo No components enabled || exec /usr/share/python/mistral/bin/mistral-server --server $COMPLIST $SERVER_ARGS"
+
+[Install]
+WantedBy=multi-user.target

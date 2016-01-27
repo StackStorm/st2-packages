@@ -26,7 +26,7 @@ Summary: Mistral workflow service
 %install
   %default_install
   %pip_install_venv
-  %service_install %{name}
+  %service_install mistral mistral-api mistral-server
   make post_install DESTDIR=%{?buildroot}
   # clean up absolute path in record file, so that /usr/bin/check-buildroot doesn't fail
   find /root/rpmbuild/BUILDROOT/%{package}* -name RECORD -exec sed -i '/\/root\/rpmbuild.*$/d' '{}' ';'
@@ -43,20 +43,22 @@ Summary: Mistral workflow service
   exit 0
 
 %post
-  %service_post %{name}
+  %service_post mistral mistral-api mistral-server
 
 %preun
-  %service_preun %{name}
+  %service_preun mistral mistral-api mistral-server
 
 %postun
-  %service_postun %{name}
+  %service_postun mistral mistral-api mistral-server
 
 %files
   %{_datadir}/python/%{name}
   %config(noreplace) %{_sysconfdir}/mistral/*
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/mistral
 %if 0%{?use_systemd}
-  %{_unitdir}/%{name}.service
+  %{_unitdir}/mistral.service
+  %{_unitdir}/mistral-api.service
+  %{_unitdir}/mistral-server.service
 %else
   %{_sysconfdir}/rc.d/init.d/%{name}
 %endif
