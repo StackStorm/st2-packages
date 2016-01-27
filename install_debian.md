@@ -60,7 +60,7 @@ EHD
 Start mistral and update schema:
 ```
 sudo service mistral start
-/usr/share/python/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf head
+/usr/share/python/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
 /usr/share/python/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
 ```
 
