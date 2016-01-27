@@ -25,8 +25,7 @@ DESC="st2actionrunner"
 NAME=st2actionrunner
 DAEMON=/usr/share/python/st2/bin/$NAME
 SPAWNER=/usr/share/python/st2/bin/runners.sh
-SCRIPTNAME=/etc/init.d/$NAME
-
+export WORKERS
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 5
