@@ -46,7 +46,7 @@ class ST2Spec
                               ' --register-all' \
                               ' --config-dir /etc/st2',
     mistral_db_head_command: '/usr/share/python/mistral/bin/mistral-db-manage' \
-                                 ' --config-file /etc/mistral/mistral.conf head',
+                                 ' --config-file /etc/mistral/mistral.conf upgrade head',
     mistral_db_populate_command: '/usr/share/python/mistral/bin/mistral-db-manage' \
                                  ' --config-file /etc/mistral/mistral.conf populate',
 
