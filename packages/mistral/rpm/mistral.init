@@ -5,13 +5,13 @@
 # Required-Start: $local_fs $network $named $remote_fs $syslog
 # Required-Stop: $local_fs $network $named $remote_fs $syslog
 # Short-Description: mistral service
-# Description: Mistral workflow service
+# Description: Mistral wrapper service
 ### END INIT INFO
 
 # mistral     This shell script takes care of starting and stopping
 #             mistral daemon.
 # chkconfig: - 85 15
-# description: Mistral workflow service
+# description: Mistral wrapper service
 # processname: mistral
 
 # Source function library.
@@ -20,120 +20,70 @@
 # Source networking configuration.
 . /etc/sysconfig/network
 
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="mistral"
 NAME=mistral
-DAEMON=/usr/share/python/mistral/bin/mistral-server
-DAEMON_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral.log"
-PIDFILE=/var/run/$NAME.pid
-SCRIPTNAME=/etc/init.d/$NAME
-RUNAS_USER="mistral"
-RUNAS_GROUP="mistral"
-
-lockfile=/var/lock/subsys/$NAME
-
-# Exit if the package is not installed
-[ -x "$DAEMON" ] || exit 5
+COMPONENTS="api,engine,executor"
+export RAN_BY_MISTRAL=1
 
 # Read configuration variable file if it is present
 [ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
 
-
-# Resemble redhatish daemon behaviour but with group and user available
-#
-nohup_start() {
-  local nicelevel corelimit
-  local pid base= nice= bg=
-  local runas_user="${RUNAS_USER:-root}"
-  local runas_group="${RUNAS_GROUP:-root}"
-  nicelevel=0
-
-  base=${1##*/}
-  __pids_var_run "$base"
-
-  [ -n "$pid" ] && return
-
-  # make sure it doesn't core dump anywhere unless requested
-  corelimit="ulimit -S -c ${DAEMON_COREFILE_LIMIT:-0}"
-  # if they set NICELEVEL in /etc/sysconfig/foo, honor it
-  [ -n "${NICELEVEL:-}" ] && nice="nice -n $NICELEVEL"
- 
-  # Echo daemon
-  [ "${BOOTUP:-}" = "verbose" -a -z "${LSB:-}" ] && echo -n " $base"
-
-  # And start it up.
-  $nice runuser -s /bin/bash -g $runas_group $runas_user -c "$corelimit >/dev/null 2>&1 ; nohup </dev/null >/dev/null 2>&1 $* &"
-}
-
-# Write pid of a running daemon into the pidfile
-#
-write_pidfile() {
-  local currentpid daemon=$1 pidfile=$2 base
-  base=${daemon##*/}
-  pidfile=${pidfile:-/var/run/$base.pid}
-
-  sleep 0.1
-  currentpid=$(ps -A xo pid,cmd | grep "\bbin/$base\b" | tail -n1 | awk '{print $1}')
-  [ -n "$currentpid" ] && echo $currentpid > $pidfile
+mistral_pass() {
+  cmd=$1
+  RS=0
+  if (echo $COMPONENTS | grep -q ",\?api,\?"); then
+    /etc/init.d/mistral-api $cmd
+    rs=$?; [ $rs -gt $RS ] && RS=$rs
+  fi
+  if (echo $COMPONENTS | grep -q "engine\|executor"); then
+    /etc/init.d/mistral-server $cmd
+    rs=$?; [ $rs -gt $RS ] && RS=$rs
+  fi
+  return $RS
 }
 
 start() {
-    echo -n $"Starting $NAME: "
-    nohup_start $DAEMON $DAEMON_ARGS
-    write_pidfile $DAEMON $PIDFILE
-    rh_status_q
-    retval=$?
-    [ $retval -eq 0 ] && success $"$NAME startup" || failure $"$NAME startup"
-    echo
-    [ $retval -eq 0 ] && touch $lockfile
-    return $retval
+  mistral_pass start
 }
 
 stop() {
-    echo -n $"Stopping $NAME: "
-    killproc -p $PIDFILE $DAEMON
-    retval=$?
-    echo
-    [ $retval -eq 0 ] && rm -f $lockfile
-    return $retval
+  mistral_pass stop
 }
 
 restart() {
-    stop
-    start
+  stop
+  start
 }
 
 reload() {
-    restart
+  restart
 }
 
 force_reload() {
-    restart
+  restart
 }
 
 rh_status() {
-    # run checks to determine if the service is running or use generic status
-    status $NAME
+  mistral_pass status
 }
 
 rh_status_q() {
-    rh_status >/dev/null 2>&1
+  rh_status >/dev/null 2>&1
 }
 
 
 case "$1" in
     start)
-        rh_status_q && exit 0
         $1
         ;;
     stop)
-        rh_status_q || exit 0
         $1
         ;;
     restart)
         $1
         ;;
     reload)
-        rh_status_q || exit 7
         $1
         ;;
     force-reload)

@@ -60,5 +60,7 @@ Summary: Mistral workflow service
   %{_unitdir}/mistral-api.service
   %{_unitdir}/mistral-server.service
 %else
-  %{_sysconfdir}/rc.d/init.d/%{name}
+  %{_sysconfdir}/rc.d/init.d/mistral
+  %{_sysconfdir}/rc.d/init.d/mistral-api
+  %{_sysconfdir}/rc.d/init.d/mistral-server
 %endif
