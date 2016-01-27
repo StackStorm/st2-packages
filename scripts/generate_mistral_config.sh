@@ -23,23 +23,10 @@ MISTRAL=$(cat <<EHD
 EHD
 )
 
-DEFAULT_ENV=$(cat <<EHD
-    DAEMON_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral.log --log-config-append /etc/mistral/wf_trace_logging.conf"
-EHD
-)
-
 MISTRAL=$(echo "$MISTRAL" | sed -r 's/^\s+//')
-DEFAULT_ENV=$(echo "$DEFAULT_ENV" | sed -r 's/^\s+//')
 
 # mistral config
 echo "$MISTRAL" > $MISTRAL_CONF || :
-
-# set up default env
-if [ "$(platform)" = deb ]; then
-  echo "$DEFAULT_ENV" > /etc/default/mistral
-else
-  echo "$DEFAULT_ENV" > /etc/sysconfig/mistral
-fi
 
 # Populate tables of the mistral database can be invoked ONLY
 # AFTER creating the mistral databasue, so make sure:
