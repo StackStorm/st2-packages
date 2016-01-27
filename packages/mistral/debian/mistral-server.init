@@ -19,6 +19,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="mistral"
 NAME=mistral-server
 DAEMON=/usr/share/python/mistral/bin/$NAME
+COMPONENTS="api,engine,executor"
 SERVER_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral-server.log"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
@@ -33,7 +34,6 @@ UMASK=022
 [ -r /etc/default/mistral ] && . /etc/default/mistral
 
 # Environment options can be set in the default file (/etc/default/mistral)
-COMPONENTS=${COMPONENTS:-api,engine,executor}
 COMPONENTS=$(echo $COMPONENTS | sed 's/,\?api,\?//')
 DAEMON_ARGS="--server ${COMPONENTS} ${SERVER_ARGS}"
 
