@@ -1,18 +1,15 @@
 [Unit]
-Description=Mistral workflow service
+Description=Mistral workflow service invocation wrapper
 After=network.target
 
 [Service]
-Type=simple
-User=mistral
-Group=mistral
-Environment="DAEMON_ARGS=--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral.log"
+Type=oneshot
 EnvironmentFile=-/etc/sysconfig/mistral
-ExecStart=/usr/share/python/mistral/bin/mistral-server $DAEMON_ARGS
-TimeoutSec=60
-PrivateTmp=true
-Restart=on-failure
-RestartSec=5
+ExecStartPost=/usr/bin/systemctl start mistral-api
+ExecStartPost=/usr/bin/systemctl start mistral-server
+ExecStop=/bin/sh -c "systemctl stop mistral-api; systemctl stop mistral-server;"
+ExecStart=/bin/sh -c true
+RemainAfterExit=true
 
 [Install]
 WantedBy=multi-user.target

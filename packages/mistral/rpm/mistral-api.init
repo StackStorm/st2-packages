@@ -1,18 +1,18 @@
 #!/bin/sh
 #
 ### BEGIN INIT INFO
-# Provides: st2exporter
+# Provides: mistral-api
 # Required-Start: $local_fs $network $named $remote_fs $syslog
 # Required-Stop: $local_fs $network $named $remote_fs $syslog
-# Short-Description: st2exporter component
-# Description: St2Exporter - StackStorm service st2exporter
+# Short-Description: mistral service
+# Description: Mistral workflow service api
 ### END INIT INFO
 
-# st2exporter     This shell script takes care of starting and stopping
-#             st2exporter daemon.
+# mistral     This shell script takes care of starting and stopping
+#             mistral daemon.
 # chkconfig: - 85 15
-# description: St2Exporter - StackStorm service st2exporter
-# processname: st2exporter
+# description: Mistral workflow service api
+# processname: mistral
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -20,13 +20,16 @@
 # Source networking configuration.
 . /etc/sysconfig/network
 
-DESC="st2exporter"
-NAME=st2exporter
-DAEMON=/usr/share/python/st2/bin/$NAME
-DAEMON_ARGS="--config-file /etc/st2/st2.conf"
+DESC="mistral"
+NAME=mistral-api
+DAEMON=/usr/share/python/mistral/bin/gunicorn
+COMPONENTS="api,engine,executor"
+API_ARGS="--log-file /var/log/mistral/mistral-api.log -b 127.0.0.1:8989 -w 2 mistral.api.wsgi"
 PIDFILE=/var/run/$NAME.pid
-RUNAS_USER="st2"
-RUNAS_GROUP="st2"
+# wait for pid long, gunicorn is brought up slowly
+WAITFORPID=10
+RUNAS_USER="mistral"
+RUNAS_GROUP="mistral"
 
 lockfile=/var/lock/subsys/$NAME
 
@@ -34,8 +37,14 @@ lockfile=/var/lock/subsys/$NAME
 [ -x "$DAEMON" ] || exit 5
 
 # Read configuration variable file if it is present
-[ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
+[ -r /etc/sysconfig/mistral ] && . /etc/sysconfig/mistral
+DAEMON_ARGS="${API_ARGS}"
 
+# Check it whether we invoked directly
+if [ -z "$RAN_BY_MISTRAL" ]; then
+  log_action_msg "Can't start this service directly, use /etc/init.d/mistral instead"
+  exit 2
+fi
 
 # Resemble redhatish daemon behaviour but with group and user available
 #
@@ -66,19 +75,24 @@ nohup_start() {
 # Write pid of a running daemon into the pidfile
 #
 write_pidfile() {
-  local currentpid daemon=$1 pidfile=$2 base
+  local currentpid daemon=$1 pidfile=$2 waitforpid=$3 base
   base=${daemon##*/}
   pidfile=${pidfile:-/var/run/$base.pid}
 
-  sleep 0.1
-  currentpid=$(ps -A xo pid,cmd | grep "\bbin/$base\b" | tail -n1 | awk '{print $1}')
+  for i in `seq 1 $waitforpid`; do
+    currentpid=$(ps -A xo pid,cmd | grep "\bbin/$base\b" | head -n1 | awk '{print $1}')
+    [ -n "$currentpid" ] || break
+    sleep 0.5
+  done
+  # use head since we need to track master
+  
   [ -n "$currentpid" ] && echo $currentpid > $pidfile
 }
 
 start() {
     echo -n $"Starting $NAME: "
     nohup_start $DAEMON $DAEMON_ARGS
-    write_pidfile $DAEMON $PIDFILE
+    write_pidfile $DAEMON $PIDFILE $WAITFORPID
     rh_status_q
     retval=$?
     [ $retval -eq 0 ] && success $"$NAME startup" || failure $"$NAME startup"

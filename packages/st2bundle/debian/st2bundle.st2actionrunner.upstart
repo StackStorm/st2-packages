@@ -12,24 +12,24 @@ stop on starting rc RUNLEVEL=[016]
 
 pre-start script
   NAME=st2actionrunner
-  WORKERSVC=st2actionrunner-worker
-  WORKERSNUM=$(/usr/bin/nproc 2>/dev/null)
+  WORKERS=$(/usr/bin/nproc 2>/dev/null)
+  WORKERS=${WORKERS:-2}
 
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
-  for i in `seq 1 $WORKERSNUM`; do
-    start $WORKERSVC WORKERID=$i || :
+  for i in `seq 1 $WORKERS`; do
+    start st2actionrunner-worker WORKERID=$i || :
   done
 end script
 
 post-stop script
   NAME=st2actionrunner
-  WORKERSVC=st2actionrunner-worker
-  WORKERSNUM=$(/usr/bin/nproc 2>/dev/null)
+  # same number as in runner.sh!
+  WORKERS=${WORKERS:-10}
 
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
-  for i in `seq 1 $WORKERSNUM`; do
-    stop $WORKERSVC WORKERID=$i || :
+  for i in `seq 1 $WORKERS`; do
+    stop st2actionrunner-worker WORKERID=$i || :
   done
 end script

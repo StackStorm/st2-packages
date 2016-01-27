@@ -1,18 +1,18 @@
 #!/bin/sh
 #
 ### BEGIN INIT INFO
-# Provides: st2exporter
+# Provides: mistral-server
 # Required-Start: $local_fs $network $named $remote_fs $syslog
 # Required-Stop: $local_fs $network $named $remote_fs $syslog
-# Short-Description: st2exporter component
-# Description: St2Exporter - StackStorm service st2exporter
+# Short-Description: mistral service
+# Description: Mistral workflow service (engine/executor)
 ### END INIT INFO
 
-# st2exporter     This shell script takes care of starting and stopping
-#             st2exporter daemon.
+# mistral     This shell script takes care of starting and stopping
+#             mistral daemon.
 # chkconfig: - 85 15
-# description: St2Exporter - StackStorm service st2exporter
-# processname: st2exporter
+# description: Mistral workflow service (engine/executor)
+# processname: mistral
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -20,13 +20,14 @@
 # Source networking configuration.
 . /etc/sysconfig/network
 
-DESC="st2exporter"
-NAME=st2exporter
-DAEMON=/usr/share/python/st2/bin/$NAME
-DAEMON_ARGS="--config-file /etc/st2/st2.conf"
+DESC="mistral"
+NAME=mistral-server
+DAEMON=/usr/share/python/mistral/bin/mistral-server
+COMPONENTS="api,engine,executor"
+SERVER_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral-server.log"
 PIDFILE=/var/run/$NAME.pid
-RUNAS_USER="st2"
-RUNAS_GROUP="st2"
+RUNAS_USER="mistral"
+RUNAS_GROUP="mistral"
 
 lockfile=/var/lock/subsys/$NAME
 
@@ -34,8 +35,15 @@ lockfile=/var/lock/subsys/$NAME
 [ -x "$DAEMON" ] || exit 5
 
 # Read configuration variable file if it is present
-[ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
+[ -r /etc/sysconfig/mistral ] && . /etc/sysconfig/mistral
+COMPONENTS=$(echo $COMPONENTS | sed 's/,\?api,\?//')
+DAEMON_ARGS="--server ${COMPONENTS} ${SERVER_ARGS}"
 
+# Check it whether we invoked directly
+if [ -z "$RAN_BY_MISTRAL" ]; then
+  log_action_msg "Can't start this service directly, use /etc/init.d/mistral instead"
+  exit 2
+fi
 
 # Resemble redhatish daemon behaviour but with group and user available
 #

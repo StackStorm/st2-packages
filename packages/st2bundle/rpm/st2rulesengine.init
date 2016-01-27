@@ -25,7 +25,6 @@ NAME=st2rulesengine
 DAEMON=/usr/share/python/st2/bin/$NAME
 DAEMON_ARGS="--config-file /etc/st2/st2.conf"
 PIDFILE=/var/run/$NAME.pid
-SCRIPTNAME=/etc/init.d/$NAME
 RUNAS_USER="st2"
 RUNAS_GROUP="st2"
 

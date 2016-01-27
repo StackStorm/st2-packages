@@ -1,18 +1,18 @@
 #!/bin/sh
 #
 ### BEGIN INIT INFO
-# Provides: st2auth
+# Provides: st2actionrunner
 # Required-Start: $local_fs $network $named $remote_fs $syslog
 # Required-Stop: $local_fs $network $named $remote_fs $syslog
-# Short-Description: st2auth component
-# Description: St2Auth - StackStorm authentication service component
+# Short-Description: st2actionrunner component
+# Description: StackStorm actionrunner wrapper service
 ### END INIT INFO
 
-# st2auth     This shell script takes care of starting and stopping
-#             st2auth daemon.
+# st2actionrunner     This shell script takes care of starting and stopping
+#             st2actionrunner daemon.
 # chkconfig: - 85 15
-# description: St2Auth - StackStorm authentication service component
-# processname: st2auth
+# description: StackStorm actionrunner wrapper service
+# processname: st2actionrunner
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -25,9 +25,7 @@ DESC="st2actionrunner"
 NAME=st2actionrunner
 DAEMON=/usr/share/python/st2/bin/$NAME
 SPAWNER=/usr/share/python/st2/bin/runners.sh
-SCRIPTNAME=/etc/init.d/$NAME
-
-lockfile=/var/lock/subsys/$NAME
+export WORKERS
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 5
