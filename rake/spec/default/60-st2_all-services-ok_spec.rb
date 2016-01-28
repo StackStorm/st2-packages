@@ -28,12 +28,6 @@ end
 
 describe 'start st2 components and services' do
   before(:all) do
-    puts "===> Starting st2 services #{spec[:service_list].join(', ')}..."
-    remote_start_services(spec[:service_list])
-
-    puts "===> Wait for st2 services to start #{spec[:wait_for_start]} sec..."
-    sleep spec[:wait_for_start]
-
     # Populate mistral db tables with initial data.
     # We don't test this invocation, due to docker-compose up actually DOES NOT
     # start clean postgres (so command fails on the second up invocation %-).
@@ -43,6 +37,12 @@ describe 'start st2 components and services' do
       spec.backend.run_command(spec[:mistral_db_head_command])
       spec.backend.run_command(spec[:mistral_db_populate_command])
     end
+
+    puts "===> Starting st2 services #{spec[:service_list].join(', ')}..."
+    remote_start_services(spec[:service_list])
+
+    puts "===> Wait for st2 services to start #{spec[:wait_for_start]} sec..."
+    sleep spec[:wait_for_start]
     puts
   end
 
