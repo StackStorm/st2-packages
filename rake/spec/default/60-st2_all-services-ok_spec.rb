@@ -7,20 +7,17 @@ describe 'external services' do
 
   describe 'rabbitmq' do
     subject { host(spec[:rabbitmqhost]) }
-    it { is_expected.to be_reachable }
     it { is_expected.to be_reachable.with :port => 5672, :timeout => 1 }
   end
 
   describe 'mongodb' do
     subject { host(spec[:mongodbhost]) }
-    it { is_expected.to be_reachable }
     it { is_expected.to be_reachable.with :port => 27017, :timeout => 1 }
   end
 
   if spec[:mistral_enabled]
     describe 'postgres' do
       subject { host(spec[:postgreshost]) }
-      it { is_expected.to be_reachable }
       it { is_expected.to be_reachable.with :port => 5432, :timeout => 1 }
     end
   end
@@ -28,10 +25,9 @@ end
 
 describe 'start st2 components and services' do
   before(:all) do
-    # Populate mistral db tables with initial data.
-    # We don't test this invocation, due to docker-compose up actually DOES NOT
-    # start clean postgres (so command fails on the second up invocation %-).
-    #
+    # run upgrade head
+    # run populate
+    # only after start mistral
     if spec[:mistral_enabled]
       puts "===> Invoking mistral-db-manage migration commands..."
       res = spec.backend.run_command(spec[:mistral_db_head_command])
@@ -45,12 +41,12 @@ describe 'start st2 components and services' do
         puts res.stderr
       end
     end
-
     puts "===> Starting st2 services #{spec[:service_list].join(', ')}..."
     remote_start_services(spec[:service_list])
 
     puts "===> Wait for st2 services to start #{spec[:wait_for_start]} sec..."
     sleep spec[:wait_for_start]
+
     puts
   end
 
