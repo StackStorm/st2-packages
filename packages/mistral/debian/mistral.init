@@ -92,7 +92,7 @@ case "$1" in
   esac
   ;;
   status)
-  do_status
+  do_status && exit 0 || exit $?
   ;;
   #reload|force-reload)
   #
