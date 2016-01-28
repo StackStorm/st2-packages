@@ -57,11 +57,11 @@ CREATE DATABASE mistral OWNER mistral;
 EHD
 ```
 
-Start mistral and update schema:
+Update schema and start mistral:
 ```
-sudo service mistral start
 /usr/share/python/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
 /usr/share/python/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
+sudo service mistral start
 ```
 
 # Starting st2 and simple checks
