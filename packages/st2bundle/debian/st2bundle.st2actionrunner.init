@@ -19,7 +19,6 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2actionrunner"
 NAME=st2actionrunner
 DAEMON=/usr/share/python/st2/bin/$NAME
-SPAWNER=/usr/share/python/st2/bin/runners.sh
 SCRIPTNAME=/etc/init.d/$NAME
 export WORKERS
 
@@ -38,53 +37,17 @@ export WORKERS
 . /lib/lsb/init-functions
 
 #
-# Function that starts the daemon/service
+# Function that starts actionrunner workers
 #
-do_start()
-{
-  # Return
-  #   0 if daemon has been started
-  #   1 if daemon was already running
-  #   2 if daemon could not be started
-  RS=0
-  $SPAWNER start
-  RS=$?
-  [ $RS = 99 ] && RS=2
-  return $RS
-}
-
-#
-# Function that stops the daemon/service
-#
-do_stop()
-{
-  # Return
-  #   0 if daemon has been stopped
-  #   1 if daemon was already stopped
-  #   2 if daemon could not be stopped
-  #   other if a failure occurred
-  RS=0
-  $SPAWNER stop
-  RS=$?
-  [ $RS = 99 ] && RS=2
-  return $RS
-}
-
-#
-# Function that sends a SIGHUP to the daemon/service
-#
-do_reload() {
-  RS=0
-  $SPAWNER reload
-  RS=$?
-  [ $RS = 99 ] && RS=2
-  return $RS
+run_wrapper() {
+  /usr/share/python/st2/bin/runners.sh $1
+  [ $? = 99 ] && return 2 || return $?
 }
 
 case "$1" in
   start)
   [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
-  do_start
+  run_wrapper start
   case "$?" in
     0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
     2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
@@ -92,14 +55,14 @@ case "$1" in
   ;;
   stop)
   [ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
-  do_stop
+  run_wrapper stop
   case "$?" in
     0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
     2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
   esac
   ;;
   status)
-  status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+  run_wrapper status && exit 0 || exit $?
   ;;
   #reload|force-reload)
   #
@@ -116,10 +79,10 @@ case "$1" in
   # 'force-reload' alias
   #
   log_daemon_msg "Restarting $DESC" "$NAME"
-  do_stop
+  run_wrapper stop
   case "$?" in
     0|1)
-    do_start
+    run_wrapper start
     case "$?" in
       0) log_end_msg 0 ;;
       1) log_end_msg 1 ;; # Old process is still running
