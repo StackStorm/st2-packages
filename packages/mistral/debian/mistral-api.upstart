@@ -16,7 +16,7 @@ kill timeout 60
 
 script
   NAME=mistral
-  API_ARGS="--log-file /var/log/mistral/mistral-api.log -b 127.0.0.1:8989 -w 2 mistral.api.wsgi"
+  API_ARGS="--log-file /var/log/mistral/mistral-api.log -b 127.0.0.1:8989 -w 1 mistral.api.wsgi"
 
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
