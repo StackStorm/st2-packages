@@ -40,8 +40,16 @@ describe 'start st2 components and services' do
     #
     if spec[:mistral_enabled]
       puts "===> Invoking mistral-db-manage migration commands..."
-      spec.backend.run_command(spec[:mistral_db_head_command])
-      spec.backend.run_command(spec[:mistral_db_populate_command])
+      res = spec.backend.run_command(spec[:mistral_db_head_command])
+      if res.exit_status > 0
+        puts "===> command: #{spec[:mistral_db_head_command]}, failed (code #{res.exit_status})"
+        puts res.stderr
+      end
+      res = spec.backend.run_command(spec[:mistral_db_populate_command])
+      if res.exit_status > 0
+        puts "===> command: #{spec[:mistral_db_populate_command]}, failed (code #{res.exit_status})"
+        puts res.stderr
+      end
     end
     puts
   end
