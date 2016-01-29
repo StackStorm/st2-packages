@@ -27,7 +27,7 @@ describe 'start st2 components and services' do
   before(:all) do
     # run upgrade head
     # run populate
-    # and only after that start mistral
+    # only after start mistral
     if spec[:mistral_enabled]
       puts "===> Invoking mistral-db-manage migration commands..."
       res = spec.backend.run_command(spec[:mistral_db_head_command])
