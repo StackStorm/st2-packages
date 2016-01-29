@@ -33,6 +33,8 @@ volumes-circle:
   image: fake
   volumes:
     - /tmp/st2-packages:/root/build
+    - /tmp/st2-packages/log/st2:/var/log/st2
+    - /tmp/st2-packages/log/mistral:/var/log/mistral
 
 ## Service used by st2
 #
