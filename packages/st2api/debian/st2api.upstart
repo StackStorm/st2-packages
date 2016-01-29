@@ -18,5 +18,5 @@ script
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-  /usr/share/python/st2api/bin/gunicorn_pecan /usr/share/python/st2api/lib/python2.7/site-packages/st2api/gunicorn_config.py -k eventlet -b 127.0.0.1:9101 --workers 1
+  /usr/share/python/st2api/bin/gunicorn_pecan /usr/share/python/st2api/lib/python2.7/site-packages/st2api/gunicorn_config.py -b 127.0.0.1:9101 --workers 1
 end script
