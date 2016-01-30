@@ -66,13 +66,13 @@ Conflicts: st2common
   %{_bindir}/*
   %config(noreplace) %{_sysconfdir}/logrotate.d/st2
   %config(noreplace) %{_sysconfdir}/st2/*
-  %{_datadir}/python/%{venv_name}
-  %{_datadir}/doc/st2/examples
-  %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/st2
+  /opt/stackstorm/%{venv_name}
   /opt/stackstorm/packs/core
   /opt/stackstorm/packs/linux
   /opt/stackstorm/packs/packs
+  /opt/stackstorm/packs/examples
   %attr(640, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
+  %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/st2
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
 %if 0%{?use_systemd}
   %{_unitdir}/st2actionrunner.service

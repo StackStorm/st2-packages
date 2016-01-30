@@ -62,7 +62,7 @@ shared_examples 'os package' do |name, _opts|
     #
     get_services do |service_name, opts|
       binary_name = opts[:binary_name] || service_name
-      describe file("/usr/share/python/#{venv_name}/bin/#{binary_name}") do
+      describe file("/opt/stackstorm/#{venv_name}/bin/#{binary_name}") do
         it_behaves_like 'script or binary'
       end
     end

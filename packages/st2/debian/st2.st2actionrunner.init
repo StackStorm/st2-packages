@@ -18,7 +18,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2actionrunner"
 NAME=st2actionrunner
-DAEMON=/usr/share/python/st2/bin/$NAME
+DAEMON=/opt/stackstorm/st2/bin/$NAME
 SCRIPTNAME=/etc/init.d/$NAME
 export WORKERS
 
@@ -40,7 +40,7 @@ export WORKERS
 # Function that starts actionrunner workers
 #
 run_wrapper() {
-  /usr/share/python/st2/bin/runners.sh $1
+  /opt/stackstorm/st2/bin/runners.sh $1
   [ $? = 99 ] && return 2 || return $?
 }
 

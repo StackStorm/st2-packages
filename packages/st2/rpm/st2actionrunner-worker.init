@@ -23,7 +23,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2actionrunner-worker"
 NAME=st2actionrunner
-DAEMON=/usr/share/python/st2/bin/$NAME
+DAEMON=/opt/stackstorm/st2/bin/$NAME
 DAEMON_ARGS="--config-file /etc/st2/st2.conf"
 PIDFILE=/var/run/$NAME-${WORKERID}.pid
 

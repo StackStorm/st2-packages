@@ -46,9 +46,9 @@ class ST2Spec
                               ' --register-fail-on-failure' \
                               ' --register-all' \
                               ' --config-dir /etc/st2',
-    mistral_db_head_command: '/usr/share/python/mistral/bin/mistral-db-manage' \
+    mistral_db_head_command: '/opt/stackstorm/mistral/bin/mistral-db-manage' \
                                  ' --config-file /etc/mistral/mistral.conf upgrade head',
-    mistral_db_populate_command: '/usr/share/python/mistral/bin/mistral-db-manage' \
+    mistral_db_populate_command: '/opt/stackstorm/mistral/bin/mistral-db-manage' \
                                  ' --config-file /etc/mistral/mistral.conf populate',
 
     st2_services: ST2_SERVICES,

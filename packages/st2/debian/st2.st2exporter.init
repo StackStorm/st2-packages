@@ -18,7 +18,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2exporter"
 NAME=st2exporter
-DAEMON=/usr/share/python/st2/bin/$NAME
+DAEMON=/opt/stackstorm/st2/bin/$NAME
 DAEMON_ARGS="--config-file /etc/st2/st2.conf"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

@@ -23,8 +23,8 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2actionrunner"
 NAME=st2actionrunner
-DAEMON=/usr/share/python/st2/bin/$NAME
-SPAWNER=/usr/share/python/st2/bin/runners.sh
+DAEMON=/opt/stackstorm/st2/bin/$NAME
+SPAWNER=/opt/stackstorm/st2/bin/runners.sh
 export WORKERS
 
 # Exit if the package is not installed

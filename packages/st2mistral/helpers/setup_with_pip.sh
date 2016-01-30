@@ -6,7 +6,7 @@
 #      from https://github.com/openstack-packages/mistral.
 #    But anyway we give it a shot.
 
-ST2PIP=/usr/share/python/mistral/bin/pip
+ST2PIP=/opt/stackstorm/mistral/bin/pip
 
 
 # Locate binary (even on shells which don't support which)
