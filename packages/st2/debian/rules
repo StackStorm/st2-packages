@@ -9,6 +9,8 @@
 # Updated ones can be found under /use/local.
 PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 WHEELDIR ?= /tmp/wheelhouse
+DH_VIRTUALENV_INSTALL_ROOT := /opt/stackstorm
+export DH_VIRTUALENV_INSTALL_ROOT
 
 %:
 	dh $@ --with python-virtualenv
@@ -37,5 +39,4 @@ override_dh_installdeb:
 	dh_installdeb
 
 override_dh_virtualenv:
-	dh_virtualenv --extra-pip-arg '--find-links=$(WHEELDIR)' \
-								--install-suffix st2 --no-test
+	dh_virtualenv --extra-pip-arg '--find-links=$(WHEELDIR)' --no-test

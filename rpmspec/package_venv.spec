@@ -3,7 +3,7 @@
 %define wheel_dir %(echo ${WHEELDIR:-/tmp/wheelhouse})
 
 # virtualenv macroses
-%define venv_install_dir usr/share/python/%{venv_name}
+%define venv_install_dir opt/stackstorm/%{venv_name}
 %define venv_dir %{buildroot}/%{venv_install_dir}
 %define venv_bin %{venv_dir}/bin
 %define venv_python %{venv_bin}/python
