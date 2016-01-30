@@ -22,7 +22,7 @@ echo "deb https://dl.bintray.com/stackstorm/${DISTRO}_staging stable main" | sud
 unset DISTRO
 
 # Update repo and install st2
-sudo apt-get update && sudo apt-get install -y st2bundle
+sudo apt-get update && sudo apt-get install -y st2
 ```
 
 ## Install dependent services

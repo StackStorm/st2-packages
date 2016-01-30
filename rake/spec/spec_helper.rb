@@ -57,7 +57,7 @@ class ST2Spec
     package_has_services: {
       st2actions: %w(st2actionrunner st2notifier st2resultstracker),
       st2reactor: %w(st2rulesengine st2sensorcontainer st2garbagecollector),
-      st2bundle: %w(st2api st2auth st2actionrunner st2notifier
+      st2: %w(st2api st2auth st2actionrunner st2notifier
                      st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector),
       mistral: [
         ['mistral', binary_name: 'mistral-server']
@@ -69,7 +69,7 @@ class ST2Spec
       st2reactor: %w(st2-rule-tester st2-trigger-refire),
       st2client: %w(st2),
       st2debug: %w(st2-submit-debug-info),
-      st2bundle: %w(st2-bootstrap-rmq st2-register-content st2-rule-tester
+      st2: %w(st2-bootstrap-rmq st2-register-content st2-rule-tester
                     st2-trigger-refire st2 st2ctl)
     },
 
@@ -80,7 +80,7 @@ class ST2Spec
         '/opt/stackstorm/packs',
         [ '/var/log/st2', example: Proc.new {|_| be_writable.by('owner')} ]
       ],
-      st2bundle: %w(/etc/st2 /var/log/st2 /etc/logrotate.d
+      st2: %w(/etc/st2 /var/log/st2 /etc/logrotate.d
                     /opt/stackstorm/packs),
       mistral: [
         '/etc/mistral',
