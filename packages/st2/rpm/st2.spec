@@ -1,4 +1,4 @@
-%define package st2bundle
+%define package st2
 %define venv_name st2
 %define svc_user st2
 %define stanley_user stanley

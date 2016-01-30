@@ -1,18 +1,16 @@
-Source: st2bundle
+Source: st2
 Section: Python
 Priority: optional
 Maintainer: StackStorm Engineering <opsadmin@stackstorm.com>
 Build-Depends: debhelper (>= 9)
 Standards-Version: 3.9.5
 Homepage: http://stackstorm.com/
-#Vcs-Git: git://anonscm.debian.org/collab-maint/st2bundle.git
-#Vcs-Browser: http://anonscm.debian.org/?p=collab-maint/st2bundle.git;a=summary
 
-Package: st2bundle
+Package: st2
 Architecture: any
 Pre-Depends: dpkg (>= 1.16.16), python2.7, libpython2.7, ${misc:Pre-Depends}, adduser
 Depends: ${shlibs:Depends}, ${misc:Depends}, libpython-dev | python-dev, libssl-dev, libffi-dev, git
 Conflicts: st2common
-Description: st2bundle - StackStorm all components bundle.
- Package is full standalone stackstorm installation including
+Description: StackStorm Event-driven automation
+ Package is full standalone st2 installation including
  all components

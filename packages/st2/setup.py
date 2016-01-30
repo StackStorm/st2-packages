@@ -20,9 +20,9 @@ from setuptools import setup, find_packages
 
 from dist_utils import fetch_requirements
 from dist_utils import apply_vagrant_workaround
-from st2bundle import __version__
+from st2 import __version__
 
-ST2_COMPONENT = 'st2bundle'
+ST2_COMPONENT = 'st2'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REQUIREMENTS_FILE = os.path.join(BASE_DIR, 'requirements.txt')
 
