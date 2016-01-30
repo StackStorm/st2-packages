@@ -19,11 +19,14 @@ all: install
 
 install: wheelhouse changelog pre_install
 
-post_install: bdist_wheel
-	sed -i "s%/var/log/%/var/log/mistral/%" $(DESTDIR)/etc/mistral/*logging.conf
+post_install:
+	# leave empty if no steps are required
 
 pre_install:
+	install -D etc/logging.conf.sample $(DESTDIR)/etc/mistral/logging.conf
 	install -D etc/wf_trace_logging.conf.sample $(DESTDIR)/etc/mistral/wf_trace_logging.conf
+	sed -i "s%/var/log/%/var/log/mistral/%" $(DESTDIR)/etc/mistral/*logging.conf
+	sed -i "/\[logger_root\]/,/\[.*\]\|\s*$$/ {s/level=DEBUG/level=INFO/}" $(DESTDIR)/etc/mistral/*logging.conf
 
 changelog: populate_version
 ifeq ($(DEBIAN),1)
