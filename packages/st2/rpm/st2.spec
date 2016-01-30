@@ -65,15 +65,15 @@ Conflicts: st2common
   %defattr(-,root,root,-)
   %{_bindir}/*
   %config(noreplace) %{_sysconfdir}/logrotate.d/st2
-  %config(noreplace) %{_sysconfdir}/st2/*
+  %config(noreplace) %attr(640, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
   /opt/stackstorm/%{venv_name}
   /opt/stackstorm/packs/core
   /opt/stackstorm/packs/linux
   /opt/stackstorm/packs/packs
   /opt/stackstorm/packs/examples
-  %attr(640, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/st2
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
+  %config(noreplace) %{_sysconfdir}/st2/*
 %if 0%{?use_systemd}
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
