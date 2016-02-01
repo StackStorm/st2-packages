@@ -1,6 +1,6 @@
 # Installing st2 on debian/ubuntu
 
-Follow this guide and we'll lead through the basic installation and setup steps.
+Follow this guide and we'll lead you through the basic installation and setup steps.
 
 ## Setting up repos and fetching required software
 
