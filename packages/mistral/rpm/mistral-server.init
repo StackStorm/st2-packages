@@ -22,7 +22,7 @@
 
 DESC="mistral"
 NAME=mistral-server
-DAEMON=/usr/share/python/mistral/bin/mistral-server
+DAEMON=/opt/stackstorm/mistral/bin/mistral-server
 COMPONENTS="api,engine,executor"
 SERVER_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral-server.log"
 PIDFILE=/var/run/$NAME.pid

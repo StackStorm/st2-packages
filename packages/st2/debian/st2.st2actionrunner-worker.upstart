@@ -1,0 +1,22 @@
+# StackStorm actionrunner worker task. Spawns st2actionrunner worker.
+#
+
+description     "StackStorm actionrunner worker task"
+ 
+respawn
+respawn limit 2 5
+
+umask 022
+kill timeout 60
+
+instance $WORKERID
+ 
+script
+  NAME=st2actionrunner
+  DAEMON_ARGS="--config-file /etc/st2/st2.conf"
+
+  # Read configuration variable file if it is present
+  [ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+  exec /opt/stackstorm/st2/bin/$NAME ${DAEMON_ARGS}
+end script

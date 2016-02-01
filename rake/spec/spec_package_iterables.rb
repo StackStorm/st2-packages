@@ -4,8 +4,8 @@ module SpecPackageIterables
   def set_context_vars(name, opts)
     @name = name
     @opts = Hashie::Mash.new.merge(opts || {})
-    # we use different venv name for st2bundle package
-    @venv_name = (name.to_s == 'st2bundle' ? 'st2' : name).to_s
+    # we use different venv name for st2 package (bundle)
+    @venv_name = (name.to_s == 'st2' ? 'st2' : name).to_s
   end
 
   # Collection iterating methods over spec lists

@@ -1,0 +1,16 @@
+Source: st2
+Section: Python
+Priority: optional
+Maintainer: StackStorm Engineering <opsadmin@stackstorm.com>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.5
+Homepage: http://stackstorm.com/
+
+Package: st2
+Architecture: any
+Pre-Depends: dpkg (>= 1.16.16), python2.7, libpython2.7, ${misc:Pre-Depends}, adduser
+Depends: ${shlibs:Depends}, ${misc:Depends}, libpython-dev | python-dev, libssl-dev, libffi-dev, git
+Conflicts: st2common
+Description: StackStorm Event-driven automation
+ Package is full standalone st2 installation including
+ all components

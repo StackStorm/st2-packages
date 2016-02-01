@@ -4,12 +4,12 @@ require 'resolv'
 
 ## Defines options for the build pipeline.
 #   NB! Should be ordered with st2common going first and
-#   NB! st2bundle going after all st2 components.
+#   NB! st2 going after all st2 components.
 #
 DEFAULT_PACKAGES = %w(
   st2common st2api st2actions
   st2auth st2client st2exporter
-  st2reactor st2debug st2bundle
+  st2reactor st2debug st2
   st2mistral mistral
 )
 
@@ -96,12 +96,12 @@ list = pipeopts.package_list.to_s.split(' ')
 packages = list.empty? ? DEFAULT_PACKAGES.dup : list
 packages_to_test = packages.dup
 
-# In components mode st2bundle package is not installed
+# In components mode package st2 (bundle) is not installed.
 if pipeopts.testmode == 'components'
-  packages_to_test.delete('st2bundle')
+  packages_to_test.delete('st2')
 else
-  # otherwise shrink to st2bundle and non st2 packages (such as mistral)
-  packages_to_test.select! { |p| p == 'st2bundle' || !p.start_with?('st2') }
+  # remove st2 components from the list
+  packages_to_test.reject! {|p| p =~ /st2.+/ }
 end
 
 ##

@@ -224,7 +224,7 @@ function prune_old_revision() {
 # Use precisely, make sure you know what exactly you want to delete
 function mass_delete() {
   BINTRAY_REPO="el7_staging"
-  packages="st2actions st2api st2auth st2bundle st2client st2common st2debug st2exporter st2reactor"
+  packages="st2actions st2api st2auth st2 st2client st2common st2debug st2exporter st2reactor"
   PKG_VERSION="1.3dev"
   revision_start=1
   revision_end=50

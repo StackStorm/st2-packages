@@ -13,11 +13,11 @@ set -e
 # ST2_DOCKERFILES_REPO - GitHub repository with Dockerfiles (https://github.com/StackStorm/st2-dockerfiles)
 # ST2_GITREV - st2 branch name (ex: master, v1.2.1). This will be used to determine correct Docker Tag: `latest`, `1.2.1`
 # ST2PKG_VERSION - st2 version, will be reused in Docker image metadata (ex: 1.2dev)
-# ST2PKG_RELEASE - Release number aka revision number for `st2bundle` package, will be reused in Docker metadata (ex: 4)
+# ST2PKG_RELEASE - Release number aka revision number for `st2` package, will be reused in Docker metadata (ex: 4)
 
 ### Usage:
-# docker.sh build st2bundle - Build base Docker image with `st2bundle` installed. This will be reused by child containers
-# docker.sh build st2actionrunner st2api st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer - Build child Docker images based on `st2bundle`, - previously created Docker image
+# docker.sh build st2 - Build base Docker image with `st2` installed. This will be reused by child containers
+# docker.sh build st2actionrunner st2api st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer - Build child Docker images based on `st2`, - previously created Docker image
 # docker.sh run st2api - Start detached `st2api` docker image
 # docker.sh test st2api 'st2 --version' - Exec command inside already started `st2api` Docker container
 # docker.sh deploy st2api st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer - Push images to Docker Hub
@@ -40,7 +40,7 @@ fi
 : ${DISTRO:? DISTRO env is required}
 : ${ST2_DOCKERFILES_REPO:? ST2_DOCKERFILES_REPO env is required}
 : ${ST2_DOCKERFILES_REPO:? ST2_GITREV env is required}
-# TODO: Parse these vars from `st2bundle_1.2dev-1_amd64.deb`
+# TODO: Parse these vars from `st2_1.2dev-1_amd64.deb`
 : ${ST2PKG_VERSION:? ST2PKG_VERSION env is required}
 : ${ST2PKG_RELEASE:? ST2PKG_RELEASE env is required}
 
@@ -63,9 +63,9 @@ cd st2-dockerfiles
 case "$1" in
   build)
     case "$2" in
-      st2bundle)
-        cp /tmp/st2-packages/st2bundle*.deb stackstorm/
-        docker build --build-arg ST2_VERSION="${ST2PKG_VERSION}-${ST2PKG_RELEASE}" -t st2bundle stackstorm/
+      st2)
+        cp /tmp/st2-packages/st2*.deb stackstorm/
+        docker build --build-arg ST2_VERSION="${ST2PKG_VERSION}-${ST2PKG_RELEASE}" -t st2 stackstorm/
       ;;
       *)
         for container in "${@:2}"; do

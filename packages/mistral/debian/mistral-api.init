@@ -18,7 +18,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="mistral"
 NAME=mistral-api
-DAEMON=/usr/share/python/mistral/bin/gunicorn
+DAEMON=/opt/stackstorm/mistral/bin/gunicorn
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 RUNAS_USER="mistral"

@@ -1,0 +1,8 @@
+../contrib/core opt/stackstorm/packs/
+../contrib/packs opt/stackstorm/packs/
+../contrib/linux opt/stackstorm/packs/
+../contrib/examples opt/stackstorm/packs/
+../st2actions/conf/logging.*.conf etc/st2/
+../st2actions/conf/syslog.*.conf etc/st2/
+../st2reactor/conf/logging.*.conf etc/st2/
+../st2reactor/conf/syslog.*.conf etc/st2/

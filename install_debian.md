@@ -22,7 +22,7 @@ echo "deb https://dl.bintray.com/stackstorm/${DISTRO}_staging stable main" | sud
 unset DISTRO
 
 # Update repo and install st2
-sudo apt-get update && sudo apt-get install -y st2bundle
+sudo apt-get update && sudo apt-get install -y st2
 ```
 
 ## Install dependent services
@@ -59,8 +59,8 @@ EHD
 
 Update schema and start mistral:
 ```
-/usr/share/python/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
-/usr/share/python/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
+/opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
+/opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
 sudo service mistral start
 ```
 
