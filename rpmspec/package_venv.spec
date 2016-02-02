@@ -7,7 +7,7 @@
 %define venv_dir %{buildroot}/%{venv_install_dir}
 %define venv_bin %{venv_dir}/bin
 %define venv_python %{venv_bin}/python
-%define venv_pip %{venv_python} %{venv_bin}/pip install --find-links=%{wheel_dir}
+%define venv_pip %{venv_python} %{venv_bin}/pip install --find-links=%{wheel_dir} --no-index
 
 # Change the virtualenv path to the target installation direcotry.
 #   - Install dependencies
