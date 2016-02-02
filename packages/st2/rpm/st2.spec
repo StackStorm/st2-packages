@@ -5,9 +5,9 @@
 %include ../rpmspec/st2pkg_toptags.spec
 
 %if 0%{?use_st2python}
-Requires: st2python, python-devel, openssl-devel, libffi-devel, git
+Requires: st2python, python-devel, openssl-devel, libffi-devel, git, pam
 %else
-Requires: python-devel, openssl-devel, libffi-devel, git
+Requires: python-devel, openssl-devel, libffi-devel, git, pam
 %endif
 
 Summary: StackStorm all components bundle
