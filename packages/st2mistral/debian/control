@@ -11,6 +11,6 @@ Homepage: http://stackstorm.com/
 Package: st2mistral
 Architecture: any
 Pre-Depends: dpkg (>= 1.16.16), python2.7, mistral | python-mistral, ${misc:Pre-Depends}
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, mistral | python-mistral
 Description: StackStorm plugins for OpenStack Mistral
  <insert long description, indented with spaces>
