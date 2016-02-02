@@ -71,9 +71,9 @@ pipeopts 'mistral' do
   standalone true
   checkout :mistral
   envpass :giturl,  'https://github.com/StackStorm/mistral', from: 'MISTRAL_GITURL'
-  envpass :gitrev,  'st2-1.2.0',                             from: 'MISTRAL_GITREV'
+  envpass :gitrev,  'st2-1.3.0',                             from: 'MISTRAL_GITREV'
   envpass :gitdir,  make_tmpname('mistral-')
-  envpass :mistral_version, '1.2.0'
+  envpass :mistral_version, '1.3.0'
   envpass :mistral_release, 1
 end
 
@@ -81,9 +81,9 @@ pipeopts 'st2mistral' do
   standalone true
   checkout :st2mistral
   envpass :giturl,  'https://github.com/StackStorm/st2mistral', from: 'ST2MISTRAL_GITURL'
-  envpass :gitrev,  'st2-1.2.0',                                from: 'ST2MISTRAL_GITREV'
+  envpass :gitrev,  'st2-1.3.0',                                from: 'ST2MISTRAL_GITREV'
   envpass :gitdir,  make_tmpname('st2mistral-')
-  envpass :mistral_version, '1.2.0'
+  envpass :mistral_version, '1.3.0'
   envpass :mistral_release, 1
 end
 
