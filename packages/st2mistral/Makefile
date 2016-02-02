@@ -1,5 +1,5 @@
 WHEELDIR ?= /tmp/wheelhouse
-COMPONENT := mistral
+COMPONENT := st2mistral
 MISTRAL_RELEASE ?= 1
 MISTRAL_VERSION ?= $(shell python -c "from pbr import version; print version.VersionInfo('mistral').version_string(),")
 
@@ -9,7 +9,7 @@ endif
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
-	DESTDIR ?= $(CURDIR)/debian/mistral
+	DESTDIR ?= $(CURDIR)/debian/$(COMPONENT)
 else
 	REDHAT := 1
 endif
@@ -30,7 +30,7 @@ pre_install:
 
 changelog: populate_version
 ifeq ($(DEBIAN),1)
-	debchange -v $(MISTRAL_VERSION)-$(MISTRAL_RELEASE)~st2 -M "automated build version: $(MISTRAL_VERSION)"
+	debchange -v $(MISTRAL_VERSION)-$(MISTRAL_RELEASE) -M "automated build version: $(MISTRAL_VERSION)"
 endif
 
 populate_version: .stamp-populate_version
