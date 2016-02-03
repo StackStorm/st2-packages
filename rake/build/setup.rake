@@ -23,7 +23,7 @@ namespace :setup do
       run hostname: opts[:testnode] do |opts|
         with opts.env do
           execute :bash, "$BASEDIR/scripts/generate_st2_config.sh"
-          if opts.packages_to_test.include? 'mistral'
+          if opts.packages_to_test.include? 'st2mistral'
             execute :bash, "$BASEDIR/scripts/generate_mistral_config.sh"
           end
         end
