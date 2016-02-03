@@ -8,6 +8,7 @@ MISTRAL_VERSION ?= $(shell python -c "from pbr import version; print version.Ver
 define INJECT_DEPS
 gunicorn
 -e git+https://github.com/StackStorm/st2mistral.git@$(GITREV)#egg=st2mistral
+-e git+https://github.com/StackStorm/python-mistralclient.git@$(GITREV)#egg=python-mistralclient
 endef
 
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
