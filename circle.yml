@@ -2,6 +2,7 @@
 # BINTRAY_ORGANIZATION
 # BINTRAY_ACCOUNT
 # BINTRAY_API_KEY
+# PACKAGECLOUD_TOKEN
 # DOCKER_USER
 # DOCKER_EMAIL
 # DOCKER_PASSWORD
@@ -46,6 +47,9 @@ dependencies:
     - sudo pip install wheel docker-compose
     - docker-compose version
     - docker version
+    - gem install package_cloud
+    - package_cloud version
+    - sudo apt-get install jq
   override:
     - .circle/docker-compose.sh pull ${DISTRO}
   post:
