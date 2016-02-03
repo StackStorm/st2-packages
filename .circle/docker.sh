@@ -47,8 +47,8 @@ fi
 # Get Docker Tag from the current st2 branch name
 if [ "${ST2_GITREV}" == 'master' ]; then
   DOCKER_TAG=latest
-elif echo "${ST2_GITREV}" | grep -q '^v[0-9]\+\.[0-9]\+\.[0-9]\+$'; then
-  DOCKER_TAG=${ST2_GITREV:1}
+elif echo "${ST2_GITREV}" | grep -q '^v[0-9]\+\.[0-9]\+$'; then
+  DOCKER_TAG=${ST2PKG_VERSION}
 else
   DEPLOY_DOCKER=0
 fi
