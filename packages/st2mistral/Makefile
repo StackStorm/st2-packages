@@ -1,7 +1,14 @@
+# Mind that that some of the vars are passed as ENV!
 WHEELDIR ?= /tmp/wheelhouse
 COMPONENT := st2mistral
 MISTRAL_RELEASE ?= 1
 MISTRAL_VERSION ?= $(shell python -c "from pbr import version; print version.VersionInfo('mistral').version_string(),")
+
+# We use special additional requirements in our mistral bundle!
+define INJECT_DEPS
+gunicorn
+-e git+https://github.com/StackStorm/st2mistral.git@$(GITREV)#egg=st2mistral
+endef
 
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
@@ -14,10 +21,10 @@ else
 	REDHAT := 1
 endif
 
-.PHONY: all install wheelhouse
 all: install
+.PHONY: all install changelog pre_install post_install
 
-install: wheelhouse changelog pre_install
+install: changelog wheelhouse pre_install
 
 post_install:
 	# leave empty if no steps are required
@@ -39,18 +46,20 @@ populate_version: .stamp-populate_version
 	touch $@
 
 wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: inject-deps populate_version
+.stamp-wheelhouse: | populate_version inject-deps bdist_wheel
 	# Install wheels into shared location
 	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
-.stamp-bdist_wheel: inject-deps populate_version
+.stamp-bdist_wheel: | populate_version
 	python setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@
 
+# We need to create bdist, before mangling requirements and running pip,
+# otherwise proccess will fail.
+export INJECT_DEPS
 inject-deps: .inject-deps
-.inject-deps:
-	# We use gunicorn in our bundle!
-	echo "gunicorn" >> requirements.txt
+.inject-deps: | bdist_wheel
+	echo "$$INJECT_DEPS" >> requirements.txt
 	touch $@

@@ -1,4 +1,4 @@
-Source: mistral
+Source: st2mistral
 Section: Python
 Priority: optional
 Maintainer: StackStorm Engineering <opsadmin@stackstorm.com>
@@ -8,9 +8,9 @@ Homepage: <insert the upstream URL, if relevant>
 #Vcs-Git: git://anonscm.debian.org/collab-maint/mistral.git
 #Vcs-Browser: http://anonscm.debian.org/?p=collab-maint/mistral.git;a=summary
 
-Package: mistral
+Package: st2mistral
 Architecture: any
 Pre-Depends: dpkg (>= 1.16.16), python2.7
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Mistral workflow service
+Description: St2 Mistral workflow service
  <insert long description, indented with spaces>
