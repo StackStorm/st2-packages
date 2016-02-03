@@ -12,3 +12,7 @@ Also we ship packages for rpm-based distros such as *el6* and *el7* *-compatible
 ### For ubuntu/debian installation
 
 Follow instructions from [install_debian.md](install_debian.md).
+
+### For centos/rhel installation
+
+Follow instructions from [install_centos.md](install_centos.md).

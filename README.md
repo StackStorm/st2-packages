@@ -30,8 +30,8 @@ It's very simple to invoke the whole build-test pipeline. First just make sure t
 docker-compose kill
 docker-compose rm -f
 
-# We want to build packages for debian wheezy
-docker-compose run wheezy
+# We want to build packages for debian wheezy (--rm will wipe packaging runner container). However all other will remain active.
+docker-compose run --rm wheezy
 ```
 
 Execution takes about *6 to 10 minutes* to build around 10 packages it depends on computing power of your CPU. When build and tests are finished, you can find all of StackStorm packages in your host local directory `/tmp/st2-packages`:
@@ -49,6 +49,26 @@ ls -l1 | grep ".deb$"
 -rw-r--r-- 1 root root 17962818 Nov 22 22:50 st2exporter_1.2dev-1_amd64.deb
 -rw-r--r-- 1 root root 18273728 Nov 22 22:50 st2reactor_1.2dev-1_amd64.deb
 ```
+
+## Manual testing inside the docker environment
+
+After build and test stages finished all docker containers remain active, so you are welcome to some more in-depth testing if desired. To do so simply run:
+
+```
+docker ps
+# Find the required testing container
+# In our case it will be st2packages_wheezytest_1
+
+# Simply exec to docker
+docker exec -it st2packages_wheezytest_1 bash
+```
+
+Once done, you are inside the testing environment where all services are up and running. Don't forget to do (after exec):
+
+```
+export TERM=xterm
+```
+At this point you can do any manual testing which is required.
 
 # License and Authors
 
