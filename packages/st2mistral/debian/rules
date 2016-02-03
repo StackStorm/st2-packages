@@ -34,4 +34,4 @@ override_dh_installdeb:
 
 override_dh_virtualenv:
 	dh_virtualenv --extra-pip-arg '--find-links=$(WHEELDIR)' \
-								--extra-pip-arg '--no-index' --no-test
+								--extra-pip-arg '--no-index' --install-suffix mistral --no-test
