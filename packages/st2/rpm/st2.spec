@@ -27,8 +27,7 @@ Conflicts: st2common
   %service_install st2actionrunner %{worker_name} st2api st2auth st2notifier
   %service_install st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
   make post_install DESTDIR=%{?buildroot}
-  # clean up absolute path in record file, so that /usr/bin/check-buildroot doesn't fail
-  find /root/rpmbuild/BUILDROOT/%{package}* -name RECORD -exec sed -i '/\/root\/rpmbuild.*$/d' '{}' ';'
+  %cleanup_python_abspath
 
 %prep
   rm -rf %{buildroot}

@@ -9,7 +9,7 @@ Homepage: http://stackstorm.com/
 Package: st2
 Architecture: any
 Pre-Depends: dpkg (>= 1.16.16), python2.7, libpython2.7, ${misc:Pre-Depends}, adduser
-Depends: ${shlibs:Depends}, ${misc:Depends}, libpython-dev | python-dev, libssl-dev, libffi-dev, git, libpam0g
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, libpython-dev | python-dev, libssl-dev, libffi-dev, git, libpam0g
 Conflicts: st2common
 Description: StackStorm Event-driven automation
  Package is full standalone st2 installation including
