@@ -90,7 +90,7 @@ if pipeopts.testmode == 'components'
   packages_to_test.delete('st2')
 else
   # remove st2 components from the list
-  packages_to_test.reject! {|p| p =~ /st2.+/ }
+  packages_to_test.reject! {|p| not %w(st2 st2mistral).include?(p) }
 end
 
 ##
