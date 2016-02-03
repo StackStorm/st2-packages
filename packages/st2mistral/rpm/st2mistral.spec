@@ -1,4 +1,5 @@
-%define package mistral
+%define package st2mistral
+%define venv_name mistral
 %define svc_user mistral
 %define version %(echo -n "${MISTRAL_VERSION:-0.1}")
 %define release %(echo -n "${MISTRAL_RELEASE:-1}")
@@ -28,8 +29,7 @@ Summary: Mistral workflow service
   %pip_install_venv
   %service_install mistral mistral-api mistral-server
   make post_install DESTDIR=%{?buildroot}
-  # clean up absolute path in record file, so that /usr/bin/check-buildroot doesn't fail
-  find /root/rpmbuild/BUILDROOT/%{package}* -name RECORD -exec sed -i '/\/root\/rpmbuild.*$/d' '{}' ';'
+  %cleanup_python_abspath
 
 %prep
   rm -rf %{buildroot}
@@ -52,7 +52,7 @@ Summary: Mistral workflow service
   %service_postun mistral mistral-api mistral-server
 
 %files
-  /opt/stackstorm/%{name}
+  /opt/stackstorm/mistral
   %config(noreplace) %{_sysconfdir}/mistral/*
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/mistral
 %if 0%{?use_systemd}

@@ -10,7 +10,7 @@ Homepage: <insert the upstream URL, if relevant>
 
 Package: st2mistral
 Architecture: any
-Pre-Depends: dpkg (>= 1.16.16), python2.7
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Pre-Depends: dpkg (>= 1.16.16), python2.7, adduser
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
 Description: St2 Mistral workflow service
  <insert long description, indented with spaces>
