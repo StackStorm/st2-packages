@@ -70,7 +70,7 @@ Conflicts: st2common
   /opt/stackstorm/packs/core
   /opt/stackstorm/packs/linux
   /opt/stackstorm/packs/packs
-  /opt/stackstorm/packs/examples
+  %_datadir/doc/st2/examples
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/st2
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
   %config(noreplace) %{_sysconfdir}/st2/*
