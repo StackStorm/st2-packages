@@ -9,6 +9,29 @@
 # Updated ones can be found under /use/local.
 PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 WHEELDIR ?= /tmp/wheelhouse
+DH_VIRTUALENV_INSTALL_ROOT := /opt/stackstorm
+export DH_VIRTUALENV_INSTALL_ROOT
 
 %:
-	dh $@
+	dh $@ --with python-virtualenv
+
+
+override_dh_installdirs:
+	dh_installdirs
+	# Restore dh_auto_install behaviour, because it was removed by dh_virtualenv
+	# dh_auto_install same with:
+	$(MAKE) install
+
+override_dh_installinit:
+	# So far don't start services
+	dh_installinit --no-start --name=mistral
+	dh_installinit --no-start --name=mistral-api
+	dh_installinit --no-start --name=mistral-server
+
+override_dh_installdeb:
+	$(MAKE) post_install
+	dh_installdeb
+
+override_dh_virtualenv:
+	dh_virtualenv --extra-pip-arg '--find-links=$(WHEELDIR)' \
+								--extra-pip-arg '--no-index' --install-suffix mistral --no-test

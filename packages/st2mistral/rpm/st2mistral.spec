@@ -1,5 +1,6 @@
 %define package st2mistral
-# version is hardcoded so far
+%define venv_name mistral
+%define svc_user mistral
 %define version %(echo -n "${MISTRAL_VERSION:-0.1}")
 %define release %(echo -n "${MISTRAL_RELEASE:-1}")
 
@@ -14,10 +15,8 @@ Group: System/Management
 License: Apache
 Url: https://github.com/StackStorm/mistral
 Source0: .
-# st2 mistral bundled package provides virtual name (openstack-mistral),
-# so we require trying to be compatible with github/openstack
-Requires: openstack-mistral
-Summary: StackStorm plugins for OpenStack Mistral
+Provides: openstack-mistral
+Summary: Mistral workflow service
 
 
 %description
@@ -27,21 +26,41 @@ Summary: StackStorm plugins for OpenStack Mistral
 
 %install
   %default_install
+  %pip_install_venv
+  %service_install mistral mistral-api mistral-server
+  make post_install DESTDIR=%{?buildroot}
+  %cleanup_python_abspath
 
 %prep
   rm -rf %{buildroot}
   mkdir -p %{buildroot}
 
-%post
-  . /usr/share/st2mistral/helpers/setup_with_pip.sh
-  st2mistral install
-
-%preun
-  . /usr/share/st2mistral/helpers/setup_with_pip.sh
-  st2mistral uninstall
-
 %clean
   rm -rf %{buildroot}
 
+%pre
+  adduser --no-create-home --system %{svc_user} 2>/dev/null
+  exit 0
+
+%post
+  %service_post mistral mistral-api mistral-server
+
+%preun
+  %service_preun mistral mistral-api mistral-server
+
+%postun
+  %service_postun mistral mistral-api mistral-server
+
 %files
-  %{_datadir}/st2mistral/*
+  /opt/stackstorm/mistral
+  %config(noreplace) %{_sysconfdir}/mistral/*
+  %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/mistral
+%if 0%{?use_systemd}
+  %{_unitdir}/mistral.service
+  %{_unitdir}/mistral-api.service
+  %{_unitdir}/mistral-server.service
+%else
+  %{_sysconfdir}/rc.d/init.d/mistral
+  %{_sysconfdir}/rc.d/init.d/mistral-api
+  %{_sysconfdir}/rc.d/init.d/mistral-server
+%endif

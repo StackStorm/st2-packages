@@ -10,7 +10,7 @@ DEFAULT_PACKAGES = %w(
   st2common st2api st2actions
   st2auth st2client st2exporter
   st2reactor st2debug st2
-  st2mistral mistral
+  st2mistral
 )
 
 pipeopts do
@@ -45,7 +45,7 @@ pipeopts do
   ## Other attributes which set directly (not using env)
 
   # checkout sets what name contexts git repos should be checkd out.
-  checkout :st2, :mistral, :st2mistral
+  checkout :st2, :st2mistral
   # specifies the list of directories to upload to remote nodes.
   upload_sources 'packages', 'scripts', 'rpmspec'
 end
@@ -67,26 +67,15 @@ pipeopts 'st2' do
   envpass :st2pkg_release, 1
 end
 
-pipeopts 'mistral' do
+pipeopts 'st2mistral' do
   standalone true
-  checkout :mistral
-  envpass :giturl,  'https://github.com/StackStorm/mistral', from: 'MISTRAL_GITURL'
-  envpass :gitrev,  'st2-1.3.0',                             from: 'MISTRAL_GITREV'
+  checkout :st2mistral
+  envpass :giturl,  'https://github.com/StackStorm/mistral', from: 'ST2MISTRAL_GITURL'
+  envpass :gitrev,  'st2-1.3.0',                             from: 'ST2MISTRAL_GITREV'
   envpass :gitdir,  make_tmpname('mistral-')
   envpass :mistral_version, '1.3.0'
   envpass :mistral_release, 1
 end
-
-pipeopts 'st2mistral' do
-  standalone true
-  checkout :st2mistral
-  envpass :giturl,  'https://github.com/StackStorm/st2mistral', from: 'ST2MISTRAL_GITURL'
-  envpass :gitrev,  'st2-1.3.0',                                from: 'ST2MISTRAL_GITREV'
-  envpass :gitdir,  make_tmpname('st2mistral-')
-  envpass :mistral_version, '1.3.0'
-  envpass :mistral_release, 1
-end
-
 
 ## --- Final pipeopts evaluation
 python_enabled = pipeopts('st2python').st2_python.to_i
@@ -101,7 +90,7 @@ if pipeopts.testmode == 'components'
   packages_to_test.delete('st2')
 else
   # remove st2 components from the list
-  packages_to_test.reject! {|p| p =~ /st2.+/ }
+  packages_to_test.reject! {|p| not %w(st2 st2mistral).include?(p) }
 end
 
 ##

@@ -1,8 +1,0 @@
-#!/bin/sh
-
-set -e
-
-USER=mistral
-chown $USER:$USER /var/log/mistral
-
-exit 0

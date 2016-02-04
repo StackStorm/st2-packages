@@ -8,7 +8,7 @@ Copyright: <years> <put author's name and email here>
 License: Apache-2.0
 
 Files: debian/*
-Copyright: 2015 unknown <opsadmin@stackstorm.com>
+Copyright: 2015 StackStorm Engineering <<opsadmin@stackstorm.com>>
 License: Apache-2.0
 
 License: Apache-2.0

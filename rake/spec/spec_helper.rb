@@ -31,7 +31,7 @@ class ST2Spec
     bin_prefix: '/usr/bin',
     conf_dir: '/etc/st2',
     log_dir: '/var/log/st2',
-    mistral_enabled: Array(pipeopts.packages_to_test).include?('mistral'),
+    mistral_enabled: Array(pipeopts.packages_to_test).include?('st2mistral'),
     package_list: Array(pipeopts.packages_to_test),
     rabbitmqhost: pipeopts.rabbitmqhost,
     postgreshost: pipeopts.postgreshost,
