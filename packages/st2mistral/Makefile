@@ -3,13 +3,17 @@ WHEELDIR ?= /tmp/wheelhouse
 COMPONENT := st2mistral
 MISTRAL_RELEASE ?= 1
 MISTRAL_VERSION ?= $(shell python -c "from pbr import version; print version.VersionInfo('mistral').version_string(),")
+# It's later than 0.11.1, so we have to use a later commit :(
+PBR_GITURL := git+https://github.com/openstack-dev/pbr@d19459daa8616dd18fde016c2970ffc41ff4ccdd\#egg=pbr
 
 # We use special additional requirements in our mistral bundle!
 define INJECT_DEPS
 gunicorn
--e git+https://github.com/StackStorm/st2mistral.git@$(GITREV)#egg=st2mistral
--e git+https://github.com/StackStorm/python-mistralclient.git@$(GITREV)#egg=python-mistralclient
+git+https://github.com/StackStorm/st2mistral.git@$(GITREV)#egg=st2mistral
+git+https://github.com/StackStorm/python-mistralclient.git@$(GITREV)#egg=python-mistralclient
+$(PBR_GITURL)
 endef
+export INJECT_DEPS
 
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
@@ -43,7 +47,9 @@ endif
 
 populate_version: .stamp-populate_version
 .stamp-populate_version:
-	pip install $(shell cat requirements.txt | grep pbr)
+	sed -i "/^pbr.*/d" requirements.txt
+	sed -i "s/setup_requires=\[.*\]/setup_requires=\['pbr'\]/" setup.py
+	pip install $(PBR_GITURL)
 	touch $@
 
 wheelhouse: .stamp-wheelhouse
@@ -59,8 +65,7 @@ bdist_wheel: .stamp-bdist_wheel
 
 # We need to create bdist, before mangling requirements and running pip,
 # otherwise proccess will fail.
-export INJECT_DEPS
-inject-deps: .inject-deps
-.inject-deps: | bdist_wheel
+inject-deps: .stamp-inject-deps
+.stamp-inject-deps: | bdist_wheel
 	echo "$$INJECT_DEPS" >> requirements.txt
 	touch $@
