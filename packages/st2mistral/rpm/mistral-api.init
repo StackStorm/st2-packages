@@ -24,7 +24,7 @@ DESC="mistral"
 NAME=mistral-api
 DAEMON=/opt/stackstorm/mistral/bin/gunicorn
 COMPONENTS="api,engine,executor"
-API_ARGS="--log-file /var/log/mistral/mistral-api.log -b 127.0.0.1:8989 -w 2 mistral.api.wsgi"
+API_ARGS="--log-file /var/log/mistral/mistral-api.log -b localhost:8989 -w 2 mistral.api.wsgi"
 PIDFILE=/var/run/$NAME.pid
 # wait for pid long, gunicorn is brought up slowly
 WAITFORPID=10

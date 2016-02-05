@@ -7,7 +7,7 @@ Type=simple
 User=mistral
 Group=mistral
 Environment="COMPONENTS=api,engine,executor"
-Environment="API_ARGS=--log-file /var/log/mistral/mistral-api.log -b 127.0.0.1:8989 -w 2 mistral.api.wsgi"
+Environment="API_ARGS=--log-file /var/log/mistral/mistral-api.log -b localhost:8989 -w 2 mistral.api.wsgi"
 EnvironmentFile=-/etc/sysconfig/mistral
 ExecStart=/bin/sh -c "(echo $COMPONENTS | grep -q '\\bapi\\b\') && exec /opt/stackstorm/mistral/bin/gunicorn $API_ARGS || echo api component is not enabled"
 PrivateTmp=true
