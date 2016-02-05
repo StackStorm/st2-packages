@@ -1,5 +1,12 @@
 #!/bin/bash
 
+fail() {
+	echo "############### ERROR ###############"
+	echo "# Failed on $1 #"
+	echo "#####################################"
+	exit 2
+}
+
 install_dependencies() {
 	sudo apt-get update
 	sudo apt-get install -y mongodb-server rabbitmq-server postgresql
@@ -12,7 +19,6 @@ setup_repositories() {
 }
 
 install_stackstorm_components() {
-	sudo apt-get update
 	sudo apt-get install -y st2 st2mistral
 }
 
@@ -33,7 +39,6 @@ configure_ssh_and_sudo () {
 	# Create an SSH system user
 	sudo useradd stanley
 	sudo mkdir -p /home/stanley/.ssh
-	sudo chmod 0700 /home/stanley/.ssh
 
 	# Generate ssh keys on StackStorm box and copy over public key into remote box.
 	sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
@@ -42,6 +47,7 @@ configure_ssh_and_sudo () {
 	# Authorize key-base acces
 	sudo cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys
 	sudo chmod 0600 /home/stanley/.ssh/authorized_keys
+	sudo chmod 0700 /home/stanley/.ssh
 	sudo chown -R stanley:stanley /home/stanley
 
 	# Enable passwordless sudo
@@ -58,16 +64,27 @@ configure_authentication() {
 	# Install htpasswd utility if you don't have it
 	sudo apt-get install -y apache2-utils
 	# Create a user record in a password file.
-	echo "Ch@ngeMe" | sudo htpasswd -i /etc/st2/htpasswd test
+	sudo echo "Ch@ngeMe" | sudo htpasswd -i /etc/st2/htpasswd test
 
-	# Get an auth token and use in CLI or API
-	st2 auth test || echo "Failed on st2 auth test"
+}
 
-	# A shortcut to authenticate and export the token
-	export ST2_AUTH_TOKEN=$(st2 auth test -p Ch@ngeMe -t)
+install_webui_and_setup_ssl_termination() {
+	# Install st2web and nginx
+	sudo apt-get install -y st2web nginx
 
-	# Check that it works
-	st2 action list  || echo "Failed on st2 action list in Configure Authentication"
+	# Generate self-signed certificate or place your existing certificate under /etc/ssl/st2
+	sudo mkdir -p /etc/ssl/st2
+	sudo openssl req -x509 -newkey rsa:2048 -keyout /etc/ssl/st2/st2.key -out /etc/ssl/st2/st2.crt \
+	-days XXX -nodes -subj "/C=US/ST=California/L=Palo Alto/O=StackStorm/OU=Information \
+	Technology/CN=$(hostname)"
+
+	# Remove default site, if present
+	sudo rm /etc/nginx/sites-enabled/default
+	# Copy and enable StackStorm's supplied config file
+	sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/sites-available/
+	sudo ln -s /etc/nginx/sites-available/st2.conf /etc/nginx/sites-enabled/st2.conf
+
+	sudo service nginx restart
 }
 
 ok_message() {
@@ -100,25 +117,30 @@ ok_message() {
 
 verify() {
 
-	st2 --version || (echo "Failed on st2 --version"; exit 2)
-	st2 -h || (echo "Failed on st2 -h"; exit 2)
-	st2 action list --pack=core || (echo "Failed on st2 action list"; exit 2)
-	st2 run core.local -- date -R || (echo "Failed on st2 run core.local -- date -R"; exit 2)
-	st2 execution list || (echo "Failed on st2 execution list"; exit 2)
-	st2 run core.remote hosts="127.0.0.1" -- uname -a || (echo "Failed on st2 run core.remote hosts="localhost" -- uname -a"; exit 2)
-	st2 run packs.install packs=st2 || (echo "Failed on st2 run packs.install packs=st2"; exit 2)
+	st2 auth test -p Ch@ngeMe || fail "st2 auth test"
+	# A shortcut to authenticate and export the token
+	export ST2_AUTH_TOKEN=$(st2 auth test -p Ch@ngeMe -t)
+
+	st2 --version || fail "st2 --version"
+	st2 -h || fail "st2 -h"
+	st2 action list --pack=core || fail "st2 action list"
+	st2 run core.local -- date -R || fail "st2 run core.local -- date -R"
+	st2 execution list || fail "st2 execution list"
+	st2 run core.remote hosts='127.0.0.1' -- uname -a || fail "st2 run core.remote hosts='127.0.0.1' -- uname -a"
+	st2 run packs.install packs=st2 || fail "st2 run packs.install packs=st2"
     ok_message
 
 }
 
-
 ## Let's do this!
 
-install_dependencies || (echo "Failed on install_dependencies"; exit 2)
-setup_repositories || (echo "Failed on setup_repositories"; exit 2)
-install_stackstorm_components || (echo "Failed on install_stackstorm_components"; exit 2)
-setup_mistral_database || (echo "Failed on setup_mistral_database"; exit 2)
-configure_authentication || (echo "Failed on configure_authentication"; exit 2)
-use_st2ctl start || (echo "Failed on use_st2ctl start"; exit 2)
-use_st2ctl reload || (echo "Failed on use_st2ctl reload"; exit 2)
+install_dependencies || fail "install_dependencies"
+setup_repositories || fail "setup_repositories"
+install_stackstorm_components || fail "install_stackstorm_components"
+setup_mistral_database || fail "setup_mistral_database"
+configure_ssh_and_sudo || fail "configure_ss_and_sudo"
+configure_authentication || fail "configure_authentication"
+install_webui_and_setup_ssl_termination || fail "install_webui_and_setup_ssl_termination"
+use_st2ctl start || fail "use_st2ctl start"
+use_st2ctl reload || fail "use_st2ctl reload"
 verify
