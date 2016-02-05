@@ -52,6 +52,7 @@ Summary: Mistral workflow service
   %service_postun mistral mistral-api mistral-server
 
 %files
+  %{_bindir}/*
   /opt/stackstorm/mistral
   %config(noreplace) %{_sysconfdir}/mistral/*
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/mistral
