@@ -74,9 +74,6 @@ class ST2Spec
       mistral: %w(mistral)
     },
 
-    st2_client_version: 'st2 --version',
-    mistral_client_version: 'mistral --version',
-
     package_has_directories: {
       st2common: [
         '/etc/st2',
