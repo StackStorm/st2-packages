@@ -69,6 +69,7 @@ Conflicts: st2common
   /opt/stackstorm/packs/core
   /opt/stackstorm/packs/linux
   /opt/stackstorm/packs/packs
+  /opt/stackstorm/packs/chatops
   %{_datadir}/doc/st2
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/st2
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
