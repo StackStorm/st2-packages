@@ -101,7 +101,6 @@ ok_message() {
     echo ""
     echo "  st2 is installed and ready to use."
     echo ""
-    echo "First time starting this machine up?"
     echo "Head to https://${ST2_IP} to access the WebUI"
     echo ""
     echo "Don't forget to dive into our documentation! Here are some resources"
