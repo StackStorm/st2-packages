@@ -1,1 +1,2 @@
 conf/mistral.conf /etc/mistral
+bin/mistral /usr/bin
