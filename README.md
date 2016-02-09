@@ -30,24 +30,16 @@ It's very simple to invoke the whole build-test pipeline. First just make sure t
 docker-compose kill
 docker-compose rm -f
 
-# We want to build packages for debian wheezy (--rm will wipe packaging runner container). However all other will remain active.
+# We want to build packages for ubuntu wheezy (--rm will wipe packaging runner container). However all other will remain active.
 docker-compose run --rm wheezy
 ```
 
-Execution takes about *6 to 10 minutes* to build around 10 packages it depends on computing power of your CPU. When build and tests are finished, you can find all of StackStorm packages in your host local directory `/tmp/st2-packages`:
+Execution takes about *6 to 10 minutes* to build 2 packages, it depends on computing power of your CPU. When build and tests are finished, you can find all of StackStorm packages in your host local directory `/tmp/st2-packages`:
 
 ```shell
 ls -l1 | grep ".deb$"
--rw-r--r-- 1 root root 26757508 Nov 22 22:51 mistral_1.1.0-1~st2_amd64.deb
--rw-r--r-- 1 root root 20449448 Nov 22 22:50 st2actions_1.2dev-1_amd64.deb
--rw-r--r-- 1 root root 17847628 Nov 22 22:50 st2api_1.2dev-1_amd64.deb
--rw-r--r-- 1 root root 18581330 Nov 22 22:50 st2auth_1.2dev-1_amd64.deb
--rw-r--r-- 1 root root 23808024 Nov 22 22:51 st2bundle_1.2dev-1_amd64.deb
--rw-r--r-- 1 root root 18234622 Nov 22 22:50 st2client_1.2dev-1_amd64.deb
--rw-r--r-- 1 root root 20127732 Nov 22 22:48 st2common_1.2dev-1_amd64.deb
--rw-r--r-- 1 root root 19107338 Nov 22 22:50 st2debug_1.2dev-1_amd64.deb
--rw-r--r-- 1 root root 17962818 Nov 22 22:50 st2exporter_1.2dev-1_amd64.deb
--rw-r--r-- 1 root root 18273728 Nov 22 22:50 st2reactor_1.2dev-1_amd64.deb
+-rw-r--r-- 1 root root 30872652 Feb  9 18:32 st2_1.4dev-1_amd64.deb
+-rw-r--r-- 1 root root 31582068 Feb  9 18:32 st2mistral_1.3.0-1_amd64.deb
 ```
 
 ## Manual testing inside the docker environment
