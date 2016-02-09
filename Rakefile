@@ -10,27 +10,43 @@ build_files.each { |file| import file }
 
 task :default => ['build:all', 'setup:all']
 
+# Hopefully it will speed up make calls from pip
+desc 'Store build node nproc value'
+task :nproc do
+  pipeline do
+    run hostname: opts[:buildnode] do
+      capture(:nproc).strip rescue nil
+    end
+  end.tap do |nproc|
+    pipeopts { build_nproc nproc }
+  end
+end
+
 namespace :build do
-  desc 'Packages build entry task'
-  task :all => [:upload_to_buildnode, :nproc, :checkout, :packages] do
+  ## Default build task, triggers the whole build task pipeline.
+  #
+  task :all => ['upload:to_buildnode', 'upload:checkout', 'build:packages'] do
     pipeline do
       run(:local) {|o| execute :ls, "-l #{o[:artifact_dir]}", verbosity: :debug}
     end
   end
 
-  # Hopefully it will speed up make calls from pip
-  desc 'Store build node nproc value'
-  task :nproc do
-    pipeline do
-      run hostname: opts[:buildnode] do
-        capture(:nproc).strip rescue nil
+  ## Packages task and build multitask (which invokes builds concurrently)
+  #
+  task :packages => [:prebuild, :build]
+  multitask :build => pipeopts.packages.map {|p| "package:#{p}"}
+
+  ## Prebuild task invokes all packages prebuild tasks.
+  #  These task are executed sequentially (we require this not to mess up pip)!
+  task :prebuild do
+    pipeopts.packages.each do |p|
+      task = "package:prebuild_#{p}"
+      if Rake::Task.task_defined?(task)
+        Rake::Task[task].invoke
       end
-    end.tap do |nproc|
-      pipeopts { build_nproc nproc }
     end
   end
 end
-
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # SPECS SHOULD BE REWRITEN COMPLETLY THEY ARE SO BAD AND UGLY.

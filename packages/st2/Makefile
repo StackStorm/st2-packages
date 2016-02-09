@@ -55,7 +55,5 @@ endif
 
 wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements
+	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
-
-# For compatibilty with other packages (since it's a meta package)
-bdist_wheel:

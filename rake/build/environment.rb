@@ -70,9 +70,10 @@ pipeopts 'st2' do
   # st2 packages are not standalone (ie. there are many $gitdir/st2*)
   standalone false
   checkout true
+  wheelhouse true
   env :components, ST2_COMPONENTS, proc: convert_to_array
-  envpass :giturl,   'https://github.com/StackStorm/st2', from: 'ST2_GITURL'
-  envpass :gitrev,   'master',                            from: 'ST2_GITREV'
+  envpass :giturl,   'https://github.com/dennybaa/st2', from: 'ST2_GITURL'
+  envpass :gitrev,   'remove-nonlocal-script',          from: 'ST2_GITREV'
   envpass :gitdir,    make_tmpname('st2-'),               from: 'ST2_GITDIR'
   envpass :st2pkg_version
   envpass :st2pkg_release, 1
@@ -81,6 +82,7 @@ end
 pipeopts 'st2mistral' do
   standalone true
   checkout true
+  wheelhouse true
   envpass :giturl,  'https://github.com/StackStorm/mistral', from: 'ST2MISTRAL_GITURL'
   envpass :gitrev,  'st2-1.3.0',                             from: 'ST2MISTRAL_GITREV'
   envpass :gitdir,  make_tmpname('mistral-')
