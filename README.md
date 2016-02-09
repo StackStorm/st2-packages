@@ -30,7 +30,7 @@ It's very simple to invoke the whole build-test pipeline. First just make sure t
 docker-compose kill
 docker-compose rm -f
 
-# We want to build packages for ubuntu wheezy (--rm will wipe packaging runner container). However all other will remain active.
+# We want to build packages for debian wheezy (--rm will wipe packaging runner container). However all other will remain active.
 docker-compose run --rm wheezy
 ```
 
