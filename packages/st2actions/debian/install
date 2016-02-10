@@ -1,2 +1,3 @@
 conf/logging.*.conf etc/st2/
 conf/syslog.*.conf etc/st2/
+bin/runners.sh opt/stackstorm/st2/bin/

@@ -8,3 +8,4 @@
 ../st2reactor/conf/logging.*.conf etc/st2/
 ../st2reactor/conf/syslog.*.conf etc/st2/
 ../conf/nginx usr/share/doc/st2/conf/
+../st2actions/bin/runners.sh opt/stackstorm/st2/bin/
