@@ -24,6 +24,7 @@ post_install: bdist_wheel
 	# We don't want anything like below to be postinst
 	install conf/logging.conf $(DESTDIR)/etc/st2/logging.actionrunner.conf
 	install conf/syslog.conf $(DESTDIR)/etc/st2/syslog.actionrunner.conf
+	install -m755 bin/runners.sh $(DESTDIR)/opt/stackstorm/st2actions/bin/runners.sh
 	sed -i -r "/args\s*=\s*/s%logs%/var/log/st2%g" $(DESTDIR)/etc/st2/logging.*conf
 
 populate_version: .stamp-populate_version
