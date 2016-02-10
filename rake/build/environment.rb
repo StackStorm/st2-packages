@@ -12,11 +12,11 @@ ST2_COMPONENTS = %w(
   st2reactor)
 
 # Default list of packages to build
-BUILDLIST = %w(st2 st2mistral)
+BUILDLIST = 'st2 st2mistral'
 
 ##  Helper procs
-convert_to_ipaddr = ->(v) { Resolv.getaddress(v) if v !~ Resolv::AddressRegex }
-convert_to_int = ->(v) { v.to_i }
+convert_to_ipaddr = ->(v) {(v !~ Resolv::AddressRegex) ? Resolv.getaddress(v) : v}
+convert_to_int = ->(v) {v.to_i}
 convert_to_array = ->(a) do
   if a.is_a? Array
     a
@@ -39,8 +39,8 @@ pipeopts do
   #
   env     :buildnode
   env     :testnode
-  env     :package_list, from: 'ST2_PACKAGES'
-  env     :packages, BUILDLIST, from: 'ST2_PACKAGES', proc: convert_to_array
+  env     :packages,     BUILDLIST, from: 'ST2_PACKAGES', proc: convert_to_array
+  env     :package_list, BUILDLIST, from: 'ST2_PACKAGES'
 
   ## Envpass attributes
   #     are fetch from environment variables, however they are also made
@@ -67,22 +67,17 @@ pipeopts do
 end
 
 pipeopts 'st2' do
-  # st2 packages are not standalone (ie. there are many $gitdir/st2*)
-  standalone false
-  checkout true
-  wheelhouse true
   env :components, ST2_COMPONENTS, proc: convert_to_array
-  envpass :giturl,   'https://github.com/dennybaa/st2', from: 'ST2_GITURL'
-  envpass :gitrev,   'remove-nonlocal-script',          from: 'ST2_GITREV'
+  checkout true
+  envpass :giturl,   'https://github.com/StackStorm/st2', from: 'ST2_GITURL'
+  envpass :gitrev,   'master',                            from: 'ST2_GITREV'
   envpass :gitdir,    make_tmpname('st2-'),               from: 'ST2_GITDIR'
   envpass :st2pkg_version
   envpass :st2pkg_release, 1
 end
 
 pipeopts 'st2mistral' do
-  standalone true
   checkout true
-  wheelhouse true
   envpass :giturl,  'https://github.com/StackStorm/mistral', from: 'ST2MISTRAL_GITURL'
   envpass :gitrev,  'st2-1.3.0',                             from: 'ST2MISTRAL_GITREV'
   envpass :gitdir,  make_tmpname('mistral-')

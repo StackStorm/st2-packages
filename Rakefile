@@ -25,7 +25,7 @@ end
 namespace :build do
   ## Default build task, triggers the whole build task pipeline.
   #
-  task :all => ['upload:to_buildnode', 'upload:checkout', 'build:packages'] do
+  task :all => [:nproc, 'upload:to_buildnode', 'upload:checkout', 'build:packages'] do
     pipeline do
       run(:local) {|o| execute :ls, "-l #{o[:artifact_dir]}", verbosity: :debug}
     end
