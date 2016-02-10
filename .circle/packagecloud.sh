@@ -1,61 +1,93 @@
 #!/bin/bash
 
-# Requires: jq
+# Requires: `jq` binary
+# Requires: `package_cloud` gem
 
 # Pass these ENV Variables
 # PACKAGECLOUD_ORGANIZATION - Packagecloud organization (default is stackstorm)
 # PACKAGECLOUD_TOKEN - act as a password for REST authentication
+# IS_PRODUCTION - whether packages are for production repo (default is 0, eg. staging repo will be used)
+# IS_ENTERPRISE - whether packages are for enterprise repo (default is 0, eg. community repo will be used)
+
+# TODO!
+# Number of latest revisions to keep for package version
+# Ex: With `MAX_REVISIONS=10`, after uploading `1.3dev-20`, `1.3dev-10` will be deleted during the same run
+MAX_REVISIONS=10
 
 # Usage:
-# packagecloud.sh deploy wheezy_staging /tmp/st2-packages
-# packagecloud.sh deploy trusty /tmp/st2-packages
-# packagecloud.sh next-revision trusty 0.12dev st2api
-# packagecloud.sh next-revision wheezy 1.1.2 st2web
+# packagecloud.sh deploy el7 /tmp/st2-packages
+# IS_ENTERPRISE=1 packagecloud.sh deploy trusty /tmp/st2-packages
+# packagecloud.sh next-revision trusty 0.14dev st2
+# packagecloud.sh next-revision wheezy 1.3.1 st2web
 function main() {
   : ${PACKAGECLOUD_ORGANIZATION:=stackstorm}
+  : ${PACKAGECLOUD_TOKEN:? PACKAGECLOUD_TOKEN env is required}
+  : ${IS_PRODUCTION:=0}
+  : ${IS_ENTERPRISE:=0}
 
   case "$1" in
     deploy)
-      deploy "$2" "$3" "$4"
+      deploy "$2" "$3"
       ;;
     next-revision)
-      LATEST_REVISION=$(latest_revision "$2" "$3" "$4" "$5")
+      LATEST_REVISION=$(latest_revision "$2" "$3" "$4") || exit $?
       if [ -n "${LATEST_REVISION}" ]; then
         echo $((LATEST_REVISION+1))
       else
         echo 1
       fi
       ;;
-    last-revision)
-      echo $(latest_revision "$2" "$3" "$4" "$5")
-      ;;
     *)
-      echo $"Usage: deploy {st2|st2_staging} {trusty|whezzy|el7} /tmp/st2-packages"
-      echo $"Usage: next-revision {st2|st2_staging} {trusty|whezzy|el7} 0.14dev st2api"
-      echo $"Usage: last-revision {st2|st2_staging} {trusty|whezzy|el7} 0.14dev st2api"
+      echo $"Usage: deploy {wheezy|jessie|trusty|el6|el7} /tmp/st2-packages"
+      echo $"Usage: next-revision {wheezy|jessie|trusty|el6|el7} 0.14dev st2"
       exit 1
   esac
 }
 
+# Get PackageCloud repo name depending on environment
+#
+### Community:
+# https://packagecloud.io/stackstorm/stable
+# https://packagecloud.io/stackstorm/unstable
+# https://packagecloud.io/stackstorm/staging-stable
+# https://packagecloud.io/stackstorm/staging-unstable
+### Enterprise:
+# https://packagecloud.io/stackstorm/enterprise
+# https://packagecloud.io/stackstorm/enterprise-staging
+function get_repo_name() {
+  if [ ${IS_ENTERPRISE} -eq 0 ]; then
+    if [ ${PKG_IS_UNSTABLE} -eq 0 ]; then
+      PACKAGECLOUD_REPO=stable
+    else
+      PACKAGECLOUD_REPO=unstable
+    fi
+
+    if [ ${IS_PRODUCTION} -eq 0 ]; then
+      PACKAGECLOUD_REPO="staging-${PACKAGECLOUD_REPO}"
+    fi
+  else
+    if [ ${IS_PRODUCTION} -eq 1 ]; then
+      PACKAGECLOUD_REPO=enterprise
+    else
+      PACKAGECLOUD_REPO=enterprise-staging
+    fi
+  fi
+}
+
 # Arguments
-# $2 PACKAGECLOUD_REPO - the targeted repo (could be rpm or deb)
-# $3 PKG_OS - distribution the package is built for
-# $4 PKG_DIR - directory with packages to upload
+# $1 PKG_OS - distribution the package is built for
+# $2 PKG_DIR - directory with packages to upload
 function deploy() {
-  # : ${BINTRAY_ACCOUNT:? BINTRAY_ACCOUNT env is required}
-  : ${PACKAGECLOUD_TOKEN:? PACKAGECLOUD_TOKEN env is required}
   : ${DEPLOY_PACKAGES:=1}
   if [ ${DEPLOY_PACKAGES} -eq 0 ]; then
     echo 'Skipping Deploy because DEPLOY_PACKAGES=0'
     exit
   fi
-  PACKAGECLOUD_REPO=$1
-  PKG_OS=$2
-  PKG_DIR=$3
 
-  : ${PACKAGECLOUD_REPO:? repo (first arg) is required}
-  : ${PKG_OS:? os (second arg) is required}
-  : ${PKG_DIR:? dir (third arg) is required}
+  PKG_OS=$1
+  PKG_DIR=$2
+  : ${PKG_OS:? os (first arg) is required}
+  : ${PKG_DIR:? dir (second arg) is required}
 
   if [ ! -d "$PKG_DIR" ]; then
     echo "No directory $PKG_DIR, aborting..."
@@ -71,9 +103,11 @@ function deploy() {
     PKG_TYPE=${PKG##*.}
     # Parse package metadata
     parse_${PKG_TYPE}
+    # Get repo name depending on env
+    get_repo_name
     # Version of the distro
     PKG_PATH_BASE=`basename $PKG_DIR`
-
+    # Get package OS in format, suited for Packagecloud
     get_pkg_os "$PKG_OS"
 
     if [ -z "$PKG_NAME" ] || [ -z "$PKG_VERSION" ] || [ -z "$PKG_RELEASE" ]; then
@@ -133,44 +167,49 @@ function parse_rpm() {
 
 function publish() {
   debug "Publishing ${PKG_PATH}..."
+
+  # TODO: Fix the following error in gem (filename overwrite) and enable `exit 1` to make sure we exit with error if something wrong happens
+  # Using https://packagecloud.io with token:******a7e9
+  # Looking for repository at stackstorm/staging-stable... success!
+  # Pushing ./test/st2mistral_1.3.0-1_amd64.deb... error:
+  #      filename: has already been taken
+  #package_cloud push ${PACKAGECLOUD_ORGANIZATION}/${PACKAGECLOUD_REPO}/${PKG_OS_NAME}/${PKG_OS_VERSION} ${PKG_PATH} || exit 1
+
   package_cloud push ${PACKAGECLOUD_ORGANIZATION}/${PACKAGECLOUD_REPO}/${PKG_OS_NAME}/${PKG_OS_VERSION} ${PKG_PATH}
-  echo ""
 }
 
 # Arguments:
-# $2 PACKAGECLOUD_REPO - the targeted repo (could be rpm or deb)
-# $3 PKG_OS - distribution the package is built for
-# $4 PKG_VERSION - Target package version to find latest revision for (1.1, 1.2dev)
-# $5 PKG_NAME - Target package name to find latest revision for (st2api, st2web)
+# $1 PKG_OS - distribution the package is built for
+# $2 PKG_VERSION - Target package version to find latest revision for (1.1, 1.2dev)
+# $3 PKG_NAME - Target package name to find latest revision for (st2, st2web)
 function latest_revision() {
-  PACKAGECLOUD_REPO=$1
-  PKG_OS=$2
-  PKG_VERSION=$3
-  PKG_NAME=$4
-  : ${PACKAGECLOUD_REPO:? repo (second arg) is required}
-  : ${PACKAGECLOUD_REPO:? repo (third arg) is required}
-  : ${PKG_VERSION:? version (fourth arg) is required}
-  : ${PKG_NAME:? name (fifth arg) is required}
-  PKG_IS_UNSTABLE=$(echo ${PKG_VERSION} | grep -qv 'dev'; echo $?)
-  if [ ${PKG_IS_UNSTABLE} -eq 1 ]; then
-    DL_DIR=unstable
-  else
-    DL_DIR=stable
-  fi
+  PKG_OS=$1
+  PKG_VERSION=$2
+  PKG_NAME=$3
+  : ${PKG_OS:? OS (first arg) is required}
+  : ${PKG_VERSION:? version (second arg) is required}
+  : ${PKG_NAME:? name (third arg) is required}
 
+  PKG_IS_UNSTABLE=$(echo ${PKG_VERSION} | grep -qv 'dev'; echo $?)
+  get_repo_name
   get_pkg_os "$PKG_OS"
 
   get_revision
 }
 
+# TODO: Check if CURL response code was successful
 function get_versions_url() {
   curl -Ss -q https://${PACKAGECLOUD_TOKEN}:@packagecloud.io/api/v1/repos/${PACKAGECLOUD_ORGANIZATION}/${PACKAGECLOUD_REPO}/packages/${PKG_TYPE}/${PKG_OS_NAME}/${PKG_OS_VERSION}/${PKG_NAME}.json |
-  jq -r .[0].versions_url
+    jq -r .[0].versions_url
 }
 
+# TODO: Check if CURL response code was successful
 function get_revision() {
-  curl -Ss -q https://${PACKAGECLOUD_TOKEN}:@packagecloud.io$(get_versions_url) |
-  jq -r "[.[] | select(.version == \"${PKG_VERSION}\") | .release] | max"
+  versions_url=$(get_versions_url)
+  if [[ ${versions_url} == /* ]]; then
+    curl -Ss -q https://${PACKAGECLOUD_TOKEN}:@packagecloud.io${versions_url} |
+      jq -r "[.[] | select(.version == \"${PKG_VERSION}\") | .release] | max"
+  fi
 }
 
 # Arguments:
