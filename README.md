@@ -34,7 +34,7 @@ docker-compose rm -f
 docker-compose run --rm wheezy
 ```
 
-Execution takes about *6 to 10 minutes* to build 2 packages, it depends on computing power of your CPU. When build and tests are finished, you can find all of StackStorm packages in your host local directory `/tmp/st2-packages`:
+Execution takes a while, so grab a cup of tea or coffie and wait until it finishes. When build and test processes succeed, you'll be all to find StackStorm packages them in `/tmp/st2-packages` on your host machine:
 
 ```shell
 ls -l1 | grep ".deb$"
