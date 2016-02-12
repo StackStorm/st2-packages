@@ -5,13 +5,12 @@
 namespace :setup do
   task :all => [:install_artifacts, :configure]
 
-  task :install_artifacts => [ 'build:upload_to_testnode', :install_st2_python ] do
+  task :install_artifacts => ['upload:to_testnode', :install_st2_python] do
     pipeline do
       run hostname: opts[:testnode] do |opts|
-        package_list = opts.packages_to_test.join(' ')
         with opts.env do
           within opts.artifact_dir do
-            execute :bash, "$BASEDIR/scripts/install_os_packages.sh #{package_list}"
+            execute :bash, "$BASEDIR/scripts/install_os_packages.sh #{opts[:package_list]}"
           end
         end
       end
@@ -23,7 +22,7 @@ namespace :setup do
       run hostname: opts[:testnode] do |opts|
         with opts.env do
           execute :bash, "$BASEDIR/scripts/generate_st2_config.sh"
-          if opts.packages_to_test.include? 'st2mistral'
+          if opts.packages.include? 'st2mistral'
             execute :bash, "$BASEDIR/scripts/generate_mistral_config.sh"
           end
         end

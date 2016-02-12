@@ -39,19 +39,19 @@ module Pipeline
       # Sets option from env
       def env(attribute, default=nil, opts={})
         _, value, opts = parse_attribute(attribute, default, opts)
-        value.tap do
-          current.assign_property(attribute, value) if value
+        convert_value(value, opts).tap do |v|
+          current.assign_property(attribute, v) if v
         end
       end
 
       # Sets option from env as well as corresponding options env[attribute]
       def envpass(attribute, default=nil, opts={})
         varname, value, opts = parse_attribute(attribute, default, opts)
-        value.tap do
-          if value
-            current.assign_property(attribute, value)
+        convert_value(value, opts).tap do |v|
+          if v
+            current.assign_property(attribute, v)
             current[:env] ||= Hashie::Mash.new
-            current[:env].merge!({varname => value})
+            current[:env].merge!({varname => v.to_s})
           end
         end
       end
@@ -93,6 +93,15 @@ module Pipeline
           [caseattr, default, opts]
         else
           [caseattr, value || default, opts]
+        end
+      end
+
+      # Convert value if proc option is provided.
+      def convert_value(value, opts)
+        if opts[:proc].is_a? Proc
+          opts[:proc].(value)
+        else
+          value
         end
       end
     end

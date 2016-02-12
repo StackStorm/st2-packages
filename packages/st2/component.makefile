@@ -14,12 +14,8 @@ else
 	REDHAT := 1
 endif
 
-.PHONY: all install wheelhouse
-all: install
-
-install: wheelhouse injectdeps changelog
-
-post_install: bdist_wheel
+.PHONY: populate_version requirements wheelhouse bdist_wheel
+all: populate_version requirements bdist_wheel
 
 populate_version: .stamp-populate_version
 .stamp-populate_version:
@@ -27,27 +23,17 @@ populate_version: .stamp-populate_version
 	sh ../scripts/populate-version.sh
 	touch $@
 
-requirements:
+requirements: .stamp-requirements
+.stamp-requirements:
 	python ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 
-changelog: populate_version
-ifeq ($(DEBIAN),1)
-	debchange -v $(ST2PKG_VERSION)-$(ST2PKG_RELEASE) -M "automated build version: $(ST2PKG_VERSION)"
-endif
-
 wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: populate_version requirements
+.stamp-wheelhouse: | populate_version requirements
 	# Install wheels into shared location
 	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
-injectdeps: .stamp-injectdeps
-.stamp-injectdeps:
-	# We can modify requirements ONLY AFTER wheelhouse has been built
-	@echo "st2common" >> requirements.txt
-	touch $@
-
 bdist_wheel: .stamp-bdist_wheel
-.stamp-bdist_wheel: populate_version
+.stamp-bdist_wheel: | populate_version requirements
 	python setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@
