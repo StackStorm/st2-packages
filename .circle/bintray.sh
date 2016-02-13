@@ -8,7 +8,7 @@
 
 # Number of latest revisions to keep for package version
 # Ex: With `MAX_REVISIONS=10`, after uploading `1.3dev-20`, `1.3dev-10` will be deleted during the same run
-MAX_REVISIONS=10
+MAX_REVISIONS=5
 
 # API-related Constants
 API=https://api.bintray.com
