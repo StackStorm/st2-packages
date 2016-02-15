@@ -9,10 +9,9 @@
 # IS_PRODUCTION - whether packages are for production repo (default is 0, eg. staging repo will be used)
 # IS_ENTERPRISE - whether packages are for enterprise repo (default is 0, eg. community repo will be used)
 
-# TODO!
 # Number of latest revisions to keep for package version
 # Ex: With `MAX_REVISIONS=10`, after uploading `1.3dev-20`, `1.3dev-10` will be deleted during the same run
-MAX_REVISIONS=10
+MAX_REVISIONS=5
 
 # Usage:
 # packagecloud.sh deploy el7 /tmp/st2-packages
