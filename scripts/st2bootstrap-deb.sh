@@ -1,4 +1,56 @@
 #!/bin/bash
+REPO_SUFFIX=''
+APTGET_SUFFIX=''
+VERSION=''
+STABLE=1
+UNSTABLE=''
+RELEASE='stable'
+STAGING=1
+
+args() {
+	for i in "$@"
+		do
+			case $i in
+			    -V=*|--version=*)
+			    VERSION="${i#*=}"
+			    shift
+			    ;;
+			    -s=*|--stable)
+				STABLE=1
+				RELEASE=stable
+			    shift
+			    ;;
+			    -u=*|--unstable)
+				UNSTABLE=1
+				RELEASE=unstable
+			    shift
+			    ;;
+			    --staging)
+				STAGING=1
+				shift
+				;;
+			    *)
+			            # unknown option
+			    ;;
+			esac
+		done
+
+if [ $STABLE != '' ] && [ $UNSTABLE != '' ];
+	then
+		echo "Only stable or unstable can be specified.  Please pick one."
+		exit 1
+fi
+
+if [ $STAGING != '' ];
+	then
+		REPO_SUFFIX='_staging'
+fi
+
+if [ $VERSION != '' ];
+	then
+		APTGET_SUFFIX="=${VERSION}"
+fi
+}
 
 fail() {
 	echo "############### ERROR ###############"
@@ -14,12 +66,12 @@ install_dependencies() {
 
 setup_repositories() {
 	wget -qO - https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
-	echo "deb https://dl.bintray.com/stackstorm/trusty_staging stable main" | sudo tee /etc/apt/sources.list.d/st2-stable.list
+	echo "deb https://dl.bintray.com/stackstorm/trusty${REPO_SUFFIX} ${RELEASE} main" | sudo tee /etc/apt/sources.list.d/st2-stable.list
 	sudo apt-get update
 }
 
 install_stackstorm_components() {
-	sudo apt-get install -y st2 st2mistral
+	sudo apt-get install -y st2${ATPGET_SUFFIX} st2mistral${APTGET_SUFFIX}
 }
 
 setup_mistral_database() {
@@ -133,7 +185,7 @@ verify() {
 }
 
 ## Let's do this!
-
+args $@
 install_dependencies || fail "install_dependencies"
 setup_repositories || fail "setup_repositories"
 install_stackstorm_components || fail "install_stackstorm_components"
