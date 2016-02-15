@@ -9,10 +9,9 @@
 # IS_PRODUCTION - whether packages are for production repo (default is 0, eg. staging repo will be used)
 # IS_ENTERPRISE - whether packages are for enterprise repo (default is 0, eg. community repo will be used)
 
-# TODO!
 # Number of latest revisions to keep for package version
 # Ex: With `MAX_REVISIONS=10`, after uploading `1.3dev-20`, `1.3dev-10` will be deleted during the same run
-MAX_REVISIONS=10
+MAX_REVISIONS=5
 
 # Usage:
 # packagecloud.sh deploy el7 /tmp/st2-packages
@@ -129,6 +128,7 @@ function deploy() {
     debug "PKG_IS_UNSTABLE:            ${PKG_IS_UNSTABLE}"
 
     publish
+    prune_old_revision
   done
 }
 
@@ -176,6 +176,17 @@ function publish() {
   #package_cloud push ${PACKAGECLOUD_ORGANIZATION}/${PACKAGECLOUD_REPO}/${PKG_OS_NAME}/${PKG_OS_VERSION} ${PKG_PATH} || exit 1
 
   package_cloud push ${PACKAGECLOUD_ORGANIZATION}/${PACKAGECLOUD_REPO}/${PKG_OS_NAME}/${PKG_OS_VERSION} ${PKG_PATH} || exit 0
+}
+
+function prune_old_revision() {
+  if [ "$PKG_RELEASE" -gt "$MAX_REVISIONS" ]; then
+    RELEASE_TO_DELETE=$((PKG_RELEASE-MAX_REVISIONS))
+    PKG_TO_DELETE=${PKG/$PKG_VERSION-$PKG_RELEASE/$PKG_VERSION-$RELEASE_TO_DELETE}
+    debug "Pruning obsolete revision ${PKG_VERSION}-${RELEASE_TO_DELETE} ..."
+    package_cloud yank ${PACKAGECLOUD_ORGANIZATION}/${PACKAGECLOUD_REPO}/${PKG_OS_NAME}/${PKG_OS_VERSION} ${PKG_TO_DELETE}
+    deleted=$?
+    debug "${PKG_VERSION}-${RELEASE_TO_DELETE} deleted? y:0/N:1 (${deleted})"
+  fi
 }
 
 # Arguments:
