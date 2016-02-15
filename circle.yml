@@ -71,7 +71,9 @@ test:
 
 deployment:
   publish:
-    branch: master
+    branch:
+      - master
+      - feature/circleci
     owner: StackStorm
     commands:
       # Deploy to Bintray all artifacts for respective distros in parallel
