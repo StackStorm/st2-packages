@@ -61,6 +61,7 @@ use_st2ctl() {
 }
 
 configure_authentication() {
+	sed -r -e '/^\[auth\]/ { n ; s/enabled = False/enabled = True/ }' /etc/st2/st2.conf
 	# Install htpasswd utility if you don't have it
 	sudo apt-get install -y apache2-utils
 	# Create a user record in a password file.
