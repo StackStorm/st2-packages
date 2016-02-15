@@ -129,6 +129,7 @@ function deploy() {
     debug "PKG_IS_UNSTABLE:            ${PKG_IS_UNSTABLE}"
 
     publish
+    prune_old_revision
   done
 }
 
@@ -176,6 +177,17 @@ function publish() {
   #package_cloud push ${PACKAGECLOUD_ORGANIZATION}/${PACKAGECLOUD_REPO}/${PKG_OS_NAME}/${PKG_OS_VERSION} ${PKG_PATH} || exit 1
 
   package_cloud push ${PACKAGECLOUD_ORGANIZATION}/${PACKAGECLOUD_REPO}/${PKG_OS_NAME}/${PKG_OS_VERSION} ${PKG_PATH} || exit 0
+}
+
+function prune_old_revision() {
+  if [ "$PKG_RELEASE" -gt "$MAX_REVISIONS" ]; then
+    RELEASE_TO_DELETE=$((PKG_RELEASE-MAX_REVISIONS))
+    PKG_TO_DELETE=${PKG/$PKG_VERSION-$PKG_RELEASE/$PKG_VERSION-$RELEASE_TO_DELETE}
+    debug "Pruning obsolete revision ${PKG_VERSION}-${RELEASE_TO_DELETE} ..."
+    package_cloud yank ${PACKAGECLOUD_ORGANIZATION}/${PACKAGECLOUD_REPO}/${PKG_OS_NAME}/${PKG_OS_VERSION} ${PKG_TO_DELETE}
+    deleted=$?
+    debug "${PKG_VERSION}-${RELEASE_TO_DELETE} deleted? y:0/N:1 (${deleted})"
+  fi
 }
 
 # Arguments:
