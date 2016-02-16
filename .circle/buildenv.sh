@@ -50,9 +50,16 @@ ST2PKG_VERSION=$(fetch_version)
 # for PackageCloud
 ST2PKG_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${ST2PKG_VERSION} st2)
 
+# Mistral versioning
+# Nasty hack until CI for Mistral is done: https://github.com/StackStorm/st2-packages/issues/82
+ST2MISTRAL_GITREV=${ST2MISTRAL_GITREV:-st2-1.3.2}
+MISTRAL_VERSION=${MISTRAL_VERSION:-1.3.2}
+MISTRAL_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${MISTRAL_VERSION} st2mistral)
+
+
 re="\\b$DISTRO\\b"
 [[ "$NOTESTS" =~ $re ]] && TESTING=0
 
-write_env ST2_GITURL ST2_GITREV ST2PKG_VERSION ST2PKG_RELEASE ST2_WAITFORSTART DISTRO TESTING
+write_env ST2_GITURL ST2_GITREV ST2PKG_VERSION ST2PKG_RELEASE ST2_WAITFORSTART DISTRO TESTING ST2MISTRAL_GITREV MISTRAL_VERSION MISTRAL_RELEASE
 
 cat ~/.buildenv
