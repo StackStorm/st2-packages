@@ -45,7 +45,10 @@ write_env() {
 ST2_GITURL=${ST2_GITURL:-$(st2_giturl)}
 ST2_GITREV=${ST2_GITREV:-$CIRCLE_BRANCH}
 ST2PKG_VERSION=$(fetch_version)
-ST2PKG_RELEASE=$(.circle/bintray.sh next-revision ${DISTRO}_staging ${ST2PKG_VERSION} st2)
+# for Bintray
+#ST2PKG_RELEASE=$(.circle/bintray.sh next-revision ${DISTRO}_staging ${ST2PKG_VERSION} st2)
+# for PackageCloud
+ST2PKG_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${ST2PKG_VERSION} st2)
 
 re="\\b$DISTRO\\b"
 [[ "$NOTESTS" =~ $re ]] && TESTING=0
