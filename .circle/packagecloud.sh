@@ -167,15 +167,7 @@ function parse_rpm() {
 
 function publish() {
   debug "Publishing ${PKG_PATH}..."
-
-  # TODO: Fix the following error in gem (filename overwrite) and enable `exit 1` to make sure we exit with error if something wrong happens
-  # Using https://packagecloud.io with token:******a7e9
-  # Looking for repository at stackstorm/staging-stable... success!
-  # Pushing ./test/st2mistral_1.3.0-1_amd64.deb... error:
-  #      filename: has already been taken
-  #package_cloud push ${PACKAGECLOUD_ORGANIZATION}/${PACKAGECLOUD_REPO}/${PKG_OS_NAME}/${PKG_OS_VERSION} ${PKG_PATH} || exit 1
-
-  package_cloud push ${PACKAGECLOUD_ORGANIZATION}/${PACKAGECLOUD_REPO}/${PKG_OS_NAME}/${PKG_OS_VERSION} ${PKG_PATH} || exit 0
+  package_cloud push ${PACKAGECLOUD_ORGANIZATION}/${PACKAGECLOUD_REPO}/${PKG_OS_NAME}/${PKG_OS_VERSION} ${PKG_PATH} || exit 1
 }
 
 function prune_old_revision() {
