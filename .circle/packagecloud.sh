@@ -52,7 +52,9 @@ function main() {
 # https://packagecloud.io/stackstorm/staging-unstable
 ### Enterprise:
 # https://packagecloud.io/stackstorm/enterprise
+# https://packagecloud.io/stackstorm/enterprise-unstable
 # https://packagecloud.io/stackstorm/enterprise-staging
+# https://packagecloud.io/stackstorm/enterprise-staging-unstable
 function get_repo_name() {
   if [ ${IS_ENTERPRISE} -eq 0 ]; then
     if [ ${PKG_IS_UNSTABLE} -eq 0 ]; then
@@ -69,6 +71,10 @@ function get_repo_name() {
       PACKAGECLOUD_REPO=enterprise
     else
       PACKAGECLOUD_REPO=enterprise-staging
+    fi
+
+    if [ ${PKG_IS_UNSTABLE} -eq 1 ]; then
+      PACKAGECLOUD_REPO="${PACKAGECLOUD_REPO}-unstable"
     fi
   fi
 }
