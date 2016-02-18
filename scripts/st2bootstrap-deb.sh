@@ -13,6 +13,7 @@ install_dependencies() {
 }
 
 setup_repositories() {
+  # Following script adds a repo file, registers gpg key and runs apt-get update
   curl -s https://packagecloud.io/install/repositories/StackStorm/staging-stable/script.deb.sh | sudo bash
 }
 
