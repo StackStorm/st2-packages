@@ -12,7 +12,7 @@ key_exists=$(sudo apt-key list | grep -B 1 Bintray)
 if [[ ! -z "$key_exists" ]]; then
   BINTRAY_KEY=$(sudo apt-key list | grep -B 1 Bintray | grep pub | awk '{print $2}' | cut -d '/' -f 2)
   echo "Deregistering Bintray GPG key ${BINTRAY_KEY}..."
-  sudo apt-key del ${BINTRAY_KEY}
+  sudo apt-key del "${BINTRAY_KEY}"
   if [[ $? != 0 ]]; then
     echo "Could not remove Bintray GPG key ${BINTRAY_REPO} from the box."
     echo "Registered keys are..."
