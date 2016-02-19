@@ -217,7 +217,7 @@ function get_revision() {
   versions_url=$(get_versions_url)
   if [[ ${versions_url} == /* ]]; then
     curl -Ss -q https://${PACKAGECLOUD_TOKEN}:@packagecloud.io${versions_url} |
-      jq -r "[.[] | select(.version == \"${PKG_VERSION}\") | .release] | max"
+      jq -r "[.[] | select(.version == \"${PKG_VERSION}\") | .release | tonumber] | max"
   fi
 }
 
