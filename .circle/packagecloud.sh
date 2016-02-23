@@ -241,8 +241,8 @@ function get_pkg_os() {
       PKG_TYPE="rpm"
       ;;
     *)
-      echo Unknown distrib $PKG_PATH_BASE. Skipping...
-      continue
+      echo "Unknown distrib '$1', aborting..."
+      exit 1
   esac
 }
 
