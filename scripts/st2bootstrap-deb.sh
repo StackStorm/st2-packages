@@ -13,9 +13,8 @@ install_dependencies() {
 }
 
 setup_repositories() {
-	wget -qO - https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
-	echo "deb https://dl.bintray.com/stackstorm/trusty_staging stable main" | sudo tee /etc/apt/sources.list.d/st2-stable.list
-	sudo apt-get update
+    # Following script adds a repo file, registers gpg key and runs apt-get update
+    curl -s https://packagecloud.io/install/repositories/StackStorm/staging-stable/script.deb.sh | sudo bash
 }
 
 install_stackstorm_components() {
