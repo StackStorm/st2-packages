@@ -10,7 +10,7 @@ endif
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
-	DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
+	#DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
 else
 	REDHAT := 1
 endif
