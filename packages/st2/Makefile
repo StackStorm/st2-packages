@@ -10,7 +10,7 @@ endif
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
-	DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
+	#DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
 else
 	REDHAT := 1
 endif
@@ -59,7 +59,7 @@ requirements:
 
 changelog: populate_version
 ifeq ($(DEBIAN),1)
-	[ -z $(DEB_EPOCH) ] && _epoch="" || _epoch="$(DEB_EPOCH):"; \
+	[ -z "$(DEB_EPOCH)" ] && _epoch="" || _epoch="$(DEB_EPOCH):"; \
 		dch -m --force-distribution -v$${_epoch}$(ST2PKG_VERSION)-$(ST2PKG_RELEASE) -D$(DEB_DISTRO) $(CHANGELOG_COMMENT)
 endif
 
