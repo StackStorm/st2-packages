@@ -2,7 +2,13 @@
 %define venv_name st2
 %define svc_user st2
 %define stanley_user stanley
+%define epoch %(_epoch=`echo $ST2PKG_VERSION | grep -q dev || echo 1`; echo "${_epoch:-0}")
+
 %include ../rpmspec/st2pkg_toptags.spec
+
+%if 0%{epoch}
+Epoch: %{epoch}
+%endif
 
 %if 0%{?use_st2python}
 Requires: st2python, python-devel, openssl-devel, libffi-devel, git, pam

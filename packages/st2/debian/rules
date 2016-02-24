@@ -35,7 +35,7 @@ override_dh_installinit:
 	dh_installinit --no-start --name=st2garbagecollector
 
 override_dh_installdeb:
-	$(MAKE) post_install
+	DESTDIR=debian/st2 $(MAKE) post_install
 	dh_installdeb
 
 override_dh_virtualenv:
