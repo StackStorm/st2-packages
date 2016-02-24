@@ -2,6 +2,7 @@ WHEELDIR ?= /tmp/wheelhouse
 ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
 ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
+CHANGELOG_COMMENT ?= "automated build, version: $(ST2PKG_VERSION)"
 
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
@@ -9,10 +10,18 @@ endif
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
-	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
+	DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
 else
 	REDHAT := 1
 endif
+
+# Only useful for debian builds
+ifeq ($(DEB_EPOCH),)
+	DEB_DISTRO := unstable
+else
+	DEB_DISTRO := $(shell lsb_release -cs)
+endif
+
 
 .PHONY: all install wheelhouse
 all: install
@@ -50,7 +59,8 @@ requirements:
 
 changelog: populate_version
 ifeq ($(DEBIAN),1)
-	debchange -v $(ST2PKG_VERSION)-$(ST2PKG_RELEASE) -M "automated build version: $(ST2PKG_VERSION)"
+	[ -z "$(DEB_EPOCH)" ] && _epoch="" || _epoch="$(DEB_EPOCH):"; \
+		dch -m --force-distribution -v$${_epoch}$(ST2PKG_VERSION)-$(ST2PKG_RELEASE) -D$(DEB_DISTRO) $(CHANGELOG_COMMENT)
 endif
 
 wheelhouse: .stamp-wheelhouse
