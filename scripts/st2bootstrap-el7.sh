@@ -8,10 +8,10 @@ set -eux
 adjust_selinux_policies() {
   if getenforce | grep -q 'Enforcing'; then
     # Allow rabbitmq to use '25672' port, otherwise it will fail to start
-    semanage port --list | grep -q 25672 || semanage port -a -t amqp_port_t -p tcp 25672
+    sudo semanage port --list | grep -q 25672 || sudo semanage port -a -t amqp_port_t -p tcp 25672
 
     # Allow network access for nginx
-    setsebool -P httpd_can_network_connect 1
+    sudo setsebool -P httpd_can_network_connect 1
   fi
 }
 
@@ -61,9 +61,9 @@ configure_st2_authentication() {
   echo "test_password" | sudo htpasswd -i /etc/st2/htpasswd test_user
 
   # Configure [auth] section in st2.conf
-  crudini --set /etc/st2/st2.conf auth enable 'True'
-  crudini --set /etc/st2/st2.conf auth backend 'flat_file'
-  crudini --set /etc/st2/st2.conf auth backend_kwargs '{"file_path": "/etc/st2/htpasswd"}'
+  sudo crudini --set /etc/st2/st2.conf auth enable 'True'
+  sudo crudini --set /etc/st2/st2.conf auth backend 'flat_file'
+  sudo crudini --set /etc/st2/st2.conf auth backend_kwargs '{"file_path": "/etc/st2/htpasswd"}'
   
   sudo st2ctl restart-component st2api
 }
@@ -127,7 +127,7 @@ install_st2mistral() {
 verify_st2mistral() {
   mistral --version
 
-  cp -rf /usr/share/doc/st2/examples /opt/stackstorm/packs
+  sudo cp -rf /usr/share/doc/st2/examples /opt/stackstorm/packs
   st2ctl reload
   
   # run mistral examples
