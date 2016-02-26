@@ -157,5 +157,4 @@ install_st2mistral
 
 install_st2web
 
-echo -e "\033[32m OK"
-tput sgr0
+echo "OK"
