@@ -124,16 +124,6 @@ install_st2mistral() {
   sudo systemctl start mistral
 }
 
-verify_st2mistral() {
-  mistral --version
-
-  sudo cp -rf /usr/share/doc/st2/examples /opt/stackstorm/packs
-  st2ctl reload
-  
-  # run mistral examples
-  st2 run examples.mistral_examples
-}
-
 install_st2web() {
   # Install st2web and nginx
   sudo yum install -y st2web nginx
@@ -153,17 +143,6 @@ install_st2web() {
   sudo systemctl restart nginx
 }
 
-verify_st2web() {
-  # dumb check that st2web index.html works
-  curl --insecure -s "https://127.0.0.1/" | grep -q "stackstorm"
-
-  # st2auth check
-  curl -X OPTIONS -I --insecure https://127.0.0.1/auth/ | grep -q 'St2-Api-Key'
-
-  # st2api check
-  curl -X OPTIONS -I --insecure https://127.0.0.1/api/ | grep -q 'St2-Api-Key'
-}
-
 
 adjust_selinux_policies
 
@@ -175,10 +154,8 @@ verify_st2
 
 install_st2mistral_depdendencies
 install_st2mistral
-verify_st2mistral
 
 install_st2web
-verify_st2web
 
 echo -e "\033[32m OK"
 tput sgr0
