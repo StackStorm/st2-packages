@@ -7,19 +7,13 @@ Follow this guide and we'll lead you through the basic installation and setup st
 First let's update the system and fetch software which will be required during installation and setup process:
 ```shell
 sudo apt-get update
-sudo apt-get install -y wget apache2-utils apt-transport-https sysvinit-utils
+sudo apt-get install -y wget curl apache2-utils apt-transport-https sysvinit-utils
 ```
 
 Second, add repositories and install st2.
 ```shell
-## NB! This step provides instructions for ubuntu trusty
-# Don't forget to use correct distro name!
-export DISTRO=trusty
-
-wget -qO - https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
-
-echo "deb https://dl.bintray.com/stackstorm/${DISTRO}_staging stable main" | sudo tee /etc/apt/sources.list.d/st2-stable.list
-unset DISTRO
+# Setup st2 repository
+curl -s https://packagecloud.io/install/repositories/StackStorm/staging-stable/script.deb.sh | sudo bash
 
 # Update repo and install st2
 sudo apt-get update && sudo apt-get install -y st2
