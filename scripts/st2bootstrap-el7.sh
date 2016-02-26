@@ -41,12 +41,12 @@ configure_st2_user() {
   sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
   
   # Authorize key-base acces
-  sudo cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys
+  sudo sh -c 'cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys'
   sudo chmod 0600 /home/stanley/.ssh/authorized_keys
   sudo chown -R stanley:stanley /home/stanley
   
   # Enable passwordless sudo
-  sudo echo "stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL" >> /etc/sudoers.d/st2
+  sudo sh -c 'echo "stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL" >> /etc/sudoers.d/st2'
   sudo chmod 0440 /etc/sudoers.d/st2
   
   # Make sure `Defaults requiretty` is disabled in `/etc/sudoers`
@@ -113,7 +113,7 @@ EHD
 
 install_st2mistral() {
   # install mistral
-  sudo yum -yq install st2mistral
+  sudo yum -y install st2mistral
   
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
@@ -180,4 +180,5 @@ verify_st2mistral
 install_st2web
 verify_st2web
 
-echo -e "\033[32m Done"
+echo -e "\033[32m OK"
+tput sgr0
