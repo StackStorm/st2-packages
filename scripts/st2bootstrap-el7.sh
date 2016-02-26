@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eux
+set -e
 
 # Note that default SELINUX policies for RHEL7 differ with CentOS7. CentOS7 is more permissive by default
 # Note that depending on distro assembly/settings you may need more rules to change
