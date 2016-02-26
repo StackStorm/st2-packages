@@ -58,7 +58,7 @@ configure_st2_authentication() {
   sudo yum -y install httpd-tools crudini
 
   # Create a user record in a password file.
-  echo "test_password" | sudo htpasswd -i /etc/st2/htpasswd test_user
+  echo "Ch@ngeMe" | sudo htpasswd -i /etc/st2/htpasswd test
 
   # Configure [auth] section in st2.conf
   sudo crudini --set /etc/st2/st2.conf auth enable 'True'
@@ -72,9 +72,9 @@ verify_st2() {
   st2 --version
   st2 -h
   
-  st2 auth test_user -p test_password
+  st2 auth test -p Ch@ngeMe
   # A shortcut to authenticate and export the token
-  export ST2_AUTH_TOKEN=$(st2 auth test_user -p test_password -t)
+  export ST2_AUTH_TOKEN=$(st2 auth test -p Ch@ngeMe -t)
   
   # List the actions from a 'core' pack
   st2 action list --pack=core
