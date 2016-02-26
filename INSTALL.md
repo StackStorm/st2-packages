@@ -2,17 +2,7 @@
 
 ## Installation from bundled packages
 
-Packages for major ubuntu/debian distros are available in our package repositories `https://dl.bintray.com/stackstorm/${distro}_staging`. Currently we provide packages for **wheezy**, **jessie** (*debian distros*) and **trusty** (*ubuntu distros*).
+Current community packages are hosted on https://packagecloud.io/StackStorm. For detailed instructions how install st2 and perform basic configuration follow the instructions bellow:
 
-Also we ship packages for rpm-based distros such as *el6* and *el7* *-compatible* packages they are available here:
-
-  - https://bintray.com/artifact/download/stackstorm/el6_staging
-  - https://bintray.com/artifact/download/stackstorm/el7_staging
-
-### For ubuntu/debian installation
-
-Follow instructions from [install_debian.md](install_debian.md).
-
-### For centos/rhel installation
-
-Follow instructions from [install_centos.md](install_centos.md).
+- Installing st2 on [Debian/Ubuntu](install_debian.md).
+- Installing st2 on [CentOS/RHEL](install_centos.md).

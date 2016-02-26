@@ -7,18 +7,13 @@ Follow this guide and we'll lead you through the basic installation and setup st
 First let's update the system and fetch software which will be required during installation and setup process:
 ```shell
 sudo yum makecache fast
-sudo yum install -y wget httpd-tools
+sudo yum install -y wget curl httpd-tools
 ```
 
 Second, add repositories and install st2.
 ```shell
-## NB! This step provides instructions for centos7 distro
-# Don't forget to use correct distro (el6 - for rhel6/centos6, and el7 - for rhel7/centos7)!
-export DISTRO=el7
-sudo wget https://bintray.com/stackstorm/${DISTRO}_staging/rpm -O /etc/yum.repos.d/bintray-stackstorm-${DISTRO}_staging.repo
-# Fix to use the correct URL
-sed -i "s|/${DISTRO}_staging|/${DISTRO}_staging/stable|" /etc/yum.repos.d/bintray-stackstorm-${DISTRO}_staging.repo
-unset DISTRO
+# Setup st2 repository
+curl -s https://packagecloud.io/install/repositories/StackStorm/staging-stable/script.rpm.sh | sudo bash
 
 # Update repo and install st2
 sudo yum install -y st2
