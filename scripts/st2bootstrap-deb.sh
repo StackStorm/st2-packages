@@ -1,10 +1,10 @@
 #!/bin/bash
 
-set -e
+set -eu
 
 fail() {
   echo "############### ERROR ###############"
-  echo "# Failed on $1 #"
+  echo "# Failed on step - $STEP #"
   echo "#####################################"
   exit 2
 }
@@ -151,15 +151,17 @@ ok_message() {
 
 ## Let's do this!
 
-install_st2_dependencies || fail "install_st2_dependencies"
-install_st2 || fail "install_st2"
-configure_st2_user || fail "configure_st2_user"
-configure_st2_authentication || fail "configure_st2_authentication"
-verify_st2 || fail "verify_st2"
+trap 'fail' EXIT
+STEP="Install st2 dependencies" && install_st2_dependencies
+STEP="Install st2" && install_st2
+STEP="Configure st2 user" && configure_st2_user
+STEP="Configure st2 auth" && configure_st2_authentication
+STEP="Verify st2" && verify_st2
 
-install_st2mistral_depdendencies || fail "install_st2mistral_depdendencies"
-install_st2mistral || fail "install_st2mistral"
+STEP="Install mistral dependencies" && install_st2mistral_depdendencies
+STEP="Install mistral" && install_st2mistral
 
-install_st2web || fail "install_st2web"
+STEP="Install st2web" && install_st2web
+trap - EXIT
 
 ok_message
