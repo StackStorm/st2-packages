@@ -23,9 +23,11 @@ install_st2() {
 }
 
 configure_st2_user () {
+  # Create an SSH system user (default `stanley` user may be already created)
+  if (! id stanley 2>/dev/null); then
+    sudo useradd stanley
+  fi
 
-  # Create an SSH system user
-  sudo useradd stanley
   sudo mkdir -p /home/stanley/.ssh
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
@@ -123,8 +125,6 @@ verify_st2() {
 }
 
 ok_message() {
-  ST2_IP=`ifconfig | grep 'inet addr' | awk '{print $2 }' | awk 'BEGIN {FS=":"}; {print $2}' | head -n 1`
-
   echo ""
   echo ""
   echo "███████╗████████╗██████╗      ██████╗ ██╗  ██╗";
@@ -136,7 +136,7 @@ ok_message() {
   echo ""
   echo "  st2 is installed and ready to use."
   echo ""
-  echo "Head to https://${ST2_IP} to access the WebUI"
+  echo "Head to https://YOUR_HOST_IP/ to access the WebUI"
   echo ""
   echo "Don't forget to dive into our documentation! Here are some resources"
   echo "for you:"
