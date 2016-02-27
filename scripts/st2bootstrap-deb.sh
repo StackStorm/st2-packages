@@ -9,7 +9,7 @@ fail() {
 
 install_dependencies() {
 	sudo apt-get update
-	sudo apt-get install -y mongodb-server rabbitmq-server postgresql
+	sudo apt-get install -y curl mongodb-server rabbitmq-server postgresql
 }
 
 setup_repositories() {
