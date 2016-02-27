@@ -154,28 +154,28 @@ install_st2web() {
 }
 
 ok_message() {
-    echo ""
-    echo ""
-    echo "███████╗████████╗██████╗      ██████╗ ██╗  ██╗";
-    echo "██╔════╝╚══██╔══╝╚════██╗    ██╔═══██╗██║ ██╔╝";
-    echo "███████╗   ██║    █████╔╝    ██║   ██║█████╔╝ ";
-    echo "╚════██║   ██║   ██╔═══╝     ██║   ██║██╔═██╗ ";
-    echo "███████║   ██║   ███████╗    ╚██████╔╝██║  ██╗";
-    echo "╚══════╝   ╚═╝   ╚══════╝     ╚═════╝ ╚═╝  ╚═╝";
-    echo ""
-    echo "  st2 is installed and ready to use."
-    echo ""
-    echo "Head to https://YOUR_HOST_IP/ to access the WebUI"
-    echo ""
-    echo "Don't forget to dive into our documentation! Here are some resources"
-    echo "for you:"
-    echo ""
-    echo "* Documentation  - https://docs.stackstorm.com"
-    echo "* Knowledge Base - https://stackstorm.reamaze.com"
-    echo ""
-    echo "Thanks for installing StackStorm! Come visit us in our Slack Channel"
-    echo "and tell us how it's going. We'd love to hear from you!"
-    echo "http://stackstorm.com/community-signup"
+  echo ""
+  echo ""
+  echo "███████╗████████╗██████╗      ██████╗ ██╗  ██╗";
+  echo "██╔════╝╚══██╔══╝╚════██╗    ██╔═══██╗██║ ██╔╝";
+  echo "███████╗   ██║    █████╔╝    ██║   ██║█████╔╝ ";
+  echo "╚════██║   ██║   ██╔═══╝     ██║   ██║██╔═██╗ ";
+  echo "███████║   ██║   ███████╗    ╚██████╔╝██║  ██╗";
+  echo "╚══════╝   ╚═╝   ╚══════╝     ╚═════╝ ╚═╝  ╚═╝";
+  echo ""
+  echo "  st2 is installed and ready to use."
+  echo ""
+  echo "Head to https://YOUR_HOST_IP/ to access the WebUI"
+  echo ""
+  echo "Don't forget to dive into our documentation! Here are some resources"
+  echo "for you:"
+  echo ""
+  echo "* Documentation  - https://docs.stackstorm.com"
+  echo "* Knowledge Base - https://stackstorm.reamaze.com"
+  echo ""
+  echo "Thanks for installing StackStorm! Come visit us in our Slack Channel"
+  echo "and tell us how it's going. We'd love to hear from you!"
+  echo "http://stackstorm.com/community-signup"
 }
 
 
