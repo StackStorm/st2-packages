@@ -2,6 +2,22 @@
 
 set -eu
 
+check_libffi_devel() {
+  install_libffi_devel=$(sudo yum install -y libffi-devel || true)
+  is_libffi_devel_available=$(echo $install_libffi_devel | grep "No package libffi-devel" || true)
+
+  if [[ ! -z "$is_libffi_devel_available" ]]; then
+    echo "Your box doesn't seem to have libffi-devel available to install. This installer"
+    echo "requires libffi-devel to be available. To proceed, hand install libffi-devel"
+    echo "version corresponding to libffi on the box. You can get the libffi version via"
+    echo "   rpm -qa | grep libffi  "
+    echo "Installer will now abort. Contact support for questions or see docs"
+    echo "   https://docs.stackstorm.com/install/rhel6.html!"
+    echo "Alternatively, you can use CentOS 6 for evaluation."
+    exit 2
+  fi
+}
+
 # Note that default SELINUX policies for RHEL7 differ with CentOS7. CentOS7 is more permissive by default
 # Note that depending on distro assembly/settings you may need more rules to change
 # Apply these changes OR disable selinux in /etc/selinux/config (manually)
@@ -117,7 +133,14 @@ verify_st2() {
 }
 
 install_st2mistral_depdendencies() {
-  sudo yum -y localinstall http://yum.postgresql.org/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-1.noarch.rpm
+  if grep -q "CentOS" /etc/redhat-release; then
+      sudo yum -y localinstall http://yum.postgresql.org/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-2.noarch.rpm
+  fi
+
+  if grep -q "Red Hat" /etc/redhat-release; then
+      sudo yum -y localinstall http://yum.postgresql.org/9.4/redhat/rhel-6-x86_64/pgdg-redhat94-9.4-2.noarch.rpm
+  fi
+
   sudo yum -y install postgresql94-server postgresql94-contrib postgresql94-devel
 
   # Setup postgresql at a first time
@@ -196,7 +219,8 @@ ok_message() {
 }
 
 trap 'fail' EXIT
-STEP='adjust_selinux_policies' && adjust_selinux_policies
+STEP='Check libffi-devel availability' && check_libffi_devel
+STEP='Adjust SELinux policies' && adjust_selinux_policies
 
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2" && install_st2
