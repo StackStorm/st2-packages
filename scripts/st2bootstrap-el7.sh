@@ -29,6 +29,7 @@ install_st2_dependencies() {
   sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
   sudo yum -y install curl mongodb-server rabbitmq-server
   sudo systemctl start mongod rabbitmq-server
+  sudo systemctl enable mongod rabbitmq-server
 }
 
 install_st2() {
@@ -114,6 +115,7 @@ install_st2mistral_depdendencies() {
 
   # Start PostgreSQL service
   sudo systemctl start postgresql
+  sudo systemctl enable postgresql
 
   cat << EHD | sudo -u postgres psql
 CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD 'StackStorm';
@@ -151,6 +153,7 @@ install_st2web() {
   sudo sed -i 's/default_server//g' /etc/nginx/nginx.conf
 
   sudo systemctl restart nginx
+  sudo systemctl enable nginx
 }
 
 ok_message() {

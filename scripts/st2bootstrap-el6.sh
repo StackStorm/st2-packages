@@ -30,6 +30,8 @@ install_st2_dependencies() {
   sudo yum -y install curl mongodb-server rabbitmq-server
   sudo service mongod start
   sudo service rabbitmq-server start
+  sudo chkconfig mongod on
+  sudo chkconfig rabbitmq-server on
 }
 
 install_st2() {
@@ -116,6 +118,7 @@ install_st2mistral_depdendencies() {
 
   # Start PostgreSQL service
   sudo service postgresql-9.4 start
+  sudo chkconfig postgresql-9.4 on
 
   cat << EHD | sudo -u postgres psql
 CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD 'StackStorm';
@@ -153,6 +156,7 @@ install_st2web() {
   sudo sed -i 's/default_server//g' /etc/nginx/conf.d/default.conf
 
   sudo service nginx start
+  sudo chkconfig nginx on
 }
 
 ok_message() {
