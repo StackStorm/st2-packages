@@ -6,12 +6,20 @@ set -eu
 # Note that depending on distro assembly/settings you may need more rules to change
 # Apply these changes OR disable selinux in /etc/selinux/config (manually)
 adjust_selinux_policies() {
-  if getenforce | grep -q 'Enforcing'; then
+  is_enforcing=$(getenforce)
+  if [ "$is_enforcing" = "Enforcing" ]; then
     # SELINUX management tools, not available for some minimal installations
     sudo yum install -y policycoreutils-python
 
     # Allow rabbitmq to use '25672' port, otherwise it will fail to start
-    sudo semanage port --list | grep -q 25672 || sudo semanage port -a -t amqp_port_t -p tcp 25672
+    # Note grep -q like we use in EL7 script breaks on RHEL6 with broken pipe because
+    # of weird interaction issue between semanage and grep. This behavior is not same
+    # in some CentOS 6 boxes where semanage port --list | grep -q ${PORT} works fine. So
+    # use this workaround unless you validate -q really works on RHEL 6.
+    ret=$(sudo semanage port --list | grep 25672 || true)
+    if [ -z "$ret" ]; then
+      sudo semanage port -a -t amqp_port_t -p tcp 25672
+    fi
 
     # Allow network access for nginx
     sudo setsebool -P httpd_can_network_connect 1
@@ -26,7 +34,10 @@ fail() {
 }
 
 install_st2_dependencies() {
-  sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+  is_epel_installed=$(rpm -qa | grep epel-release || true)
+  if [[ -z "$is_epel_installed" ]]; then
+    sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+  fi
   sudo yum -y install curl mongodb-server rabbitmq-server
   sudo service mongod start
   sudo service rabbitmq-server start
