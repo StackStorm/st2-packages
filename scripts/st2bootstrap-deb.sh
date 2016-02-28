@@ -35,13 +35,13 @@ configure_st2_user () {
   #sudo cp ${KEY_LOCATION}/stanley_rsa.pub /home/stanley/.ssh/stanley_rsa.pub
 
   # Authorize key-base acces
-  sudo cat /home/stanley/.ssh/stanley_rsa.pub | sudo tee -a /home/stanley/.ssh/authorized_keys
+  sudo sh -c 'cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys'
   sudo chmod 0600 /home/stanley/.ssh/authorized_keys
   sudo chmod 0700 /home/stanley/.ssh
   sudo chown -R stanley:stanley /home/stanley
 
   # Enable passwordless sudo
-  sudo echo "stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL" | sudo tee -a /etc/sudoers.d/st2
+  sudo sh -c 'echo "stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL" >> /etc/sudoers.d/st2'
   sudo chmod 0440 /etc/sudoers.d/st2
 
   ##### NOTE STILL NEED ADJUST CONFIGURATION FOR ST2 USER SECTION #####
