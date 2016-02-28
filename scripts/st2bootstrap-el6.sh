@@ -6,12 +6,20 @@ set -eu
 # Note that depending on distro assembly/settings you may need more rules to change
 # Apply these changes OR disable selinux in /etc/selinux/config (manually)
 adjust_selinux_policies() {
-  if getenforce | grep -q 'Enforcing'; then
+  is_enforcing=$(getenforce)
+  if [ "$is_enforcing" = "Enforcing" ]; then
     # SELINUX management tools, not available for some minimal installations
     sudo yum install -y policycoreutils-python
 
     # Allow rabbitmq to use '25672' port, otherwise it will fail to start
-    sudo semanage port --list | grep -q 25672 || sudo semanage port -a -t amqp_port_t -p tcp 25672
+    # Note grep -q like we use in EL7 script breaks on RHEL6 with broken pipe because
+    # of weird interaction issue between semanage and grep. This behavior is not same
+    # in some CentOS 6 boxes where semanage port --list | grep -q ${PORT} works fine. So
+    # use this workaround unless you validate -q really works on RHEL 6.
+    ret=$(sudo semanage port --list | grep 25672 || true)
+    if [ -z "$ret" ]; then
+      sudo semanage port -a -t amqp_port_t -p tcp 25672
+    fi
 
     # Allow network access for nginx
     sudo setsebool -P httpd_can_network_connect 1
@@ -28,11 +36,13 @@ fail() {
 install_st2_dependencies() {
   is_epel_installed=$(rpm -qa | grep epel-release || true)
   if [[ -z "$is_epel_installed" ]]; then
-    sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
   fi
   sudo yum -y install curl mongodb-server rabbitmq-server
-  sudo systemctl start mongod rabbitmq-server
-  sudo systemctl enable mongod rabbitmq-server
+  sudo service mongod start
+  sudo service rabbitmq-server start
+  sudo chkconfig mongod on
+  sudo chkconfig rabbitmq-server on
 }
 
 install_st2() {
@@ -72,7 +82,7 @@ configure_st2_authentication() {
   sudo yum -y install httpd-tools crudini
 
   # Create a user record in a password file.
-  echo "Ch@ngeMe" | sudo htpasswd -i /etc/st2/htpasswd test
+  sudo htpasswd -bs /etc/st2/htpasswd test Ch@ngeMe
 
   # Configure [auth] section in st2.conf
   sudo crudini --set /etc/st2/st2.conf auth enable 'True'
@@ -107,18 +117,19 @@ verify_st2() {
 }
 
 install_st2mistral_depdendencies() {
-  sudo yum -y install postgresql-server postgresql-contrib postgresql-devel
+  sudo yum -y localinstall http://yum.postgresql.org/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-1.noarch.rpm
+  sudo yum -y install postgresql94-server postgresql94-contrib postgresql94-devel
 
   # Setup postgresql at a first time
-  sudo postgresql-setup initdb
+  sudo service postgresql-9.4 initdb
 
   # Make localhost connections to use an MD5-encrypted password for authentication
-  sudo sed -i "s/\(host.*all.*all.*127.0.0.1\/32.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
-  sudo sed -i "s/\(host.*all.*all.*::1\/128.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
+  sudo sed -i "s/\(host.*all.*all.*127.0.0.1\/32.*\)ident/\1md5/" /var/lib/pgsql/9.4/data/pg_hba.conf
+  sudo sed -i "s/\(host.*all.*all.*::1\/128.*\)ident/\1md5/" /var/lib/pgsql/9.4/data/pg_hba.conf
 
   # Start PostgreSQL service
-  sudo systemctl start postgresql
-  sudo systemctl enable postgresql
+  sudo service postgresql-9.4 start
+  sudo chkconfig postgresql-9.4 on
 
   cat << EHD | sudo -u postgres psql
 CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD 'StackStorm';
@@ -136,7 +147,7 @@ install_st2mistral() {
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
 
   # start mistral
-  sudo systemctl start mistral
+  sudo service mistral start
 }
 
 install_st2web() {
@@ -152,11 +163,11 @@ install_st2web() {
   # Copy and enable StackStorm's supplied config file
   sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
 
-  # Disable default_server configuration in existing /etc/nginx/nginx.conf
-  sudo sed -i 's/default_server//g' /etc/nginx/nginx.conf
+  # Disable default_server configuration in existing /etc/nginx/conf.d/default.conf
+  sudo sed -i 's/default_server//g' /etc/nginx/conf.d/default.conf
 
-  sudo systemctl restart nginx
-  sudo systemctl enable nginx
+  sudo service nginx start
+  sudo chkconfig nginx on
 }
 
 ok_message() {
