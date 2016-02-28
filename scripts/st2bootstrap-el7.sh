@@ -26,7 +26,10 @@ fail() {
 }
 
 install_st2_dependencies() {
-  sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  is_epel_installed=$(rpm -qa | grep epel-release || true)
+  if [[ -z "$is_epel_installed" ]]; then
+    sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  fi
   sudo yum -y install curl mongodb-server rabbitmq-server
   sudo systemctl start mongod rabbitmq-server
   sudo systemctl enable mongod rabbitmq-server
