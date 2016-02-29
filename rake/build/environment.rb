@@ -7,7 +7,7 @@ require 'resolv'
 
 # St2 components which are part of the bundle package
 ST2_COMPONENTS = %w(
-  st2api st2actions st2common
+  st2api st2stream st2actions st2common
   st2auth st2client st2exporter
   st2reactor)
 
