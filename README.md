@@ -2,6 +2,7 @@
 
 [![Circle CI Build Status](https://circleci.com/gh/StackStorm/st2-packages/tree/master.svg?style=shield)](https://circleci.com/gh/StackStorm/st2-packages)
 [![Go to Docker Hub](https://img.shields.io/badge/Docker%20Hub-%E2%86%92-blue.svg)](https://hub.docker.com/r/stackstorm/)
+[![Download deb/rpm](https://img.shields.io/badge/Download-deb/rpm-blue.svg)](https://packagecloud.io/StackStorm/)
 
 
 ## Highlights
@@ -61,6 +62,14 @@ Once done, you are inside the testing environment where all services are up and 
 export TERM=xterm
 ```
 At this point you can do any manual testing which is required.
+
+
+# Installation
+Current community packages are hosted on https://packagecloud.io/StackStorm. For detailed instructions how install st2 and perform basic configuration follow the instructions bellow:
+- [Ubuntu/Debian](https://docs.stackstorm.com/install/deb.html)
+- [RHEL7/CentOS7](https://docs.stackstorm.com/install/rhel7.html)
+- [RHEL6/CentOS6](https://docs.stackstorm.com/install/rhel6.html)
+
 
 # License and Authors
 
