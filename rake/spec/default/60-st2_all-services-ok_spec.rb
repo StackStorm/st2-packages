@@ -82,6 +82,11 @@ describe 'st2 services' do
     it { should be_listening }
   end
 
+  describe 'st2stream', prompt_on_failure: true do
+    subject { port(9102) }
+    it { should be_listening }
+  end
+
   if spec[:mistral_enabled]
     describe 'mistral', prompt_on_failure: true do
       subject { port(8989) }
