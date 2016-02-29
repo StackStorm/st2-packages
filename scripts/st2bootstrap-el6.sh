@@ -8,10 +8,10 @@ message=$(cat <<EHD
 No repository containing libffi-devel package has been located!
 Setup "server-optional" repository following instructions
 https://access.redhat.com/solutions/265523. After adding the repository using
-your preffered method (subscription or yum-utils) please re-run this script!
+your preferred method (subscription or yum-utils) please re-run this script!
 
-If you still have questions please contact the support or also you can try
-to use CentOS 6 platform if it's suitable for you.
+If you still have questions, please contact support. Alternatively, you can use
+CentOS 6 for evaluation.
 EHD
 )
   yum list libffi-devel 1>/dev/null 2>&1 || no_libffi_devel=$?
