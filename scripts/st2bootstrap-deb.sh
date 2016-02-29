@@ -2,11 +2,65 @@
 
 set -eu
 
+REPO_TYPE='production'
+RELEASE='stable'
+
+APTGET_SUFFIX=''
+VERSION=''
+# XXX: Set this to '' when production becomes the shipping repo.
+STAGING=1
+
 fail() {
   echo "############### ERROR ###############"
   echo "# Failed on step - $STEP #"
   echo "#####################################"
   exit 2
+}
+
+setup_args() {
+  for i in "$@"
+    do
+      case $i in
+          -V=*|--version=*)
+          VERSION="${i#*=}"
+          shift
+          ;;
+          -s=*|--stable)
+        RELEASE=stable
+          shift
+          ;;
+          -u=*|--unstable)
+        RELEASE=unstable
+          shift
+          ;;
+          --staging)
+        STAGING=1
+        shift
+        ;;
+          *)
+                  # unknown option
+          ;;
+      esac
+    done
+
+  if [ "$STAGING" != '' ];
+    then
+      REPO_TYPE='staging'
+      echo "########################################################"
+      echo "#    Installing st2 components from STAGING repo.      #"
+      echo "########################################################"
+      echo ""
+      echo ""
+  fi
+
+  if [ "$VERSION" != '' ];
+    then
+      APTGET_SUFFIX="=${VERSION}"
+  fi
+
+  echo "########################################################"
+  echo "#           Installing st2 $RELEASE $VERSION                 #" # left spaces intentionally
+  echo "########################################################"
 }
 
 install_st2_dependencies() {
@@ -16,8 +70,8 @@ install_st2_dependencies() {
 
 install_st2() {
   # Following script adds a repo file, registers gpg key and runs apt-get update
-  curl -s https://packagecloud.io/install/repositories/StackStorm/staging-stable/script.deb.sh | sudo bash
-  sudo apt-get install -y st2
+  curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_TYPE}-${RELEASE}/script.deb.sh | sudo bash
+  sudo apt-get install -y st2${APTGET_SUFFIX}
   sudo st2ctl reload
   sudo st2ctl start
 }
@@ -73,7 +127,7 @@ EHD
 
 install_st2mistral() {
   # install mistral
-  sudo apt-get install -y st2mistral
+  sudo apt-get install -y st2mistral${APTGET_SUFFIX}
 
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
@@ -83,7 +137,7 @@ install_st2mistral() {
 
 install_st2web() {
   # Install st2web and nginx
-  sudo apt-get install -y st2web nginx
+  sudo apt-get install -y st2web${APTGET_SUFFIX} nginx
 
   # Generate self-signed certificate or place your existing certificate under /etc/ssl/st2
   sudo mkdir -p /etc/ssl/st2
@@ -152,6 +206,7 @@ ok_message() {
 ## Let's do this!
 
 trap 'fail' EXIT
+STEP="Setup args" && setup_args $@
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
