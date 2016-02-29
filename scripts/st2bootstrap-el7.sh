@@ -185,7 +185,7 @@ ok_message() {
 }
 
 trap 'fail' EXIT
-STEP='adjust_selinux_policies' && adjust_selinux_policies
+STEP='Adjust SELinux policies' && adjust_selinux_policies
 
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2" && install_st2
