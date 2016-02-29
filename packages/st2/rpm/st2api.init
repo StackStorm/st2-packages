@@ -23,7 +23,7 @@
 DESC="st2api"
 NAME=st2api
 DAEMON=/opt/stackstorm/st2/bin/gunicorn_pecan
-DAEMON_ARGS="-k sync -b 127.0.0.1:9101 --workers 1 --threads 1 --graceful-timeout 10 --timeout 30"
+DAEMON_ARGS="-k sync -b 127.0.0.1:9101 --workers 2 --threads 1 --graceful-timeout 10 --timeout 30"
 PIDFILE=/var/run/$NAME.pid
 RUNAS_USER="st2"
 RUNAS_GROUP="st2"
