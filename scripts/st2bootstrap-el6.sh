@@ -27,16 +27,6 @@ adjust_selinux_policies() {
     # SELINUX management tools, not available for some minimal installations
     sudo yum install -y policycoreutils-python
 
-    # Allow rabbitmq to use '25672' port, otherwise it will fail to start
-    # Note grep -q like we use in EL7 script breaks on RHEL6 with broken pipe because
-    # of weird interaction issue between semanage and grep. This behavior is not same
-    # in some CentOS 6 boxes where semanage port --list | grep -q ${PORT} works fine. So
-    # use this workaround unless you validate -q really works on RHEL 6.
-    ret=$(sudo semanage port --list | grep 25672 || true)
-    if [ -z "$ret" ]; then
-      sudo semanage port -a -t amqp_port_t -p tcp 25672
-    fi
-
     # Allow network access for nginx
     sudo setsebool -P httpd_can_network_connect 1
   fi
