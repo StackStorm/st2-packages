@@ -48,14 +48,25 @@ ST2PKG_VERSION=$(fetch_version)
 # for Bintray
 #ST2PKG_RELEASE=$(.circle/bintray.sh next-revision ${DISTRO}_staging ${ST2PKG_VERSION} st2)
 # for PackageCloud
-ST2PKG_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${ST2PKG_VERSION} st2)
+if [ -z "$CIRCLE_PR_REPONAME" ]; then
+  ST2PKG_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${ST2PKG_VERSION} st2)
+else
+  # is fork
+  ST2PKG_RELEASE=1
+fi
+
 
 # Mistral versioning
 # Nasty hack until CI for Mistral is done: https://github.com/StackStorm/st2-packages/issues/82
 ST2MISTRAL_GITURL=${ST2MISTRAL_GITURL:-https://github.com/StackStorm/mistral}
 ST2MISTRAL_GITREV=${ST2MISTRAL_GITREV:-st2-1.3.2}
 MISTRAL_VERSION=${MISTRAL_VERSION:-1.3.2}
-MISTRAL_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${MISTRAL_VERSION} st2mistral)
+if [ -z "$CIRCLE_PR_REPONAME" ]; then
+  MISTRAL_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${MISTRAL_VERSION} st2mistral)
+else
+  # is fork
+  MISTRAL_RELEASE=1
+fi
 
 
 re="\\b$DISTRO\\b"
