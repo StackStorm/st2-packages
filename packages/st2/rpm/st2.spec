@@ -30,7 +30,7 @@ Conflicts: st2common
 %install
   %default_install
   %pip_install_venv
-  %service_install st2actionrunner %{worker_name} st2api st2auth st2notifier
+  %service_install st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
   %service_install st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
   make post_install DESTDIR=%{?buildroot}
   %cleanup_python_abspath
@@ -52,15 +52,15 @@ Conflicts: st2common
   exit 0
 
 %post
-  %service_post st2actionrunner %{worker_name} st2api st2auth st2notifier
+  %service_post st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
   %service_post st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
 
 %preun
-  %service_preun st2actionrunner %{worker_name} st2api st2auth st2notifier
+  %service_preun st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
   %service_preun st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
 
 %postun
-  %service_postun st2actionrunner %{worker_name} st2api st2auth st2notifier
+  %service_postun st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
   %service_postun st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
   # rpm has no purge option, so we leave this file
   [ -f /etc/logrotate.d/st2 ] && mv -f /etc/logrotate.d/st2 /etc/logrotate.d/st2.disabled
@@ -84,6 +84,7 @@ Conflicts: st2common
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
   %{_unitdir}/st2api.service
+  %{_unitdir}/st2stream.service
   %{_unitdir}/st2auth.service
   %{_unitdir}/st2notifier.service
   %{_unitdir}/st2resultstracker.service
@@ -94,6 +95,7 @@ Conflicts: st2common
   %{_sysconfdir}/rc.d/init.d/st2actionrunner
   %{_sysconfdir}/rc.d/init.d/%{worker_name}
   %{_sysconfdir}/rc.d/init.d/st2api
+  %{_sysconfdir}/rc.d/init.d/st2stream
   %{_sysconfdir}/rc.d/init.d/st2auth
   %{_sysconfdir}/rc.d/init.d/st2notifier
   %{_sysconfdir}/rc.d/init.d/st2resultstracker
