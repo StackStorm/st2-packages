@@ -4,7 +4,7 @@ set -eu
 
 REPO_TYPE='staging' # XXX: Set this to 'production' when production becomes the shipping repo.
 RELEASE='stable'
-VERSION=''  # Should be major.minor.patch XXX: Add some regex validation.
+VERSION=''  # Should be major.minor.patch or major.minordev. E.g. 1.3.2 or 1.4dev.
 
 # Private variables
 BETA=1 # XXX: Remove this and other usages when production becomes the shipping repo
@@ -45,17 +45,23 @@ setup_args() {
       esac
     done
 
-  # XXX: Can't get this to work.
-  # if ! [[ "$VERSION" =~ ^[0-9]+\\.[0-9]+\\dev ]] || ! [[ "$VERSION" =~ ^[0-9]+\\.[0-9]+\\.[0-9]+\ ]]; then
-  #   echo "$VERSION does not match supported formats x.y.z or x.ydev"
-  #   exit 2
-  # fi
+  if [[ "$RELEASE" == "unstable" ]]; then
+    echo "This script does not support installing from unstable sources!"
+    # XXX: Fix this when st2mistral unstable sources become available!
+    exit 1
+  fi
 
-  # XXX: Can't get this to work either
-  # if [[ "$VERSION" =~ ^[0-9]+\\.[0-9]+\dev ]]; then
-  #  echo "You're requesting a dev version! Switching to unstable!"
-  #  RELEASE='unstable'
-  # fi
+  if [[ "$VERSION" != '' ]]; then
+    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+      echo "$VERSION does not match supported formats x.y.z or x.ydev"
+      exit 1
+    fi
+
+    if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+     echo "You're requesting a dev version! Switching to unstable!"
+     RELEASE='unstable'
+    fi
+  fi
 
   echo "########################################################"
   echo "          Installing st2 $RELEASE $VERSION              "
@@ -74,28 +80,28 @@ install_st2_dependencies() {
   sudo apt-get install -y curl mongodb-server rabbitmq-server
 }
 
-get_full_pkg_version() {
+get_full_pkg_versions() {
   if [ "$VERSION" != '' ];
   then
     local ST2_VER=$(apt-cache show st2 | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
     if [ -z "$ST2_VER" ]; then
       echo "Could not find requested version of st2!!!"
       sudo apt-cache policy st2
-      exit 2
+      exit 3
     fi
 
     local ST2MISTRAL_VER=$(apt-cache show st2mistral | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
     if [ -z "$ST2MISTRAL_VER" ]; then
       echo "Could not find requested version of st2mistral!!!"
       sudo apt-cache policy st2mistral
-      exit 2
+      exit 3
     fi
 
     local ST2WEB_VER=$(apt-cache show st2web | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
     if [ -z "$ST2WEB_VER" ]; then
       echo "Could not find requested version of st2web."
       sudo apt-cache policy st2web
-      exit 2
+      exit 3
     fi
     ST2_PKG_VERSION="=${ST2_VER}"
     ST2MISTRAL_PKG_VERSION="=${ST2MISTRAL_VER}"
@@ -112,7 +118,7 @@ get_full_pkg_version() {
 install_st2() {
   # Following script adds a repo file, registers gpg key and runs apt-get update
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_TYPE}-${RELEASE}/script.deb.sh | sudo bash
-  STEP="get_full_pkg_version" && get_full_pkg_version
+  STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
   sudo apt-get install -y st2${ST2_PKG_VERSION}
   sudo st2ctl reload
   sudo st2ctl start
