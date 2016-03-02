@@ -18,8 +18,6 @@ EHD
   if [ ! -z "$no_libffi_devel" ]; then
     echo "$message"
     exit 2
-  else
-    sudo yum install -y libffi-devel
   fi
 }
 
