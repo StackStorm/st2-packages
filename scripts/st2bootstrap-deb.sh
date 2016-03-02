@@ -79,6 +79,10 @@ install_st2mistral() {
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
   # Register mistral actions
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
+  
+  # Start Mistral
+  sudo service mistral-server start
+  sudo service mistral-api start
 }
 
 install_st2web() {
