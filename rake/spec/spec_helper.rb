@@ -37,7 +37,7 @@ class ST2Spec
     postgreshost: pipeopts.postgreshost,
     mongodbhost:  pipeopts.mongodbhost,
     # NB!!! We shouldn't change circle.yml for every branch of `st2`! Hardcode value here so it will work for all tests consistently!
-    wait_for_start: ENV['ST2_WAITFORSTART'].to_s != '' ? ENV['ST2_WAITFORSTART'].to_i : 7,
+    wait_for_start: ENV['ST2_WAITFORSTART'].to_s != '' ? ENV['ST2_WAITFORSTART'].to_i : 12,
     loglines_to_show: 20,
     logdest_pattern: {
       st2actionrunner: 'st2actionrunner.{pid}'
