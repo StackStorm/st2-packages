@@ -3,17 +3,20 @@
 set -eu
 
 check_libffi_devel() {
-  install_libffi_devel=$(sudo yum install -y libffi-devel || true)
-  is_libffi_devel_available=$(echo $install_libffi_devel | grep "No package libffi-devel" || true)
+  local message= no_libffi_devel=
+message=$(cat <<EHD
+No repository containing libffi-devel package has been located!
+Setup "server-optional" repository following instructions
+https://access.redhat.com/solutions/265523. After adding the repository using
+your preferred method (subscription or yum-utils) please re-run this script!
 
-  if [[ ! -z "$is_libffi_devel_available" ]]; then
-    echo "Your box doesn't seem to have libffi-devel available to install. This installer"
-    echo "requires libffi-devel to be available. To proceed, hand install libffi-devel"
-    echo "version corresponding to libffi on the box. You can get the libffi version via"
-    echo "   rpm -qa | grep libffi  "
-    echo "Installer will now abort. Contact support for questions or see docs"
-    echo "   https://docs.stackstorm.com/install/rhel6.html!"
-    echo "Alternatively, you can use CentOS 6 for evaluation."
+If you still have questions, please contact support. Alternatively, you can use
+CentOS 6 for evaluation.
+EHD
+)
+  yum list libffi-devel 1>/dev/null 2>&1 || no_libffi_devel=$?
+  if [ ! -z "$no_libffi_devel" ]; then
+    echo "$message"
     exit 2
   fi
 }

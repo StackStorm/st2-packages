@@ -44,3 +44,6 @@ override_dh_virtualenv:
 	# querying pypi and rely only on --find-links.
 	dh_virtualenv --extra-pip-arg '--find-links=$(WHEELDIR)' \
 								--extra-pip-arg '--no-index' --no-test
+
+override_dh_compress:
+	dh_compress -X.conf
