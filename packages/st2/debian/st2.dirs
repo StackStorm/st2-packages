@@ -1,4 +1,5 @@
 /etc/logrotate.d
 /etc/st2
 /opt/stackstorm/exports
+/opt/stackstorm/virtualenvs
 /var/log/st2
