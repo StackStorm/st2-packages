@@ -1,12 +1,12 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          st2api
+# Provides:          st2stream
 # Required-Start:    $local_fs $network $remote_fs $syslog
 # Required-Stop:     $local_fs $network $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: StackStorm st2api
-# Description:       Debain sysvinit for st2api.
+# Short-Description: StackStorm st2stream
+# Description:       Debain sysvinit for st2stream.
 #
 ### END INIT INFO
 
@@ -16,10 +16,10 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="st2api"
-NAME=st2api
+DESC="st2stream"
+NAME=st2stream
 DAEMON=/opt/stackstorm/st2/bin/gunicorn_pecan
-DAEMON_ARGS="-k sync -b 127.0.0.1:9101 --workers 2 --threads 1 --graceful-timeout 10 --timeout 30"
+DAEMON_ARGS="-k eventlet -b 127.0.0.1:9102 --workers 1 --threads 10 --graceful-timeout 10 --timeout 30"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 RUNAS_USER="st2"
@@ -31,7 +31,7 @@ UMASK=022
 
 # Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
-DAEMON_ARGS="/opt/stackstorm/st2/lib/python2.7/site-packages/st2api/gunicorn_config.py ${DAEMON_ARGS}"
+DAEMON_ARGS="/opt/stackstorm/st2/lib/python2.7/site-packages/st2stream/gunicorn_config.py ${DAEMON_ARGS}"
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh

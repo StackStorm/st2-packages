@@ -1,18 +1,18 @@
 #!/bin/sh
 #
 ### BEGIN INIT INFO
-# Provides: st2api
+# Provides: st2stream
 # Required-Start: $local_fs $network $named $remote_fs $syslog
 # Required-Stop: $local_fs $network $named $remote_fs $syslog
-# Short-Description: st2api component
-# Description: St2Api - StackStorm service st2api
+# Short-Description: st2stream component
+# Description: St2Api - StackStorm service st2stream
 ### END INIT INFO
 
-# st2api     This shell script takes care of starting and stopping
-#             st2api daemon.
+# st2stream     This shell script takes care of starting and stopping
+#             st2stream daemon.
 # chkconfig: - 85 15
-# description: St2Api - StackStorm service st2api
-# processname: st2api
+# description: St2Api - StackStorm service st2stream
+# processname: st2stream
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -20,10 +20,10 @@
 # Source networking configuration.
 . /etc/sysconfig/network
 
-DESC="st2api"
-NAME=st2api
+DESC="st2stream"
+NAME=st2stream
 DAEMON=/opt/stackstorm/st2/bin/gunicorn_pecan
-DAEMON_ARGS="-k sync -b 127.0.0.1:9101 --workers 2 --threads 1 --graceful-timeout 10 --timeout 30"
+DAEMON_ARGS="-k eventlet -b 127.0.0.1:9102 --workers 1 --threads 10 --graceful-timeout 10 --timeout 30"
 PIDFILE=/var/run/$NAME.pid
 RUNAS_USER="st2"
 RUNAS_GROUP="st2"
@@ -35,7 +35,7 @@ lockfile=/var/lock/subsys/$NAME
 
 # Read configuration variable file if it is present
 [ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
-DAEMON_ARGS="/opt/stackstorm/st2/lib/python2.7/site-packages/st2api/gunicorn_config.py ${DAEMON_ARGS}"
+DAEMON_ARGS="/opt/stackstorm/st2/lib/python2.7/site-packages/st2stream/gunicorn_config.py ${DAEMON_ARGS}"
 
 
 # Resemble redhatish daemon behaviour but with group and user available

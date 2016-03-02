@@ -27,6 +27,7 @@ override_dh_installinit:
 	dh_installinit --no-start --name=st2actionrunner-worker
 	dh_installinit --no-start --name=st2actionrunner
 	dh_installinit --no-start --name=st2api
+	dh_installinit --no-start --name=st2stream
 	dh_installinit --no-start --name=st2auth
 	dh_installinit --no-start --name=st2notifier
 	dh_installinit --no-start --name=st2resultstracker
@@ -43,3 +44,6 @@ override_dh_virtualenv:
 	# querying pypi and rely only on --find-links.
 	dh_virtualenv --extra-pip-arg '--find-links=$(WHEELDIR)' \
 								--extra-pip-arg '--no-index' --no-test
+
+override_dh_compress:
+	dh_compress -X.conf

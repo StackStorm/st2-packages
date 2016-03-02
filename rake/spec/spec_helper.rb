@@ -24,7 +24,7 @@ class ST2Spec
   extend Pipeline::Options
   instance_eval(File.read('rake/build/environment.rb'))
 
-  ST2_SERVICES = %w(st2api st2auth st2actionrunner st2notifier
+  ST2_SERVICES = %w(st2api st2stream st2auth st2actionrunner st2notifier
                     st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector)
 
   SPECCONF = {
@@ -37,7 +37,7 @@ class ST2Spec
     postgreshost: pipeopts.postgreshost,
     mongodbhost:  pipeopts.mongodbhost,
     # NB!!! We shouldn't change circle.yml for every branch of `st2`! Hardcode value here so it will work for all tests consistently!
-    wait_for_start: ENV['ST2_WAITFORSTART'].to_s != '' ? ENV['ST2_WAITFORSTART'].to_i : 7,
+    wait_for_start: ENV['ST2_WAITFORSTART'].to_s != '' ? ENV['ST2_WAITFORSTART'].to_i : 12,
     loglines_to_show: 20,
     logdest_pattern: {
       st2actionrunner: 'st2actionrunner.{pid}'
@@ -57,7 +57,7 @@ class ST2Spec
     package_has_services: {
       st2actions: %w(st2actionrunner st2notifier st2resultstracker),
       st2reactor: %w(st2rulesengine st2sensorcontainer st2garbagecollector),
-      st2: %w(st2api st2auth st2actionrunner st2notifier
+      st2: %w(st2api st2stream st2auth st2actionrunner st2notifier
                      st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector),
       mistral: [
         ['mistral', binary_name: 'mistral-server']
