@@ -2,6 +2,12 @@
 
 set -eu
 
+USERNAME='test'
+PASSWORD='Ch@ngeMe'
+
+HUBOT_ADAPTER='slack'
+HUBOT_SLACK_TOKEN='' # XXX: Change me please!
+
 check_libffi_devel() {
   local message= no_libffi_devel=
 message=$(cat <<EHD
@@ -91,7 +97,7 @@ configure_st2_authentication() {
   sudo yum -y install httpd-tools crudini
 
   # Create a user record in a password file.
-  sudo htpasswd -bs /etc/st2/htpasswd test Ch@ngeMe
+  sudo htpasswd -bs /etc/st2/htpasswd $USERNAME $PASSWORD
 
   # Configure [auth] section in st2.conf
   sudo crudini --set /etc/st2/st2.conf auth enable 'True'
@@ -105,9 +111,9 @@ verify_st2() {
   st2 --version
   st2 -h
 
-  st2 auth test -p Ch@ngeMe
+  st2 auth $USERNAME -p $PASSWORD
   # A shortcut to authenticate and export the token
-  export ST2_AUTH_TOKEN=$(st2 auth test -p Ch@ngeMe -t)
+  export ST2_AUTH_TOKEN=$(st2 auth $USERNAME -p $PASSWORD -t)
 
   # List the actions from a 'core' pack
   st2 action list --pack=core
@@ -186,6 +192,44 @@ install_st2web() {
   sudo chkconfig nginx on
 }
 
+install_st2chatops() {
+  # Install Node
+  curl -sL https://rpm.nodesource.com/setup_4.x | sudo -E bash -
+  sudo yum install -y nodejs
+
+  # Install st2chatops
+  sudo yum install -y st2chatops
+}
+
+configure_st2chatops() {
+  # Set credentials
+  sudo sed -i.bak -r "s/^(export ST2_AUTH_USERNAME.).*/\1$USERNAME/" /opt/stackstorm/chatops/st2chatops.env
+  sudo sed -i.bak -r "s/^(export ST2_AUTH_PASSWORD.).*/\1$PASSWORD/" /opt/stackstorm/chatops/st2chatops.env
+
+  # Setup adapter
+  if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
+  then
+    sudo sed -i.bak -r "s/^(export HUBOT_ADAPTER.).*/\1$HUBOT_ADAPTER/" /opt/stackstorm/chatops/st2chatops.env
+    sudo sed -i.bak -r "s/^(export HUBOT_SLACK_TOKEN.).*/\1$HUBOT_SLACK_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
+
+    sudo service st2chatops restart
+    sudo chkconfig st2chatops on
+  else
+    echo "####################### WARNING ########################"
+    echo "######## Chatops requires manual configuration #########"
+    echo "Edit /opt/stackstorm/chatops/st2chatops.env to specify  "
+    echo "the adapter and settings hubot should use to connect to "
+    echo "the chat you're using. Don't forget to start the service"
+    echo "afterwards:"
+    echo ""
+    echo "  $ sudo service st2chatops restart"
+    echo ""
+    echo "For more information, please refer to documentation at  "
+    echo "https://docs.stackstorm.com/install/deb.html#setup-chatops"
+    echo "########################################################"
+  fi
+}
+
 ok_message() {
   echo ""
   echo ""
@@ -225,6 +269,8 @@ STEP="Install mistral dependencies" && install_st2mistral_depdendencies
 STEP="Install mistral" && install_st2mistral
 
 STEP="Install st2web" && install_st2web
+STEP="Install st2chatops" && install_st2chatops
+STEP="Configure st2chatops" && configure_st2chatops
 trap - EXIT
 
 ok_message
