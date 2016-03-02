@@ -5,8 +5,8 @@ set -eu
 USERNAME='test'
 PASSWORD='Ch@ngeMe'
 
-# HUBOT_ADAPTER='slack'
-# HUBOT_SLACK_TOKEN='xoxb-CHANGE-ME-PLEASE'
+HUBOT_ADAPTER='slack'
+HUBOT_SLACK_TOKEN='' # XXX: Change me please!
 
 fail() {
   echo "############### ERROR ###############"
@@ -106,7 +106,7 @@ install_st2web() {
   sudo service nginx restart
 }
 
-install_st2chatops {
+install_st2chatops() {
   # Install Node
   curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
   sudo apt-get install -y nodejs
@@ -115,13 +115,13 @@ install_st2chatops {
   sudo apt-get install -y st2chatops
 }
 
-configure_st2chatops {
+configure_st2chatops() {
   # Set credentials
   sudo sed -i.bak -r "s/^(export ST2_AUTH_USERNAME.).*/\1$USERNAME/" /opt/stackstorm/chatops/st2chatops.env
   sudo sed -i.bak -r "s/^(export ST2_AUTH_PASSWORD.).*/\1$PASSWORD/" /opt/stackstorm/chatops/st2chatops.env
 
   # Setup adapter
-  if [ "$HUBOT_ADAPTER" == "slack" ] && [ -z "$HUBOT_SLACK_TOKEN" ]
+  if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
   then
     sudo sed -i.bak -r "s/^(export HUBOT_ADAPTER.).*/\1$HUBOT_ADAPTER/" /opt/stackstorm/chatops/st2chatops.env
     sudo sed -i.bak -r "s/^(export HUBOT_SLACK_TOKEN.).*/\1$HUBOT_SLACK_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
