@@ -26,6 +26,9 @@ NAME=st2actionrunner
 DAEMON=/opt/stackstorm/st2/bin/$NAME
 DAEMON_ARGS="--config-file /etc/st2/st2.conf"
 PIDFILE=/var/run/$NAME-${WORKERID}.pid
+RUNAS_USER="root"
+RUNAS_GROUP="st2packs"
+UMASK=002
 
 lockfile=/var/lock/subsys/$NAME
 
@@ -40,6 +43,9 @@ if [ -z $WORKERID ]; then
   failure "Can't start this service directly, use /etc/init.d/st2actionrunner instead"
   exit 3
 fi
+
+# Set required umask
+umask $UMASK
 
 # Resemble redhatish daemon behaviour but with group and user available
 #
