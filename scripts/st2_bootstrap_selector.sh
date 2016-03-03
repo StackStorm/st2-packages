@@ -103,5 +103,3 @@ else
     echo "Running deployment script for St2 ${VERSION}..."
     bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE}
 fi
-
-echo "${ST2BOOTSTRAP}"
