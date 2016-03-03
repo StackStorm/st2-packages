@@ -70,8 +70,8 @@ Conflicts: st2common
   %{_datadir}/doc/st2
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/st2
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
-  %attr(775, root, %{packs_user}) /opt/stackstorm/packs/*
-  %attr(775, root, %{packs_user}) /opt/stackstorm/virtualenvs
+  %attr(775, root, %{packs_group}) /opt/stackstorm/packs/*
+  %attr(775, root, %{packs_group}) /opt/stackstorm/virtualenvs
 %if 0%{?use_systemd}
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
