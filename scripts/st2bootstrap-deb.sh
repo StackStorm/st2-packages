@@ -2,6 +2,16 @@
 
 set -eu
 
+REPO_TYPE='staging' # XXX: Set this to 'production' when production becomes the shipping repo.
+RELEASE='stable'
+VERSION=''  # Should be major.minor.patch or major.minordev. E.g. 1.3.2 or 1.4dev.
+
+# Private variables
+BETA=1 # XXX: Remove this and other usages when production becomes the shipping repo
+ST2_PKG_VERSION=''
+ST2MISTRAL_PKG_VERSION=''
+ST2WEB_PKG_VERSION=''
+
 fail() {
   echo "############### ERROR ###############"
   echo "# Failed on step - $STEP #"
@@ -9,15 +19,107 @@ fail() {
   exit 2
 }
 
+setup_args() {
+  for i in "$@"
+    do
+      case $i in
+          -V=*|--version=*)
+          VERSION="${i#*=}"
+          shift
+          ;;
+          -s=*|--stable)
+        RELEASE=stable
+          shift
+          ;;
+          -u=*|--unstable)
+        RELEASE=unstable
+          shift
+          ;;
+          --staging)
+        REPO_TYPE='staging'
+        shift
+        ;;
+          *)
+                  # unknown option
+          ;;
+      esac
+    done
+
+  if [[ "$RELEASE" == "unstable" ]]; then
+    echo "This script does not support installing from unstable sources!"
+    # XXX: Fix this when st2mistral unstable sources become available!
+    exit 1
+  fi
+
+  if [[ "$VERSION" != '' ]]; then
+    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+      echo "$VERSION does not match supported formats x.y.z or x.ydev"
+      exit 1
+    fi
+
+    if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+     echo "You're requesting a dev version! Switching to unstable!"
+     RELEASE='unstable'
+    fi
+  fi
+
+  echo "########################################################"
+  echo "          Installing st2 $RELEASE $VERSION              "
+  echo "########################################################"
+
+  if [[ -z "$BETA"  && "$REPO_TYPE"="staging" ]]; then
+    printf "\n\n"
+    echo "################################################################"
+    echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
+    echo "################################################################"
+  fi
+}
+
 install_st2_dependencies() {
   sudo apt-get update
   sudo apt-get install -y curl mongodb-server rabbitmq-server
 }
 
+get_full_pkg_versions() {
+  if [ "$VERSION" != '' ];
+  then
+    local ST2_VER=$(apt-cache show st2 | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    if [ -z "$ST2_VER" ]; then
+      echo "Could not find requested version of st2!!!"
+      sudo apt-cache policy st2
+      exit 3
+    fi
+
+    local ST2MISTRAL_VER=$(apt-cache show st2mistral | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    if [ -z "$ST2MISTRAL_VER" ]; then
+      echo "Could not find requested version of st2mistral!!!"
+      sudo apt-cache policy st2mistral
+      exit 3
+    fi
+
+    local ST2WEB_VER=$(apt-cache show st2web | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    if [ -z "$ST2WEB_VER" ]; then
+      echo "Could not find requested version of st2web."
+      sudo apt-cache policy st2web
+      exit 3
+    fi
+    ST2_PKG_VERSION="=${ST2_VER}"
+    ST2MISTRAL_PKG_VERSION="=${ST2MISTRAL_VER}"
+    ST2WEB_PKG_VERSION="=${ST2WEB_VER}"
+    echo "##########################################################"
+    echo "#### Following versions of packages will be installed ####"
+    echo "st2${ST2_PKG_VERSION}"
+    echo "st2mistral${ST2MISTRAL_PKG_VERSION}"
+    echo "st2web${ST2WEB_PKG_VERSION}"
+    echo "##########################################################"
+  fi
+}
+
 install_st2() {
   # Following script adds a repo file, registers gpg key and runs apt-get update
-  curl -s https://packagecloud.io/install/repositories/StackStorm/staging-stable/script.deb.sh | sudo bash
-  sudo apt-get install -y st2
+  curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_TYPE}-${RELEASE}/script.deb.sh | sudo bash
+  STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
+  sudo apt-get install -y st2${ST2_PKG_VERSION}
   sudo st2ctl reload
   sudo st2ctl start
 }
@@ -73,7 +175,7 @@ EHD
 
 install_st2mistral() {
   # install mistral
-  sudo apt-get install -y st2mistral
+  sudo apt-get install -y st2mistral${ST2MISTRAL_PKG_VERSION}
 
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
@@ -86,7 +188,7 @@ install_st2mistral() {
 
 install_st2web() {
   # Install st2web and nginx
-  sudo apt-get install -y st2web nginx
+  sudo apt-get install -y st2web${ST2WEB_PKG_VERSION} nginx
 
   # Generate self-signed certificate or place your existing certificate under /etc/ssl/st2
   sudo mkdir -p /etc/ssl/st2
@@ -155,6 +257,7 @@ ok_message() {
 ## Let's do this!
 
 trap 'fail' EXIT
+STEP="Setup args" && setup_args $@
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
