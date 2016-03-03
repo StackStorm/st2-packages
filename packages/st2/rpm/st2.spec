@@ -2,6 +2,7 @@
 %define venv_name st2
 %define svc_user st2
 %define stanley_user stanley
+%define packs_group st2packs
 #define epoch %(_epoch=`echo $ST2PKG_VERSION | grep -q dev || echo 1`; echo "${_epoch:-0}")
 
 %include ../rpmspec/st2pkg_toptags.spec
@@ -43,13 +44,7 @@ Conflicts: st2common
   rm -rf %{buildroot}
 
 %pre
-  # handle installation (not upgrade)
-  if [ $1 = 1 ]; then
-    [ -f /etc/logrotate.d/st2.disabled ] && mv -f /etc/logrotate.d/st2.disabled /etc/logrotate.d/st2
-  fi
-  adduser --no-create-home --system %{svc_user} 2>/dev/null
-  adduser --user-group %{stanley_user} 2>/dev/null
-  exit 0
+  %include rpm/preinst_script.spec
 
 %post
   %service_post st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
@@ -62,24 +57,21 @@ Conflicts: st2common
 %postun
   %service_postun st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
   %service_postun st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
-  # rpm has no purge option, so we leave this file
-  [ -f /etc/logrotate.d/st2 ] && mv -f /etc/logrotate.d/st2 /etc/logrotate.d/st2.disabled
-  exit 0
+  # Wipe out st2 logrotate config, since there's no analog of apt-get purge avaialable
+  [ ! -f /etc/logrotate.d/st2 ] || rm /etc/logrotate.d/st2
 
 %files
   %defattr(-,root,root,-)
+  /opt/stackstorm/%{venv_name}
   %{_bindir}/*
   %config(noreplace) %{_sysconfdir}/logrotate.d/st2
-  %config(noreplace) %attr(640, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
-  /opt/stackstorm/%{venv_name}
-  /opt/stackstorm/packs/core
-  /opt/stackstorm/packs/linux
-  /opt/stackstorm/packs/packs
-  /opt/stackstorm/packs/chatops
+  %config(noreplace) %attr(600, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
+  %config(noreplace) %{_sysconfdir}/st2/*
   %{_datadir}/doc/st2
   %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/st2
   %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
-  %config(noreplace) %{_sysconfdir}/st2/*
+  %attr(775, root, %{packs_user}) /opt/stackstorm/packs/*
+  %attr(775, root, %{packs_user}) /opt/stackstorm/virtualenvs
 %if 0%{?use_systemd}
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service

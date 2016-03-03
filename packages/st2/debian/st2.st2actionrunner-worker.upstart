@@ -2,11 +2,13 @@
 #
 
 description     "StackStorm actionrunner worker task"
- 
+
+setuid root
+setgid st2packs
 respawn
 respawn limit 2 5
 
-umask 022
+umask 002
 kill timeout 60
 
 instance $WORKERID

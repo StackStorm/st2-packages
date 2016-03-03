@@ -59,25 +59,8 @@ rh_status() {
     $SPAWNER status
 }
 
-rh_status_q() {
-    rh_status >/dev/null 2>&1
-}
-
-
 case "$1" in
-    start)
-        rh_status_q && exit 0
-        $1
-        ;;
-    stop)
-        rh_status_q || exit 0
-        $1
-        ;;
-    restart)
-        $1
-        ;;
-    reload)
-        rh_status_q || exit 7
+    start|stop|restart|reload)
         $1
         ;;
     force-reload)
@@ -87,7 +70,6 @@ case "$1" in
         rh_status
         ;;
     condrestart|try-restart)
-        rh_status_q || exit 0
         restart
         ;;
     *)
