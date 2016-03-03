@@ -6,7 +6,7 @@ USERNAME='test'
 PASSWORD='Ch@ngeMe'
 
 HUBOT_ADAPTER='slack'
-HUBOT_SLACK_TOKEN='' # XXX: Change me please!
+HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
 
 fail() {
   echo "############### ERROR ###############"
@@ -85,7 +85,7 @@ install_st2mistral() {
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
   # Register mistral actions
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
-  
+
   # Start Mistral
   sudo service mistral start
 }
@@ -120,14 +120,16 @@ install_st2chatops() {
 
 configure_st2chatops() {
   # Set credentials
-  sudo sed -i.bak -r "s/^(export ST2_AUTH_USERNAME.).*/\1$USERNAME/" /opt/stackstorm/chatops/st2chatops.env
-  sudo sed -i.bak -r "s/^(export ST2_AUTH_PASSWORD.).*/\1$PASSWORD/" /opt/stackstorm/chatops/st2chatops.env
+  sudo sed -i -r "s/^(export ST2_AUTH_USERNAME.).*/\1$USERNAME/" /opt/stackstorm/chatops/st2chatops.env
+  sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/\1$PASSWORD/" /opt/stackstorm/chatops/st2chatops.env
 
   # Setup adapter
   if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
   then
-    sudo sed -i.bak -r "s/^(export HUBOT_ADAPTER.).*/\1$HUBOT_ADAPTER/" /opt/stackstorm/chatops/st2chatops.env
-    sudo sed -i.bak -r "s/^(export HUBOT_SLACK_TOKEN.).*/\1$HUBOT_SLACK_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
+    sudo sed -i -r "s/^# (export HUBOT_ADAPTER=slack)/\1/" /opt/stackstorm/chatops/st2chatops.env
+    sudo sed -i -r "s/^# (export HUBOT_SLACK_TOKEN.).*/\1/" st2chatops.env
+    sudo sed -i -r "s/^(export HUBOT_ADAPTER.).*/\1$HUBOT_ADAPTER/" /opt/stackstorm/chatops/st2chatops.env
+    sudo sed -i -r "s/^(export HUBOT_SLACK_TOKEN.).*/\1$HUBOT_SLACK_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
 
     sudo service st2chatops restart
   else

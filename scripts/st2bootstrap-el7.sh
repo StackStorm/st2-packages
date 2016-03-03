@@ -6,7 +6,7 @@ USERNAME='test'
 PASSWORD='Ch@ngeMe'
 
 HUBOT_ADAPTER='slack'
-HUBOT_SLACK_TOKEN='' # XXX: Change me please!
+HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
 
 # Note that default SELINUX policies for RHEL7 differ with CentOS7. CentOS7 is more permissive by default
 # Note that depending on distro assembly/settings you may need more rules to change
@@ -176,14 +176,16 @@ install_st2chatops() {
 
 configure_st2chatops() {
   # Set credentials
-  sudo sed -i.bak -r "s/^(export ST2_AUTH_USERNAME.).*/\1$USERNAME/" /opt/stackstorm/chatops/st2chatops.env
-  sudo sed -i.bak -r "s/^(export ST2_AUTH_PASSWORD.).*/\1$PASSWORD/" /opt/stackstorm/chatops/st2chatops.env
+  sudo sed -i -r "s/^(export ST2_AUTH_USERNAME.).*/\1$USERNAME/" /opt/stackstorm/chatops/st2chatops.env
+  sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/\1$PASSWORD/" /opt/stackstorm/chatops/st2chatops.env
 
   # Setup adapter
   if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
   then
-    sudo sed -i.bak -r "s/^(export HUBOT_ADAPTER.).*/\1$HUBOT_ADAPTER/" /opt/stackstorm/chatops/st2chatops.env
-    sudo sed -i.bak -r "s/^(export HUBOT_SLACK_TOKEN.).*/\1$HUBOT_SLACK_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
+    sudo sed -i -r "s/^# (export HUBOT_ADAPTER=slack)/\1/" /opt/stackstorm/chatops/st2chatops.env
+    sudo sed -i -r "s/^# (export HUBOT_SLACK_TOKEN.).*/\1/" st2chatops.env
+    sudo sed -i -r "s/^(export HUBOT_ADAPTER.).*/\1$HUBOT_ADAPTER/" /opt/stackstorm/chatops/st2chatops.env
+    sudo sed -i -r "s/^(export HUBOT_SLACK_TOKEN.).*/\1$HUBOT_SLACK_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
 
     sudo systemctl st2chatops restart
     sudo systemctl enable st2chatops
