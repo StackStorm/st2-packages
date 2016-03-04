@@ -34,9 +34,8 @@ Conflicts: st2common
   %service_install st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
   %service_install st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
   make post_install DESTDIR=%{buildroot}
-%if %{!?use_systemd}
-  install -D -m644 conf/rhel-functions-sysvinit %{buildroot}/opt/stackstorm/st2/share/sysvinit/functions
-%endif
+  %{!?use_systemd:install -D -m644 conf/rhel-functions-sysvinit %{buildroot}/opt/stackstorm/st2/share/sysvinit/functions}
+
   %cleanup_python_abspath
 
 %prep
