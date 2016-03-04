@@ -32,12 +32,6 @@ setup_args() {
       esac
     done
 
-  if [[ "$RELEASE" == "unstable" ]]; then
-    echo "This script does not support installing from unstable sources!"
-    # XXX: Fix this when st2mistral unstable sources become available!
-    exit 1
-  fi
-
   if [[ "$VERSION" != '' ]]; then
     if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
       echo "$VERSION does not match supported formats x.y.z or x.ydev"
