@@ -33,7 +33,9 @@ Conflicts: st2common
   %pip_install_venv
   %service_install st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
   %service_install st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
-  make post_install DESTDIR=%{?buildroot}
+  make post_install DESTDIR=%{buildroot}
+  %{!?use_systemd:install -D -m644 conf/rhel-functions-sysvinit %{buildroot}/opt/stackstorm/st2/share/sysvinit/functions}
+
   %cleanup_python_abspath
 
 %prep
@@ -68,8 +70,8 @@ Conflicts: st2common
   %config(noreplace) %attr(600, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
   %config(noreplace) %{_sysconfdir}/st2/*
   %{_datadir}/doc/st2
-  %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/st2
-  %attr(755, %{svc_user}, %{svc_user}) /opt/stackstorm/exports
+  %attr(755, %{svc_user}, root) /opt/stackstorm/exports
+  %attr(755, %{svc_user}, root) %{_localstatedir}/log/st2
   %attr(775, root, %{packs_group}) /opt/stackstorm/packs/*
   %attr(775, root, %{packs_group}) /opt/stackstorm/virtualenvs
 %if 0%{?use_systemd}

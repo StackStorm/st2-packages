@@ -14,12 +14,6 @@
 # description: StackStorm actionrunner wrapper service
 # processname: st2actionrunner
 
-# Source function library.
-. /etc/rc.d/init.d/functions
-
-# Source networking configuration.
-. /etc/sysconfig/network
-
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2actionrunner"
 NAME=st2actionrunner
