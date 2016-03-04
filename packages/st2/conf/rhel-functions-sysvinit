@@ -76,10 +76,10 @@ daemon() {
 
         # make sure it doesn't core dump anywhere unless requested
         corelimit="ulimit -S -c ${DAEMON_COREFILE_LIMIT:-0}"
-        
+
         # if they set NICELEVEL in /etc/sysconfig/foo, honor it
         [ -n "${NICELEVEL:-}" ] && nice="nice -n $NICELEVEL"
-        
+
         # if they set CGROUP_DAEMON in /etc/sysconfig/foo, honor it
         if [ -n "${CGROUP_DAEMON}" ]; then
                 if [ ! -x /bin/cgexec ]; then
@@ -120,11 +120,11 @@ daemon() {
 }
 
 
-# Write pid of a running daemon into the pidfile
-#
+# Write pid of a starting daemon into the pidfile.
+# By default wait for the pid up to 3 seconds.
 save_chkprocesspid() {
   local pid= pid_file= base= trailer=
-  local pgrep_opts="-n" sleep="0.1" 
+  local pgrep_opts="-n" timeout="3.0"
 
   while [ "$1" != "${1##--}" ]; do
     case $1 in
@@ -150,12 +150,12 @@ save_chkprocesspid() {
           base=${1#--scriptname=}
           shift
           ;;
-      --sleep)
-          sleep=$2
+      --timeout)
+          timeout=$2
           shift 2
           ;;
-      --sleep=?*)
-          sleep=${1#--sleep=}
+      --timeout=?*)
+          timeout=${1#--timeout=}
           shift
           ;;
 
@@ -164,12 +164,21 @@ save_chkprocesspid() {
     esac
   done
 
-  # Give window for a process to go up
-  sleep $sleep
-
   # Locate pid of a started daemon (oldest pid in case if masterpid is given).
   [ -z "$scriptname"] || trailer=".*${scriptname}"
-  pid=$(pgrep $pgrep_opts -f "$1${trailer}")
+
+  # Check for pid in a cycle until found or timed-out.
+  #
+  for s in $(seq 0.0 0.1 $timeout); do
+    pid=$(pgrep $pgrep_opts -f "$1${trailer}")
+    if [ ! -z "$pid" ]; then
+      sleep 0.1
+      # In case of false-positve during forking, double check that pid exists.
+      [ -d /proc/$pid ] && break || continue
+    else
+      sleep 0.1
+    fi
+  done
 
   # Define pid_file path.
   [ -z "$base" ] && base=${1##*/}
