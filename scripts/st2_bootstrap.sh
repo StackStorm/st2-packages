@@ -77,7 +77,7 @@ if [[ -n "$DEBTEST" ]]; then
 elif [[ -n "$RHTEST" ]]; then
   TYPE="rpms"
   echo "# Detected Distro is ${RHTEST}"
-  RHMAJVER=`cat /etc/redhat-release | awk '{ print $3}' | cut -d '.' -f1`
+  RHMAJVER=`cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/'`
   ST2BOOTSTRAP="${BASE_PATH}-el${RHMAJVER}.sh"
 else
   echo "Unknown Operating System"
