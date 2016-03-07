@@ -24,7 +24,7 @@ class ST2Spec
   extend Pipeline::Options
   instance_eval(File.read('rake/build/environment.rb'))
 
-  ST2_SERVICES = %w(st2api st2stream st2auth st2actionrunner st2notifier
+  ST2_SERVICES = %w(st2api st2auth st2actionrunner st2notifier
                     st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector)
 
   SPECCONF = {
@@ -57,7 +57,7 @@ class ST2Spec
     package_has_services: {
       st2actions: %w(st2actionrunner st2notifier st2resultstracker),
       st2reactor: %w(st2rulesengine st2sensorcontainer st2garbagecollector),
-      st2: %w(st2api st2stream st2auth st2actionrunner st2notifier
+      st2: %w(st2api st2auth st2actionrunner st2notifier
                      st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector),
       mistral: [
         ['mistral', binary_name: 'mistral-server']
