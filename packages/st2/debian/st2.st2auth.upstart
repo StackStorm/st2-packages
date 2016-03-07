@@ -1,4 +1,4 @@
-\description     "StackStorm st2auth service"
+description     "StackStorm st2auth service"
 author          "StackStorm Engineering <opsadmin@stackstorm.com>"
 
 start on filesystem and net-device-up IFACE!=lo
