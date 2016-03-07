@@ -2,7 +2,7 @@
 
 set -eu
 
-USERNAME='test'
+USERNAME='st2admin'
 PASSWORD='Ch@ngeMe'
 
 HUBOT_ADAPTER='slack'
