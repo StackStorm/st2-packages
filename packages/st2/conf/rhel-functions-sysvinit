@@ -172,9 +172,8 @@ pgrep_waitforpid() {
   for s in $(seq 0.0 0.1 $timeout); do
     pid=$(pgrep $pgrep_opts -f "$1${trailer}")
     if [ ! -z "$pid" ]; then
-      sleep 0.1
       # In case of false-positve during forking, double check that pid exists.
-      [ -d /proc/$pid ] && break || continue
+      sleep 0.1; checkpid $pid && break || continue
     else
       sleep 0.1
     fi
@@ -184,11 +183,11 @@ pgrep_waitforpid() {
   [ -z "$base" ] && base=${1##*/}
   pid_file=${pid_file:-/var/run/$base.pid}
 
-  if [ -z "$pid" ]; then
-    failure $"$base startup"
-  else
+  if checkpid $pid; then
     echo $pid > $pid_file
     success $"$base startup"
+  else
+    failure $"$base startup"
   fi
 }
 
@@ -230,14 +229,13 @@ waitforpid() {
   #
   for s in $(seq 0.0 0.1 $timeout); do
     if [ -f "$pid_file" ]; then
-      pid=$(cat $pid_file)
-      sleep 0.1
       # In case process dies or anything, we keep iterating
-      [ -d /proc/$pid ] && break || continue
+      pid=$(cat $pid_file)
+      sleep 0.1; checkpid $pid && break || continue
     else
       sleep 0.1
     fi
   done
 
-  [ -d /proc/$pid ] && success $"$base startup" || failure $"$base startup"
+  checkpid $pid && success $"$base startup" || failure $"$base startup"
 }
