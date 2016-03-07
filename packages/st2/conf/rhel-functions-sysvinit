@@ -122,13 +122,13 @@ daemon() {
 
 # Write pid of a starting daemon into the pidfile.
 # By default wait for the pid up to 3 seconds.
-save_chkprocesspid() {
+pgrep_waitforpid() {
   local pid= pid_file= base= trailer=
   local pgrep_opts="-n" timeout="3.0"
 
   while [ "$1" != "${1##--}" ]; do
     case $1 in
-      '')    echo $"$0: Usage: save_chkprocesspid {program}"
+      '')    echo $"$0: Usage: pgrep_waitforpid {program}"
              return 1;;
       --masterpid)
           pgrep_opts="-o"
@@ -159,7 +159,7 @@ save_chkprocesspid() {
           shift
           ;;
 
-      *)  echo $"$0: Usage: save_chkprocesspid {program}"
+      *)  echo $"$0: Usage: pgrep_waitforpid {program}"
           return 1;;
     esac
   done
@@ -190,4 +190,54 @@ save_chkprocesspid() {
     echo $pid > $pid_file
     success $"$base startup"
   fi
+}
+
+# Waits for a process startup and when it writes the pidfile.
+waitforpid() {
+  local pid= pid_file= base= timeout="3.0"
+
+  while [ "$1" != "${1##--}" ]; do
+    case $1 in
+      '')    echo $"$0: Usage: waitforpid [options]"
+             return 1;;
+      --pidfile)
+          pid_file=$2
+          shift 2
+          ;;
+      --pidfile=?*)
+          pid_file=${1#--pidfile=}
+          shift
+          ;;
+      --timeout)
+          timeout=$2
+          shift 2
+          ;;
+      --timeout=?*)
+          timeout=${1#--timeout=}
+          shift
+          ;;
+
+      *)  echo $"$0: Usage: waitforpid [options]"
+          return 1;;
+    esac
+  done
+
+  # Define pid_file path.
+  [ -z "$base" ] && base=${1##*/}
+  pid_file=${pid_file:-/var/run/$base.pid}
+
+  # Check for pid in a cycle until found or timed-out.
+  #
+  for s in $(seq 0.0 0.1 $timeout); do
+    if [ -f "$pid_file" ]; then
+      pid=$(cat $pid_file)
+      sleep 0.1
+      # In case process dies or anything, we keep iterating
+      [ -d /proc/$pid ] && break || continue
+    else
+      sleep 0.1
+    fi
+  done
+
+  [ -d /proc/$pid ] && success $"$base startup" || failure $"$base startup"
 }
