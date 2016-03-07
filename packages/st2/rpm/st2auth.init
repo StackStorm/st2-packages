@@ -26,8 +26,8 @@
 DESC="st2auth"
 NAME=st2auth
 DAEMON=/opt/stackstorm/st2/bin/gunicorn_pecan
-DAEMON_ARGS="-k sync -b 127.0.0.1:9100 --workers 1 --threads 1 --graceful-timeout 10 --timeout 30"
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/var/run/st2/$NAME.pid
+DAEMON_ARGS="-k sync -b 127.0.0.1:9100 --workers 1 --threads 1 --graceful-timeout 10 --timeout 30 --pid ${PIDFILE}"
 RUNAS_USER="st2"
 
 lockfile=/var/lock/subsys/$NAME
@@ -44,7 +44,7 @@ start() {
     echo -n $"Starting $NAME: "
     daemon --background --check=${NAME} --user=${RUNAS_USER} \
         $DAEMON $DAEMON_ARGS
-    pgrep_waitforpid --masterpid --scriptname=${NAME} ${DAEMON}
+    waitforpid --pidfile=${PIDFILE}
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile || return $retval
@@ -73,7 +73,7 @@ force_reload() {
 
 rh_status() {
     # run checks to determine if the service is running or use generic status
-    status $NAME
+    status -p $PIDFILE $NAME
 }
 
 rh_status_q() {
