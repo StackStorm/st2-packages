@@ -55,7 +55,7 @@ start() {
     echo -n $"Starting $NAME: "
     daemon --background --check=${NAME} --user=${RUNAS_USER} --group=${RUNAS_GROUP} \
         $DAEMON $DAEMON_ARGS
-    pgrep_waitforpid --scriptname=${NAME} --pidfile=${PIDFILE} ${DAEMON}
+    save_chkprocesspid --scriptname=${NAME} --pidfile=${PIDFILE} ${DAEMON}
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile || return $retval
