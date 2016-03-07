@@ -19,8 +19,8 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="st2stream"
 NAME=st2stream
 DAEMON=/opt/stackstorm/st2/bin/gunicorn_pecan
-PIDFILE=/var/run/st2/$NAME.pid
-DAEMON_ARGS="-k eventlet -b 127.0.0.1:9102 --workers 1 --threads 10 --graceful-timeout 10 --timeout 30 --pid ${PIDFILE}"
+DAEMON_ARGS="-k eventlet -b 127.0.0.1:9102 --workers 1 --threads 10 --graceful-timeout 10 --timeout 30"
+PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 RUNAS_USER="st2"
 RUNAS_GROUP="st2"
@@ -63,7 +63,7 @@ do_start()
   #   1 if daemon was already running
   #   2 if daemon could not be started
   lsb_running || return 1
-  start-stop-daemon --start --quiet --chuid $RUNAS_USER:$RUNAS_GROUP --umask $UMASK --background --pidfile $PIDFILE \
+  start-stop-daemon --start --quiet --chuid $RUNAS_USER:$RUNAS_GROUP --umask $UMASK --background --make-pidfile --pidfile $PIDFILE \
      --exec $DAEMON -- $DAEMON_ARGS \
     || return 2
 }
