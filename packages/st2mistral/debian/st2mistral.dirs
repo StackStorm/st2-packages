@@ -1,2 +1,3 @@
 /etc/mistral
 /var/log/mistral
+/var/run/mistral
