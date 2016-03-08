@@ -16,7 +16,7 @@ machine:
     DISTROS: "wheezy jessie trusty el6 el7"
     NOTESTS: "el7"
     ST2_GITURL: https://github.com/StackStorm/st2
-    ST2_GITREV: master
+    ST2_GITREV: $CIRCLE_BRANCH
     ST2_DOCKERFILES_REPO: https://github.com/StackStorm/st2-dockerfiles
     BUILD_DOCKER: 0
     DEPLOY_DOCKER: 0
@@ -35,6 +35,7 @@ machine:
 
 checkout:
   post:
+    - echo $CIRCLE_BRANCH
     - .circle/buildenv.sh
 
 dependencies:
@@ -62,7 +63,7 @@ test:
         parallel: true
   post:
     - .circle/docker.sh build st2
-    - .circle/docker.sh build st2actionrunner st2api st2stream st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
+    - .circle/docker.sh build st2actionrunner st2api st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
     - .circle/docker.sh run st2api
     - .circle/docker.sh test st2api 'st2 --version'
 
@@ -77,5 +78,5 @@ deployment:
       - |
         DISTROS=($DISTROS)
         parallel -v -j0 --line-buffer .circle/packagecloud.sh deploy {} ~/packages/{} ::: ${DISTROS[@]::$CIRCLE_NODE_TOTAL}
-      - .circle/docker.sh deploy st2actionrunner st2api st2stream st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
+      - .circle/docker.sh deploy st2actionrunner st2api st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
       - .circle/save_payload.py ~/packages
