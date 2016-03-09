@@ -2,11 +2,16 @@
 
 set -eu
 
-USERNAME='st2admin'
+USERNAME='test'
 PASSWORD='Ch@ngeMe'
 
 HUBOT_ADAPTER='slack'
 HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
+VERSION=''
+RELEASE='stable'
+REPO_TYPE='staging'
+BETA=''
+ST2_PKG_VERSION=''
 
 fail() {
   echo "############### ERROR ###############"
@@ -15,15 +20,107 @@ fail() {
   exit 2
 }
 
+setup_args() {
+  for i in "$@"
+    do
+      case $i in
+          -V=*|--version=*)
+          VERSION="${i#*=}"
+          shift
+          ;;
+          -s=*|--stable)
+        RELEASE=stable
+          shift
+          ;;
+          -u=*|--unstable)
+        RELEASE=unstable
+          shift
+          ;;
+          --staging)
+        REPO_TYPE='staging'
+        shift
+        ;;
+          *)
+                  # unknown option
+          ;;
+      esac
+    done
+
+  if [[ "$RELEASE" == "unstable" ]]; then
+    echo "This script does not support installing from unstable sources!"
+    # XXX: Fix this when st2mistral unstable sources become available!
+    exit 1
+  fi
+
+  if [[ "$VERSION" != '' ]]; then
+    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+      echo "$VERSION does not match supported formats x.y.z or x.ydev"
+      exit 1
+    fi
+
+    if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+     echo "You're requesting a dev version! Switching to unstable!"
+     RELEASE='unstable'
+    fi
+  fi
+
+  echo "########################################################"
+  echo "          Installing st2 $RELEASE $VERSION              "
+  echo "########################################################"
+
+  if [[ -z "$BETA"  && "$REPO_TYPE"="staging" ]]; then
+    printf "\n\n"
+    echo "################################################################"
+    echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
+    echo "################################################################"
+  fi
+}
+
 install_st2_dependencies() {
   sudo apt-get update
   sudo apt-get install -y curl mongodb-server rabbitmq-server
 }
 
+get_full_pkg_versions() {
+  if [ "$VERSION" != '' ];
+  then
+    local ST2_VER=$(apt-cache show st2 | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    if [ -z "$ST2_VER" ]; then
+      echo "Could not find requested version of st2!!!"
+      sudo apt-cache policy st2
+      exit 3
+    fi
+
+    local ST2MISTRAL_VER=$(apt-cache show st2mistral | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    if [ -z "$ST2MISTRAL_VER" ]; then
+      echo "Could not find requested version of st2mistral!!!"
+      sudo apt-cache policy st2mistral
+      exit 3
+    fi
+
+    local ST2WEB_VER=$(apt-cache show st2web | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    if [ -z "$ST2WEB_VER" ]; then
+      echo "Could not find requested version of st2web."
+      sudo apt-cache policy st2web
+      exit 3
+    fi
+    ST2_PKG_VERSION="=${ST2_VER}"
+    ST2MISTRAL_PKG_VERSION="=${ST2MISTRAL_VER}"
+    ST2WEB_PKG_VERSION="=${ST2WEB_VER}"
+    echo "##########################################################"
+    echo "#### Following versions of packages will be installed ####"
+    echo "st2${ST2_PKG_VERSION}"
+    echo "st2mistral${ST2MISTRAL_PKG_VERSION}"
+    echo "st2web${ST2WEB_PKG_VERSION}"
+    echo "##########################################################"
+  fi
+}
+
 install_st2() {
   # Following script adds a repo file, registers gpg key and runs apt-get update
-  curl -s https://packagecloud.io/install/repositories/StackStorm/staging-stable/script.deb.sh | sudo bash
-  sudo apt-get install -y st2
+  curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_TYPE}-${RELEASE}/script.deb.sh | sudo bash
+  STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
+  sudo apt-get install -y st2${ST2_PKG_VERSION}
   sudo st2ctl reload
   sudo st2ctl start
 }
@@ -58,7 +155,7 @@ configure_st2_authentication() {
   sudo apt-get install -y apache2-utils crudini
 
   # Create a user record in a password file.
-  sudo echo $PASSWORD | sudo htpasswd -i /etc/st2/htpasswd $USERNAME
+  sudo echo "Ch@ngeMe" | sudo htpasswd -i /etc/st2/htpasswd test
 
   # Configure [auth] section in st2.conf
   sudo crudini --set /etc/st2/st2.conf auth enable 'True'
@@ -79,28 +176,17 @@ EHD
 
 install_st2mistral() {
   # install mistral
-  sudo apt-get install -y st2mistral
+  sudo apt-get install -y st2mistral${ST2MISTRAL_PKG_VERSION}
 
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
   # Register mistral actions
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
-
-  # Start Mistral
-  sudo service mistral start
 }
 
 install_st2web() {
-  # Add key and repo for the lastest stable nginx
-  sudo apt-key adv --fetch-keys http://nginx.org/keys/nginx_signing.key
-  sudo sh -c "cat <<EOT > /etc/apt/sources.list.d/nginx.list
-deb http://nginx.org/packages/ubuntu/ trusty nginx
-deb-src http://nginx.org/packages/ubuntu/ trusty nginx
-EOT"
-  sudo apt-get update
-
   # Install st2web and nginx
-  sudo apt-get install -y st2web nginx
+  sudo apt-get install -y st2web${ST2WEB_PKG_VERSION} nginx
 
   # Generate self-signed certificate or place your existing certificate under /etc/ssl/st2
   sudo mkdir -p /etc/ssl/st2
@@ -109,59 +195,21 @@ EOT"
   Technology/CN=$(hostname)"
 
   # Remove default site, if present
-  sudo rm -f /etc/nginx/conf.d/default.conf
+  sudo rm /etc/nginx/sites-enabled/default
   # Copy and enable StackStorm's supplied config file
-  sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
+  sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/sites-available/
+  sudo ln -s /etc/nginx/sites-available/st2.conf /etc/nginx/sites-enabled/st2.conf
 
   sudo service nginx restart
-}
-
-install_st2chatops() {
-  # Install Node
-  curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
-  sudo apt-get install -y nodejs
-
-  # Install st2chatops
-  sudo apt-get install -y st2chatops
-}
-
-configure_st2chatops() {
-  # Set credentials
-  sudo sed -i -r "s/^(export ST2_AUTH_USERNAME.).*/\1$USERNAME/" /opt/stackstorm/chatops/st2chatops.env
-  sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/\1$PASSWORD/" /opt/stackstorm/chatops/st2chatops.env
-
-  # Setup adapter
-  if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
-  then
-    sudo sed -i -r "s/^# (export HUBOT_ADAPTER=slack)/\1/" /opt/stackstorm/chatops/st2chatops.env
-    sudo sed -i -r "s/^# (export HUBOT_SLACK_TOKEN.).*/\1/" st2chatops.env
-    sudo sed -i -r "s/^(export HUBOT_ADAPTER.).*/\1$HUBOT_ADAPTER/" /opt/stackstorm/chatops/st2chatops.env
-    sudo sed -i -r "s/^(export HUBOT_SLACK_TOKEN.).*/\1$HUBOT_SLACK_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
-
-    sudo service st2chatops restart
-  else
-    echo "####################### WARNING ########################"
-    echo "######## Chatops requires manual configuration #########"
-    echo "Edit /opt/stackstorm/chatops/st2chatops.env to specify  "
-    echo "the adapter and settings hubot should use to connect to "
-    echo "the chat you're using. Don't forget to start the service"
-    echo "afterwards:"
-    echo ""
-    echo "  $ sudo service st2chatops restart"
-    echo ""
-    echo "For more information, please refer to documentation at  "
-    echo "https://docs.stackstorm.com/install/deb.html#setup-chatops"
-    echo "########################################################"
-  fi
 }
 
 verify_st2() {
   st2 --version
   st2 -h
 
-  st2 auth $USERNAME -p $PASSWORD
+  st2 auth test -p Ch@ngeMe
   # A shortcut to authenticate and export the token
-  export ST2_AUTH_TOKEN=$(st2 auth $USERNAME -p $PASSWORD -t)
+  export ST2_AUTH_TOKEN=$(st2 auth test -p Ch@ngeMe -t)
 
   # List the actions from a 'core' pack
   st2 action list --pack=core
@@ -207,6 +255,7 @@ ok_message() {
 ## Let's do this!
 
 trap 'fail' EXIT
+STEP="Setup args" && setup_args $@
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
@@ -217,9 +266,6 @@ STEP="Install mistral dependencies" && install_st2mistral_depdendencies
 STEP="Install mistral" && install_st2mistral
 
 STEP="Install st2web" && install_st2web
-
-STEP="Install st2chatops" && install_st2chatops
-STEP="Configure st2chatops" && configure_st2chatops
 trap - EXIT
 
 ok_message
