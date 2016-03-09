@@ -179,6 +179,14 @@ install_st2mistral() {
 }
 
 install_st2web() {
+  # Add key and repo for the lastest stable nginx
+  sudo apt-key adv --fetch-keys http://nginx.org/keys/nginx_signing.key
+  sudo sh -c "cat <<EOT > /etc/apt/sources.list.d/nginx.list
+deb http://nginx.org/packages/ubuntu/ trusty nginx
+deb-src http://nginx.org/packages/ubuntu/ trusty nginx
+EOT"
+  sudo apt-get update
+
   # Install st2web and nginx
   sudo apt-get install -y st2web${ST2WEB_PKG_VERSION} nginx
 
@@ -298,6 +306,9 @@ STEP="Install mistral dependencies" && install_st2mistral_depdendencies
 STEP="Install mistral" && install_st2mistral
 
 STEP="Install st2web" && install_st2web
+
+STEP="Install st2chatops" && install_st2chatops
+STEP="Configure st2chatops" && configure_st2chatops
 trap - EXIT
 
 ok_message
