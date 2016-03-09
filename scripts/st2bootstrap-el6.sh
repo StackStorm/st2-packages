@@ -264,6 +264,16 @@ install_st2mistral() {
 }
 
 install_st2web() {
+  # Add key and repo for the lastest stable nginx
+  sudo rpm --import http://nginx.org/keys/nginx_signing.key
+  sudo sh -c "cat <<EOT > /etc/yum.repos.d/nginx.repo
+[nginx]
+name=nginx repo
+baseurl=http://nginx.org/packages/rhel/6/x86_64/
+gpgcheck=1
+enabled=1
+EOT"
+
   # Install st2web and nginx
   sudo yum install -y st2web nginx
 
