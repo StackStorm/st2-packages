@@ -16,7 +16,7 @@ machine:
     DISTROS: "wheezy jessie trusty el6 el7"
     NOTESTS: "el7"
     ST2_GITURL: https://github.com/StackStorm/st2
-    ST2_GITREV: $CIRCLE_BRANCH
+    ST2_GITREV: v1.3
     ST2_DOCKERFILES_REPO: https://github.com/StackStorm/st2-dockerfiles
     BUILD_DOCKER: 0
     DEPLOY_DOCKER: 0
@@ -35,7 +35,6 @@ machine:
 
 checkout:
   post:
-    - echo $CIRCLE_BRANCH
     - .circle/buildenv.sh
 
 dependencies:
