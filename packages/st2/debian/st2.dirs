@@ -3,3 +3,4 @@
 /opt/stackstorm/exports
 /opt/stackstorm/virtualenvs
 /var/log/st2
+/var/run/st2
