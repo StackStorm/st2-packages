@@ -71,6 +71,7 @@ deployment:
   publish:
     branch:
       - master
+      - /v[0-9]+\.[0-9]+/
       - feature/circleci
     owner: StackStorm
     commands:
