@@ -29,7 +29,6 @@ Summary: Mistral workflow service
   %pip_install_venv
   %service_install mistral mistral-api mistral-server
   make post_install DESTDIR=%{?buildroot}
-  install -D -m644 conf/helpers-sysvinit %{buildroot}/opt/stackstorm/mistral/share/sysvinit/helpers
   %{!?use_systemd:install -D -m644 conf/rhel-functions-sysvinit %{buildroot}/opt/stackstorm/mistral/share/sysvinit/functions}
 
   %cleanup_python_abspath

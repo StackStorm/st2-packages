@@ -3,7 +3,7 @@
 # Check if mistral-api or mistral-server components are enabled (checks $COMPONENTS)
 enabled_list() {
   local service= quiet= components= list= retval=0
-  [ "$1" == "-q" ] && quiet='quiet' && shift
+  [ "$1" = "-q" ] && quiet='quiet' && shift
   service="$1"
 
   [ "$service" = api ] && components="api"
