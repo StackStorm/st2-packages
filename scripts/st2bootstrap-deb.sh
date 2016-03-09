@@ -2,7 +2,7 @@
 
 set -eu
 
-USERNAME='test'
+USERNAME='st2admin'
 PASSWORD='Ch@ngeMe'
 
 HUBOT_ADAPTER='slack'
@@ -201,7 +201,7 @@ verify_st2() {
   st2 --version
   st2 -h
 
-  st2 auth test -p Ch@ngeMe
+  st2 auth $USERNAME -p $PASSWORD
   # A shortcut to authenticate and export the token
   export ST2_AUTH_TOKEN=$(st2 auth test -p Ch@ngeMe -t)
 
