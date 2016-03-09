@@ -21,8 +21,8 @@ script
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-  COMPONENTS=${COMPONENTS:-api,engine,executor}
-  COMPONENTS=$(echo $COMPONENTS | sed 's/,\?api,\?//')
+  # Exit if server components are disabled, otherwise inject them into args.
+  enabled_list -q server || exit 0
 
-  exec /opt/stackstorm/mistral/bin/mistral-server --server ${COMPONENTS} ${SERVER_ARGS}
+  exec /opt/stackstorm/mistral/bin/mistral-server --server $(enabled_list server) ${SERVER_ARGS}
 end script

@@ -21,5 +21,9 @@ script
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
+  # NB! Exit if mistral-api is disabled
+  . /opt/stackstorm/mistral/share/sysvinit/helpers
+  enabled_list -q api || exit 0
+
   exec /opt/stackstorm/mistral/bin/gunicorn $API_ARGS
 end script
