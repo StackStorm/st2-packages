@@ -2,7 +2,7 @@
 
 set -eu
 
-USERNAME='test'
+USERNAME='st2admin'
 PASSWORD='Ch@ngeMe'
 
 HUBOT_ADAPTER='slack'
@@ -91,6 +91,14 @@ install_st2mistral() {
 }
 
 install_st2web() {
+  # Add key and repo for the lastest stable nginx
+  sudo apt-key adv --fetch-keys http://nginx.org/keys/nginx_signing.key
+  sudo sh -c "cat <<EOT > /etc/apt/sources.list.d/nginx.list
+deb http://nginx.org/packages/ubuntu/ trusty nginx
+deb-src http://nginx.org/packages/ubuntu/ trusty nginx
+EOT"
+  sudo apt-get update
+
   # Install st2web and nginx
   sudo apt-get install -y st2web nginx
 
@@ -101,10 +109,9 @@ install_st2web() {
   Technology/CN=$(hostname)"
 
   # Remove default site, if present
-  sudo rm -f /etc/nginx/sites-enabled/default
+  sudo rm -f /etc/nginx/conf.d/default.conf
   # Copy and enable StackStorm's supplied config file
-  sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/sites-available/
-  sudo ln -s /etc/nginx/sites-available/st2.conf /etc/nginx/sites-enabled/st2.conf
+  sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
 
   sudo service nginx restart
 }
