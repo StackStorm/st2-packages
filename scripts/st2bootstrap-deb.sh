@@ -59,7 +59,7 @@ setup_args() {
   fi
 
   echo "########################################################"
-  echo "          Installing st2 $RELEASE $VERSION              "
+  echo "          Installing StackStorm $RELEASE $VERSION              "
   echo "########################################################"
 
   if [[ -z "$BETA"  && "$REPO_TYPE"="staging" ]]; then
@@ -80,7 +80,7 @@ get_full_pkg_versions() {
   then
     local ST2_VER=$(apt-cache show st2 | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
     if [ -z "$ST2_VER" ]; then
-      echo "Could not find requested version of st2!!!"
+      echo "Could not find requested version of StackStorm!!!"
       sudo apt-cache policy st2
       exit 3
     fi
@@ -149,7 +149,7 @@ configure_st2_authentication() {
   sudo apt-get install -y apache2-utils crudini
 
   # Create a user record in a password file.
-  sudo echo "${PASSWORD}" | sudo htpasswd -i /etc/st2/htpasswd test
+  sudo echo "${PASSWORD}" | sudo htpasswd -i /etc/st2/htpasswd $USERNAME
 
   # Configure [auth] section in st2.conf
   sudo crudini --set /etc/st2/st2.conf auth enable 'True'
