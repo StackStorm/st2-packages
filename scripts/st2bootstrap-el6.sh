@@ -1,12 +1,103 @@
-#!/bin/bash
+#!/bin/bash -x
 
 set -eu
 
-USERNAME='test'
+USERNAME='st2admin'
 PASSWORD='Ch@ngeMe'
 
 HUBOT_ADAPTER='slack'
 HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
+VERSION=''
+RELEASE='stable'
+REPO_TYPE='staging'
+BETA=''
+ST2_PKG_VERSION=''
+
+setup_args() {
+  for i in "$@"
+    do
+      case $i in
+          -V=*|--version=*)
+          VERSION="${i#*=}"
+          shift
+          ;;
+          -s=*|--stable)
+        RELEASE=stable
+          shift
+          ;;
+          -u=*|--unstable)
+        RELEASE=unstable
+          shift
+          ;;
+          --staging)
+        REPO_TYPE='staging'
+        shift
+        ;;
+          *)
+                  # unknown option
+          ;;
+      esac
+    done
+
+  if [[ "$VERSION" != '' ]]; then
+    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+      echo "$VERSION does not match supported formats x.y.z or x.ydev"
+      exit 1
+    fi
+
+    if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+     echo "You're requesting a dev version! Switching to unstable!"
+     RELEASE='unstable'
+    fi
+  fi
+
+  echo "########################################################"
+  echo "          Installing st2 $RELEASE $VERSION              "
+  echo "########################################################"
+
+  if [[ -z "$BETA"  && "$REPO_TYPE"="staging" ]]; then
+    printf "\n\n"
+    echo "################################################################"
+    echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
+    echo "################################################################"
+  fi
+}
+
+
+get_full_pkg_versions() {
+  if [ "$VERSION" != '' ];
+  then
+    local ST2_VER=$(apt-cache show st2 | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    if [ -z "$ST2_VER" ]; then
+      echo "Could not find requested version of st2!!!"
+      sudo apt-cache policy st2
+      exit 3
+    fi
+
+    local ST2MISTRAL_VER=$(apt-cache show st2mistral | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    if [ -z "$ST2MISTRAL_VER" ]; then
+      echo "Could not find requested version of st2mistral!!!"
+      sudo apt-cache policy st2mistral
+      exit 3
+    fi
+
+    local ST2WEB_VER=$(apt-cache show st2web | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    if [ -z "$ST2WEB_VER" ]; then
+      echo "Could not find requested version of st2web."
+      sudo apt-cache policy st2web
+      exit 3
+    fi
+    ST2_PKG_VERSION="=${ST2_VER}"
+    ST2MISTRAL_PKG_VERSION="=${ST2MISTRAL_VER}"
+    ST2WEB_PKG_VERSION="=${ST2WEB_VER}"
+    echo "##########################################################"
+    echo "#### Following versions of packages will be installed ####"
+    echo "st2${ST2_PKG_VERSION}"
+    echo "st2mistral${ST2MISTRAL_PKG_VERSION}"
+    echo "st2web${ST2WEB_PKG_VERSION}"
+    echo "##########################################################"
+  fi
+}
 
 check_libffi_devel() {
   local message= no_libffi_devel=
@@ -61,8 +152,8 @@ install_st2_dependencies() {
 }
 
 install_st2() {
-  curl -s https://packagecloud.io/install/repositories/StackStorm/staging-stable/script.rpm.sh | sudo bash
-  sudo yum -y install st2
+  curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_TYPE}-${RELEASE}/script.rpm.sh | sudo bash
+  sudo yum -y install st2${ST2_PKG_VERSION}
   sudo st2ctl reload
   sudo st2ctl start
 }
@@ -267,6 +358,7 @@ ok_message() {
 }
 
 trap 'fail' EXIT
+STEP='Parse arguments' && setup_args $@
 STEP='Check libffi-devel availability' && check_libffi_devel
 STEP='Adjust SELinux policies' && adjust_selinux_policies
 
