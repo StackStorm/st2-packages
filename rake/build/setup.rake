@@ -21,7 +21,9 @@ namespace :setup do
     pipeline do
       run hostname: opts[:testnode] do |opts|
         with opts.env do
-          execute :bash, "$BASEDIR/scripts/generate_st2_config.sh"
+          if opts.packages.include? 'st2'
+            execute :bash, "$BASEDIR/scripts/generate_st2_config.sh"
+          end
           if opts.packages.include? 'st2mistral'
             execute :bash, "$BASEDIR/scripts/generate_mistral_config.sh"
           end

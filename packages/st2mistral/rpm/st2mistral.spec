@@ -29,6 +29,8 @@ Summary: Mistral workflow service
   %pip_install_venv
   %service_install mistral mistral-api mistral-server
   make post_install DESTDIR=%{?buildroot}
+  %{!?use_systemd:install -D -m644 conf/rhel-functions-sysvinit %{buildroot}/opt/stackstorm/mistral/share/sysvinit/functions}
+
   %cleanup_python_abspath
 
 %prep
@@ -55,7 +57,8 @@ Summary: Mistral workflow service
   %{_bindir}/mistral
   /opt/stackstorm/mistral
   %config(noreplace) %{_sysconfdir}/mistral/*
-  %attr(755, %{svc_user}, %{svc_user}) %{_localstatedir}/log/mistral
+  %attr(755, %{svc_user}, root) %{_localstatedir}/log/mistral
+  %attr(755, %{svc_user}, root) %{_localstatedir}/run/mistral
 %if 0%{?use_systemd}
   %{_unitdir}/mistral.service
   %{_unitdir}/mistral-api.service

@@ -1,0 +1,26 @@
+# -*-Shell-script-*-
+
+# Check if mistral-api or mistral-server components are enabled (checks $COMPONENTS)
+enabled_list() {
+  local service= quiet= components= list= retval=0
+  [ "$1" = "-q" ] && quiet='quiet' && shift
+  service="$1"
+
+  [ "$service" = api ] && components="api"
+  [ "$service" = server ] && components="engine executor"
+
+  # build up the component list
+  for comp in $components; do
+    echo $COMPONENTS | grep -q ",\?${comp},\?" && list="$list $comp"
+  done
+  list=$(echo $list | sed -e 's/^ //' -e 's/ /,/g')
+
+  # Print out list if not empty
+  if [ -z "$list" ]; then
+    echo "mistral-${service} is disabled check \$COMPONENTS environment variable!"
+    retval=1
+  else
+    [ -z "$quiet" ] && echo $list
+  fi
+  return $retval
+}

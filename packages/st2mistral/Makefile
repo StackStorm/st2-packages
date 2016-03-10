@@ -37,6 +37,7 @@ post_install:
 pre_install:
 	install -D etc/logging.conf.sample $(DESTDIR)/etc/mistral/logging.conf
 	install -D etc/wf_trace_logging.conf.sample $(DESTDIR)/etc/mistral/wf_trace_logging.conf
+	install -D -m644 conf/helpers-sysvinit $(DESTDIR)/opt/stackstorm/mistral/share/sysvinit/helpers
 	sed -i "s%/var/log/%/var/log/mistral/%" $(DESTDIR)/etc/mistral/*logging.conf
 	sed -i "/\[logger_root\]/,/\[.*\]\|\s*$$/ {s/level=DEBUG/level=INFO/}" $(DESTDIR)/etc/mistral/*logging.conf
 
