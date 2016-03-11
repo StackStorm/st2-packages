@@ -14,41 +14,31 @@
 # description: Mistral wrapper service
 # processname: mistral
 
-# Source function library.
-. /etc/rc.d/init.d/functions
-
-# Source networking configuration.
-. /etc/sysconfig/network
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="mistral"
 NAME=mistral
-COMPONENTS="api,engine,executor"
-export RAN_BY_MISTRAL=1
 
 # Read configuration variable file if it is present
 [ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
 
-mistral_pass() {
-  cmd=$1
-  RS=0
-  if (echo $COMPONENTS | grep -q ",\?api,\?"); then
-    /etc/init.d/mistral-api $cmd
-    rs=$?; [ $rs -gt $RS ] && RS=$rs
-  fi
-  if (echo $COMPONENTS | grep -q "engine\|executor"); then
-    /etc/init.d/mistral-server $cmd
-    rs=$?; [ $rs -gt $RS ] && RS=$rs
-  fi
-  return $RS
+
+# Mistral wrapper passes execution to mistral-api and mistral-server
+mistral_wrapper() {
+  local action="$1" rs= retval=0
+  /etc/init.d/mistral-api $action
+  rs=$?; [ $rs -gt $retval ] && retval=$rs
+  /etc/init.d/mistral-server $action
+  rs=$?; [ $rs -gt $retval ] && retval=$rs
+  return $retval
 }
 
 start() {
-  mistral_pass start
+  mistral_wrapper start
 }
 
 stop() {
-  mistral_pass stop
+  mistral_wrapper stop
 }
 
 restart() {
@@ -65,7 +55,7 @@ force_reload() {
 }
 
 rh_status() {
-  mistral_pass status
+  mistral_wrapper status
 }
 
 rh_status_q() {

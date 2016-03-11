@@ -134,6 +134,7 @@ centos6test:
 
 centos7test:
   image: quay.io/dennybaa/droneunit:centos7-systemd
+  privileged: true
   extends:
     file: docker-compose.override.yml
     service: volumes-compose

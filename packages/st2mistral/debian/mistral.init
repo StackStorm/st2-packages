@@ -18,9 +18,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="mistral"
 NAME=mistral
-COMPONENTS="api,engine,executor"
 SCRIPTNAME=/etc/init.d/$NAME
-export RAN_BY_MISTRAL=1
 
 # Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
@@ -33,18 +31,14 @@ export RAN_BY_MISTRAL=1
 # and status_of_proc is working.
 . /lib/lsb/init-functions
 
-mistral_pass() {
-  cmd=$1
-  RS=0
-  if (echo $COMPONENTS | grep -q ",\?api,\?"); then
-    /etc/init.d/mistral-api $cmd
-    rs=$?; [ $rs -gt $RS ] && RS=$rs
-  fi
-  if (echo $COMPONENTS | grep -q "engine\|executor"); then
-    /etc/init.d/mistral-server $cmd
-    rs=$?; [ $rs -gt $RS ] && RS=$rs
-  fi
-  return $RS
+
+mistral_wrapper() {
+  local action="$1" rs= retval=0
+  /etc/init.d/mistral-api $action
+  rs=$?; [ $rs -gt $retval ] && retval=$rs
+  /etc/init.d/mistral-server $action
+  rs=$?; [ $rs -gt $retval ] && retval=$rs
+  return $retval
 }
 
 #
@@ -52,7 +46,7 @@ mistral_pass() {
 #
 do_start()
 {
-  mistral_pass start
+  mistral_wrapper start
 }
 
 #
@@ -60,18 +54,18 @@ do_start()
 #
 do_stop()
 {
-  mistral_pass stop
+  mistral_wrapper stop
 }
 
 #
 # Function that sends a SIGHUP to the daemon/service
 #
 do_reload() {
-  mistral_pass reload
+  mistral_wrapper reload
 }
 
 do_status() {
-  mistral_pass status
+  mistral_wrapper status
 }
 
 case "$1" in
