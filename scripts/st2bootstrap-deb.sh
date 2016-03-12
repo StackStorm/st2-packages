@@ -12,6 +12,8 @@ RELEASE='stable'
 REPO_TYPE='staging'
 BETA=''
 ST2_PKG_VERSION=''
+ST2MISTRAL_PKG_VERSION=''
+ST2WEB_PKG_VERSION=''
 
 fail() {
   echo "############### ERROR ###############"
