@@ -9,7 +9,7 @@ Group=mistral
 Environment="COMPONENTS=api,engine,executor"
 Environment="API_ARGS=--log-file /var/log/mistral/mistral-api.log -b 127.0.0.1:8989 -w 2 mistral.api.wsgi --graceful-timeout 10"
 EnvironmentFile=-/etc/sysconfig/mistral
-ExecStart=/bin/sh -c "(echo $COMPONENTS | grep -q '\\bapi\\b\') && exec /opt/stackstorm/mistral/bin/gunicorn $API_ARGS || echo api component is not enabled"
+ExecStart=/bin/sh -c ". /opt/stackstorm/mistral/share/sysvinit/helpers; enabled_list -q api || exit 0; exec /opt/stackstorm/mistral/bin/gunicorn $API_ARGS"
 PrivateTmp=true
 
 [Install]

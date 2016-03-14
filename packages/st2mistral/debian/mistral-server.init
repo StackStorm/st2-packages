@@ -21,7 +21,7 @@ NAME=mistral-server
 DAEMON=/opt/stackstorm/mistral/bin/$NAME
 COMPONENTS="api,engine,executor"
 SERVER_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral-server.log"
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/var/run/mistral/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 RUNAS_USER="mistral"
 RUNAS_GROUP="mistral"
@@ -33,10 +33,6 @@ UMASK=022
 # Read configuration variable file if it is present
 [ -r /etc/default/mistral ] && . /etc/default/mistral
 
-# Environment options can be set in the default file (/etc/default/mistral)
-COMPONENTS=$(echo $COMPONENTS | sed 's/,\?api,\?//')
-DAEMON_ARGS="--server ${COMPONENTS} ${SERVER_ARGS}"
-
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
 
@@ -45,22 +41,20 @@ DAEMON_ARGS="--server ${COMPONENTS} ${SERVER_ARGS}"
 # and status_of_proc is working.
 . /lib/lsb/init-functions
 
-# Check it whether we invoked directly
-if [ -z "$RAN_BY_MISTRAL" ]; then
-  log_action_msg "Can't start this service directly, use /etc/init.d/mistral instead"
-  exit 3
-fi
+# Source our helpers
+. /opt/stackstorm/mistral/share/sysvinit/helpers
+
 
 #
-# Check if service is running
+# Check if service is running (docker fail-safe)
+#   returns: 0 - not running, 1 - running
 #
-# Service is running: 1, otherwise 0.
 lsb_running()
 {
-  procid=$(cat $PIDFILE 2>/dev/null)
-  [ ! -z $procid ] && [ -d /proc/$procid ] && \
-      cat /proc/$procid/cmdline | grep -q $DAEMON && return 1
-  return 0
+  local retval=1 pid="$(cat $PIDFILE 2>/dev/null)"
+  [ ! -z $pid ] && [ -d /proc/$pid ] && \
+      cat /proc/$pid/cmdline | grep -q $DAEMON && retval=0
+  return $retval
 }
 
 #
@@ -72,7 +66,7 @@ do_start()
   #   0 if daemon has been started
   #   1 if daemon was already running
   #   2 if daemon could not be started
-  lsb_running || return 1
+  lsb_running && return 1
   start-stop-daemon --start --quiet --chuid $RUNAS_USER:$RUNAS_GROUP --umask $UMASK --background --make-pidfile --pidfile $PIDFILE \
     --exec $DAEMON -- $DAEMON_ARGS \
     || return 2
@@ -116,6 +110,11 @@ do_reload() {
   start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE
   return 0
 }
+
+
+# Exit if server components are disabled, otherwise inject them into args.
+enabled_list -q server || exit 0
+DAEMON_ARGS="--server $(enabled_list server) ${SERVER_ARGS}"
 
 case "$1" in
   start)

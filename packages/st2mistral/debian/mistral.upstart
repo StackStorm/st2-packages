@@ -5,29 +5,19 @@ start on filesystem and net-device-up IFACE!=lo
 stop on starting rc RUNLEVEL=[016]
 
 pre-start script
-  # Read configuration variable file if it is present
-  [ -r /etc/default/$NAME ] && . /etc/default/$NAME
-
-  COMPONENTS=${COMPONENTS:-api,engine,executor}
-
-  if (echo $COMPONENTS | grep -q ",\?api,\?"); then
-    start mistral-api
-  fi
-  if (echo $COMPONENTS | grep -q "engine\|executor"); then
-    start mistral-server
-  fi
+  retval=0
+  /etc/init.d/mistral-api start
+  rs=$?; [ $rs -gt $retval ] && retval=$rs
+  /etc/init.d/mistral-server start
+  rs=$?; [ $rs -gt $retval ] && retval=$rs
+  exit $retval
 end script
 
 post-stop script
-  # Read configuration variable file if it is present
-  [ -r /etc/default/$NAME ] && . /etc/default/$NAME
-
-  COMPONENTS="${COMPONENTS:-api,engine,executor}"
-
-  if (echo $COMPONENTS | grep -q ",\?api,\?"); then
-    stop mistral-api
-  fi
-  if (echo $COMPONENTS | grep -q "engine\|executor"); then
-    stop mistral-server
-  fi
+  retval=0
+  /etc/init.d/mistral-api stop
+  rs=$?; [ $rs -gt $retval ] && retval=$rs
+  /etc/init.d/mistral-server stop
+  rs=$?; [ $rs -gt $retval ] && retval=$rs
+  exit $retval
 end script
