@@ -65,7 +65,9 @@ setup_args() {
 setup_args $@
 
 get_version_branch() {
-  BRANCH="v$(echo ${VERSION} | awk 'BEGIN {FS="."}; {print $1 "." $2}')"
+  if [[ "$RELEASE" == 'stable' ]]; then
+      BRANCH="v$(echo ${VERSION} | awk 'BEGIN {FS="."}; {print $1 "." $2}')"
+  fi
 }
 
 if [[ "$VERSION" != '' ]]; then
