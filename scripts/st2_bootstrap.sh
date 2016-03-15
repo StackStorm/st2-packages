@@ -76,7 +76,7 @@ if [[ "$VERSION" != '' ]]; then
 fi
 
 if [[ "$RELEASE" != '' ]]; then
-  RELEASE="--version ${RELEASE}"
+  RELEASE="--${RELEASE}"
 fi
 
 if [[ "$REPO_TYPE" == 'staging' ]]; then
