@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE_PATH="https://raw.githubusercontent.com/StackStorm/st2-packages/master/scripts/st2bootstrap"
+BASE_PATH="https://raw.githubusercontent.com/StackStorm/st2-packages"
 BOOTSTRAP_FILE='st2bootstrap.sh'
 
 DEBTEST=`lsb_release -a 2> /dev/null | grep Distributor | awk '{print $3}'`
@@ -10,6 +10,7 @@ RELEASE='stable'
 REPO_TYPE='staging'
 BETA=''
 ST2_PKG_VERSION=''
+BRANCH='master'
 
 setup_args() {
   for i in "$@"
@@ -63,7 +64,12 @@ setup_args() {
 
 setup_args $@
 
+get_version_branch() {
+  BRANCH="v$(echo ${VERSION} | awk 'BEGIN {FS="."}; {print $1 "." $2}')"
+}
+
 if [[ "$VERSION" != '' ]]; then
+  get_version_branch $VERSION
   VERSION="--version ${VERSION}"
 fi
 
@@ -78,12 +84,12 @@ fi
 if [[ -n "$DEBTEST" ]]; then
   TYPE="debs"
   echo "# Detected Distro is ${DEBTEST}"
-  ST2BOOTSTRAP="${BASE_PATH}-deb.sh"
+  ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-deb.sh"
 elif [[ -n "$RHTEST" ]]; then
   TYPE="rpms"
   echo "# Detected Distro is ${RHTEST}"
   RHMAJVER=`cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/'`
-  ST2BOOTSTRAP="${BASE_PATH}-el${RHMAJVER}.sh"
+  ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-el${RHMAJVER}.sh"
 else
   echo "Unknown Operating System"
   exit 2
