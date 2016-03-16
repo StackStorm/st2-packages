@@ -10,7 +10,7 @@ fetch_version() {
   if [ -f ../version_st2.py ]; then
     # Get st2 version based on hardcoded string in st2common
     # build takes place in `st2` repo
-    python -c 'execfile("../version.py"); print __version__'
+    python -c 'execfile("../version_st2.py"); print __version__'
   else
     # build takes place in `st2-packages` repo
     curl -sSL -o /tmp/mistral_version.py ${ST2MISTRAL_GITURL}/raw/${ST2MISTRAL_GITREV}/version_st2.py
