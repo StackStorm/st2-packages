@@ -33,5 +33,5 @@ override_dh_installdeb:
 	dh_installdeb
 
 override_dh_virtualenv:
-	dh_virtualenv --extra-pip-arg '--find-links=$(WHEELDIR)' \
+	dh_virtualenv --extra-pip-arg '--find-links=$(WHEELDIR)' --preinstall psycopg2 \
 								--extra-pip-arg '--no-index' --install-suffix mistral --no-test
