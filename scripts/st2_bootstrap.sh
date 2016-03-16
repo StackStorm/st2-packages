@@ -49,17 +49,6 @@ setup_args() {
      RELEASE='unstable'
     fi
   fi
-
-  echo "########################################################"
-  echo "          Installing st2 $RELEASE $VERSION              "
-  echo "########################################################"
-
-  if [[ -z "$BETA"  && "$REPO_TYPE"="staging" ]]; then
-    printf "\n\n"
-    echo "################################################################"
-    echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
-    echo "################################################################"
-  fi
 }
 
 setup_args $@
