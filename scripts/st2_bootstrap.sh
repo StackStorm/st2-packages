@@ -49,17 +49,6 @@ setup_args() {
      RELEASE='unstable'
     fi
   fi
-
-  echo "########################################################"
-  echo "          Installing st2 $RELEASE $VERSION              "
-  echo "########################################################"
-
-  if [[ -z "$BETA"  && "$REPO_TYPE"="staging" ]]; then
-    printf "\n\n"
-    echo "################################################################"
-    echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
-    echo "################################################################"
-  fi
 }
 
 setup_args $@
@@ -83,15 +72,15 @@ if [[ "$REPO_TYPE" == 'staging' ]]; then
   REPO_TYPE="--staging"
 fi
 
-if [[ -n "$DEBTEST" ]]; then
-  TYPE="debs"
-  echo "# Detected Distro is ${DEBTEST}"
-  ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-deb.sh"
-elif [[ -n "$RHTEST" ]]; then
+if [[ -n "$RHTEST" ]]; then
   TYPE="rpms"
   echo "# Detected Distro is ${RHTEST}"
   RHMAJVER=`cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/'`
   ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-el${RHMAJVER}.sh"
+elif [[ -n "$DEBTEST" ]]; then
+  TYPE="debs"
+  echo "# Detected Distro is ${DEBTEST}"
+  ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-deb.sh"
 else
   echo "Unknown Operating System"
   exit 2
