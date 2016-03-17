@@ -22,7 +22,6 @@ else
 	DEB_DISTRO := $(shell lsb_release -cs)
 endif
 
-
 .PHONY: all install wheelhouse
 all: install
 
@@ -67,6 +66,19 @@ ifeq ($(DEBIAN),1)
 endif
 
 wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: | populate_version requirements
+.stamp-wheelhouse: | populate_version inject-deps requirements
+	cat requirements.txt
 	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	touch $@
+
+# Note: We want to dynamically inject "st2client" dependency. This way we can
+# pin it to the version we build so the requirement is satisfied by locally
+# built wheel and not version from PyPi
+inject-deps: .stamp-inject-deps
+.stamp-inject-deps: | bdist_wheel
+	# Note: We dynamically obtain the version, this is required because dev
+	# build versions don't store correct version identifier in __init__.py
+	# and we need setup.py to normalize iz
+	$(eval $ST2PKG_NORMALIZED_VERSION :=$(shell python st2client/setup.py --version))
+	echo "st2client==$($ST2PKG_NORMALIZED_VERSION)" >> requirements.txt
 	touch $@
