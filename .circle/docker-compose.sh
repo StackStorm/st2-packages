@@ -29,29 +29,21 @@ case "$1" in
         -e MONGODBHOST=${HOST_IP} \
         $2 /bin/true
   ;;
-  build_st2)
+  build)
     echo Starting Packages Build for $2 ...
     docker-compose -f docker-compose.circle.yml run \
         -e ST2_GITURL=${ST2_GITURL} \
         -e ST2_GITREV=${ST2_GITREV} \
         -e ST2PKG_VERSION=${ST2PKG_VERSION} \
         -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
-        -e RABBITMQHOST=${HOST_IP} \
-        -e POSTGRESHOST=${HOST_IP} \
-        -e MONGODBHOST=${HOST_IP} \
-        -e ST2_PACKGES=st2 \
-        $2 build
-  ;;
-  build_st2mistral)
-    echo Starting Packages Build for $2 ...
-    docker-compose -f docker-compose.circle.yml run \
         -e ST2MISTRAL_GITURL=${ST2MISTRAL_GITURL} \
         -e ST2MISTRAL_GITREV=${ST2MISTRAL_GITREV} \
         -e MISTRAL_VERSION=${MISTRAL_VERSION} \
         -e MISTRAL_RELEASE=${MISTRAL_RELEASE} \
         -e RABBITMQHOST=${HOST_IP} \
         -e POSTGRESHOST=${HOST_IP} \
-        -e ST2_PACKGES=st2mistral \
+        -e MONGODBHOST=${HOST_IP} \
+        -e ST2_PACAKGES=${ST2_PACAKGES} \
         $2 build
   ;;
   test)
