@@ -75,7 +75,7 @@ wheelhouse: .stamp-wheelhouse
 # pin it to the version we build so the requirement is satisfied by locally
 # built wheel and not version from PyPi
 inject-deps: .stamp-inject-deps
-.stamp-inject-deps: | bdist_wheel
+.stamp-inject-deps:
 	# Note: We dynamically obtain the version, this is required because dev
 	# build versions don't store correct version identifier in __init__.py
 	# and we need setup.py to normalize iz
