@@ -26,6 +26,7 @@ populate_version: .stamp-populate_version
 requirements: .stamp-requirements
 .stamp-requirements:
 	python ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
+	cat ../fixed-requirements.txt
 
 wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements
