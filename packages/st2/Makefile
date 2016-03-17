@@ -79,6 +79,6 @@ inject-deps: .stamp-inject-deps
 	# Note: We dynamically obtain the version, this is required because dev
 	# build versions don't store correct version identifier in __init__.py
 	# and we need setup.py to normalize iz
-	$(eval $ST2PKG_NORMALIZED_VERSION :=$(shell python st2client/setup.py --version))
+	$(eval $ST2PKG_NORMALIZED_VERSION :=$(shell python ../st2common/setup.py --version))
 	echo "st2client==$($ST2PKG_NORMALIZED_VERSION)" >> requirements.txt
 	touch $@
