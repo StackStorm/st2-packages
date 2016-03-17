@@ -58,7 +58,7 @@ populate_version: .stamp-populate_version
 
 requirements:
 	python ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt -f ../fixed-requirements.txt
-	cat ../fixed-requirements.txt
+	cat requirements.txt
 
 changelog: populate_version
 ifeq ($(DEBIAN),1)
