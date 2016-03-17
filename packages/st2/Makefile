@@ -66,7 +66,7 @@ ifeq ($(DEBIAN),1)
 endif
 
 wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: | populate_version inject-deps requirements
+.stamp-wheelhouse: | populate_version requirements inject-deps
 	cat requirements.txt
 	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
