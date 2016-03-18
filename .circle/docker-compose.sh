@@ -43,7 +43,7 @@ case "$1" in
         -e RABBITMQHOST=${HOST_IP} \
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
-        -e ST2_PACKAGES=${ST2_PACAKGES} \
+        -e ST2_PACKAGES=${ST2_PACKAGES} \
         $2 build
   ;;
   test)
