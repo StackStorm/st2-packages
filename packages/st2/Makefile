@@ -4,6 +4,11 @@ ST2PKG_RELEASE ?= 1
 ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
 CHANGELOG_COMMENT ?= "automated build, version: $(ST2PKG_VERSION)"
 
+# Note: We dynamically obtain the version, this is required because dev
+# build versions don't store correct version identifier in __init__.py
+# and we need setup.py to normalize it (e.g. 1.4dev -> 1.4.dev0)
+ST2PKG_NORMALIZED_VERSION ?= $(shell python setup.py --version || echo "failedtoretrieveversion")
+
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 endif
@@ -76,9 +81,5 @@ wheelhouse: .stamp-wheelhouse
 # built wheel and not version from PyPi
 inject-deps: .stamp-inject-deps
 .stamp-inject-deps:
-	# Note: We dynamically obtain the version, this is required because dev
-	# build versions don't store correct version identifier in __init__.py
-	# and we need setup.py to normalize it (e.g. 1.4dev -> 1.4.dev0)
-	$(eval $ST2PKG_NORMALIZED_VERSION :=$(shell python setup.py --version || echo "failedtoretrieveversion"))
-	echo "st2client==$($ST2PKG_NORMALIZED_VERSION)" >> requirements.txt
+	echo "st2client==$(ST2PKG_NORMALIZED_VERSION)" >> requirements.txt
 	touch $@
