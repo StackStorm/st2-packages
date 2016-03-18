@@ -16,7 +16,6 @@ endif
 # and we need setup.py to normalize it (e.g. 1.4dev -> 1.4.dev0)
 ST2PKG_NORMALIZED_VERSION ?= $(shell $(PYTHON_BINARY) setup.py --version || echo "failed_to_retrieve_version")
 
-
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	#DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
