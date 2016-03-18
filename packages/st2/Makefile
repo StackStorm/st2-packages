@@ -4,14 +4,18 @@ ST2PKG_RELEASE ?= 1
 ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
 CHANGELOG_COMMENT ?= "automated build, version: $(ST2PKG_VERSION)"
 
+ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
+	PATH := /usr/share/python/st2python/bin:$(PATH)
+	PYTHON_BINARY := /usr/share/python/st2python/bin/python
+else
+	PYTHON_BINARY := python
+endif
+
 # Note: We dynamically obtain the version, this is required because dev
 # build versions don't store correct version identifier in __init__.py
 # and we need setup.py to normalize it (e.g. 1.4dev -> 1.4.dev0)
-ST2PKG_NORMALIZED_VERSION ?= $(shell python setup.py --version || /usr/share/python/st2python/bin/python setup.py --version)
+ST2PKG_NORMALIZED_VERSION ?= $(shell $(PYTHON_BINARY) setup.py --version || echo "failed_to_retrieve_version")
 
-ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
-	PATH := /usr/share/python/st2python/bin:$(PATH)
-endif
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
