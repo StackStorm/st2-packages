@@ -36,7 +36,8 @@ machine:
 
 checkout:
   post:
-    - .circle/buildenv.sh
+    - .circle/buildenv_st2.sh
+    - .circle/buildenv_mistral.sh
 
 dependencies:
   cache_directories:
