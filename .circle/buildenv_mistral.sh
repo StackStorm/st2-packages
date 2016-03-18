@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-source ./buildenv_common.sh
+my_dir="$(dirname "$0")"
+source "$my_dir/buildenv_common.sh"
 
 distros=($DISTROS)
 DISTRO=${distros[$CIRCLE_NODE_INDEX]}
