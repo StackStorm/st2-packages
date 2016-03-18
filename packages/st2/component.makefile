@@ -37,7 +37,7 @@ requirements: .stamp-requirements
 	cat requirements.txt
 
 wheelhouse: .stamp-wheelhouse
-.stamp-wheelhouse: | populate_version requirements inject-deps
+.stamp-wheelhouse: | populate_version requirements
 	# Install wheels into shared location
 	cat requirements.txt
 	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
