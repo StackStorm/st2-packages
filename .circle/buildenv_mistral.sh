@@ -14,9 +14,7 @@ fetch_version() {
     python -c 'execfile("../version_st2.py"); print __version__'
   else
     # build takes place in `st2-packages` repo
-    echo ${ST2MISTRAL_GITURL}/raw/${ST2MISTRAL_GITREV}/version_st2.py
     curl -sSL -o /tmp/mistral_version.py ${ST2MISTRAL_GITURL}/raw/${ST2MISTRAL_GITREV}/version_st2.py
-    cat /tmp/mistral_version.py
     python -c 'execfile("/tmp/mistral_version.py"); print __version__'
   fi
 }
