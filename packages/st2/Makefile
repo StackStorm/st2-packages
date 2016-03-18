@@ -7,7 +7,7 @@ CHANGELOG_COMMENT ?= "automated build, version: $(ST2PKG_VERSION)"
 # Note: We dynamically obtain the version, this is required because dev
 # build versions don't store correct version identifier in __init__.py
 # and we need setup.py to normalize it (e.g. 1.4dev -> 1.4.dev0)
-ST2PKG_NORMALIZED_VERSION ?= $(shell python setup.py --version || echo "failedtoretrieveversion")
+ST2PKG_NORMALIZED_VERSION ?= $(shell python setup.py --version || /usr/share/python/st2python/bin/python setup.py --version)
 
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
