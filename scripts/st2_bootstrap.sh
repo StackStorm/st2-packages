@@ -1,10 +1,16 @@
 #!/bin/bash
 
-BASE_PATH="https://raw.githubusercontent.com/StackStorm/st2-packages/master/scripts/st2bootstrap"
+BASE_PATH="https://raw.githubusercontent.com/StackStorm/st2-packages"
 BOOTSTRAP_FILE='st2bootstrap.sh'
 
 DEBTEST=`lsb_release -a 2> /dev/null | grep Distributor | awk '{print $3}'`
 RHTEST=`cat /etc/redhat-release 2> /dev/null | sed -e "s~\(.*\)release.*~\1~g"`
+VERSION=''
+RELEASE='stable'
+REPO_TYPE='staging'
+BETA=''
+ST2_PKG_VERSION=''
+BRANCH='master'
 
 setup_args() {
   for i in "$@"
@@ -33,7 +39,7 @@ setup_args() {
     done
 
   if [[ "$VERSION" != '' ]]; then
-    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
       echo "$VERSION does not match supported formats x.y.z or x.ydev"
       exit 1
     fi
@@ -43,42 +49,38 @@ setup_args() {
      RELEASE='unstable'
     fi
   fi
+}
 
-  echo "########################################################"
-  echo "          Installing st2 $RELEASE $VERSION              "
-  echo "########################################################"
+setup_args $@
 
-  if [[ -z "$BETA"  && "$REPO_TYPE"="staging" ]]; then
-    printf "\n\n"
-    echo "################################################################"
-    echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
-    echo "################################################################"
+get_version_branch() {
+  if [[ "$RELEASE" == 'stable' ]]; then
+      BRANCH="v$(echo ${VERSION} | awk 'BEGIN {FS="."}; {print $1 "." $2}')"
   fi
 }
 
-setup_args
-
 if [[ "$VERSION" != '' ]]; then
+  get_version_branch $VERSION
   VERSION="--version ${VERSION}"
 fi
 
 if [[ "$RELEASE" != '' ]]; then
-  RELEASE="--version ${RELEASE}"
+  RELEASE="--${RELEASE}"
 fi
 
 if [[ "$REPO_TYPE" == 'staging' ]]; then
   REPO_TYPE="--staging"
 fi
 
-if [[ -n "$DEBTEST" ]]; then
-  TYPE="debs"
-  echo "# Detected Distro is ${DEBTEST}"
-  ST2BOOTSTRAP="${BASE_PATH}-deb.sh"
-elif [[ -n "$RHTEST" ]]; then
+if [[ -n "$RHTEST" ]]; then
   TYPE="rpms"
   echo "# Detected Distro is ${RHTEST}"
   RHMAJVER=`cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/'`
-  ST2BOOTSTRAP="${BASE_PATH}-el${RHMAJVER}.sh"
+  ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-el${RHMAJVER}.sh"
+elif [[ -n "$DEBTEST" ]]; then
+  TYPE="debs"
+  echo "# Detected Distro is ${DEBTEST}"
+  ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-deb.sh"
 else
   echo "Unknown Operating System"
   exit 2

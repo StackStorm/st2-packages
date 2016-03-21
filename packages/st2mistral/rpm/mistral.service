@@ -5,9 +5,8 @@ After=network.target
 [Service]
 Type=oneshot
 EnvironmentFile=-/etc/sysconfig/mistral
-ExecStartPost=/usr/bin/systemctl start mistral-api
-ExecStartPost=/usr/bin/systemctl start mistral-server
-ExecStop=/bin/sh -c "systemctl stop mistral-api; systemctl stop mistral-server;"
+ExecStartPost=/usr/bin/systemctl start mistral-api mistral-server
+ExecStop=/usr/bin/systemctl stop mistral-api mistral-server
 ExecStart=/bin/sh -c true
 RemainAfterExit=true
 

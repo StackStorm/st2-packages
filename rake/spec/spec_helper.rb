@@ -70,7 +70,7 @@ class ST2Spec
       st2client: %w(st2),
       st2debug: %w(st2-submit-debug-info),
       st2: %w(st2-bootstrap-rmq st2-register-content st2-rule-tester
-                    st2-trigger-refire st2 st2ctl),
+              st2-apply-rbac-definitions st2-trigger-refire st2 st2ctl),
       mistral: %w(mistral)
     },
 

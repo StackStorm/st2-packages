@@ -19,12 +19,14 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="mistral"
 NAME=mistral-api
 DAEMON=/opt/stackstorm/mistral/bin/gunicorn
-PIDFILE=/var/run/$NAME.pid
+COMPONENTS="api,engine,executor"
+PIDFILE=/var/run/mistral/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 RUNAS_USER="mistral"
 RUNAS_GROUP="mistral"
-API_ARGS="--log-file /var/log/mistral/mistral-api.log -b 127.0.0.1:8989 -w 2 mistral.api.wsgi --graceful-timeout 10"
+API_ARGS="--log-file /var/log/mistral/mistral-api.log -b 127.0.0.1:8989 -w 2 mistral.api.wsgi --graceful-timeout 10 --pid ${PIDFILE}"
 UMASK=022
+
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -41,22 +43,20 @@ DAEMON_ARGS="${API_ARGS}"
 # and status_of_proc is working.
 . /lib/lsb/init-functions
 
-# Check it whether we invoked directly
-if [ -z "$RAN_BY_MISTRAL" ]; then
-  log_action_msg "Can't start this service directly, use /etc/init.d/mistral instead"
-  exit 3
-fi
+# Source our helpers
+. /opt/stackstorm/mistral/share/sysvinit/helpers
+
 
 #
-# Check if service is running
+# Check if service is running (docker fail-safe)
+#   returns: 0 - not running, 1 - running
 #
-# Service is running: 1, otherwise 0.
 lsb_running()
 {
-  procid=$(cat $PIDFILE 2>/dev/null)
-  [ ! -z $procid ] && [ -d /proc/$procid ] && \
-      cat /proc/$procid/cmdline | grep -q $DAEMON && return 1
-  return 0
+  local retval=1 pid="$(cat $PIDFILE 2>/dev/null)"
+  [ ! -z $pid ] && [ -d /proc/$pid ] && \
+      cat /proc/$pid/cmdline | grep -q $DAEMON && retval=0
+  return $retval
 }
 
 #
@@ -68,8 +68,8 @@ do_start()
   #   0 if daemon has been started
   #   1 if daemon was already running
   #   2 if daemon could not be started
-  lsb_running || return 1
-  start-stop-daemon --start --quiet --chuid $RUNAS_USER:$RUNAS_GROUP --umask $UMASK --background --make-pidfile --pidfile $PIDFILE \
+  lsb_running && return 1
+  start-stop-daemon --start --quiet --chuid $RUNAS_USER:$RUNAS_GROUP --umask $UMASK --background --pidfile $PIDFILE \
     --exec $DAEMON -- $DAEMON_ARGS \
     || return 2
 }
@@ -112,6 +112,10 @@ do_reload() {
   start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE
   return 0
 }
+
+
+# NB! Exit if mistral-api is disabled
+enabled_list -q api || exit 0
 
 case "$1" in
   start)

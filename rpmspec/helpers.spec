@@ -36,8 +36,8 @@
 ## Clean up RECORD and some other files left by python, which may contain
 #   absolute buildroot paths.
 %define cleanup_python_abspath \
-  find /root/rpmbuild/BUILDROOT/%{package}-* -name RECORD -o -name '*.egg-link' -o -name '*.pth' | \
-      xargs -I{} -n1 sed -i 's@/root/rpmbuild.*/opt/@/opt/@' {} \
+  find %{buildroot} -name RECORD -o -name '*.egg-link' -o -name '*.pth' | \
+      xargs -I{} -n1 sed -i 's@%{buildroot}@@' {} \
 %{nil}
 
 # Define use_systemd to know if we on a systemd system
