@@ -78,5 +78,5 @@ deployment:
       - |
         DISTROS=($DISTROS)
         parallel -v -j0 --line-buffer .circle/packagecloud.sh deploy {} ~/packages/{} ::: ${DISTROS[@]::$CIRCLE_NODE_TOTAL}
-      - .circle/docker.sh deploy st2actionrunner st2api st2stream st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
+      - .circle/circleci.sh build st2-dockerfiles master
       - .circle/save_payload.py ~/packages
