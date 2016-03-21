@@ -5,7 +5,15 @@ ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; p
 
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
+	PYTHON_BINARY := /usr/share/python/st2python/bin/python
+else
+	PYTHON_BINARY := python
 endif
+
+# Note: We dynamically obtain the version, this is required because dev
+# build versions don't store correct version identifier in __init__.py
+# and we need setup.py to normalize it (e.g. 1.4dev -> 1.4.dev0)
+ST2PKG_NORMALIZED_VERSION ?= $(shell $(PYTHON_BINARY) setup.py --version || echo "failed_to_retrieve_version")
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
@@ -26,14 +34,25 @@ populate_version: .stamp-populate_version
 requirements: .stamp-requirements
 .stamp-requirements:
 	python ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
+	cat requirements.txt
 
 wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements
 	# Install wheels into shared location
+	cat requirements.txt
 	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
-.stamp-bdist_wheel: | populate_version requirements
+.stamp-bdist_wheel: | populate_version requirements inject-deps
+	cat requirements.txt
 	python setup.py bdist_wheel -d $(WHEELDIR)
+	touch $@
+
+# Note: We want to dynamically inject "st2client" dependency. This way we can
+# pin it to the version we build so the requirement is satisfied by locally
+# built wheel and not version from PyPi
+inject-deps: .stamp-inject-deps
+.stamp-inject-deps:
+	echo "st2client==$(ST2PKG_NORMALIZED_VERSION)" >> requirements.txt
 	touch $@
