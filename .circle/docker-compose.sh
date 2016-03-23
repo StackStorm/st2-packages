@@ -2,7 +2,7 @@
 # Usage: docker-compose.sh OPERATION
 #   This script is a st2 packages build pipeline invocation wrapper.
 #
-# Operations: 
+# Operations:
 #   pull, build and test operations are available. Which pull containers,
 #   build and test packages respectivly.
 #
@@ -43,6 +43,7 @@ case "$1" in
         -e RABBITMQHOST=${HOST_IP} \
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
+        -e ST2_PACKAGES="${ST2_PACKAGES}" \
         $2 build
   ;;
   test)

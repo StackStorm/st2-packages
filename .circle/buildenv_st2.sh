@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+my_dir="$(dirname "$0")"
+source "$my_dir/buildenv_common.sh"
+
 distros=($DISTROS)
 DISTRO=${distros[$CIRCLE_NODE_INDEX]}
 
@@ -26,15 +29,6 @@ st2_giturl() {
   fi
 }
 
-# Write export lines into ~/.buildenv and also source it in ~/.circlerc
-write_env() {
-  for e in $*; do
-    eval "value=\$$e"
-    [ -z "$value" ] || echo "export $e=$value" >> ~/.buildenv
-  done
-  echo ". ~/.buildenv" >> ~/.circlerc
-}
-
 # ---
 # ST2_GITURL - st2 GitHub repository (ex: https://github.com/StackStorm/st2)
 # ST2_GITREV - st2 branch name (ex: master, v1.2.1). This will be used to determine correct Docker Tag: `latest`, `1.2.1`
@@ -55,23 +49,9 @@ else
   ST2PKG_RELEASE=1
 fi
 
-
-# Mistral versioning
-# Nasty hack until CI for Mistral is done: https://github.com/StackStorm/st2-packages/issues/82
-ST2MISTRAL_GITURL=${ST2MISTRAL_GITURL:-https://github.com/StackStorm/mistral}
-ST2MISTRAL_GITREV=${ST2MISTRAL_GITREV:-st2-1.3.2}
-MISTRAL_VERSION=${MISTRAL_VERSION:-1.3.2}
-if [ -z "$CIRCLE_PR_REPONAME" ]; then
-  MISTRAL_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${MISTRAL_VERSION} st2mistral)
-else
-  # is fork
-  MISTRAL_RELEASE=1
-fi
-
-
 re="\\b$DISTRO\\b"
 [[ "$NOTESTS" =~ $re ]] && TESTING=0
 
-write_env ST2_GITURL ST2_GITREV ST2PKG_VERSION ST2PKG_RELEASE ST2_WAITFORSTART DISTRO TESTING ST2MISTRAL_GITURL ST2MISTRAL_GITREV MISTRAL_VERSION MISTRAL_RELEASE
+write_env ST2_GITURL ST2_GITREV ST2PKG_VERSION ST2PKG_RELEASE ST2_WAITFORSTART DISTRO TESTING
 
 cat ~/.buildenv
