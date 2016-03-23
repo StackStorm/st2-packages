@@ -5,6 +5,7 @@
 %define release %(echo -n "${MISTRAL_RELEASE:-1}")
 
 %define _sourcedir ./
+%define _builddir %{SOURCE0}
 %include rpmspec/helpers.spec
 %include rpmspec/package_venv.spec
 
