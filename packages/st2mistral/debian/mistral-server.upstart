@@ -16,12 +16,14 @@ kill timeout 60
 
 script
   NAME=mistral
+  COMPONENTS="api,engine,executor"
   SERVER_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral-server.log"
 
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
   # Exit if server components are disabled, otherwise inject them into args.
+  . /opt/stackstorm/mistral/share/sysvinit/helpers
   enabled_list -q server || exit 0
 
   exec /opt/stackstorm/mistral/bin/mistral-server --server $(enabled_list server) ${SERVER_ARGS}

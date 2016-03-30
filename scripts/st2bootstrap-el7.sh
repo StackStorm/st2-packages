@@ -332,6 +332,7 @@ ok_message() {
 }
 
 trap 'fail' EXIT
+STEP='Parse arguments' && setup_args $@
 STEP='Adjust SELinux policies' && adjust_selinux_policies
 
 STEP="Install st2 dependencies" && install_st2_dependencies

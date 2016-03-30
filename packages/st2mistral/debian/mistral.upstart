@@ -6,18 +6,18 @@ stop on starting rc RUNLEVEL=[016]
 
 pre-start script
   retval=0
-  /etc/init.d/mistral-api start
+  /sbin/initctl start mistral-api
   rs=$?; [ $rs -gt $retval ] && retval=$rs
-  /etc/init.d/mistral-server start
+  /sbin/initctl start mistral-server
   rs=$?; [ $rs -gt $retval ] && retval=$rs
   exit $retval
 end script
 
 post-stop script
   retval=0
-  /etc/init.d/mistral-api stop
+  /sbin/initctl stop mistral-api
   rs=$?; [ $rs -gt $retval ] && retval=$rs
-  /etc/init.d/mistral-server stop
+  /sbin/initctl stop mistral-server
   rs=$?; [ $rs -gt $retval ] && retval=$rs
   exit $retval
 end script
