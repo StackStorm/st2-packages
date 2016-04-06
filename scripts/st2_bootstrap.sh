@@ -10,6 +10,8 @@ RELEASE='stable'
 REPO_TYPE='staging'
 BETA=''
 ST2_PKG_VERSION=''
+USERNAME=''
+PASSWORD=''
 BRANCH='master'
 
 setup_args() {
@@ -21,19 +23,27 @@ setup_args() {
           shift
           ;;
           -s=*|--stable)
-        RELEASE=stable
+          RELEASE=stable
           shift
           ;;
           -u=*|--unstable)
-        RELEASE=unstable
+          RELEASE=unstable
           shift
           ;;
           --staging)
-        REPO_TYPE='staging'
-        shift
-        ;;
+          REPO_TYPE='staging'
+          shift
+          ;;
+          --user=*)
+          USERNAME="${i#*=}"
+          shift
+          ;;
+          --password=*)
+          PASSWORD="${i#*=}"
+          shift
+          ;;
           *)
-                  # unknown option
+          # unknown option
           ;;
       esac
     done
@@ -49,6 +59,14 @@ setup_args() {
      RELEASE='unstable'
     fi
   fi
+
+  if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
+    echo "Let's set StackStorm admin credentials."
+    echo "You can also use \"--user\" and \"--password\" for unattended installation."
+    read -e -p "Admin username: " -i "st2admin" USERNAME
+    read -e -s -p "Password: " PASSWORD
+  fi
+
 }
 
 setup_args $@
@@ -71,6 +89,9 @@ fi
 if [[ "$REPO_TYPE" == 'staging' ]]; then
   REPO_TYPE="--staging"
 fi
+
+USERNAME="--user=${USERNAME}"
+PASSWORD="--password=${PASSWORD}"
 
 if [[ -n "$RHTEST" ]]; then
   TYPE="rpms"
@@ -97,5 +118,5 @@ else
     chmod +x ${BOOTSTRAP_FILE}
 
     echo "Running deployment script for St2 ${VERSION}..."
-    bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE}
+    bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${USERNAME} ${PASSWORD}
 fi
