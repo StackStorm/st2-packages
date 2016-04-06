@@ -2,9 +2,6 @@
 
 set -eu
 
-USERNAME='st2admin'
-PASSWORD='Ch@ngeMe'
-
 HUBOT_ADAPTER='slack'
 HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
 VERSION=''
@@ -12,6 +9,8 @@ RELEASE='stable'
 REPO_TYPE='staging'
 BETA=''
 ST2_PKG_VERSION=''
+USERNAME=''
+PASSWORD=''
 
 setup_args() {
   for i in "$@"

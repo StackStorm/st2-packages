@@ -2,9 +2,6 @@
 
 set -eu
 
-USERNAME='st2admin'
-PASSWORD='Ch@ngeMe'
-
 HUBOT_ADAPTER='slack'
 HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
 VERSION=''
@@ -14,6 +11,8 @@ BETA=''
 ST2_PKG_VERSION=''
 ST2MISTRAL_PKG_VERSION=''
 ST2WEB_PKG_VERSION=''
+USERNAME=''
+PASSWORD=''
 
 fail() {
   echo "############### ERROR ###############"
