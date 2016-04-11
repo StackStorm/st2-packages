@@ -2,9 +2,6 @@
 
 set -eu
 
-USERNAME='st2admin'
-PASSWORD='Ch@ngeMe'
-
 HUBOT_ADAPTER='slack'
 HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
 VERSION=''
@@ -12,6 +9,8 @@ RELEASE='stable'
 REPO_TYPE='staging'
 BETA=''
 ST2_PKG_VERSION=''
+USERNAME=''
+PASSWORD=''
 
 setup_args() {
   for i in "$@"
@@ -22,19 +21,27 @@ setup_args() {
           shift
           ;;
           -s=*|--stable)
-        RELEASE=stable
+          RELEASE=stable
           shift
           ;;
           -u=*|--unstable)
-        RELEASE=unstable
+          RELEASE=unstable
           shift
           ;;
           --staging)
-        REPO_TYPE='staging'
-        shift
-        ;;
+          REPO_TYPE='staging'
+          shift
+          ;;
+          --user=*)
+          USERNAME="${i#*=}"
+          shift
+          ;;
+          --password=*)
+          PASSWORD="${i#*=}"
+          shift
+          ;;
           *)
-                  # unknown option
+          # unknown option
           ;;
       esac
     done
@@ -61,6 +68,14 @@ setup_args() {
     echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
     echo "################################################################"
   fi
+
+  if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
+    echo "Let's set StackStorm admin credentials."
+    echo "You can also use \"--user\" and \"--password\" for unattended installation."
+    read -e -p "Admin username: " -i "st2admin" USERNAME
+    read -e -s -p "Password: " PASSWORD
+  fi
+
 }
 
 
