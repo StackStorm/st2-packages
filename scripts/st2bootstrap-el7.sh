@@ -175,7 +175,7 @@ configure_st2_user() {
   sudo chmod 0440 /etc/sudoers.d/st2
 
   # Make sure `Defaults requiretty` is disabled in `/etc/sudoers`
-  sudo sed -i "s/^Defaults\s\+requiretty/# Defaults requiretty/g" /etc/sudoers
+  sudo sed -i -r "s/^Defaults\s+\+requiretty/# Defaults +requiretty/g" /etc/sudoers
 }
 
 configure_st2_authentication() {
