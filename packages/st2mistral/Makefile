@@ -10,8 +10,8 @@ PBR_GITURL := git+https://github.com/openstack-dev/pbr@d19459daa8616dd18fde016c2
 define INJECT_DEPS
 gunicorn
 git+https://github.com/StackStorm/st2mistral.git@$(GITREV)#egg=st2mistral
+git+https://github.com/StackStorm/python-mistralclient.git@$(GITREV)#egg=python-mistralclient
 $(PBR_GITURL)
-psycopg2
 endef
 export INJECT_DEPS
 
