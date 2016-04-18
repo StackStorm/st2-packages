@@ -6,7 +6,7 @@ HUBOT_ADAPTER='slack'
 HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
 VERSION=''
 RELEASE='stable'
-REPO_TYPE='staging'
+REPO_TYPE=''
 BETA=''
 ST2_PKG_VERSION=''
 USERNAME=''
@@ -45,6 +45,10 @@ setup_args() {
           ;;
       esac
     done
+
+  if [[ "$REPO_TYPE" != '' ]]; then
+      REPO_PREFIX="${REPO_TYPE}-"
+  fi
 
   if [[ "$VERSION" != '' ]]; then
     if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
@@ -167,7 +171,7 @@ install_st2_dependencies() {
 }
 
 install_st2() {
-  curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_TYPE}-${RELEASE}/script.rpm.sh | sudo bash
+  curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
   sudo yum -y install st2${ST2_PKG_VERSION}
   sudo st2ctl reload
   sudo st2ctl start
