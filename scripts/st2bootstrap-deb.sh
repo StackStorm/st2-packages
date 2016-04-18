@@ -153,12 +153,12 @@ configure_st2_user () {
   sudo chmod 0700 /home/stanley/.ssh
   sudo chown -R stanley:stanley /home/stanley
 
-  # Disable requiretty for all users
-  sed -i "s/^Defaults\s\+requiretty/# Defaults requiretty/g" /etc/sudoers
-
   # Enable passwordless sudo
   sudo sh -c 'echo "stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL" >> /etc/sudoers.d/st2'
   sudo chmod 0440 /etc/sudoers.d/st2
+
+  # Disable requiretty for all users
+  sed -i "s/^Defaults\s+\+requiretty/# Defaults requiretty/g" /etc/sudoers
 
   ##### NOTE STILL NEED ADJUST CONFIGURATION FOR ST2 USER SECTION #####
 }
