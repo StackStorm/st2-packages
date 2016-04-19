@@ -158,7 +158,7 @@ configure_st2_user () {
   sudo chmod 0440 /etc/sudoers.d/st2
 
   # Disable requiretty for all users
-  sed -i -r "s/^Defaults\s+\+requiretty/# Defaults +requiretty/g" /etc/sudoers
+  sudo sed -i -r "s/^Defaults\s+\+?requiretty/# Defaults requiretty/g" /etc/sudoers
 
   ##### NOTE STILL NEED ADJUST CONFIGURATION FOR ST2 USER SECTION #####
 }
