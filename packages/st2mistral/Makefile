@@ -11,6 +11,7 @@ define INJECT_DEPS
 gunicorn
 git+https://github.com/StackStorm/st2mistral.git@$(GITREV)#egg=st2mistral
 $(PBR_GITURL)
+psycopg2
 endef
 export INJECT_DEPS
 
