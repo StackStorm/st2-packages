@@ -6,7 +6,8 @@ HUBOT_ADAPTER='slack'
 HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
 VERSION=''
 RELEASE='stable'
-REPO_TYPE='staging'
+REPO_TYPE=''
+REPO_PREFIX=''
 BETA=''
 ST2_PKG_VERSION=''
 ST2MISTRAL_PKG_VERSION=''
@@ -54,6 +55,10 @@ setup_args() {
           ;;
       esac
     done
+
+  if [[ "$REPO_TYPE" != '' ]]; then
+      REPO_PREFIX="${REPO_TYPE}-"
+  fi
 
   if [[ "$VERSION" != '' ]]; then
     if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
@@ -128,7 +133,7 @@ get_full_pkg_versions() {
 
 install_st2() {
   # Following script adds a repo file, registers gpg key and runs apt-get update
-  curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_TYPE}-${RELEASE}/script.deb.sh | sudo bash
+  curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.deb.sh | sudo bash
   STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
   sudo apt-get install -y st2${ST2_PKG_VERSION}
   sudo st2ctl reload
