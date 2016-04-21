@@ -7,7 +7,7 @@ DEBTEST=`lsb_release -a 2> /dev/null | grep Distributor | awk '{print $3}'`
 RHTEST=`cat /etc/redhat-release 2> /dev/null | sed -e "s~\(.*\)release.*~\1~g"`
 VERSION=''
 RELEASE='stable'
-REPO_TYPE='staging'
+REPO_TYPE=''
 BETA=''
 ST2_PKG_VERSION=''
 USERNAME=''
@@ -62,11 +62,10 @@ setup_args() {
 
   if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
     echo "Let's set StackStorm admin credentials."
-    echo "You can also use \"--user\" and \"--password\" for unattended installation."
-    read -e -p "Admin username: " -i "st2admin" USERNAME
-    read -e -s -p "Password: " PASSWORD
+    echo "You can also use \"--user\" and \"--password\" to override default st2 credentials."
+    USERNAME=${USERNAME:-st2admin}
+    PASSWORD=${PASSWORD:-Ch@ngeMe}
   fi
-
 }
 
 setup_args $@
@@ -117,6 +116,6 @@ else
     curl -Ss -k -o ${BOOTSTRAP_FILE} ${ST2BOOTSTRAP}
     chmod +x ${BOOTSTRAP_FILE}
 
-    echo "Running deployment script for St2 ${VERSION}..."
+    echo "Running deployment script for st2 ${VERSION}..."
     bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${USERNAME} ${PASSWORD}
 fi

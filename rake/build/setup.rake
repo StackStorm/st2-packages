@@ -40,7 +40,7 @@ namespace :setup do
           repo_path = '/etc/yum.repos.d/stackstorm-el6-stable.repo'
           execute :wget, "-nv https://bintray.com/stackstorm/el6/rpm -O #{repo_path}"
           execute :sed, "-ir 's~stackstorm/el6~stackstorm/el6/stable~' #{repo_path}"
-          execute :yum, "-y install st2python"
+          execute :yum, "--nogpgcheck -y install st2python"
         end
       end
     end
