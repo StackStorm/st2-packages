@@ -8,7 +8,6 @@ VERSION=''
 RELEASE='stable'
 REPO_TYPE=''
 REPO_PREFIX=''
-BETA=''
 ST2_PKG_VERSION=''
 ST2MISTRAL_PKG_VERSION=''
 ST2WEB_PKG_VERSION=''
@@ -76,7 +75,7 @@ setup_args() {
   echo "          Installing StackStorm $RELEASE $VERSION              "
   echo "########################################################"
 
-  if [[ -z "$BETA"  && "$REPO_TYPE"="staging" ]]; then
+  if [ "$REPO_TYPE" == "staging" ]; then
     printf "\n\n"
     echo "################################################################"
     echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"

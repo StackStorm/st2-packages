@@ -8,7 +8,6 @@ VERSION=''
 RELEASE='stable'
 REPO_TYPE=''
 REPO_PREFIX=''
-BETA=''
 ST2_PKG_VERSION=''
 USERNAME=''
 PASSWORD=''
@@ -67,7 +66,7 @@ setup_args() {
   echo "          Installing st2 $RELEASE $VERSION              "
   echo "########################################################"
 
-  if [[ -z "$BETA"  && "$REPO_TYPE"="staging" ]]; then
+  if [ "$REPO_TYPE" == "staging" ]; then
     printf "\n\n"
     echo "################################################################"
     echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
@@ -153,6 +152,7 @@ install_st2_dependencies() {
 
 install_st2() {
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
+  STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
   sudo yum -y install st2${ST2_PKG_VERSION}
   sudo st2ctl reload
   sudo st2ctl start

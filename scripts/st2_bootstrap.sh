@@ -8,7 +8,6 @@ RHTEST=`cat /etc/redhat-release 2> /dev/null | sed -e "s~\(.*\)release.*~\1~g"`
 VERSION=''
 RELEASE='stable'
 REPO_TYPE=''
-BETA=''
 ST2_PKG_VERSION=''
 USERNAME=''
 PASSWORD=''
