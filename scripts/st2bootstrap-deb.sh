@@ -206,7 +206,7 @@ install_st2mistral() {
 }
 
 install_st2web() {
-  # Add key and repo for the lastest stable nginx
+  # Add key and repo for the latest stable nginx
   sudo apt-key adv --fetch-keys http://nginx.org/keys/nginx_signing.key
   sudo sh -c "cat <<EOT > /etc/apt/sources.list.d/nginx.list
 deb http://nginx.org/packages/ubuntu/ trusty nginx

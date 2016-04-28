@@ -255,7 +255,7 @@ install_st2mistral() {
 }
 
 install_st2web() {
-  # Add key and repo for the lastest stable nginx
+  # Add key and repo for the latest stable nginx
   sudo rpm --import http://nginx.org/keys/nginx_signing.key
   sudo sh -c "cat <<EOT > /etc/yum.repos.d/nginx.repo
 [nginx]
