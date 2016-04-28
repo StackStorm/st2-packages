@@ -7,6 +7,7 @@ HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
 VERSION=''
 RELEASE='stable'
 REPO_TYPE=''
+REPO_PREFIX=''
 BETA=''
 ST2_PKG_VERSION=''
 USERNAME=''
@@ -51,7 +52,7 @@ setup_args() {
   fi
 
   if [[ "$VERSION" != '' ]]; then
-    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
       echo "$VERSION does not match supported formats x.y.z or x.ydev"
       exit 1
     fi
@@ -88,21 +89,21 @@ get_full_pkg_versions() {
     local ST2_VER=$(yum info st2 | grep Version | awk '{print $3}' | grep ${VERSION} | sort --version-sort | tail -n 1)
     if [ -z "$ST2_VER" ]; then
       echo "Could not find requested version of st2!!!"
-      sudo apt-cache policy st2
+      sudo yum info st2
       exit 3
     fi
 
     local ST2MISTRAL_VER=$(yum info st2mistral | grep Version | awk '{print $3}' | grep ${VERSION} | sort --version-sort | tail -n 1)
     if [ -z "$ST2MISTRAL_VER" ]; then
       echo "Could not find requested version of st2mistral!!!"
-      sudo apt-cache policy st2mistral
+      sudo yum info st2mistral
       exit 3
     fi
 
     local ST2WEB_VER=$(yum info st2web | grep Version | awk '{print $3}' | grep ${VERSION} | sort --version-sort | tail -n 1)
     if [ -z "$ST2WEB_VER" ]; then
       echo "Could not find requested version of st2web."
-      sudo apt-cache policy st2web
+      sudo yum info st2web
       exit 3
     fi
     ST2_PKG_VERSION="=${ST2_VER}"
