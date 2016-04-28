@@ -146,7 +146,7 @@ install_st2() {
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.deb.sh | sudo bash
   STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
   sudo apt-get install -y st2${ST2_PKG_VERSION}
-  sudo st2ctl reload
+  sudo st2ctl reload --register-all
   sudo st2ctl start
 }
 
