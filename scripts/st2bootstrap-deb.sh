@@ -11,6 +11,7 @@ REPO_PREFIX=''
 ST2_PKG_VERSION=''
 ST2MISTRAL_PKG_VERSION=''
 ST2WEB_PKG_VERSION=''
+ST2CHATOPS_PKG_VERSION=''
 USERNAME=''
 PASSWORD=''
 
@@ -118,14 +119,24 @@ get_full_pkg_versions() {
       sudo apt-cache policy st2web
       exit 3
     fi
+
+    local ST2CHATOPS_VER=$(apt-cache show st2chatops | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    if [ -z "$ST2CHATOPS_VER" ]; then
+      echo "Could not find requested version of st2chatops."
+      sudo apt-cache policy st2chatops
+      exit 3
+    fi
+
     ST2_PKG_VERSION="=${ST2_VER}"
     ST2MISTRAL_PKG_VERSION="=${ST2MISTRAL_VER}"
     ST2WEB_PKG_VERSION="=${ST2WEB_VER}"
+    ST2CHATOPS_PKG_VERSION="=${ST2CHATOPS_VER}"
     echo "##########################################################"
     echo "#### Following versions of packages will be installed ####"
     echo "st2${ST2_PKG_VERSION}"
     echo "st2mistral${ST2MISTRAL_PKG_VERSION}"
     echo "st2web${ST2WEB_PKG_VERSION}"
+    echo "st2chatops${ST2CHATOPS_PKG_VERSION}"
     echo "##########################################################"
   fi
 }
@@ -236,7 +247,7 @@ install_st2chatops() {
   sudo apt-get install -y nodejs
 
   # Install st2chatops
-  sudo apt-get install -y st2chatops
+  sudo apt-get install -y st2chatops${ST2CHATOPS_PKG_VERSION}
 }
 
 configure_st2chatops() {
