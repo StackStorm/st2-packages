@@ -7,10 +7,14 @@ HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
 VERSION=''
 RELEASE='stable'
 REPO_TYPE=''
-BETA=''
+REPO_PREFIX=''
 ST2_PKG_VERSION=''
 USERNAME=''
 PASSWORD=''
+ST2_PKG='st2'
+ST2MISTRAL_PKG='st2mistral'
+ST2WEB_PKG='st2web'
+ST2CHATOPS_PKG='st2chatops'
 
 setup_args() {
   for i in "$@"
@@ -51,7 +55,7 @@ setup_args() {
   fi
 
   if [[ "$VERSION" != '' ]]; then
-    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
       echo "$VERSION does not match supported formats x.y.z or x.ydev"
       exit 1
     fi
@@ -66,7 +70,7 @@ setup_args() {
   echo "          Installing st2 $RELEASE $VERSION              "
   echo "########################################################"
 
-  if [[ -z "$BETA"  && "$REPO_TYPE"="staging" ]]; then
+  if [ "$REPO_TYPE" == "staging" ]; then
     printf "\n\n"
     echo "################################################################"
     echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
@@ -82,40 +86,59 @@ setup_args() {
 }
 
 
+install_yum_utils() {
+  # We need repoquery tool to get package_name-package_ver-package_rev in RPM based distros
+  # if we don't want to construct this string manually using yum info --show-duplicates and
+  # doing a bunch of sed awk magic. Problem is this is not installed by default on all images.
+  sudo yum install -y yum-utils
+}
+
+
 get_full_pkg_versions() {
   if [ "$VERSION" != '' ];
   then
-    local ST2_VER=$(yum info st2 | grep Version | awk '{print $3}' | grep ${VERSION} | sort --version-sort | tail -n 1)
+    local ST2_VER=$(repoquery --nvr --show-duplicates st2 | grep ${VERSION} | sort --version-sort | tail -n 1)
     if [ -z "$ST2_VER" ]; then
       echo "Could not find requested version of st2!!!"
-      sudo apt-cache policy st2
+      sudo repoquery --nvr --show-duplicates st2
       exit 3
     fi
+    ST2_PKG=${ST2_VER}
 
-    local ST2MISTRAL_VER=$(yum info st2mistral | grep Version | awk '{print $3}' | grep ${VERSION} | sort --version-sort | tail -n 1)
+    local ST2MISTRAL_VER=$(repoquery --nvr --show-duplicates st2mistral | grep ${VERSION} | sort --version-sort | tail -n 1)
     if [ -z "$ST2MISTRAL_VER" ]; then
       echo "Could not find requested version of st2mistral!!!"
-      sudo apt-cache policy st2mistral
+      sudo repoquery --nvr --show-duplicates st2mistral
       exit 3
     fi
+    ST2MISTRAL_PKG=${ST2MISTRAL_VER}
 
-    local ST2WEB_VER=$(yum info st2web | grep Version | awk '{print $3}' | grep ${VERSION} | sort --version-sort | tail -n 1)
+    local ST2WEB_VER=$(repoquery --nvr --show-duplicates st2web | grep ${VERSION} | sort --version-sort | tail -n 1)
     if [ -z "$ST2WEB_VER" ]; then
       echo "Could not find requested version of st2web."
-      sudo apt-cache policy st2web
+      sudo repoquery --nvr --show-duplicates st2web
       exit 3
     fi
-    ST2_PKG_VERSION="=${ST2_VER}"
-    ST2MISTRAL_PKG_VERSION="=${ST2MISTRAL_VER}"
-    ST2WEB_PKG_VERSION="=${ST2WEB_VER}"
+    ST2WEB_PKG=${ST2WEB_VER}
+
+    local ST2CHATOPS_VER=$(repoquery --nvr --show-duplicates st2chatops | grep ${VERSION} | sort --version-sort | tail -n 1)
+    if [ -z "$ST2CHATOPS_VER" ]; then
+      echo "Could not find requested version of st2chatops."
+      sudo repoquery --nvr --show-duplicates st2chatops
+      exit 3
+    fi
+    ST2CHATOPS_PKG=${ST2CHATOPS_VER}
+
     echo "##########################################################"
     echo "#### Following versions of packages will be installed ####"
-    echo "st2${ST2_PKG_VERSION}"
-    echo "st2mistral${ST2MISTRAL_PKG_VERSION}"
-    echo "st2web${ST2WEB_PKG_VERSION}"
+    echo "${ST2_PKG}"
+    echo "${ST2MISTRAL_PKG}"
+    echo "${ST2WEB_PKG}"
+    echo "${ST2CHATOPS_PKG}"
     echo "##########################################################"
   fi
 }
+
 
 # Note that default SELINUX policies for RHEL7 differ with CentOS7. CentOS7 is more permissive by default
 # Note that depending on distro assembly/settings you may need more rules to change
@@ -152,7 +175,8 @@ install_st2_dependencies() {
 
 install_st2() {
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
-  sudo yum -y install st2${ST2_PKG_VERSION}
+  STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
+  sudo yum -y install ${ST2_PKG}
   sudo st2ctl reload
   sudo st2ctl start
 }
@@ -243,7 +267,7 @@ EHD
 
 install_st2mistral() {
   # install mistral
-  sudo yum -y install st2mistral
+  sudo yum -y install ${ST2MISTRAL_PKG}
 
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
@@ -266,7 +290,7 @@ enabled=1
 EOT"
 
   # Install st2web and nginx
-  sudo yum install -y st2web nginx
+  sudo yum install -y ${ST2WEB_PKG} nginx
 
   # Generate self-signed certificate or place your existing certificate under /etc/ssl/st2
   sudo mkdir -p /etc/ssl/st2
@@ -290,7 +314,7 @@ install_st2chatops() {
   sudo yum install -y nodejs
 
   # Install st2chatops
-  sudo yum install -y st2chatops
+  sudo yum install -y ${ST2CHATOPS_PKG}
 }
 
 configure_st2chatops() {
@@ -352,6 +376,7 @@ ok_message() {
 trap 'fail' EXIT
 STEP='Parse arguments' && setup_args $@
 STEP='Adjust SELinux policies' && adjust_selinux_policies
+STEP='Install repoquery tool' && install_yum_utils
 
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2" && install_st2
