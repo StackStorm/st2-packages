@@ -8,7 +8,6 @@ RHTEST=`cat /etc/redhat-release 2> /dev/null | sed -e "s~\(.*\)release.*~\1~g"`
 VERSION=''
 RELEASE='stable'
 REPO_TYPE=''
-BETA=''
 ST2_PKG_VERSION=''
 USERNAME=''
 PASSWORD=''
@@ -97,10 +96,12 @@ if [[ -n "$RHTEST" ]]; then
   echo "# Detected Distro is ${RHTEST}"
   RHMAJVER=`cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/'`
   ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-el${RHMAJVER}.sh"
+  BOOTSTRAP_FILE='st2bootstrap-el${RHMAJVER}.sh'
 elif [[ -n "$DEBTEST" ]]; then
   TYPE="debs"
   echo "# Detected Distro is ${DEBTEST}"
   ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-deb.sh"
+  BOOTSTRAP_FILE='st2bootstrap-deb.sh'
 else
   echo "Unknown Operating System"
   exit 2
@@ -117,5 +118,6 @@ else
     chmod +x ${BOOTSTRAP_FILE}
 
     echo "Running deployment script for st2 ${VERSION}..."
+    echo "OS specific script cmd: bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${USERNAME} ${PASSWORD}"
     bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${USERNAME} ${PASSWORD}
 fi
