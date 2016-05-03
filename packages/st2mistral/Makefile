@@ -9,6 +9,7 @@ PBR_GITURL := git+https://github.com/openstack-dev/pbr@d19459daa8616dd18fde016c2
 # We use special additional requirements in our mistral bundle!
 define INJECT_DEPS
 gunicorn
+psycopg2
 git+https://github.com/StackStorm/st2mistral.git@$(GITREV)#egg=st2mistral
 $(PBR_GITURL)
 psycopg2
