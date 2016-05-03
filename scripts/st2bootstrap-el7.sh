@@ -330,7 +330,7 @@ configure_st2chatops() {
     sudo sed -i -r "s/^(export HUBOT_ADAPTER.).*/\1$HUBOT_ADAPTER/" /opt/stackstorm/chatops/st2chatops.env
     sudo sed -i -r "s/^(export HUBOT_SLACK_TOKEN.).*/\1$HUBOT_SLACK_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
 
-    sudo systemctl st2chatops restart
+    sudo systemctl restart st2chatops
     sudo systemctl enable st2chatops
   else
     echo "####################### WARNING ########################"
