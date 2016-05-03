@@ -238,6 +238,7 @@ configure_st2_authentication() {
   sudo crudini --set /etc/st2/st2.conf auth backend_kwargs '{"file_path": "/etc/st2/htpasswd"}'
 
   sudo st2ctl restart-component st2api
+  sudo st2ctl restart-component st2stream
 }
 
 verify_st2() {
