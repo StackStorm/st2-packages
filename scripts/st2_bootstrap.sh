@@ -60,10 +60,15 @@ setup_args() {
   fi
 
   if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
-    echo "Let's set StackStorm admin credentials."
-    echo "You can also use \"--user\" and \"--password\" to override default st2 credentials."
+    echo "You can use \"--user\" and \"--password\" to override default st2 credentials."
+    SLEEP_TIME=10
+    echo "Sleeping for ${SLEEP_TIME} seconds if you want to Ctrl + C now..."
+    sleep ${SLEEP_TIME}
+    echo "Resorting to default username and password... You have an option to change password later!"
     USERNAME=${USERNAME:-st2admin}
     PASSWORD=${PASSWORD:-Ch@ngeMe}
+    echo "Username: ${USERNAME}"
+    echo "Password: ${PASSWORD}"
   fi
 }
 
@@ -93,13 +98,24 @@ PASSWORD="--password=${PASSWORD}"
 
 if [[ -n "$RHTEST" ]]; then
   TYPE="rpms"
-  echo "# Detected Distro is ${RHTEST}"
+  echo "*** Detected Distro is ${RHTEST} ***"
   RHMAJVER=`cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/'`
+  echo "*** Detected distro version ${RHMAJVER} ***"
+  if [[ "$RHMAJVER" != '6' && "$RHMAJVER" != '7' ]]; then
+    echo "Unsupported distro version $RHMAJVER! Aborting!"
+    exit 2
+  fi
   ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-el${RHMAJVER}.sh"
   BOOTSTRAP_FILE='st2bootstrap-el${RHMAJVER}.sh'
 elif [[ -n "$DEBTEST" ]]; then
   TYPE="debs"
-  echo "# Detected Distro is ${DEBTEST}"
+  echo "*** Detected Distro is ${DEBTEST} ***"
+  SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
+  echo "*** Detected flavor ${SUBTYPE} ***"
+  if [[ "$SUBTYPE" != 'trusty' ]]; then
+    echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) as base system!"
+    exit 2
+  fi
   ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-deb.sh"
   BOOTSTRAP_FILE='st2bootstrap-deb.sh'
 else
