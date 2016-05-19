@@ -6,6 +6,8 @@
 #   pull, build and test operations are available. Which pull containers,
 #   build and test packages respectivly.
 #
+ST2_CIRCLE_URL=${ST2_CIRCLE_URL}
+write_env ST2_CIRCLE_URL
 
 set -e
 # Source the build environment defintion (details in buildenv.sh)
@@ -62,3 +64,4 @@ case "$1" in
         $2 test
   ;;
 esac
+
