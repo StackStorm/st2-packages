@@ -28,12 +28,12 @@ namespace :package do
         command show_uuid: false, label: "checkout: update st2"
         with opts.env do
           # Update gitdir with rpmspecs and st2 packagedir
-	  execute :bash, '$GITDIR/scripts/populate-sha.sh'
           within opts.basedir do
             execute :cp, '-r rpmspec/ packages/st2/ $GITDIR'
             opts.components.each do |component|
               execute :cp, "packages/st2/component.makefile ${GITDIR}/#{component}/Makefile"
             end
+	    execute :bash, '$GITDIR/scripts/populate-sha.sh'
           end
         end
       end
