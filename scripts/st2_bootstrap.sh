@@ -125,6 +125,7 @@ fi
 
 hash curl 2>/dev/null || { echo >&2 "'curl' is not installed. Aborting."; exit 1; }
 
+CURLTEST=`curl --output /dev/null --silent --head --fail ${ST2BOOTSTRAP}`
 if [ $? -ne 0 ]; then
     echo -e "Could not find file ${ST2BOOTSTRAP}"
     exit 2
