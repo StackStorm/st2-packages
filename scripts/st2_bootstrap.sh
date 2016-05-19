@@ -17,15 +17,15 @@ setup_args() {
   for i in "$@"
     do
       case $i in
-          -V=*|--version=*)
+          -v=*|--version=*)
           VERSION="${i#*=}"
           shift
           ;;
-          -s=*|--stable)
+          -s|--stable)
           RELEASE=stable
           shift
           ;;
-          -u=*|--unstable)
+          -u|--unstable)
           RELEASE=unstable
           shift
           ;;
@@ -60,15 +60,15 @@ setup_args() {
   fi
 
   if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
-    echo "You can use \"--user\" and \"--password\" to override default st2 credentials."
+    USERNAME=${USERNAME:-st2admin}
+    PASSWORD=${PASSWORD:-Ch@ngeMe}
+    echo "You can use \"--user=<CHANGEME>\" and \"--password=<CHANGEME>\" to override following default st2 credentials."
     SLEEP_TIME=10
+    echo "Username: ${USERNAME}"
+    echo "Password: ${PASSWORD}"
     echo "Sleeping for ${SLEEP_TIME} seconds if you want to Ctrl + C now..."
     sleep ${SLEEP_TIME}
     echo "Resorting to default username and password... You have an option to change password later!"
-    USERNAME=${USERNAME:-st2admin}
-    PASSWORD=${PASSWORD:-Ch@ngeMe}
-    echo "Username: ${USERNAME}"
-    echo "Password: ${PASSWORD}"
   fi
 }
 
@@ -123,7 +123,7 @@ else
   exit 2
 fi
 
-CURLTEST=`curl --output /dev/null --silent --head --fail ${ST2BOOTSTRAP}`
+hash curl 2>/dev/null || { echo >&2 "'curl' is not installed. Aborting."; exit 1; }
 
 if [ $? -ne 0 ]; then
     echo -e "Could not find file ${ST2BOOTSTRAP}"
