@@ -26,15 +26,15 @@ setup_args() {
   for i in "$@"
     do
       case $i in
-          -V=*|--version=*)
+          -v=*|--version=*)
           VERSION="${i#*=}"
           shift
           ;;
-          -s=*|--stable)
+          -s|--stable)
           RELEASE=stable
           shift
           ;;
-          -u=*|--unstable)
+          -u|--unstable)
           RELEASE=unstable
           shift
           ;;
