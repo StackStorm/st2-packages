@@ -6,8 +6,6 @@
 #   pull, build and test operations are available. Which pull containers,
 #   build and test packages respectivly.
 #
-ST2_CIRCLE_URL=${ST2_CIRCLE_URL}
-write_env ST2_CIRCLE_URL
 
 set -e
 # Source the build environment defintion (details in buildenv.sh)
@@ -29,6 +27,7 @@ case "$1" in
         -e RABBITMQHOST=${HOST_IP} \
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
+	-e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
         $2 /bin/true
   ;;
   build)
@@ -46,6 +45,7 @@ case "$1" in
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
+	-e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
         $2 build
   ;;
   test)
@@ -61,6 +61,7 @@ case "$1" in
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
+	-e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
         $2 test
   ;;
 esac
