@@ -74,6 +74,7 @@ pipeopts 'st2' do
   envpass :gitdir,    make_tmpname('st2-'),               from: 'ST2_GITDIR'
   envpass :st2pkg_version
   envpass :st2pkg_release, 1
+  envpass :st2_circle_url
 end
 
 pipeopts 'st2mistral' do
