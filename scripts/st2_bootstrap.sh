@@ -106,7 +106,7 @@ if [[ -n "$RHTEST" ]]; then
     exit 2
   fi
   ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-el${RHMAJVER}.sh"
-  BOOTSTRAP_FILE='st2bootstrap-el${RHMAJVER}.sh'
+  BOOTSTRAP_FILE="st2bootstrap-el${RHMAJVER}.sh"
 elif [[ -n "$DEBTEST" ]]; then
   TYPE="debs"
   echo "*** Detected Distro is ${DEBTEST} ***"
@@ -117,7 +117,7 @@ elif [[ -n "$DEBTEST" ]]; then
     exit 2
   fi
   ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-deb.sh"
-  BOOTSTRAP_FILE='st2bootstrap-deb.sh'
+  BOOTSTRAP_FILE="st2bootstrap-deb.sh"
 else
   echo "Unknown Operating System"
   exit 2
