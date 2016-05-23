@@ -33,7 +33,7 @@ namespace :package do
             opts.components.each do |component|
               execute :cp, "packages/st2/component.makefile ${GITDIR}/#{component}/Makefile"
             end
-	    execute :bash, '$GITDIR/scripts/populate-sha.sh'
+            execute :bash, '$GITDIR/scripts/populate-sha.sh'
           end
         end
       end
