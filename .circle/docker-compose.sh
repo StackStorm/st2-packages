@@ -27,7 +27,7 @@ case "$1" in
         -e RABBITMQHOST=${HOST_IP} \
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
-	-e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
+        -e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
         $2 /bin/true
   ;;
   build)
