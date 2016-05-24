@@ -27,6 +27,7 @@ case "$1" in
         -e RABBITMQHOST=${HOST_IP} \
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
+        -e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
         $2 /bin/true
   ;;
   build)
@@ -44,6 +45,7 @@ case "$1" in
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
+        -e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
         $2 build
   ;;
   test)
@@ -59,6 +61,8 @@ case "$1" in
         -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
+        -e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
         $2 test
   ;;
 esac
+
