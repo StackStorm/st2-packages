@@ -194,6 +194,43 @@ configure_st2_authentication() {
   sudo st2ctl restart-component st2stream
 }
 
+configure_st2_cli_config() {
+  # Configure CLI config (write credentials for the root user and user which ran the script)
+  CURRENT_USER=$(whoami)
+  ROOT_USER="root"
+
+  CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
+  CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
+  ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
+  ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
+
+  # Write config for current user
+  if [ ! -d ${CURRENT_USER_CLI_CONFIG_DIRECTORY} ]; then
+    sudo mkdir -f ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
+  fi
+
+  sudo sh -c "cat <<EOT > ${CURRENT_USER_CLI_CONFIG_PATH}
+[credentials]
+username = ${USERNAME}
+password = ${PASSWORD}
+EOT"
+
+  # Write config for root user (in case current user != root)
+  if [ "${CURRENT_USER}" == "${ROOT_USER}"]; then
+      return
+  fi
+
+  if [ ! -d ${ROOT_USER_CLI_CONFIG_DIRECTORY} ]; then
+    sudo mkdir -f ${ROOT_USER_CLI_CONFIG_DIRECTORY}
+  fi
+
+  sudo sh -c "cat <<EOT > ${ROOT_USER_CLI_CONFIG_PATH}
+[credentials]
+username = ${USERNAME}
+password = ${PASSWORD}
+EOT"
+}
+
 install_st2mistral_depdendencies() {
   sudo apt-get install -y postgresql
 
@@ -338,6 +375,7 @@ STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
 STEP="Configure st2 auth" && configure_st2_authentication
+STEP="Configure st2 CLI config" && configure_st2_cli_config
 STEP="Verify st2" && verify_st2
 
 STEP="Install mistral dependencies" && install_st2mistral_depdendencies
