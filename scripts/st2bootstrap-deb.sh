@@ -197,30 +197,14 @@ configure_st2_authentication() {
 
 configure_st2_cli_config() {
   # Configure CLI config (write credentials for the root user and user which ran the script)
-  CURRENT_USER=$(whoami)
   ROOT_USER="root"
-
-  CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
-  CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
+  CURRENT_USER=$(whoami)
 
   ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
 
-  # Write config for current user
-  if [ ! -d ${CURRENT_USER_CLI_CONFIG_DIRECTORY} ]; then
-    sudo mkdir -p ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
-  fi
-
-  sudo sh -c "cat <<EOT > ${CURRENT_USER_CLI_CONFIG_PATH}
-[credentials]
-username = ${USERNAME}
-password = ${PASSWORD}
-EOT"
-
-  # Write config for root user (in case current user != root)
-  if [ "${CURRENT_USER}" == "${ROOT_USER}"]; then
-      return
-  fi
+  CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
+  CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
 
   if [ ! -d ${ROOT_USER_CLI_CONFIG_DIRECTORY} ]; then
     sudo mkdir -p ${ROOT_USER_CLI_CONFIG_DIRECTORY}
@@ -231,6 +215,26 @@ EOT"
 username = ${USERNAME}
 password = ${PASSWORD}
 EOT"
+
+  # Write config for root user
+  if [ "${CURRENT_USER}" == "${ROOT_USER}"]; then
+      return
+  fi
+
+  # Write config for current user (in case current user != root)
+  if [ ! -d ${CURRENT_USER_CLI_CONFIG_DIRECTORY} ]; then
+    sudo mkdir -p ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
+    sudo chown -R ${CURRENT_USER}:${CURRENT_USER}
+  fi
+
+  sudo sh -c "cat <<EOT > ${CURRENT_USER_CLI_CONFIG_PATH}
+[credentials]
+username = ${USERNAME}
+password = ${PASSWORD}
+EOT"
+
+  # Fix the permissions
+  sudo chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
 }
 
 install_st2mistral_depdendencies() {
