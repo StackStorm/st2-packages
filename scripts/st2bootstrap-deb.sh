@@ -201,12 +201,13 @@ configure_st2_cli_config() {
 
   CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
   CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
+
   ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
 
   # Write config for current user
   if [ ! -d ${CURRENT_USER_CLI_CONFIG_DIRECTORY} ]; then
-    sudo mkdir -f ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
+    sudo mkdir -p ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
   fi
 
   sudo sh -c "cat <<EOT > ${CURRENT_USER_CLI_CONFIG_PATH}
@@ -221,7 +222,7 @@ EOT"
   fi
 
   if [ ! -d ${ROOT_USER_CLI_CONFIG_DIRECTORY} ]; then
-    sudo mkdir -f ${ROOT_USER_CLI_CONFIG_DIRECTORY}
+    sudo mkdir -p ${ROOT_USER_CLI_CONFIG_DIRECTORY}
   fi
 
   sudo sh -c "cat <<EOT > ${ROOT_USER_CLI_CONFIG_PATH}
