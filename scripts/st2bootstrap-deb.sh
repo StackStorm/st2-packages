@@ -86,6 +86,7 @@ setup_args() {
   if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
     echo "Let's set StackStorm admin credentials."
     echo "You can also use \"--user\" and \"--password\" for unattended installation."
+    echo "Press \"ENTER\" to continue or \"CTRL+C\" to exit/abort"
     read -e -p "Admin username: " -i "st2admin" USERNAME
     read -e -s -p "Password: " PASSWORD
   fi
