@@ -217,14 +217,13 @@ password = ${PASSWORD}
 EOT"
 
   # Write config for root user
-  if [ "${CURRENT_USER}" == "${ROOT_USER}"]; then
+  if [ "${CURRENT_USER}" == "${ROOT_USER}" ]; then
       return
   fi
 
   # Write config for current user (in case current user != root)
   if [ ! -d ${CURRENT_USER_CLI_CONFIG_DIRECTORY} ]; then
     sudo mkdir -p ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
-    sudo chown -R ${CURRENT_USER}:${CURRENT_USER}
   fi
 
   sudo sh -c "cat <<EOT > ${CURRENT_USER_CLI_CONFIG_PATH}
