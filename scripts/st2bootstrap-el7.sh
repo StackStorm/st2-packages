@@ -80,6 +80,7 @@ setup_args() {
   if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
     echo "Let's set StackStorm admin credentials."
     echo "You can also use \"--user\" and \"--password\" for unattended installation."
+    echo "Press \"ENTER\" to continue or \"CTRL+C\" to exit/abort"
     read -e -p "Admin username: " -i "st2admin" USERNAME
     read -e -s -p "Password: " PASSWORD
   fi
@@ -177,8 +178,9 @@ install_st2() {
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
   STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
   sudo yum -y install ${ST2_PKG}
-  sudo st2ctl reload --register-all
   sudo st2ctl start
+  sleep 5
+  sudo st2ctl reload --register-all
 }
 
 configure_st2_user() {
@@ -244,6 +246,47 @@ verify_st2() {
 
   # Install a pack
   st2 run packs.install packs=st2
+}
+
+configure_st2_cli_config() {
+  # Configure CLI config (write credentials for the root user and user which ran the script)
+  ROOT_USER="root"
+  CURRENT_USER=$(whoami)
+
+  ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
+  ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
+
+  CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
+  CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
+
+  if [ ! -d ${ROOT_USER_CLI_CONFIG_DIRECTORY} ]; then
+    sudo mkdir -p ${ROOT_USER_CLI_CONFIG_DIRECTORY}
+  fi
+
+  sudo sh -c "cat <<EOT > ${ROOT_USER_CLI_CONFIG_PATH}
+[credentials]
+username = ${USERNAME}
+password = ${PASSWORD}
+EOT"
+
+  # Write config for root user
+  if [ "${CURRENT_USER}" == "${ROOT_USER}" ]; then
+      return
+  fi
+
+  # Write config for current user (in case current user != root)
+  if [ ! -d ${CURRENT_USER_CLI_CONFIG_DIRECTORY} ]; then
+    sudo mkdir -p ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
+  fi
+
+  sudo sh -c "cat <<EOT > ${CURRENT_USER_CLI_CONFIG_PATH}
+[credentials]
+username = ${USERNAME}
+password = ${PASSWORD}
+EOT"
+
+  # Fix the permissions
+  sudo chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
 }
 
 install_st2mistral_depdendencies() {
@@ -383,6 +426,7 @@ STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
 STEP="Configure st2 auth" && configure_st2_authentication
+STEP="Configure st2 CLI config" && configure_st2_cli_config
 STEP="Verify st2" && verify_st2
 
 STEP="Install mistral dependencies" && install_st2mistral_depdendencies
