@@ -66,6 +66,7 @@ Conflicts: st2common
   %defattr(-,root,root,-)
   /opt/stackstorm/%{venv_name}
   %{_bindir}/*
+  %config %{_sysconfdir}/bash_completion.d/st2
   %config(noreplace) %{_sysconfdir}/logrotate.d/st2
   %config(noreplace) %attr(600, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
   %config(noreplace) %{_sysconfdir}/st2/*
