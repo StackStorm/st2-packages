@@ -389,9 +389,9 @@ install_st2chatops() {
 }
 
 configure_st2chatops() {
-  # Set credentials
-  sudo sed -i -r "s/^(export ST2_AUTH_USERNAME.).*/\1$USERNAME/" /opt/stackstorm/chatops/st2chatops.env
-  sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/\1$PASSWORD/" /opt/stackstorm/chatops/st2chatops.env
+  # set API keys. This should work since CLI is configuered already.
+  ST2_API_KEY=`st2 apikey create -k`
+  sudo sed -i -r "s/^(export ST2_API_KEY.).*/\1$ST2_API_KEY/" /opt/stackstorm/chatops/st2chatops.env
 
   # Setup adapter
   if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
