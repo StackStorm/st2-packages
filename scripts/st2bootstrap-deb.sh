@@ -299,8 +299,9 @@ configure_st2chatops() {
   ST2_API_KEY=`st2 apikey create -k`
   sudo sed -i -r "s/^(export ST2_API_KEY.).*/\1$ST2_API_KEY/" /opt/stackstorm/chatops/st2chatops.env
 
-  sudo sed -i -r "/^(export ST2_AUTH_USERNAME.).*/d" /opt/stackstorm/chatops/st2chatops.env
-  sudo sed -i -r "/^(export ST2_AUTH_PASSWORD.).*/d" /opt/stackstorm/chatops/st2chatops.env
+  sudo sed -i -r "s/^(export ST2_AUTH_URL.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
+  sudo sed -i -r "s/^(export ST2_AUTH_USERNAME.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
+  sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
 
   # Setup adapter
   if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
