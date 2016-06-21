@@ -1,3 +1,4 @@
+# Note: This file is used for both - debian and rpm packages
 opt/stackstorm/st2/bin/st2 usr/bin/st2
 opt/stackstorm/st2/bin/st2-trigger-refire usr/bin/st2-trigger-refire
 opt/stackstorm/st2/bin/st2-rule-tester usr/bin/st2-rule-tester
