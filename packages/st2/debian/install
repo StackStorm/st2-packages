@@ -2,6 +2,7 @@
 ../contrib/packs opt/stackstorm/packs/
 ../contrib/linux opt/stackstorm/packs/
 ../contrib/chatops opt/stackstorm/packs/
+../contrib/default opt/stackstorm/packs/
 ../contrib/examples usr/share/doc/st2/
 ../st2actions/conf/logging.*.conf etc/st2/
 ../st2actions/conf/syslog.*.conf etc/st2/
