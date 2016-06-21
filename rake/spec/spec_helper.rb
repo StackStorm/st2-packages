@@ -71,7 +71,7 @@ class ST2Spec
       st2debug: %w(st2-submit-debug-info),
       st2: %w(st2-bootstrap-rmq st2-register-content st2-rule-tester
               st2-apply-rbac-definitions st2-trigger-refire st2 st2ctl
-              st2-generate-symmetric-crypto-key),
+              st2-generate-symmetric-crypto-key st2-submit-debug-info),
       mistral: %w(mistral)
     },
 
