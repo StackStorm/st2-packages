@@ -8,10 +8,8 @@ PBR_GITURL := git+https://github.com/openstack-dev/pbr@d19459daa8616dd18fde016c2
 
 # We use special additional requirements in our mistral bundle!
 define INJECT_DEPS
-gunicorn
 git+https://github.com/StackStorm/st2mistral.git@$(GITREV)#egg=st2mistral
 $(PBR_GITURL)
-psycopg2
 endef
 export INJECT_DEPS
 
@@ -69,5 +67,7 @@ bdist_wheel: .stamp-bdist_wheel
 inject-deps: .stamp-inject-deps
 .stamp-inject-deps: | bdist_wheel
 	echo "$$INJECT_DEPS" >> requirements.txt
+	grep -q 'gunicorn' requirements.txt || echo "gunicorn" >> requirements.txt
+	grep -q 'psycopg2' requirements.txt || echo "psycopg2" >> requirements.txt
 	grep -q 'amqp' requirements.txt || echo "amqp>=1.4.0,<2.0.0" >> requirements.txt
 	touch $@
