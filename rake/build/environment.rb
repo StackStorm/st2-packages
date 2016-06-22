@@ -9,7 +9,8 @@ require 'resolv'
 ST2_COMPONENTS = %w(
   st2api st2stream st2actions st2common
   st2auth st2client st2exporter
-  st2reactor)
+  st2reactor
+  st2debug)
 
 # Default list of packages to build
 BUILDLIST = 'st2 st2mistral'
