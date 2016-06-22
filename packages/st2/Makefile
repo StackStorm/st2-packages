@@ -86,5 +86,4 @@ wheelhouse: .stamp-wheelhouse
 inject-deps: .stamp-inject-deps
 .stamp-inject-deps:
 	echo "st2client==$(ST2PKG_NORMALIZED_VERSION)" >> requirements.txt
-	echo "st2debug" >> requirements.txt
 	touch $@
