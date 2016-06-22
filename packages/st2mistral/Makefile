@@ -67,7 +67,7 @@ bdist_wheel: .stamp-bdist_wheel
 inject-deps: .stamp-inject-deps
 .stamp-inject-deps: | bdist_wheel
 	echo "$$INJECT_DEPS" >> requirements.txt
-	grep -q 'gunicorn' requiements.txt || echo "gunicorn" >> requiremnts.txt
-	grep -q 'psycopg2' requiements.txt || echo "psycopg2" >> requiremnts.txt
+	grep -q 'gunicorn' requiements.txt || echo "gunicorn" >> requirements.txt
+	grep -q 'psycopg2' requiements.txt || echo "psycopg2" >> requirements.txt
 	grep -q 'amqp' requirements.txt || echo "amqp>=1.4.0,<2.0.0" >> requirements.txt
 	touch $@
