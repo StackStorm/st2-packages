@@ -25,6 +25,7 @@ end script
 post-stop script
   NAME=st2actionrunner
   # same number as in runner.sh!
+  WORKERS=$(/usr/bin/nproc 2>/dev/null)
   WORKERS=${WORKERS:-10}
 
   # Read configuration variable file if it is present
