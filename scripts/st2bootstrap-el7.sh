@@ -20,7 +20,7 @@ setup_args() {
   for i in "$@"
     do
       case $i in
-          -v=*|--version=*)
+          -v|--version=*)
           VERSION="${i#*=}"
           shift
           ;;
