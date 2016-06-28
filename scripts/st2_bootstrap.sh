@@ -17,7 +17,7 @@ setup_args() {
   for i in "$@"
     do
       case $i in
-          -v=*|--version=*)
+          -v|--version=*)
           VERSION="${i#*=}"
           shift
           ;;
@@ -82,7 +82,7 @@ get_version_branch() {
 
 if [[ "$VERSION" != '' ]]; then
   get_version_branch $VERSION
-  VERSION="--version ${VERSION}"
+  VERSION="--version=${VERSION}"
 fi
 
 if [[ "$RELEASE" != '' ]]; then
