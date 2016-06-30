@@ -8,10 +8,10 @@ VERSION=''
 RELEASE='stable'
 REPO_TYPE=''
 REPO_PREFIX=''
-BETA=''
 ST2_PKG_VERSION=''
 ST2MISTRAL_PKG_VERSION=''
 ST2WEB_PKG_VERSION=''
+ST2CHATOPS_PKG_VERSION=''
 USERNAME=''
 PASSWORD=''
 
@@ -26,15 +26,15 @@ setup_args() {
   for i in "$@"
     do
       case $i in
-          -V=*|--version=*)
+          -v|--version=*)
           VERSION="${i#*=}"
           shift
           ;;
-          -s=*|--stable)
+          -s|--stable)
           RELEASE=stable
           shift
           ;;
-          -u=*|--unstable)
+          -u|--unstable)
           RELEASE=unstable
           shift
           ;;
@@ -76,7 +76,7 @@ setup_args() {
   echo "          Installing StackStorm $RELEASE $VERSION              "
   echo "########################################################"
 
-  if [[ -z "$BETA"  && "$REPO_TYPE"="staging" ]]; then
+  if [ "$REPO_TYPE" == "staging" ]; then
     printf "\n\n"
     echo "################################################################"
     echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
@@ -86,6 +86,7 @@ setup_args() {
   if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
     echo "Let's set StackStorm admin credentials."
     echo "You can also use \"--user\" and \"--password\" for unattended installation."
+    echo "Press \"ENTER\" to continue or \"CTRL+C\" to exit/abort"
     read -e -p "Admin username: " -i "st2admin" USERNAME
     read -e -s -p "Password: " PASSWORD
   fi
@@ -119,14 +120,24 @@ get_full_pkg_versions() {
       sudo apt-cache policy st2web
       exit 3
     fi
+
+    local ST2CHATOPS_VER=$(apt-cache show st2chatops | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    if [ -z "$ST2CHATOPS_VER" ]; then
+      echo "Could not find requested version of st2chatops."
+      sudo apt-cache policy st2chatops
+      exit 3
+    fi
+
     ST2_PKG_VERSION="=${ST2_VER}"
     ST2MISTRAL_PKG_VERSION="=${ST2MISTRAL_VER}"
     ST2WEB_PKG_VERSION="=${ST2WEB_VER}"
+    ST2CHATOPS_PKG_VERSION="=${ST2CHATOPS_VER}"
     echo "##########################################################"
     echo "#### Following versions of packages will be installed ####"
     echo "st2${ST2_PKG_VERSION}"
     echo "st2mistral${ST2MISTRAL_PKG_VERSION}"
     echo "st2web${ST2WEB_PKG_VERSION}"
+    echo "st2chatops${ST2CHATOPS_PKG_VERSION}"
     echo "##########################################################"
   fi
 }
@@ -136,8 +147,9 @@ install_st2() {
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.deb.sh | sudo bash
   STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
   sudo apt-get install -y st2${ST2_PKG_VERSION}
-  sudo st2ctl reload
   sudo st2ctl start
+  sleep 5
+  sudo st2ctl reload --register-all
 }
 
 configure_st2_user () {
@@ -181,6 +193,48 @@ configure_st2_authentication() {
   sudo crudini --set /etc/st2/st2.conf auth backend_kwargs '{"file_path": "/etc/st2/htpasswd"}'
 
   sudo st2ctl restart-component st2api
+  sudo st2ctl restart-component st2stream
+}
+
+configure_st2_cli_config() {
+  # Configure CLI config (write credentials for the root user and user which ran the script)
+  ROOT_USER="root"
+  CURRENT_USER=$(whoami)
+
+  ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
+  ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
+
+  CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
+  CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
+
+  if [ ! -d ${ROOT_USER_CLI_CONFIG_DIRECTORY} ]; then
+    sudo mkdir -p ${ROOT_USER_CLI_CONFIG_DIRECTORY}
+  fi
+
+  sudo sh -c "cat <<EOT > ${ROOT_USER_CLI_CONFIG_PATH}
+[credentials]
+username = ${USERNAME}
+password = ${PASSWORD}
+EOT"
+
+  # Write config for root user
+  if [ "${CURRENT_USER}" == "${ROOT_USER}" ]; then
+      return
+  fi
+
+  # Write config for current user (in case current user != root)
+  if [ ! -d ${CURRENT_USER_CLI_CONFIG_DIRECTORY} ]; then
+    sudo mkdir -p ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
+  fi
+
+  sudo sh -c "cat <<EOT > ${CURRENT_USER_CLI_CONFIG_PATH}
+[credentials]
+username = ${USERNAME}
+password = ${PASSWORD}
+EOT"
+
+  # Fix the permissions
+  sudo chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
 }
 
 install_st2mistral_depdendencies() {
@@ -206,7 +260,7 @@ install_st2mistral() {
 }
 
 install_st2web() {
-  # Add key and repo for the lastest stable nginx
+  # Add key and repo for the latest stable nginx
   sudo apt-key adv --fetch-keys http://nginx.org/keys/nginx_signing.key
   sudo sh -c "cat <<EOT > /etc/apt/sources.list.d/nginx.list
 deb http://nginx.org/packages/ubuntu/ trusty nginx
@@ -237,19 +291,23 @@ install_st2chatops() {
   sudo apt-get install -y nodejs
 
   # Install st2chatops
-  sudo apt-get install -y st2chatops
+  sudo apt-get install -y st2chatops${ST2CHATOPS_PKG_VERSION}
 }
 
 configure_st2chatops() {
-  # Set credentials
-  sudo sed -i -r "s/^(export ST2_AUTH_USERNAME.).*/\1$USERNAME/" /opt/stackstorm/chatops/st2chatops.env
-  sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/\1$PASSWORD/" /opt/stackstorm/chatops/st2chatops.env
+  # set API keys. This should work since CLI is configuered already.
+  ST2_API_KEY=`st2 apikey create -k`
+  sudo sed -i -r "s/^(export ST2_API_KEY.).*/\1$ST2_API_KEY/" /opt/stackstorm/chatops/st2chatops.env
+
+  sudo sed -i -r "s/^(export ST2_AUTH_URL.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
+  sudo sed -i -r "s/^(export ST2_AUTH_USERNAME.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
+  sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
 
   # Setup adapter
   if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
   then
     sudo sed -i -r "s/^# (export HUBOT_ADAPTER=slack)/\1/" /opt/stackstorm/chatops/st2chatops.env
-    sudo sed -i -r "s/^# (export HUBOT_SLACK_TOKEN.).*/\1/" st2chatops.env
+    sudo sed -i -r "s/^# (export HUBOT_SLACK_TOKEN.).*/\1/" /opt/stackstorm/chatops/st2chatops.env
     sudo sed -i -r "s/^(export HUBOT_ADAPTER.).*/\1$HUBOT_ADAPTER/" /opt/stackstorm/chatops/st2chatops.env
     sudo sed -i -r "s/^(export HUBOT_SLACK_TOKEN.).*/\1$HUBOT_SLACK_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
 
@@ -327,6 +385,7 @@ STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
 STEP="Configure st2 auth" && configure_st2_authentication
+STEP="Configure st2 CLI config" && configure_st2_cli_config
 STEP="Verify st2" && verify_st2
 
 STEP="Install mistral dependencies" && install_st2mistral_depdendencies
