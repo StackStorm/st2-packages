@@ -35,7 +35,7 @@ docker-compose rm -f
 docker-compose run --rm wheezy
 ```
 
-Execution takes a while, so grab a cup of tea or coffie and wait until it finishes. When build and test processes succeed, you'll be all to find StackStorm packages them in `/tmp/st2-packages` on your host machine:
+Execution takes a while, so grab a cup of tea or coffee and wait until it finishes. When build and test processes succeed, you'll be all to find StackStorm packages them in `/tmp/st2-packages` on your host machine:
 
 ```shell
 ls -l1 | grep ".deb$"
