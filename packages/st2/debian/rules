@@ -23,6 +23,17 @@ override_dh_installdirs:
 	$(MAKE) install
 
 override_dh_installinit:
+	dh_systemd_enable --name=st2actionrunner-worker st2actionrunner@.service
+	dh_systemd_enable --name=st2actionrunner st2actionrunner.service
+	dh_systemd_enable --name=st2api st2api.service
+	dh_systemd_enable --name=st2stream st2stream.service
+	dh_systemd_enable --name=st2auth st2auth.service
+	dh_systemd_enable --name=st2notifier st2notifier.service
+	dh_systemd_enable --name=st2resultstracker st2resultstracker.service
+	dh_systemd_enable --name=st2rulesengine st2rulesengine.service
+	dh_systemd_enable --name=st2sensorcontainer st2sensorcontainer.service
+	dh_systemd_enable --name=st2garbagecollector st2garbagecollector.service
+
 	# So far don't start services
 	dh_installinit --no-start --name=st2actionrunner-worker
 	dh_installinit --no-start --name=st2actionrunner
@@ -34,6 +45,8 @@ override_dh_installinit:
 	dh_installinit --no-start --name=st2rulesengine
 	dh_installinit --no-start --name=st2sensorcontainer
 	dh_installinit --no-start --name=st2garbagecollector
+	
+	dh_systemd_start --no-restart-on-upgrade
 
 override_dh_installdeb:
 	DESTDIR=debian/st2 $(MAKE) post_install
