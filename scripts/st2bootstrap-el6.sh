@@ -186,11 +186,26 @@ install_st2_dependencies() {
   if [[ -z "$is_epel_installed" ]]; then
     sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
   fi
-  sudo yum -y install curl mongodb-server rabbitmq-server
-  sudo service mongod start
+  sudo yum -y install curl -server rabbitmq-server
   sudo service rabbitmq-server start
-  sudo chkconfig mongod on
   sudo chkconfig rabbitmq-server on
+}
+
+install_mongodb() {
+  # Add key and repo for the latest stable MongoDB (3.2)
+  sudo rpm --import https://www.mongodb.org/static/pgp/server-3.2.asc
+  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-3.2.repo
+[mongodb-org-3.2]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/3.2/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-3.2.asc
+EOT"
+
+  sudo yum -y install mongodb-org
+  sudo service mongod start
+  sudo chkconfig mongod on
 }
 
 install_st2() {
@@ -454,6 +469,7 @@ STEP='Adjust SELinux policies' && adjust_selinux_policies
 STEP='Install repoquery tool' && install_yum_utils
 
 STEP="Install st2 dependencies" && install_st2_dependencies
+STEP="Install st2 dependencies (MongoDB)" && install_mongodb
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
 STEP="Configure st2 auth" && configure_st2_authentication
