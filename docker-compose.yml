@@ -77,31 +77,31 @@ el6:
 ## Package build nodes
 #
 wheezybuild:
-  image: quay.io/stackstorm/packagingenv:wheezy
+  image: stackstorm/packagingenv:wheezy
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
 
 jessiebuild:
-  image: quay.io/stackstorm/packagingenv:jessie
+  image: stackstorm/packagingenv:jessie
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
 
 trustybuild:
-  image: quay.io/stackstorm/packagingenv:trusty
+  image: stackstorm/packagingenv:trusty
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
 
 centos6build:
-  image: quay.io/stackstorm/packagingenv:centos6
+  image: stackstorm/packagingenv:centos6
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
 
 centos7build:
-  image: quay.io/stackstorm/packagingenv:centos7
+  image: stackstorm/packagingenv:centos7
   extends:
     file: docker-compose.override.yml
     service: volumes-compose

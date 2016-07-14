@@ -20,7 +20,7 @@ script:
 
 services:
   - quay.io/dennybaa/droneunit:wheezy-sshd
-  - quay.io/stackstorm/packagingenv:wheezy
+  - stackstorm/packagingenv:wheezy
   - library/rabbitmq
   - library/postgres
   - library/mongo
