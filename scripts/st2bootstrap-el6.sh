@@ -186,7 +186,7 @@ install_st2_dependencies() {
   if [[ -z "$is_epel_installed" ]]; then
     sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
   fi
-  sudo yum -y install curl -server rabbitmq-server
+  sudo yum -y install curl rabbitmq-server
   sudo service rabbitmq-server start
   sudo chkconfig rabbitmq-server on
 }
