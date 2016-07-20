@@ -41,10 +41,10 @@ xenial:
     service: suite-circle
   environment:
     - BUILDNODE=xenialbuild
-    - TESTNODE=trustytest
+    - TESTNODE=xenialtest
   links:
     - xenialbuild
-    - trustytest
+    - xenialtest
 
 el7:
   image: quay.io/stackstorm/packagingrunner
@@ -128,6 +128,15 @@ trustytest:
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
+
+xenialtest:
+  image: stackstorm/packagingtest:xenial
+  privileged: true
+  extends:
+    file: docker-compose.override.yml
+    service: volumes-circle
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
 centos6test:
   image: quay.io/dennybaa/droneunit:centos6-sshd

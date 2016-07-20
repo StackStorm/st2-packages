@@ -17,7 +17,7 @@ notify:
 machine:
   # Overwrite these ENV variables in parametrized (manual/API) builds
   environment:
-    DISTROS: "wheezy jessie trusty el6 el7"
+    DISTROS: "wheezy jessie trusty xenial el6 el7"
     NOTESTS: "el7"
     ST2_GITURL: https://github.com/StackStorm/st2
     ST2_GITREV: master
