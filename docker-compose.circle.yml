@@ -74,19 +74,19 @@ el6:
 ## Package build nodes
 #
 wheezybuild:
-  image: quay.io/stackstorm/packagingenv:wheezy
+  image: stackstorm/packagingenv:wheezy
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 jessiebuild:
-  image: quay.io/stackstorm/packagingenv:jessie
+  image: stackstorm/packagingenv:jessie
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 trustybuild:
-  image: quay.io/stackstorm/packagingenv:trusty
+  image: stackstorm/packagingenv:trusty
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
@@ -98,13 +98,13 @@ xenialbuild:
     service: volumes-circle
 
 centos6build:
-  image: quay.io/stackstorm/packagingenv:centos6
+  image: stackstorm/packagingenv:centos6
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 centos7build:
-  image: quay.io/stackstorm/packagingenv:centos7
+  image: stackstorm/packagingenv:centos7
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
@@ -112,19 +112,19 @@ centos7build:
 ## Package testing nodes
 #
 wheezytest:
-  image: quay.io/dennybaa/droneunit:wheezy-sshd
+  image: stackstorm/packagingtest:wheezy
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 jessietest:
-  image: quay.io/dennybaa/droneunit:jessie-sshd
+  image: stackstorm/packagingtest:jessie
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 trustytest:
-  image: quay.io/dennybaa/droneunit:trusty-upstart
+  image: stackstorm/packagingtest:trusty
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
@@ -139,13 +139,13 @@ xenialtest:
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
 centos6test:
-  image: quay.io/dennybaa/droneunit:centos6-sshd
+  image: stackstorm/packagingtest:centos6
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 centos7test:
-  image: quay.io/dennybaa/droneunit:centos7-systemd
+  image: stackstorm/packagingtest:centos7
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
