@@ -94,7 +94,22 @@ setup_args() {
 
 install_st2_dependencies() {
   sudo apt-get update
-  sudo apt-get install -y curl mongodb-server rabbitmq-server
+
+  # Note: gnupg-curl is needed to be able to use https transport when fetching keys
+  sudo apt-get install -y gnupg-curl
+  sudo apt-get install -y curl
+  sudo apt-get install -y rabbitmq-server
+}
+
+install_mongodb() {
+    # Add key and repo for the latest stable MongoDB (3.2)
+  sudo apt-key adv --fetch-keys https://www.mongodb.org/static/pgp/server-3.2.asc
+  sudo sh -c "cat <<EOT > /etc/apt/sources.list.d/mongodb-org-3.2.list
+deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse
+EOT"
+
+  sudo apt-get update
+  sudo apt-get install -y mongodb-org
 }
 
 get_full_pkg_versions() {
@@ -382,6 +397,7 @@ ok_message() {
 trap 'fail' EXIT
 STEP="Setup args" && setup_args $@
 STEP="Install st2 dependencies" && install_st2_dependencies
+STEP="Install st2 dependencies (MongoDB)" && install_mongodb
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
 STEP="Configure st2 auth" && configure_st2_authentication
