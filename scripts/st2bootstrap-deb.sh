@@ -301,9 +301,8 @@ EOT"
 }
 
 install_st2chatops() {
-  # Install Node
+  # Add NodeJS 4 repo
   curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
-  sudo apt-get install -y nodejs
 
   # Install st2chatops
   sudo apt-get install -y st2chatops${ST2CHATOPS_PKG_VERSION}
