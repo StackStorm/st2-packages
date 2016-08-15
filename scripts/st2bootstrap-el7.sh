@@ -370,9 +370,8 @@ EOT"
 }
 
 install_st2chatops() {
-  # Install Node
+  # Add NodeJS 4 repo
   curl -sL https://rpm.nodesource.com/setup_4.x | sudo -E bash -
-  sudo yum install -y nodejs
 
   # Install st2chatops
   sudo yum install -y ${ST2CHATOPS_PKG}
