@@ -12,9 +12,10 @@ WHEELDIR ?= /tmp/wheelhouse
 DH_VIRTUALENV_INSTALL_ROOT := /opt/stackstorm
 export DH_VIRTUALENV_INSTALL_ROOT
 
-%:
-	dh $@ --with python-virtualenv
+IS_SYSTEMD = $(shell command -v dh_systemd_enable > /dev/null 2>&1 && echo true)
 
+%:
+	dh $@ --with python-virtualenv $(shell $IS_SYSTEMD && echo --with=systemd)
 
 override_dh_installdirs:
 	dh_installdirs
@@ -23,6 +24,18 @@ override_dh_installdirs:
 	$(MAKE) install
 
 override_dh_installinit:
+ifeq (true, $(IS_SYSTEMD))
+	dh_systemd_enable --name=st2actionrunner st2actionrunner.service
+	install -p -m644 debian/st2actionrunner@.service debian/st2/lib/systemd/system/st2actionrunner@.service
+	dh_systemd_enable --name=st2api st2api.service
+	dh_systemd_enable --name=st2stream st2stream.service
+	dh_systemd_enable --name=st2auth st2auth.service
+	dh_systemd_enable --name=st2notifier st2notifier.service
+	dh_systemd_enable --name=st2resultstracker st2resultstracker.service
+	dh_systemd_enable --name=st2rulesengine st2rulesengine.service
+	dh_systemd_enable --name=st2sensorcontainer st2sensorcontainer.service
+	dh_systemd_enable --name=st2garbagecollector st2garbagecollector.service
+else
 	# So far don't start services
 	dh_installinit --no-start --name=st2actionrunner-worker
 	dh_installinit --no-start --name=st2actionrunner
@@ -34,6 +47,7 @@ override_dh_installinit:
 	dh_installinit --no-start --name=st2rulesengine
 	dh_installinit --no-start --name=st2sensorcontainer
 	dh_installinit --no-start --name=st2garbagecollector
+endif
 
 override_dh_installdeb:
 	DESTDIR=debian/st2 $(MAKE) post_install

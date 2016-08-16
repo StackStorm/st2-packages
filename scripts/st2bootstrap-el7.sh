@@ -169,9 +169,26 @@ install_st2_dependencies() {
   if [[ -z "$is_epel_installed" ]]; then
     sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
   fi
-  sudo yum -y install curl mongodb-server rabbitmq-server
-  sudo systemctl start mongod rabbitmq-server
-  sudo systemctl enable mongod rabbitmq-server
+  sudo yum -y install curl rabbitmq-server
+  sudo systemctl start rabbitmq-server
+  sudo systemctl enable rabbitmq-server
+}
+
+install_mongodb() {
+  # Add key and repo for the latest stable MongoDB (3.2)
+  sudo rpm --import https://www.mongodb.org/static/pgp/server-3.2.asc
+  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-3.2.repo
+[mongodb-org-3.2]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/7Server/mongodb-org/3.2/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-3.2.asc
+EOT"
+
+  sudo yum -y install mongodb-org
+  sudo systemctl start mongod
+  sudo systemctl enable mongod
 }
 
 install_st2() {
@@ -353,9 +370,8 @@ EOT"
 }
 
 install_st2chatops() {
-  # Install Node
+  # Add NodeJS 4 repo
   curl -sL https://rpm.nodesource.com/setup_4.x | sudo -E bash -
-  sudo yum install -y nodejs
 
   # Install st2chatops
   sudo yum install -y ${ST2CHATOPS_PKG}
@@ -427,6 +443,7 @@ STEP='Adjust SELinux policies' && adjust_selinux_policies
 STEP='Install repoquery tool' && install_yum_utils
 
 STEP="Install st2 dependencies" && install_st2_dependencies
+STEP="Install st2 dependencies (MongoDB)" && install_mongodb
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
 STEP="Configure st2 auth" && configure_st2_authentication

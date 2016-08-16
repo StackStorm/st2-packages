@@ -7,6 +7,9 @@ author          "StackStorm Engineering <opsadmin@stackstorm.com>"
 start on filesystem and net-device-up IFACE!=lo
 stop on starting rc RUNLEVEL=[016]
 
+# Note: We disable upstart logging since the services manage logs themselves
+console none
+
 # We don't directly invoke runners.sh, rather then use for loop in here.
 # yeap... upstart is weird.
 

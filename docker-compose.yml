@@ -43,6 +43,21 @@ trusty:
     - mongodb
     - postgres
 
+xenial:
+  image: quay.io/stackstorm/packagingrunner
+  extends:
+    file: docker-compose.override.yml
+    service: suite-circle
+  environment:
+    - BUILDNODE=xenialbuild
+    - TESTNODE=xenialtest
+  links:
+    - xenialbuild
+    - xenialtest
+    - rabbitmq
+    - mongodb
+    - postgres
+
 el7:
   image: quay.io/stackstorm/packagingrunner
   extends:
@@ -94,6 +109,12 @@ trustybuild:
     file: docker-compose.override.yml
     service: volumes-compose
 
+xenialbuild:
+  image: stackstorm/packagingenv:xenial
+  extends:
+    file: docker-compose.override.yml
+    service: volumes-circle
+
 centos6build:
   image: quay.io/stackstorm/packagingenv:centos6
   extends:
@@ -125,6 +146,15 @@ trustytest:
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
+
+xenialtest:
+  image: stackstorm/packagingtest:xenial
+  privileged: true
+  extends:
+    file: docker-compose.override.yml
+    service: volumes-circle
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
 centos6test:
   image: quay.io/dennybaa/droneunit:centos6-sshd
