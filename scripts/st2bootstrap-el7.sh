@@ -322,6 +322,8 @@ generate_symmetric_crypto_key_for_datastore() {
 
   # set path to the key file in the config
   sudo crudini --set /etc/st2/st2.conf keyvalue encryption_key_path ${DATASTORE_ENCRYPTION_KEY_PATH}
+
+  sudo st2ctl restart-component st2api
 }
 install_st2mistral_depdendencies() {
   sudo yum -y install postgresql-server postgresql-contrib postgresql-devel
