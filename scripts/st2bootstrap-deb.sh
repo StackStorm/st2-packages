@@ -252,6 +252,20 @@ EOT"
   sudo chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
 }
 
+generate_symmetric_crypto_key_for_datastore() {
+  DATASTORE_ENCRYPTION_KEY_PATH="/etc/st2/keys/datastore_key.json"
+
+  sudo mkdir -p /etc/st2/keys/
+  sudo st2-generate-symmetric-crypto-key --key-path ${DATASTORE_ENCRYPTION_KEY_PATH}
+
+  # Make sure only st2 user can read the file
+  sudo chgrp st2 /etc/st2/keys/datastore_key.json
+  sudo chmod o-r /etc/st2/keys/datastore_key.json
+
+  # set path to the key file in the config
+  sudo crudini --set /etc/st2/st2.conf keyvalue encryption_key_path ${DATASTORE_ENCRYPTION_KEY_PATH}
+}
+
 install_st2mistral_depdendencies() {
   sudo apt-get install -y postgresql
 
@@ -401,6 +415,7 @@ STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
 STEP="Configure st2 auth" && configure_st2_authentication
 STEP="Configure st2 CLI config" && configure_st2_cli_config
+STEP="Generate symmetric crypto key for datastore" && generate_symmetric_crypto_key_for_datastore
 STEP="Verify st2" && verify_st2
 
 STEP="Install mistral dependencies" && install_st2mistral_depdendencies
