@@ -261,6 +261,8 @@ generate_symmetric_crypto_key_for_datastore() {
 
   # Make sure only st2 user can read the file
   sudo usermod -a -G st2 st2
+  sudo chgrp st2 ${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}
+  sudo chmod o-r ${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}
   sudo chgrp st2 ${DATASTORE_ENCRYPTION_KEY_PATH}
   sudo chmod o-r ${DATASTORE_ENCRYPTION_KEY_PATH}
 
