@@ -13,7 +13,7 @@ Name: %{package}
 Version: %{version}
 Release: %{release}
 Group: System/Management
-License: Apache
+License: Apache 2.0
 Url: https://github.com/StackStorm/mistral
 Source0: .
 Provides: openstack-mistral
