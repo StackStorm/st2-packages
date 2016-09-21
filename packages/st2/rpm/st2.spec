@@ -49,7 +49,7 @@ Conflicts: st2common
   %include rpm/preinst_script.spec
 
 %post
-  %service_post st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
+  %service_post st2actionrunner st2api st2stream st2auth st2notifier
   %service_post st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
 
 %preun
