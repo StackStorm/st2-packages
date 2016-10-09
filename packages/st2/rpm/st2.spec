@@ -65,6 +65,7 @@ Conflicts: st2common
 %files
   %defattr(-,root,root,-)
   /opt/stackstorm/%{venv_name}
+  /opt/stackstorm/runners/*
   %{_bindir}/*
   %config %{_sysconfdir}/bash_completion.d/st2
   %config(noreplace) %{_sysconfdir}/logrotate.d/st2
