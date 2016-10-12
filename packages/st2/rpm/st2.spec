@@ -65,6 +65,7 @@ Conflicts: st2common
 %files
   %defattr(-,root,root,-)
   /opt/stackstorm/%{venv_name}
+  /opt/stackstorm/runners/*
   %{_bindir}/*
   %config %{_sysconfdir}/bash_completion.d/st2
   %config(noreplace) %{_sysconfdir}/logrotate.d/st2
@@ -72,6 +73,7 @@ Conflicts: st2common
   %config(noreplace) %{_sysconfdir}/st2/*
   %{_datadir}/doc/st2
   %attr(755, %{svc_user}, root) /opt/stackstorm/exports
+  %attr(755, %{svc_user}, root) /opt/stackstorm/runners/*
   %attr(755, %{svc_user}, root) %{_localstatedir}/log/st2
   %attr(755, %{svc_user}, root) %{_localstatedir}/run/st2
   %attr(775, root, %{packs_group}) /opt/stackstorm/packs/*
