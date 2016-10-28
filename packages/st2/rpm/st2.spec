@@ -72,6 +72,7 @@ Conflicts: st2common
   %config(noreplace) %attr(600, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
   %config(noreplace) %{_sysconfdir}/st2/*
   %{_datadir}/doc/st2
+  %attr(755, %{svc_user}, root) /opt/stackstorm/configs
   %attr(755, %{svc_user}, root) /opt/stackstorm/exports
   %attr(755, %{svc_user}, root) /opt/stackstorm/runners/*
   %attr(755, %{svc_user}, root) %{_localstatedir}/log/st2
