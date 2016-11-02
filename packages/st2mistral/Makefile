@@ -3,6 +3,14 @@ WHEELDIR ?= /tmp/wheelhouse
 COMPONENT := st2mistral
 MISTRAL_RELEASE ?= 1
 MISTRAL_VERSION ?= $(shell python -c "from pbr import version; print version.VersionInfo('mistral').version_string(),")
+
+# Identify the python-mistralclient branch to use.
+ifneq (,$(findstring dev,$(MISTRAL_VERSION)))
+	MISTRALCLIENT_REPO := git+https:\/\/github.com\/StackStorm\/python-mistralclient.git\#egg=python-mistralclient
+else
+	MISTRALCLIENT_REPO := git+https:\/\/github.com\/StackStorm\/python-mistralclient.git@st2-$(MISTRAL_VERSION)\#egg=python-mistralclient
+endif
+
 # It's later than 0.11.1, so we have to use a later commit :(
 PBR_GITURL := git+https://github.com/openstack-dev/pbr@d19459daa8616dd18fde016c2970ffc41ff4ccdd\#egg=pbr
 
@@ -70,4 +78,5 @@ inject-deps: .stamp-inject-deps
 	grep -q 'gunicorn' requirements.txt || echo "gunicorn" >> requirements.txt
 	grep -q 'psycopg2' requirements.txt || echo "psycopg2" >> requirements.txt
 	grep -q 'amqp' requirements.txt || echo "amqp>=1.4.0,<2.0.0" >> requirements.txt
+	sed -i "s/^python-mistralclient.*/$(MISTRALCLIENT_REPO)/g" requirements.txt
 	touch $@
