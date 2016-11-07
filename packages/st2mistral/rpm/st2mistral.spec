@@ -42,7 +42,7 @@ Summary: Mistral workflow service
   rm -rf %{buildroot}
 
 %pre
-  adduser --no-create-home --system %{svc_user} 2>/dev/null
+  adduser --no-create-home --system --user-group %{svc_user} 2>/dev/null
   exit 0
 
 %post
