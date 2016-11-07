@@ -4,13 +4,14 @@ Priority: optional
 Maintainer: StackStorm Engineering <opsadmin@stackstorm.com>
 Build-Depends: debhelper (>= 9), python, dh-virtualenv (>= 0.8)
 Standards-Version: 3.9.5
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: git://anonscm.debian.org/collab-maint/mistral.git
-#Vcs-Browser: http://anonscm.debian.org/?p=collab-maint/mistral.git;a=summary
+Homepage: https://stackstorm.com/
+Vcs-Git: git://github.com/stackstorm/mistral.git
+Vcs-Browser: https://github.com/stackstorm/mistral
 
 Package: st2mistral
 Architecture: any
 Pre-Depends: dpkg (>= 1.16.16), python2.7, adduser
 Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
-Description: St2 Mistral workflow service
- <insert long description, indented with spaces>
+Description: st2 Mistral workflow service.
+ Task orchestration and workflow engine with powerful strategies like parallelism, loops, retries,
+ nested tasks, execution order capabilities. Rules defined in YAML, extended with YAQL expressions.
