@@ -8,6 +8,6 @@ opt/stackstorm/st2/bin/st2-bootstrap-rmq usr/bin/st2-bootstrap-rmq
 opt/stackstorm/st2/bin/st2-submit-debug-info usr/bin/st2-submit-debug-info
 opt/stackstorm/st2/bin/st2-generate-symmetric-crypto-key usr/bin/st2-generate-symmetric-crypto-key
 opt/stackstorm/st2/bin/st2-self-check usr/bin/st2-self-check
-opt/stackstorm/st2/bin/st2-validate-pack-config /bin/st2-validate-pack-config
-opt/stackstorm/st2/bin/st2-check-license /bin/st2-check-license
+opt/stackstorm/st2/bin/st2-validate-pack-config usr/bin/st2-validate-pack-config
+opt/stackstorm/st2/bin/st2-check-license usr/bin/st2-check-license
 opt/stackstorm/st2/bin/st2ctl usr/bin/st2ctl
