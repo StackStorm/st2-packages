@@ -158,7 +158,13 @@ shared_examples 'script or binary' do
 
   shebang = /^#!(?<interpreter>.*?)$/m
   if described_class.content.match(shebang)
-    describe file(Regexp.last_match[:interpreter]) do
+    # Note: We skip /usr/bin/env lines
+    interpreter_path = Regexp.last_match[:interpreter]
+    if Regexp.last_match[:interpreter].start_with?("/usr/bin/env")
+        return
+    end
+
+    describe file(interpreter_path) do
       it { is_expected.to be_file & be_executable }
     end
   end
