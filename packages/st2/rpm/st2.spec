@@ -51,6 +51,7 @@ Conflicts: st2common
 %post
   %service_post st2actionrunner st2api st2stream st2auth st2notifier
   %service_post st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
+  %include rpm/postinst_script.spec
 
 %preun
   %service_preun st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
