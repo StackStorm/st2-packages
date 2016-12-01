@@ -14,7 +14,11 @@ ST2WEB_PKG_VERSION=''
 ST2CHATOPS_PKG_VERSION=''
 USERNAME=''
 PASSWORD=''
-
+SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
+if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' ]]; then
+  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) or 16.04 (xenial) as base system!"
+  exit 2
+fi
 fail() {
   echo "############### ERROR ###############"
   echo "# Failed on step - $STEP #"
@@ -100,18 +104,19 @@ install_st2_dependencies() {
   sudo apt-get install -y curl
   sudo apt-get install -y rabbitmq-server
 }
-
 install_mongodb() {
-    # Add key and repo for the latest stable MongoDB (3.2)
-  sudo apt-key adv --fetch-keys https://www.mongodb.org/static/pgp/server-3.2.asc
-  sudo sh -c "cat <<EOT > /etc/apt/sources.list.d/mongodb-org-3.2.list
-deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse
-EOT"
+  # Add key and repo for the latest stable MongoDB (3.2)
+  sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
 
   sudo apt-get update
   sudo apt-get install -y mongodb-org
-}
 
+  if [[ "$SUBTYPE" == 'xenial' ]]; then  
+    sudo systemctl enable mongod
+    sudo systemctl start mongod
+  fi
+}
 get_full_pkg_versions() {
   if [ "$VERSION" != '' ];
   then
@@ -298,8 +303,8 @@ install_st2web() {
   # Add key and repo for the latest stable nginx
   sudo apt-key adv --fetch-keys http://nginx.org/keys/nginx_signing.key
   sudo sh -c "cat <<EOT > /etc/apt/sources.list.d/nginx.list
-deb http://nginx.org/packages/ubuntu/ trusty nginx
-deb-src http://nginx.org/packages/ubuntu/ trusty nginx
+deb http://nginx.org/packages/ubuntu/ ${SUBTYPE} nginx
+deb-src http://nginx.org/packages/ubuntu/ ${SUBTYPE} nginx
 EOT"
   sudo apt-get update
 
