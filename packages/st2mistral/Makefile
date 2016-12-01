@@ -73,7 +73,7 @@ inject-deps: .stamp-inject-deps
 	grep -q 'amqp' requirements.txt || echo "amqp>=1.4.0,<2.0.0" >> requirements.txt
 
 ifeq (,$(findstring dev,$(MISTRAL_VERSION)))
-	sed -i "s/^python-mistralclient.*/git+https:\/\/github.com\/StackStorm\/python-mistralclient.git@st2-$(MISTRAL_VERSION)\#egg=python-mistralclient/g" requirements.txt
+	sed -i "s/^python-mistralclient.*/-e git+https:\/\/github.com\/StackStorm\/python-mistralclient.git@st2-$(MISTRAL_VERSION)\#egg=python-mistralclient/g" requirements.txt
 endif
 
 	touch $@
