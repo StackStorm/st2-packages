@@ -59,7 +59,8 @@ wheelhouse: .stamp-wheelhouse
 
 bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | populate_version
-	python setup.py bdist_wheel -d $(WHEELDIR)
+	# python setup.py bdist_wheel -d $(WHEELDIR)
+	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 # We need to create bdist, before mangling requirements and running pip,
