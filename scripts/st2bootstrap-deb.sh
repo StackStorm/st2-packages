@@ -114,7 +114,7 @@ install_mongodb() {
 
   if [[ "$SUBTYPE" == 'xenial' ]]; then  
     sudo systemctl enable mongod
-    sudo service mongod start
+    sudo systemctl start mongod
   fi
 }
 get_full_pkg_versions() {
