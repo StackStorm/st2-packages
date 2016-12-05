@@ -79,6 +79,7 @@ Conflicts: st2common
   %attr(755, %{svc_user}, root) %{_localstatedir}/log/st2
   %attr(755, %{svc_user}, root) %{_localstatedir}/run/st2
   %attr(775, root, %{packs_group}) /opt/stackstorm/packs/*
+  %attr(775, root, %{packs_group}) /usr/share/doc/st2/examples
   %attr(775, root, %{packs_group}) /opt/stackstorm/virtualenvs
 %if 0%{?use_systemd}
   %{_unitdir}/st2actionrunner.service
