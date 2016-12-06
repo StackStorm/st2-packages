@@ -1,0 +1,7 @@
+
+
+If you are reporting a problem, please provide the following information:
+  - [ ] Operating system: `uname -a`, `./etc/lsb_release` or `cat /etc/redhat-release`
+  - [ ] StackStorm version: `st2 --version`
+  
+#Issue details
