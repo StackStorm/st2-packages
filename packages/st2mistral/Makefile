@@ -24,10 +24,6 @@ else
 	REDHAT := 1
 endif
 
-# Makefile function to retry the failed command 'N' times
-# Example: $(call retry,3,some_script.sh)
-retry = $(2) $(foreach t,$(shell seq 1 ${1}),|| (echo -e "\033[33m Failed ($$?): '$(2)'\n Retrying $t ... \033[0m"; $(2)))
-
 all: install
 .PHONY: all install changelog pre_install post_install
 
@@ -52,19 +48,22 @@ populate_version: .stamp-populate_version
 .stamp-populate_version:
 	sed -i "/^pbr.*/d" requirements.txt
 	sed -i "s/setup_requires=\[.*\]/setup_requires=\['pbr'\]/" setup.py
-	$(call retry,1,pip install $(PBR_GITURL))
+	pip install $(PBR_GITURL) || \
+		pip install $(PBR_GITURL)
 	touch $@
 
 wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version inject-deps bdist_wheel
 	# Install wheels into shared location
-	$(call retry,2,pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt)
+	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | populate_version
 	# python setup.py bdist_wheel -d $(WHEELDIR)
-	$(call retry,2,pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt)
+	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 # We need to create bdist, before mangling requirements and running pip,
