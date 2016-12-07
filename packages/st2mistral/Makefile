@@ -48,19 +48,22 @@ populate_version: .stamp-populate_version
 .stamp-populate_version:
 	sed -i "/^pbr.*/d" requirements.txt
 	sed -i "s/setup_requires=\[.*\]/setup_requires=\['pbr'\]/" setup.py
-	pip install $(PBR_GITURL)
+	pip install $(PBR_GITURL) || \
+		pip install $(PBR_GITURL)
 	touch $@
 
 wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version inject-deps bdist_wheel
 	# Install wheels into shared location
-	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | populate_version
 	# python setup.py bdist_wheel -d $(WHEELDIR)
-	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 # We need to create bdist, before mangling requirements and running pip,
