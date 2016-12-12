@@ -14,7 +14,11 @@ ST2WEB_PKG_VERSION=''
 ST2CHATOPS_PKG_VERSION=''
 USERNAME=''
 PASSWORD=''
-
+SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
+if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' ]]; then
+  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) or 16.04 (xenial) as base system!"
+  exit 2
+fi
 fail() {
   echo "############### ERROR ###############"
   echo "# Failed on step - $STEP #"
@@ -94,9 +98,25 @@ setup_args() {
 
 install_st2_dependencies() {
   sudo apt-get update
-  sudo apt-get install -y curl mongodb-server rabbitmq-server
-}
 
+  # Note: gnupg-curl is needed to be able to use https transport when fetching keys
+  sudo apt-get install -y gnupg-curl
+  sudo apt-get install -y curl
+  sudo apt-get install -y rabbitmq-server
+}
+install_mongodb() {
+  # Add key and repo for the latest stable MongoDB (3.2)
+  sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+
+  sudo apt-get update
+  sudo apt-get install -y mongodb-org
+
+  if [[ "$SUBTYPE" == 'xenial' ]]; then  
+    sudo systemctl enable mongod
+    sudo systemctl start mongod
+  fi
+}
 get_full_pkg_versions() {
   if [ "$VERSION" != '' ];
   then
@@ -237,6 +257,26 @@ EOT"
   sudo chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
 }
 
+generate_symmetric_crypto_key_for_datastore() {
+  DATASTORE_ENCRYPTION_KEYS_DIRECTORY="/etc/st2/keys"
+  DATASTORE_ENCRYPTION_KEY_PATH="${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}/datastore_key.json"
+
+  sudo mkdir -p ${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}
+  sudo st2-generate-symmetric-crypto-key --key-path ${DATASTORE_ENCRYPTION_KEY_PATH}
+
+  # Make sure only st2 user can read the file
+  sudo usermod -a -G st2 st2
+  sudo chgrp st2 ${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}
+  sudo chmod o-r ${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}
+  sudo chgrp st2 ${DATASTORE_ENCRYPTION_KEY_PATH}
+  sudo chmod o-r ${DATASTORE_ENCRYPTION_KEY_PATH}
+
+  # set path to the key file in the config
+  sudo crudini --set /etc/st2/st2.conf keyvalue encryption_key_path ${DATASTORE_ENCRYPTION_KEY_PATH}
+
+  sudo st2ctl restart-component st2api
+}
+
 install_st2mistral_depdendencies() {
   sudo apt-get install -y postgresql
 
@@ -263,8 +303,8 @@ install_st2web() {
   # Add key and repo for the latest stable nginx
   sudo apt-key adv --fetch-keys http://nginx.org/keys/nginx_signing.key
   sudo sh -c "cat <<EOT > /etc/apt/sources.list.d/nginx.list
-deb http://nginx.org/packages/ubuntu/ trusty nginx
-deb-src http://nginx.org/packages/ubuntu/ trusty nginx
+deb http://nginx.org/packages/ubuntu/ ${SUBTYPE} nginx
+deb-src http://nginx.org/packages/ubuntu/ ${SUBTYPE} nginx
 EOT"
   sudo apt-get update
 
@@ -286,9 +326,8 @@ EOT"
 }
 
 install_st2chatops() {
-  # Install Node
+  # Add NodeJS 4 repo
   curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
-  sudo apt-get install -y nodejs
 
   # Install st2chatops
   sudo apt-get install -y st2chatops${ST2CHATOPS_PKG_VERSION}
@@ -382,10 +421,12 @@ ok_message() {
 trap 'fail' EXIT
 STEP="Setup args" && setup_args $@
 STEP="Install st2 dependencies" && install_st2_dependencies
+STEP="Install st2 dependencies (MongoDB)" && install_mongodb
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
 STEP="Configure st2 auth" && configure_st2_authentication
 STEP="Configure st2 CLI config" && configure_st2_cli_config
+STEP="Generate symmetric crypto key for datastore" && generate_symmetric_crypto_key_for_datastore
 STEP="Verify st2" && verify_st2
 
 STEP="Install mistral dependencies" && install_st2mistral_depdendencies

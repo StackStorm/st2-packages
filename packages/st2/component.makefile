@@ -40,13 +40,15 @@ wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements
 	# Install wheels into shared location
 	cat requirements.txt
-	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | populate_version requirements inject-deps
 	cat requirements.txt
-	python setup.py bdist_wheel -d $(WHEELDIR)
+	python setup.py bdist_wheel -d $(WHEELDIR) || \
+		python setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@
 
 # Note: We want to dynamically inject "st2client" dependency. This way we can

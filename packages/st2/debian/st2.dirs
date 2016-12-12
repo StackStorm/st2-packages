@@ -1,6 +1,7 @@
 /etc/bash_completion.d
 /etc/logrotate.d
 /etc/st2
+/opt/stackstorm/configs
 /opt/stackstorm/exports
 /opt/stackstorm/virtualenvs
 /var/log/st2

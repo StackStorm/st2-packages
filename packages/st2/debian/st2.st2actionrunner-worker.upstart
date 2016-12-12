@@ -3,6 +3,9 @@
 
 description     "StackStorm actionrunner worker task"
 
+# Note: We disable upstart logging since the services manage logs themselves
+console none
+
 setuid root
 setgid st2packs
 respawn
@@ -12,7 +15,7 @@ umask 002
 kill timeout 60
 
 instance $WORKERID
- 
+
 script
   NAME=st2actionrunner
   DAEMON_ARGS="--config-file /etc/st2/st2.conf"

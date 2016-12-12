@@ -13,15 +13,16 @@ Name: %{package}
 Version: %{version}
 Release: %{release}
 Group: System/Management
-License: Apache
+License: Apache 2.0
 Url: https://github.com/StackStorm/mistral
 Source0: .
 Provides: openstack-mistral
-Summary: Mistral workflow service
+Summary: st2 Mistral workflow service
 
 
 %description
-  <insert long description, indented with spaces>
+  Task orchestration and workflow engine with powerful strategies like parallelism, loops, retries,
+  nested tasks, execution order capabilities. Rules defined in YAML, extended with YAQL expressions.
 
 %define _builddir %{SOURCE0}
 
@@ -42,7 +43,7 @@ Summary: Mistral workflow service
   rm -rf %{buildroot}
 
 %pre
-  adduser --no-create-home --system %{svc_user} 2>/dev/null
+  adduser --no-create-home --system --user-group %{svc_user} 2>/dev/null
   exit 0
 
 %post

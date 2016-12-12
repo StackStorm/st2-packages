@@ -65,12 +65,12 @@ class ST2Spec
     },
 
     package_has_binaries: {
-      st2common: %w(st2-bootstrap-rmq st2-register-content st2-self-check st2ctl),
+      st2common: %w(st2-bootstrap-rmq st2-register-content st2-self-check st2ctl st2-validate-pack-config st2-check-license),
       st2reactor: %w(st2-rule-tester st2-trigger-refire),
       st2client: %w(st2),
       st2debug: %w(st2-submit-debug-info),
       st2: %w(st2-bootstrap-rmq st2-register-content st2-rule-tester
-              st2-apply-rbac-definitions st2-trigger-refire st2 st2-self-check st2ctl
+              st2-apply-rbac-definitions st2-trigger-refire st2 st2-self-check st2-validate-pack-config st2-check-license st2ctl
               st2-generate-symmetric-crypto-key st2-submit-debug-info),
       mistral: %w(mistral)
     },
@@ -158,8 +158,13 @@ shared_examples 'script or binary' do
 
   shebang = /^#!(?<interpreter>.*?)$/m
   if described_class.content.match(shebang)
-    describe file(Regexp.last_match[:interpreter]) do
-      it { is_expected.to be_file & be_executable }
+    # Note: We skip /usr/bin/env lines
+    interpreter_path = Regexp.last_match[:interpreter]
+    if not Regexp.last_match[:interpreter].start_with?("/usr/bin/env")
+
+      describe file(interpreter_path) do
+        it { is_expected.to be_file & be_executable }
+      end
     end
   end
 end

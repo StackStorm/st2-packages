@@ -49,8 +49,9 @@ Conflicts: st2common
   %include rpm/preinst_script.spec
 
 %post
-  %service_post st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
+  %service_post st2actionrunner st2api st2stream st2auth st2notifier
   %service_post st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
+  %include rpm/postinst_script.spec
 
 %preun
   %service_preun st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
@@ -65,16 +66,20 @@ Conflicts: st2common
 %files
   %defattr(-,root,root,-)
   /opt/stackstorm/%{venv_name}
+  /opt/stackstorm/runners/*
   %{_bindir}/*
   %config %{_sysconfdir}/bash_completion.d/st2
   %config(noreplace) %{_sysconfdir}/logrotate.d/st2
   %config(noreplace) %attr(600, %{svc_user}, %{svc_user}) %{_sysconfdir}/st2/htpasswd
   %config(noreplace) %{_sysconfdir}/st2/*
   %{_datadir}/doc/st2
+  %attr(755, %{svc_user}, root) /opt/stackstorm/configs
   %attr(755, %{svc_user}, root) /opt/stackstorm/exports
+  %attr(755, %{svc_user}, root) /opt/stackstorm/runners/*
   %attr(755, %{svc_user}, root) %{_localstatedir}/log/st2
   %attr(755, %{svc_user}, root) %{_localstatedir}/run/st2
   %attr(775, root, %{packs_group}) /opt/stackstorm/packs/*
+  %attr(775, root, %{packs_group}) /usr/share/doc/st2/examples
   %attr(775, root, %{packs_group}) /opt/stackstorm/virtualenvs
 %if 0%{?use_systemd}
   %{_unitdir}/st2actionrunner.service

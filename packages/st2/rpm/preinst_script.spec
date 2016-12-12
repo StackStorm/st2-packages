@@ -7,7 +7,9 @@ ST2_USER=%{svc_user}
 ## Permissions of directories which has to be reset on upgrade
 RESET_PERMS=$(cat <<EHD | sed 's/\s\+/ /g'
 ug+rw root:_packsgroup /opt/stackstorm/packs
+ug+rw root:_packsgroup /usr/share/doc/st2/examples
 ug+rw root:_packsgroup /opt/stackstorm/virtualenvs
+755 _st2user:root      /opt/stackstorm/configs
 755 _st2user:root      /opt/stackstorm/exports
 EHD
 )
@@ -16,7 +18,7 @@ EHD
 create_users() {
   # create st2 user (services user)
   (id $ST2_USER 1>/dev/null 2>&1) ||
-    adduser --no-create-home --system $ST2_USER
+    adduser --no-create-home --system --user-group $ST2_USER
 
   # make st2 member of st2packs group
   (getent group $PACKS_GROUP 1>/dev/null 2>&1) || groupadd -r $PACKS_GROUP

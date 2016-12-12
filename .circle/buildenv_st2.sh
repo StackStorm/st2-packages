@@ -42,7 +42,7 @@ ST2PKG_VERSION=$(fetch_version)
 # for Bintray
 #ST2PKG_RELEASE=$(.circle/bintray.sh next-revision ${DISTRO}_staging ${ST2PKG_VERSION} st2)
 # for PackageCloud
-if [ -z "$CIRCLE_PR_REPONAME" ]; then
+if [ -n "$PACKAGECLOUD_TOKEN" ]; then
   ST2PKG_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${ST2PKG_VERSION} st2)
 else
   # is fork

@@ -3,6 +3,7 @@
 BASE_PATH="https://raw.githubusercontent.com/StackStorm/st2-packages"
 BOOTSTRAP_FILE='st2bootstrap.sh'
 
+ARCH=`arch`
 DEBTEST=`lsb_release -a 2> /dev/null | grep Distributor | awk '{print $3}'`
 RHTEST=`cat /etc/redhat-release 2> /dev/null | sed -e "s~\(.*\)release.*~\1~g"`
 VERSION=''
@@ -11,7 +12,9 @@ REPO_TYPE=''
 ST2_PKG_VERSION=''
 USERNAME=''
 PASSWORD=''
-BRANCH='master'
+
+# Note: This variable needs to default to a branch of the latest stable release
+BRANCH='v2.1'
 
 setup_args() {
   for i in "$@"
@@ -74,6 +77,15 @@ setup_args() {
 
 setup_args $@
 
+# Note: If either --unstable or --staging flag is provided we default branch to master
+if [[ "$RELEASE" == 'unstable' ]]; then
+  BRANCH="master"
+fi
+
+if [[ "$REPO_TYPE" == 'staging' ]]; then
+  BRANCH="master"
+fi
+
 get_version_branch() {
   if [[ "$RELEASE" == 'stable' ]]; then
       BRANCH="v$(echo ${VERSION} | awk 'BEGIN {FS="."}; {print $1 "." $2}')"
@@ -95,6 +107,11 @@ fi
 
 USERNAME="--user=${USERNAME}"
 PASSWORD="--password=${PASSWORD}"
+
+if [[ "$ARCH" != 'x86_64' ]]; then
+  echo "Unsupported architecture. Please use a 64-bit OS! Aborting!"
+  exit 2
+fi
 
 if [[ -n "$RHTEST" ]]; then
   TYPE="rpms"

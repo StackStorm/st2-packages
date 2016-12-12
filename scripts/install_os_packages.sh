@@ -10,8 +10,14 @@ version_delemiter() {
   [ "$(platform)" = "deb" ] && echo '_' || echo '-'
 }
 
-install_rpm() { sudo yum -y install $(lookup_fullnames $@); }
+install_rpm() {
+  sudo yum -y update
+  sudo yum -y install $(lookup_fullnames $@);
+}
+
 install_deb() {
+  sudo apt-get -y update
+
   for fpath in $(lookup_fullnames $@); do
     gdebi -qn "$fpath"
   done

@@ -1,6 +1,9 @@
 description     "Mistral workflow api job"
 author          "StackStorm Engineering <opsadmin@stackstorm.com>"
 
+# Note: We disable upstart logging since the services manage logs themselves
+console none
+
 # This doesn't start/stop by itself (AND SHOULD NOT!),
 # use mistral job instead.
 start on mistral-api

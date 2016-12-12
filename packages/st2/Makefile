@@ -30,6 +30,11 @@ else
 	DEB_DISTRO := $(shell lsb_release -cs)
 endif
 
+# Makefile function to retry the failed command 'N' times
+# Make sure you use it for nothing but networking stuff (think about race conditons)
+# Example: $(call retry,3,some_script.sh)
+retry = $(2) $(foreach t,$(shell seq 1 ${1}),|| (echo -e "\033[33m Failed ($$?): '$(2)'\n Retrying $t ... \033[0m"; $(2)))
+
 .PHONY: all install wheelhouse
 all: install
 
@@ -77,7 +82,8 @@ endif
 wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements inject-deps
 	cat requirements.txt
-	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 # Note: We want to dynamically inject "st2client" dependency. This way we can
