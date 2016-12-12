@@ -263,6 +263,8 @@ configure_st2_cli_config() {
   ROOT_USER="root"
   CURRENT_USER=$(whoami)
 
+  : "${HOME:=`eval echo ~$(whoami)`}"
+
   ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
 
