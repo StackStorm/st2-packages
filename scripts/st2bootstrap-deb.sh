@@ -104,7 +104,7 @@ check_st2_host_dependencies() {
 
   # NOTE: lsof restricts the number of ports specified with "-i" to 100.
   echo "Checking if required TCP ports are already in use."
-  ret=`sudo /usr/sbin/lsof -V -P -i :80 -i :443 -i :4369 -i :5672 -i :9100 -i :9101 -i :9102 \
+  ret=`sudo /usr/bin/lsof -V -P -i :80 -i :443 -i :4369 -i :5672 -i :9100 -i :9101 -i :9102 \
        -i :25672 -i :27017 | grep LISTEN || echo "Unbound"`
   if [ "$ret" != "Unbound" ]; then
     printf "$ret\n\n"
