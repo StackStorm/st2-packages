@@ -181,7 +181,7 @@ fail() {
   exit 2
 }
 
-check_st2_host() {
+check_st2_host_dependencies() {
   # Check that the following TCP ports are available.
   # Abort the installation early if the required ports are being used by an existing process.
 
@@ -189,17 +189,19 @@ check_st2_host() {
 
   # NOTE: lsof restricts the number of ports specified with "-i" to 100.
   echo "Checking if required TCP ports are already in use."
-  echo ""
-  sudo lsof -V -P -i :80 -i :443 -i :4369 -i :5672 -i :9100 -i :9101 -i :9102 -i 25672 -i :27017 | grep LISTEN
-  if [ $? -eq 0 ]; then
-    echo "Not all required TCP ports are available."
+  ret=`sudo /usr/sbin/lsof -V -P -i :80 -i :443 -i :4369 -i :5672 -i :9100 -i :9101 -i :9102 \
+       -i :25672 -i :27017 | grep LISTEN || echo "Unbound"`
+  if [ "$ret" != "Unbound" ]; then
+    printf "$ret\n\n"
+    echo "Not all required TCP ports are available. ST2 will fail to start."
+    echo "Please, stop any services listening on the ports mentioned above."
     exit 1
   fi
 
   echo "Checking space availability for MongoDB. MongoDB 3.2 requires at least 350MB free in /var/lib/..."
-  echo ""
   VAR_SPACE=`df -Pk /var/lib | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{print $4}'`
   if [ ${VAR_SPACE} -lt 358400 ]; then
+    echo ""
     echo "There is not enough space for MongoDB. It will fail to start. Please, add some space to /var or clean it up."
     exit 1
   fi
@@ -210,7 +212,7 @@ install_st2_dependencies() {
   if [[ -z "$is_epel_installed" ]]; then
     sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
   fi
-  sudo yum -y install curl rabbitmq-server
+  sudo yum -y install lsof curl rabbitmq-server
   sudo service rabbitmq-server start
   sudo chkconfig rabbitmq-server on
 }
@@ -507,7 +509,7 @@ ok_message() {
 
 trap 'fail' EXIT
 STEP='Parse arguments' && setup_args $@
-STEP="Check st2 host" && check_st2_host
+STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_dependencies
 STEP='Check libffi-devel availability' && check_libffi_devel
 STEP='Adjust SELinux policies' && adjust_selinux_policies
 STEP='Install repoquery tool' && install_yum_utils
