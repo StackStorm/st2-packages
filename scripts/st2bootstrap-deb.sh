@@ -100,11 +100,12 @@ check_st2_host_dependencies() {
   # Check that the following TCP ports are available.
   # Abort the installation early if the required ports are being used by an existing process.
 
-  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), and st2 (9100-9102).
+  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672),
+  # postgresql (5432) and st2 (9100-9102).
 
   # NOTE: lsof restricts the number of ports specified with "-i" to 100.
   echo "Checking if required TCP ports are already in use."
-  ret=`sudo /usr/bin/lsof -V -P -i :80 -i :443 -i :4369 -i :5672 -i :9100 -i :9101 -i :9102 \
+  ret=`sudo /usr/bin/lsof -V -P -i :80 -i :443 -i :4369 -i :5432 -i :5672 -i :9100 -i :9101 -i :9102 \
        -i :25672 -i :27017 | grep LISTEN || echo "Unbound"`
   if [ "$ret" != "Unbound" ]; then
     printf "$ret\n\n"
