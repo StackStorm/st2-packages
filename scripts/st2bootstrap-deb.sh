@@ -112,7 +112,7 @@ install_mongodb() {
   sudo apt-get update
   sudo apt-get install -y mongodb-org
 
-  if [[ "$SUBTYPE" == 'xenial' ]]; then  
+  if [[ "$SUBTYPE" == 'xenial' ]]; then
     sudo systemctl enable mongod
     sudo systemctl start mongod
   fi
@@ -368,6 +368,11 @@ configure_st2chatops() {
 }
 
 verify_st2() {
+
+  # TODO: This is a temporary and nasty workaround for xenial CI failures.
+  if [[ "$SUBTYPE" == 'xenial' ]]; then
+    sleep 30
+  fi
   st2 --version
   st2 -h
 
