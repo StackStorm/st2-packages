@@ -96,29 +96,54 @@ setup_args() {
   fi
 }
 
+function port_status() {
+  # If a the specified tcp4 port is bound, then return (port,pid,process name) tuple.
+  # Return "Unbound" if a pipe command fails.
+  # Else, return empty string.
+
+  # Use netstat and grep to get a list of all the tcp4 sockets that are in the LISTEN state.
+  # Use cut to ensure that we can grep for the specified port at beginning of the line.
+
+  ret=$(sudo netstat -tunlp4 | grep LISTEN | tr -s ' ' | cut -f 4,7 -d ' ' | cut -f 2 -d ':' | grep ^$1 | tr ' ' '\t' || echo 'Unbound')
+  echo "$ret"
+}
+
 check_st2_host_dependencies() {
-  # Check that the following TCP ports are available.
-  # Abort the installation early if the required ports are being used by an existing process.
+  # CHECK 1: Determine which, if any, of the required ports are used by an existing process.
 
-  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672),
-  # postgresql (5432) and st2 (9100-9102).
+  # Abort the installation early if the following ports are being used by an existing process.
+  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), postgresql (5432) and st2 (9100-9102).
 
-  # NOTE: lsof restricts the number of ports specified with "-i" to 100.
-  echo "Checking if required TCP ports are already in use."
-  ret=`sudo /usr/bin/lsof -V -P -i :80 -i :443 -i :4369 -i :5432 -i :5672 -i :9100 -i :9101 -i :9102 \
-       -i :25672 -i :27017 | grep LISTEN || echo "Unbound"`
-  if [ "$ret" != "Unbound" ]; then
-    printf "$ret\n\n"
-    echo "Not all required TCP ports are available. ST2 will fail to start."
-    echo "Please, stop any services listening on the ports mentioned above."
+  declare -a ports=("80" "443" "4369" "5432" "5672" "9100" "9101" "9102" "25672" "27017")
+  declare -a used=()
+
+  for i in "${ports[@]}"
+  do
+    rv=$(port_status $i)
+    if [ "$rv" != "Unbound" ] && [ "$rv" != "" ]; then
+      used+=("$rv")
+    fi
+  done
+
+  # If any used ports were found, display helpful message and exit
+  if [ ${#used[@]} -gt 0 ]; then
+    printf "\nNot all required TCP ports are available. ST2 and related services will fail to start.\n\n"
+    echo "The following ports are in use by the specified pid/process and need to be stopped:"
+    for port_pid_process in "${used[@]}"
+    do
+       echo " $port_pid_process"
+    done
+    echo ""
     exit 1
   fi
 
-  echo "Checking space availability for MongoDB. MongoDB 3.2 requires at least 350MB free in /var/lib/..."
+  # CHECK 2: Ensure there is enough space at /var/lib/mongodb
   VAR_SPACE=`df -Pk /var/lib | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{print $4}'`
   if [ ${VAR_SPACE} -lt 358400 ]; then
     echo ""
-    echo "There is not enough space for MongoDB. It will fail to start. Please, add some space to /var or clean it up."
+    echo "MongoDB 3.2 requires at least 350MB free in /var/lib/mongodb"
+    echo "There is not enough space for MongoDB. It will fail to start."
+    echo "Please, add some space to /var or clean it up."
     exit 1
   fi
 }
