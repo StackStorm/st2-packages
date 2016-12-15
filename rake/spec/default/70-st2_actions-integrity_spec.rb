@@ -3,7 +3,7 @@ describe 'st2 actions integrity checks' do
     its(:exit_status) { is_expected.to eq 0 }
   end
 
-  describe command("st2 packs install github") do
+  describe command("st2 pack install github") do
     its(:exit_status) { is_expected.to eq 0 }
   end
 end
