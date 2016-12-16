@@ -24,9 +24,6 @@ machine:
     ST2MISTRAL_GITREV: master
     ST2_DOCKERFILES_REPO: https://github.com/StackStorm/st2-dockerfiles
     ST2_PACKAGES: "st2 st2mistral"
-    BUILD_DOCKER: 0
-    DEPLOY_DOCKER: 0
-    DEPLOY_PACKAGES: 1
   pre:
     - mkdir -p ~/packages
     # Need latest Docker version for some features to work (CircleCI by default works with outdated version)

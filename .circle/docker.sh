@@ -22,8 +22,8 @@ set -e
 # docker.sh test st2api 'st2 --version' - Exec command inside already started `st2api` Docker container
 # docker.sh deploy st2api st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer - Push images to Docker Hub
 
-: ${BUILD_DOCKER:=1}
-: ${DEPLOY_DOCKER:=1}
+: ${BUILD_DOCKER:=0}
+: ${DEPLOY_DOCKER:=0}
 
 if [ ${DISTRO} != 'wheezy' ]; then
     echo "Skipping the Docker stage for ${DISTRO}."
