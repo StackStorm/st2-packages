@@ -39,15 +39,7 @@ st2_giturl() {
 ST2_GITURL=${ST2_GITURL:-$(st2_giturl)}
 ST2_GITREV=${ST2_GITREV:-$CIRCLE_BRANCH}
 ST2PKG_VERSION=$(fetch_version)
-# for Bintray
-#ST2PKG_RELEASE=$(.circle/bintray.sh next-revision ${DISTRO}_staging ${ST2PKG_VERSION} st2)
-# for PackageCloud
-if [ -n "$PACKAGECLOUD_TOKEN" ]; then
-  ST2PKG_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${ST2PKG_VERSION} st2)
-else
-  # is fork
-  ST2PKG_RELEASE=1
-fi
+ST2PKG_RELEASE=${CIRCLE_BUILD_NUM}
 
 re="\\b$DISTRO\\b"
 [[ "$NOTESTS" =~ $re ]] && TESTING=0
