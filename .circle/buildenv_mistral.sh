@@ -30,7 +30,7 @@ mistral_giturl() {
 
 # Mistral versioning
 ST2MISTRAL_GITURL=${ST2MISTRAL_GITURL:-https://github.com/StackStorm/mistral}
-ST2MISTRAL_GITREV=${ST2MISTRAL_GITREV:-$CIRCLE_BRANCH}
+ST2MISTRAL_GITREV=${ST2MISTRAL_GITREV:-master}
 MISTRAL_VERSION=$(fetch_version)
 if [ -n "$PACKAGECLOUD_TOKEN" ]; then
   MISTRAL_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${MISTRAL_VERSION} st2mistral)

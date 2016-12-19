@@ -36,8 +36,8 @@ st2_giturl() {
 # ST2PKG_RELEASE - Release number aka revision number for `st2` package, will be reused in Docker metadata (ex: 4)
 # ST2_WAITFORSTART - Delay between st2 start and service checks
 
-ST2_GITURL=${ST2_GITURL:-$(st2_giturl)}
-ST2_GITREV=${ST2_GITREV:-$CIRCLE_BRANCH}
+ST2_GITURL=${ST2_GITURL:-https://github.com/StackStorm/st2}
+ST2_GITREV=${ST2_GITREV:-master}
 ST2PKG_VERSION=$(fetch_version)
 # for Bintray
 #ST2PKG_RELEASE=$(.circle/bintray.sh next-revision ${DISTRO}_staging ${ST2PKG_VERSION} st2)
