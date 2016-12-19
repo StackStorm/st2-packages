@@ -36,6 +36,10 @@ setup_args() {
           REPO_TYPE='staging'
           shift
           ;;
+          --dev=*)
+          DEV_BUILD="${i#*=}"
+          shift
+          ;;
           --user=*)
           USERNAME="${i#*=}"
           shift
@@ -75,6 +79,13 @@ setup_args() {
     echo "################################################################"
     echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
     echo "################################################################"
+  fi
+
+  if [ "$DEV_BUILD" != '' ]; then
+    printf "\n\n"
+    echo "###############################################################################"
+    echo "### Installing from dev build artifacts!!! REALLY, ANYTHING COULD HAPPEN!!! ###"
+    echo "###############################################################################"
   fi
 
   if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
@@ -210,8 +221,18 @@ EOT"
 
 install_st2() {
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
-  STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
-  sudo yum -y install ${ST2_PKG}
+
+  if [ "$DEV_BUILD" = '' ]; then
+    STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
+    sudo yum -y install ${ST2_PKG}
+  else
+    curl -SsL -k -o ./jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+    chmod +x ./jq
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | ./jq -r '.[] | select(.path | test("/home/ubuntu/packages/el6/st2-.*.rpm"; "i")) | .url')"
+    sudo yum -y install ${PACKAGE_URL}
+    rm jq
+  fi
+
   sudo st2ctl start
   sleep 5
   sudo st2ctl reload --register-all
@@ -375,7 +396,15 @@ EHD
 
 install_st2mistral() {
   # install mistral
-  sudo yum -y install ${ST2MISTRAL_PKG}
+  if [ "$DEV_BUILD" = '' ]; then
+    sudo yum -y install ${ST2MISTRAL_PKG}
+  else
+    curl -SsL -k -o ./jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+    chmod +x ./jq
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | ./jq -r '.[] | select(.path | test("/home/ubuntu/packages/el6/st2mistral-.*.rpm"; "i")) | .url')"
+    sudo yum -y install ${PACKAGE_URL}
+    rm jq
+  fi
 
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
