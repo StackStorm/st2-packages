@@ -112,25 +112,25 @@ centos7build:
 ## Package testing nodes
 #
 wheezytest:
-  image: stackstorm/packagingtest:wheezy
+  image: stackstorm/packagingtest:wheezy-sshd
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 jessietest:
-  image: stackstorm/packagingtest:jessie
+  image: stackstorm/packagingtest:jessie-sshd
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 trustytest:
-  image: stackstorm/packagingtest:trusty
+  image: stackstorm/packagingtest:trusty-upstart
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 xenialtest:
-  image: stackstorm/packagingtest:xenial
+  image: stackstorm/packagingtest:xenial-systemd
   privileged: true
   extends:
     file: docker-compose.override.yml
@@ -139,13 +139,13 @@ xenialtest:
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
 centos6test:
-  image: stackstorm/packagingtest:centos6
+  image: stackstorm/packagingtest:centos6-sshd
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 centos7test:
-  image: stackstorm/packagingtest:centos7
+  image: stackstorm/packagingtest:centos7-systemd
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
