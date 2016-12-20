@@ -12,7 +12,7 @@ DISTROS = (os.environ.get('DISTROS') or sys.exit('DISTROS env variable is requir
 CIRCLE_NODE_TOTAL = int(os.environ.get('CIRCLE_NODE_TOTAL')) or sys.exit('CIRCLE_NODE_TOTAL env variable is required!')
 
 
-def env(var):
+def env(var, default=''):
     """
     Shortcut to get ENV variable value
     :param var: Input environment variable name
@@ -20,7 +20,7 @@ def env(var):
     :return:
     :rtype: ``str``
     """
-    return os.environ.get(var, '')
+    return os.environ.get(var, default)
 
 
 class Payload(object):
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     parser.add_argument('dir', help='directory tree with created packages')
     args = parser.parse_args()
 
-    if int(env('DEPLOY_PACKAGES')):
+    if int(env('DEPLOY_PACKAGES', '1')):
         for distro in islice(DISTROS, CIRCLE_NODE_TOTAL):
             try:
                 filename = (glob.glob(os.path.join(args.dir, distro, 'st2*.deb')) + glob.glob(os.path.join(args.dir, distro, 'st2*.rpm')))[0]
