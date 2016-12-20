@@ -181,15 +181,13 @@ install_st2() {
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo apt-get install -y st2${ST2_PKG_VERSION}
   else
-    curl -SsL -k -o ./jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
-    chmod +x ./jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | ./jq -r '.[] | select(.path | test("/home/ubuntu/packages/${SUBTYPE}/st2_.*.deb"; "i")) | .url')"
+    sudo apt-get install -y jq
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "${SUBTYPE}/st2_.*.deb")"
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
     curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
     sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
     sudo apt-get install -yf
     rm ${PACKAGE_FILENAME}
-    rm jq
   fi
   
   sudo st2ctl start
@@ -318,15 +316,13 @@ install_st2mistral() {
   if [ "$DEV_BUILD" = '' ]; then
     sudo apt-get install -y st2mistral${ST2MISTRAL_PKG_VERSION}
   else
-    curl -SsL -k -o ./jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
-    chmod +x ./jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | ./jq -r '.[] | select(.path | test("/home/ubuntu/packages/${SUBTYPE}/st2mistral_.*.deb"; "i")) | .url')"
+    sudo apt-get install -y jq
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "${SUBTYPE}/st2mistral_.*.deb")"
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
     curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
     sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
     sudo apt-get install -yf
     rm ${PACKAGE_FILENAME}
-    rm jq
   fi
 
   # Setup Mistral DB tables, etc.

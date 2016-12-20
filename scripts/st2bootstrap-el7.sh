@@ -209,11 +209,9 @@ install_st2() {
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo yum -y install ${ST2_PKG}
   else
-    curl -SsL -k -o ./jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
-    chmod +x ./jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | ./jq -r '.[] | select(.path | test("/home/ubuntu/packages/el7/st2-.*.rpm"; "i")) | .url')"
+    sudo yum -y install jq
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el7/st2-.*.rpm")"
     sudo yum -y install ${PACKAGE_URL}
-    rm jq
   fi
 
   sudo st2ctl start
@@ -373,11 +371,9 @@ install_st2mistral() {
   if [ "$DEV_BUILD" = '' ]; then
     sudo yum -y install ${ST2MISTRAL_PKG}
   else
-    curl -SsL -k -o ./jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
-    chmod +x ./jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | ./jq -r '.[] | select(.path | test("/home/ubuntu/packages/el7/st2mistral-.*.rpm"; "i")) | .url')"
+    sudo yum -y install jq
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el7/st2mistral-.*.rpm")"
     sudo yum -y install ${PACKAGE_URL}
-    rm jq
   fi
 
   # Setup Mistral DB tables, etc.
