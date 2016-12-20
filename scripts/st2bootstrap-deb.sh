@@ -12,6 +12,7 @@ ST2_PKG_VERSION=''
 ST2MISTRAL_PKG_VERSION=''
 ST2WEB_PKG_VERSION=''
 ST2CHATOPS_PKG_VERSION=''
+DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
