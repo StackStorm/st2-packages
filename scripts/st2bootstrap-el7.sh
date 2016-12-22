@@ -165,15 +165,28 @@ fail() {
 }
 
 function port_status() {
-  # If a the specified tcp4 port is bound, then return (port,pid,process name) tuple.
-  # Return "Unbound" if a pipe command fails.
-  # Else, return empty string.
-
-  # Use netstat and grep to get a list of all the tcp4 sockets that are in the LISTEN state.
-  # Use cut to ensure that we can grep for the specified port at beginning of the line.
-
-  ret=$(sudo netstat -tunlp4 | grep LISTEN | tr -s ' ' | cut -f 4,7 -d ' ' | cut -f 2 -d ':' | grep ^$1 | tr ' ' '\t' || echo 'Unbound')
-  echo "$ret"
+  # If the specified tcp4 port is bound, then return the "port pid/procname",
+  # else if a pipe command fails, return "Unbound",
+  # else return "".
+  #
+  # Please note that all return values end with a newline.
+  #
+  # Use netstat and awk to get a list of all the tcp4 sockets that are in the LISTEN state,
+  # matching the specified port.
+  #
+  # The `netstat -tunlp --inet` command is assumed to output data in the following format:
+  #   Active Internet connections (only servers)
+  #   Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+  #   tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      7506/httpd
+  #
+  # The awk command prints the 4th and 7th columns of any line matching both the following criteria:
+  #   1) The 4th column contains the port passed to port_status()  (i.e., $1)
+  #   2) The 6th column contains "LISTEN"
+  #
+  # Sample output:
+  #   0.0.0.0:25000 7506/sshd
+  ret=$(sudo netstat -tunlp --inet | awk -v port=$1 '$4 ~ port && $6 ~ /LISTEN/ { print $4 " " $7 }' || echo 'Unbound');
+  echo "$ret";
 }
 
 check_st2_host_dependencies() {
