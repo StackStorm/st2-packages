@@ -9,7 +9,6 @@ st2passwd     = ENV['ST2PASSWORD'] ? ENV['ST2PASSWORD'] : 'Ch@ngeMe'
 box           = ENV['BOX'] ? ENV['BOX'] : 'centos/7'
 source_folder = ENV['SRC_FOLDER']   || nil
 dest_folder   = ENV['DST_FOLDER']   || nil
-bootstrap     = ENV['ST2BOOTSTRAP'] || nil
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
@@ -39,15 +38,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # See https://www.vagrantup.com/docs/networking/public_network.html
     # st2.vm.network "public_network", bridge: 'en0: Wi-Fi (AirPort)'
     # Install docker-engine and docker-compose
-    st2.vm.provision :shell, :path => "scripts/docker.sh", :privileged => false, :args => "#{dest_folder}"
-
-    # Optionally run st2_bootstrap.sh
-    if !bootstrap.nil?
-      st2.vm.provision "shell" do |s|
-        s.path = "scripts/st2_bootstrap.sh"
-        s.args   = "#{st2user} #{st2passwd} #{release}"
-        s.privileged = false
-      end
-    end
+    st2.vm.provision :docker
+    st2.vm.provision :shell, :path => "scripts/setup.sh", :privileged => false
   end
 end
