@@ -10,11 +10,12 @@ VERSION=''
 RELEASE='stable'
 REPO_TYPE=''
 ST2_PKG_VERSION=''
+DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
 
 # Note: This variable needs to default to a branch of the latest stable release
-BRANCH='v2.0'
+BRANCH='v2.1'
 
 setup_args() {
   for i in "$@"
@@ -34,6 +35,10 @@ setup_args() {
           ;;
           --staging)
           REPO_TYPE='staging'
+          shift
+          ;;
+          --dev=*)
+          DEV_BUILD="${i#*=}"
           shift
           ;;
           --user=*)
@@ -86,6 +91,10 @@ if [[ "$REPO_TYPE" == 'staging' ]]; then
   BRANCH="master"
 fi
 
+if [[ "$DEV_BUILD" != '' ]]; then
+  BRANCH="master"
+fi
+
 get_version_branch() {
   if [[ "$RELEASE" == 'stable' ]]; then
       BRANCH="v$(echo ${VERSION} | awk 'BEGIN {FS="."}; {print $1 "." $2}')"
@@ -103,6 +112,10 @@ fi
 
 if [[ "$REPO_TYPE" == 'staging' ]]; then
   REPO_TYPE="--staging"
+fi
+
+if [[ "$DEV_BUILD" != '' ]]; then
+  DEV_BUILD="--dev=${DEV_BUILD}"
 fi
 
 USERNAME="--user=${USERNAME}"
@@ -153,5 +166,5 @@ else
 
     echo "Running deployment script for st2 ${VERSION}..."
     echo "OS specific script cmd: bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${USERNAME} ${PASSWORD}"
-    bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${USERNAME} ${PASSWORD}
+    bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${DEV_BUILD} ${USERNAME} ${PASSWORD}
 fi

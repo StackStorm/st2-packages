@@ -9,6 +9,7 @@ RELEASE='stable'
 REPO_TYPE=''
 REPO_PREFIX=''
 ST2_PKG_VERSION=''
+DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
 ST2_PKG='st2'
@@ -34,6 +35,10 @@ setup_args() {
           ;;
           --staging)
           REPO_TYPE='staging'
+          shift
+          ;;
+          --dev=*)
+          DEV_BUILD="${i#*=}"
           shift
           ;;
           --user=*)
@@ -75,6 +80,13 @@ setup_args() {
     echo "################################################################"
     echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
     echo "################################################################"
+  fi
+
+  if [ "$DEV_BUILD" != '' ]; then
+    printf "\n\n"
+    echo "###############################################################################"
+    echo "### Installing from dev build artifacts!!! REALLY, ANYTHING COULD HAPPEN!!! ###"
+    echo "###############################################################################"
   fi
 
   if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
@@ -181,6 +193,71 @@ fail() {
   exit 2
 }
 
+function port_status() {
+  # If the specified tcp4 port is bound, then return the "port pid/procname",
+  # else if a pipe command fails, return "Unbound",
+  # else return "".
+  #
+  # Please note that all return values end with a newline.
+  #
+  # Use netstat and awk to get a list of all the tcp4 sockets that are in the LISTEN state,
+  # matching the specified port.
+  #
+  # The `netstat -tunlp --inet` command is assumed to output data in the following format:
+  #   Active Internet connections (only servers)
+  #   Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+  #   tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      7506/httpd
+  #
+  # The awk command prints the 4th and 7th columns of any line matching both the following criteria:
+  #   1) The 4th column contains the port passed to port_status()  (i.e., $1)
+  #   2) The 6th column contains "LISTEN"
+  #
+  # Sample output:
+  #   0.0.0.0:25000 7506/sshd
+  ret=$(sudo netstat -tunlp --inet | awk -v port=$1 '$4 ~ port && $6 ~ /LISTEN/ { print $4 " " $7 }' || echo 'Unbound');
+  echo "$ret";
+}
+
+check_st2_host_dependencies() {
+  # CHECK 1: Determine which, if any, of the required ports are used by an existing process.
+
+  # Abort the installation early if the following ports are being used by an existing process.
+  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), postgresql (5432) and st2 (9100-9102).
+
+  declare -a ports=("80" "443" "4369" "5432" "5672" "9100" "9101" "9102" "25672" "27017")
+  declare -a used=()
+
+  for i in "${ports[@]}"
+  do
+    rv=$(port_status $i)
+    if [ "$rv" != "Unbound" ] && [ "$rv" != "" ]; then
+      used+=("$rv")
+    fi
+  done
+
+  # If any used ports were found, display helpful message and exit
+  if [ ${#used[@]} -gt 0 ]; then
+    printf "\nNot all required TCP ports are available. ST2 and related services will fail to start.\n\n"
+    echo "The following ports are in use by the specified pid/process and need to be stopped:"
+    for port_pid_process in "${used[@]}"
+    do
+       echo " $port_pid_process"
+    done
+    echo ""
+    exit 1
+  fi
+
+  # CHECK 2: Ensure there is enough space at /var/lib/mongodb
+  VAR_SPACE=`df -Pk /var/lib | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{print $4}'`
+  if [ ${VAR_SPACE} -lt 358400 ]; then
+    echo ""
+    echo "MongoDB 3.2 requires at least 350MB free in /var/lib/mongodb"
+    echo "There is not enough space for MongoDB. It will fail to start."
+    echo "Please, add some space to /var or clean it up."
+    exit 1
+  fi
+}
+
 install_st2_dependencies() {
   is_epel_installed=$(rpm -qa | grep epel-release || true)
   if [[ -z "$is_epel_installed" ]]; then
@@ -210,8 +287,16 @@ EOT"
 
 install_st2() {
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
-  STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
-  sudo yum -y install ${ST2_PKG}
+
+  if [ "$DEV_BUILD" = '' ]; then
+    STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
+    sudo yum -y install ${ST2_PKG}
+  else
+    sudo yum -y install jq
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el6/st2-.*.rpm")"
+    sudo yum -y install ${PACKAGE_URL}
+  fi
+
   sudo st2ctl start
   sleep 5
   sudo st2ctl reload --register-all
@@ -262,6 +347,8 @@ configure_st2_cli_config() {
   # Configure CLI config (write credentials for the root user and user which ran the script)
   ROOT_USER="root"
   CURRENT_USER=$(whoami)
+
+  : "${HOME:=`eval echo ~$(whoami)`}"
 
   ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
@@ -373,7 +460,13 @@ EHD
 
 install_st2mistral() {
   # install mistral
-  sudo yum -y install ${ST2MISTRAL_PKG}
+  if [ "$DEV_BUILD" = '' ]; then
+    sudo yum -y install ${ST2MISTRAL_PKG}
+  else
+    sudo yum -y install jq
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el6/st2mistral-.*.rpm")"
+    sudo yum -y install ${PACKAGE_URL}
+  fi
 
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
@@ -483,6 +576,7 @@ ok_message() {
 
 trap 'fail' EXIT
 STEP='Parse arguments' && setup_args $@
+STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_dependencies
 STEP='Check libffi-devel availability' && check_libffi_devel
 STEP='Adjust SELinux policies' && adjust_selinux_policies
 STEP='Install repoquery tool' && install_yum_utils
