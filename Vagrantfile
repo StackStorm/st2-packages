@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-hostname      = 'st2vagrant'
+hostname      = 'st2-packages'
 st2user       = ENV['ST2USER'] ? ENV['ST2USER']: 'st2admin'
 st2passwd     = ENV['ST2PASSWORD'] ? ENV['ST2PASSWORD'] : 'Ch@ngeMe'
 box           = ENV['BOX'] ? ENV['BOX'] : 'centos/7'
