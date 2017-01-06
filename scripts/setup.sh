@@ -1,7 +1,5 @@
 #!/bin/bash
 
-COMPOSE_DIR='/vagrant'
-
 echo "[Install] dependencies"
 sudo yum update
 
@@ -13,9 +11,7 @@ echo "[Install] docker-compose"
 sudo sh -c 'curl -sL https://github.com/docker/compose/releases/download/1.9.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
 sudo chmod +x /usr/local/bin/docker-compose
 
-
-echo "COMPOSE_DIR = ${COMPOSE_DIR}"
-sudo sh -c "(cd ${COMPOSE_DIR} && /usr/local/bin/docker-compose run --rm el7)"
+sudo sh -c "(cd /vagrant && /usr/local/bin/docker-compose run --rm el7)"
 
 # TODO: Optionally install the packages we just built
 # TODO: Optionally run self-verification
