@@ -270,6 +270,10 @@ install_st2_dependencies() {
     sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
   fi
   sudo yum -y install curl rabbitmq-server
+
+  # Configure RabbitMQ to listen on localhost only
+  sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
+
   sudo service rabbitmq-server start
   sudo chkconfig rabbitmq-server on
 

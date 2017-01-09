@@ -187,6 +187,15 @@ install_st2_dependencies() {
   sudo apt-get install -y curl
   sudo apt-get install -y rabbitmq-server
 
+  # Configure RabbitMQ to listen on localhost only
+  sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
+
+  if [[ "$SUBTYPE" == 'xenial' ]]; then
+    sudo systemctl restart rabbitmq-server
+  else
+    sudo service rabbitmq-server restart
+  fi
+
   # Various other dependencies needed by st2 and installer script
   sudo apt-get install -y crudini
 }
