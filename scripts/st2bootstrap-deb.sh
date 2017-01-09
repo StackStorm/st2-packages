@@ -15,6 +15,8 @@ ST2CHATOPS_PKG_VERSION=''
 DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
+ST2_MONGODB_PASSWORD=''
+ST2_POSTGRESQL_PASSWORD=''
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
 if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' ]]; then
   echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) or 16.04 (xenial) as base system!"
@@ -59,6 +61,14 @@ setup_args() {
           PASSWORD="${i#*=}"
           shift
           ;;
+          --st2-mongodb-password=*)
+          ST2_MONGODB_PASSWORD="${i#*=}"
+          shift
+          ;;
+          --st2-postgresql-password=*)
+          ST2_POSTGRESQL_PASSWORD="${i#*=}"
+          shift
+          ;;
           *)
           # unknown option
           ;;
@@ -97,6 +107,16 @@ setup_args() {
     echo "###############################################################################"
     echo "### Installing from dev build artifacts!!! REALLY, ANYTHING COULD HAPPEN!!! ###"
     echo "###############################################################################"
+  fi
+
+  if [[ -z "${ST2_MONGODB_PASSWORD}" ]]; then
+      >&2 echo "ERROR: The --st2-mongodb-password option is not provided. Please provide a password to set for MongoDB access."
+      exit 1
+  fi
+
+  if [[ -z "${ST2_POSTGRESQL_PASSWORD}" ]]; then
+      >&2 echo "ERROR: The --st2-postgresql-password option is not provided. Please provide a password to set for PostgreSQL access."
+      exit 1
   fi
 
   if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
@@ -181,6 +201,7 @@ install_st2_dependencies() {
   sudo apt-get install -y curl
   sudo apt-get install -y rabbitmq-server
 }
+
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB (3.2)
   sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
@@ -191,6 +212,34 @@ install_mongodb() {
 
   # Configure MongoDB to listen on localhost only
   sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
+
+  # Create admin user and user used by StackStorm
+  mongo <<EOF
+use admin;
+db.createUser({
+    user: "admin",
+    pwd: "${ST2_MONGODB_PASSWORD}",
+    roles: [
+        { role: "userAdminAnyDatabase", db: "admin" }
+    ]
+});
+quit();
+EOF
+
+  mongo <<EOF
+use st2;
+db.createUser({
+    user: "stackstorm",
+    pwd: "${ST2_MONGODB_PASSWORD}",
+    roles: [
+        { role: "readWrite", db: "st2" }
+    ]
+});
+quit();
+EOF
+
+  # Require authentication to be able to acccess the database
+  sudo sh -c 'echo "security:\n  authorization: enabled" >> /etc/mongod.conf'
 
   if [[ "$SUBTYPE" == 'xenial' ]]; then
     sudo systemctl enable mongod
@@ -260,7 +309,7 @@ install_st2() {
     sudo apt-get install -yf
     rm ${PACKAGE_FILENAME}
   fi
-  
+
   sudo st2ctl start
   sleep 5
   sudo st2ctl reload --register-all
@@ -305,6 +354,10 @@ configure_st2_authentication() {
   sudo crudini --set /etc/st2/st2.conf auth enable 'True'
   sudo crudini --set /etc/st2/st2.conf auth backend 'flat_file'
   sudo crudini --set /etc/st2/st2.conf auth backend_kwargs '{"file_path": "/etc/st2/htpasswd"}'
+
+  # Configure [database] section in st2.conf (username password for MongoDB access)
+  sudo crudini --set /etc/st2/st2.conf database username "stackstorm"
+  sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
 
   sudo st2ctl restart-component st2api
   sudo st2ctl restart-component st2stream
