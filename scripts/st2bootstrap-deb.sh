@@ -200,6 +200,9 @@ install_st2_dependencies() {
   sudo apt-get install -y gnupg-curl
   sudo apt-get install -y curl
   sudo apt-get install -y rabbitmq-server
+
+  # Various other dependencies needed by st2 and installer script
+  sudo apt-get install -y crudini
 }
 
 install_mongodb() {
@@ -344,8 +347,8 @@ configure_st2_user () {
 }
 
 configure_st2_authentication() {
-  # Install htpasswd and tool for editing ini files
-  sudo apt-get install -y apache2-utils crudini
+  # Install htpasswd tool for editing ini files
+  sudo apt-get install -y apache2-utils
 
   # Create a user record in a password file.
   sudo echo "${PASSWORD}" | sudo htpasswd -i /etc/st2/htpasswd $USERNAME
