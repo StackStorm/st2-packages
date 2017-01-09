@@ -330,6 +330,10 @@ install_st2() {
     sudo yum -y install ${PACKAGE_URL}
   fi
 
+  # Configure [database] section in st2.conf (username password for MongoDB access)
+  sudo crudini --set /etc/st2/st2.conf database username "stackstorm"
+  sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
+
   sudo st2ctl start
   sleep 5
   sudo st2ctl reload --register-all
