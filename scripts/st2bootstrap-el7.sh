@@ -266,7 +266,7 @@ install_st2_dependencies() {
   sudo systemctl enable rabbitmq-server
 
   # Various other dependencies needed by st2 and installer script
-  sudo yum -y install -tools crudini
+  sudo yum -y install crudini
 }
 
 install_mongodb() {
