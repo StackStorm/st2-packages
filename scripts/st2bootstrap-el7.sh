@@ -95,6 +95,11 @@ setup_args() {
     echo "Press \"ENTER\" to continue or \"CTRL+C\" to exit/abort"
     read -e -p "Admin username: " -i "st2admin" USERNAME
     read -e -s -p "Password: " PASSWORD
+
+    if [ "${PASSWORD}" = '' ]; then
+        echo "Password cannot be empty."
+        exit 1
+    fi
   fi
 }
 
