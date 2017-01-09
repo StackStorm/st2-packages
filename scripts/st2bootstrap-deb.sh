@@ -445,7 +445,7 @@ install_st2mistral_depdendencies() {
   sudo apt-get install -y postgresql
 
   # Configure service only listens on localhost
-  sudo crudini --set /etc/postgresql/9.3/main/postgresql.conf '' listen_address "127.0.0.1"
+  sudo crudini --set /etc/postgresql/*/main/postgresql.conf '' listen_address "127.0.0.1"
 
   sudo service postgresql restart
 
