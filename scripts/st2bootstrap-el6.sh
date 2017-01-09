@@ -258,6 +258,12 @@ check_st2_host_dependencies() {
   fi
 }
 
+generate_random_passwords() {
+  # Generate random password used for MongoDB and PostgreSQL user authentication
+  ST2_MONGODB_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
+  ST2_POSTGRESQL_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
+}
+
 install_st2_dependencies() {
   is_epel_installed=$(rpm -qa | grep epel-release || true)
   if [[ -z "$is_epel_installed" ]]; then
@@ -266,6 +272,9 @@ install_st2_dependencies() {
   sudo yum -y install curl rabbitmq-server
   sudo service rabbitmq-server start
   sudo chkconfig rabbitmq-server on
+
+  # Various other dependencies needed by st2 and installer script
+  sudo yum -y install -tools crudini
 }
 
 install_mongodb() {
@@ -284,6 +293,34 @@ EOT"
 
   # Configure MongoDB to listen on localhost only
   sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
+
+  # Create admin user and user used by StackStorm
+  mongo <<EOF
+use admin;
+db.createUser({
+    user: "admin",
+    pwd: "${ST2_MONGODB_PASSWORD}",
+    roles: [
+        { role: "userAdminAnyDatabase", db: "admin" }
+    ]
+});
+quit();
+EOF
+
+  mongo <<EOF
+use st2;
+db.createUser({
+    user: "stackstorm",
+    pwd: "${ST2_MONGODB_PASSWORD}",
+    roles: [
+        { role: "readWrite", db: "st2" }
+    ]
+});
+quit();
+EOF
+
+  # Require authentication to be able to acccess the database
+  sudo sh -c 'echo "security:\n  authorization: enabled" >> /etc/mongod.conf'
 
   sudo service mongod start
   sudo chkconfig mongod on
@@ -332,8 +369,8 @@ configure_st2_user() {
 }
 
 configure_st2_authentication() {
-  # Install htpasswd and tool for editing ini files
-  sudo yum -y install httpd-tools crudini
+  # Install htpasswd tool
+  sudo yum -y install httpd-tools
 
   # Create a user record in a password file.
   sudo htpasswd -bs /etc/st2/htpasswd $USERNAME $PASSWORD
@@ -457,7 +494,7 @@ install_st2mistral_depdendencies() {
   sudo chkconfig postgresql-9.4 on
 
   cat << EHD | sudo -u postgres psql
-CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD 'StackStorm';
+CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD '${ST2_POSTGRESQL_PASSWORD}';
 CREATE DATABASE mistral OWNER mistral;
 EHD
 }
@@ -472,8 +509,12 @@ install_st2mistral() {
     sudo yum -y install ${PACKAGE_URL}
   fi
 
+  # Configure database settings
+  sudo crudini --set /etc/st2/st2.conf database connection "postgresql://mistral:${ST2_POSTGRESQL_PASSWORD}@localhost/mistral"
+
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
+
   # Register mistral actions
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
 
@@ -584,6 +625,7 @@ STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_depend
 STEP='Check libffi-devel availability' && check_libffi_devel
 STEP='Adjust SELinux policies' && adjust_selinux_policies
 STEP='Install repoquery tool' && install_yum_utils
+STEP="Generate random password" && generate_random_passwords
 
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2 dependencies (MongoDB)" && install_mongodb

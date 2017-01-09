@@ -202,9 +202,6 @@ install_mongodb() {
   # Configure MongoDB to listen on localhost only
   sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
 
-  # Generate random password used for user authentication
-  ST2_MONGODB_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
-
   # Create admin user and user used by StackStorm
   mongo <<EOF
 use admin;
