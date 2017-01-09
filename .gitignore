@@ -3,3 +3,4 @@
 Gemfile
 Gemfile.lock
 .vagrant
+*.log
