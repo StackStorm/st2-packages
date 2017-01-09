@@ -294,7 +294,12 @@ EOT"
   # Configure MongoDB to listen on localhost only
   sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
 
-  # Create admin user and user used by StackStorm
+  sudo service mongod start
+  sudo chkconfig mongod on
+
+  sleep 5
+
+  # Create admin user and user used by StackStorm (MongoDB needs to be running)
   mongo <<EOF
 use admin;
 db.createUser({
@@ -322,8 +327,8 @@ EOF
   # Require authentication to be able to acccess the database
   sudo sh -c 'echo "security:\n  authorization: enabled" >> /etc/mongod.conf'
 
-  sudo service mongod start
-  sudo chkconfig mongod on
+  # MongoDB needs to be restarted after enabling auth
+  sudo service mongod restart
 }
 
 install_st2() {
