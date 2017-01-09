@@ -189,9 +189,14 @@ install_mongodb() {
   sudo apt-get update
   sudo apt-get install -y mongodb-org
 
+  # Configure MongoDB to listen on localhost only
+  sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
+
   if [[ "$SUBTYPE" == 'xenial' ]]; then
     sudo systemctl enable mongod
     sudo systemctl start mongod
+  else
+    sudo service mongod restart
   fi
 }
 get_full_pkg_versions() {

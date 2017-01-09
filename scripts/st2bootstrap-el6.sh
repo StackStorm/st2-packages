@@ -281,6 +281,10 @@ gpgkey=https://www.mongodb.org/static/pgp/server-3.2.asc
 EOT"
 
   sudo yum -y install mongodb-org
+
+  # Configure MongoDB to listen on localhost only
+  sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
+
   sudo service mongod start
   sudo chkconfig mongod on
 }
