@@ -490,6 +490,9 @@ install_st2mistral_depdendencies() {
   # Setup postgresql at a first time
   sudo service postgresql-9.4 initdb
 
+  # Configure service only listens on localhost
+  sudo crudini --set /etc/postgresql/9.4/main/postgresql.conf '' listen_address "127.0.0.1"
+
   # Make localhost connections to use an MD5-encrypted password for authentication
   sudo sed -i "s/\(host.*all.*all.*127.0.0.1\/32.*\)ident/\1md5/" /var/lib/pgsql/9.4/data/pg_hba.conf
   sudo sed -i "s/\(host.*all.*all.*::1\/128.*\)ident/\1md5/" /var/lib/pgsql/9.4/data/pg_hba.conf

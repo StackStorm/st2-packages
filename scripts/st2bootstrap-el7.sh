@@ -468,6 +468,9 @@ install_st2mistral_depdendencies() {
   sudo sed -i "s/\(host.*all.*all.*127.0.0.1\/32.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
   sudo sed -i "s/\(host.*all.*all.*::1\/128.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
 
+  # Configure service only listens on localhost
+  sudo crudini --set /etc/postgresql/9.4/main/postgresql.conf '' listen_address "127.0.0.1"
+
   # Start PostgreSQL service
   sudo systemctl start postgresql
   sudo systemctl enable postgresql

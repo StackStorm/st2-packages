@@ -240,7 +240,6 @@ EOF
   sudo sh -c 'echo "security:\n  authorization: enabled" >> /etc/mongod.conf'
 
   # MongoDB needs to be restarted after enabling auth
-
   if [[ "$SUBTYPE" == 'xenial' ]]; then
     sudo systemctl enable mongod
     sudo systemctl restart mongod
@@ -430,6 +429,11 @@ generate_symmetric_crypto_key_for_datastore() {
 
 install_st2mistral_depdendencies() {
   sudo apt-get install -y postgresql
+
+  # Configure service only listens on localhost
+  sudo crudini --set /etc/postgresql/9.3/main/postgresql.conf '' listen_address "127.0.0.1"
+
+  sudo service postgresql restart
 
   cat << EHD | sudo -u postgres psql
 CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD '${ST2_POSTGRESQL_PASSWORD}';
