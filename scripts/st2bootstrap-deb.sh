@@ -430,7 +430,7 @@ install_st2mistral_depdendencies() {
   sudo apt-get install -y postgresql
 
   cat << EHD | sudo -u postgres psql
-CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD 'StackStorm';
+CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD '${ST2_POSTGRESQL_PASSWORD}';
 CREATE DATABASE mistral OWNER mistral;
 EHD
 }
@@ -449,8 +449,12 @@ install_st2mistral() {
     rm ${PACKAGE_FILENAME}
   fi
 
+  # Configure database settings
+  sudo crudini --set /etc/st2/st2.conf database connection "postgresql://mistral:${ST2_POSTGRESQL_PASSWORD}@localhost/mistral"
+
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
+
   # Register mistral actions
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
 
