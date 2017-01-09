@@ -15,8 +15,6 @@ ST2CHATOPS_PKG_VERSION=''
 DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
-ST2_MONGODB_PASSWORD=''
-ST2_POSTGRESQL_PASSWORD=''
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
 if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' ]]; then
   echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) or 16.04 (xenial) as base system!"
@@ -61,14 +59,6 @@ setup_args() {
           PASSWORD="${i#*=}"
           shift
           ;;
-          --st2-mongodb-password=*)
-          ST2_MONGODB_PASSWORD="${i#*=}"
-          shift
-          ;;
-          --st2-postgresql-password=*)
-          ST2_POSTGRESQL_PASSWORD="${i#*=}"
-          shift
-          ;;
           *)
           # unknown option
           ;;
@@ -107,16 +97,6 @@ setup_args() {
     echo "###############################################################################"
     echo "### Installing from dev build artifacts!!! REALLY, ANYTHING COULD HAPPEN!!! ###"
     echo "###############################################################################"
-  fi
-
-  if [[ -z "${ST2_MONGODB_PASSWORD}" ]]; then
-      >&2 echo "ERROR: The --st2-mongodb-password option is not provided. Please provide a password to set for MongoDB access."
-      exit 1
-  fi
-
-  if [[ -z "${ST2_POSTGRESQL_PASSWORD}" ]]; then
-      >&2 echo "ERROR: The --st2-postgresql-password option is not provided. Please provide a password to set for PostgreSQL access."
-      exit 1
   fi
 
   if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
@@ -193,6 +173,12 @@ check_st2_host_dependencies() {
   fi
 }
 
+generate_random_passwords() {
+  # Generate random password used for MongoDB and PostgreSQL user authentication
+  ST2_MONGODB_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
+  ST2_POSTGRESQL_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
+}
+
 install_st2_dependencies() {
   sudo apt-get update
 
@@ -215,6 +201,9 @@ install_mongodb() {
 
   # Configure MongoDB to listen on localhost only
   sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
+
+  # Generate random password used for user authentication
+  ST2_MONGODB_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
 
   # Create admin user and user used by StackStorm
   mongo <<EOF
@@ -592,6 +581,7 @@ ok_message() {
 trap 'fail' EXIT
 STEP="Setup args" && setup_args $@
 STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_dependencies
+STEP="Generate random password" && generate_random_passwords
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2 dependencies (MongoDB)" && install_mongodb
 STEP="Install st2" && install_st2
