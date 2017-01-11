@@ -1,2 +1,3 @@
 conf/mistral.conf /etc/mistral
 bin/mistral /usr/bin
+conf/policy.json /etc/mistral
