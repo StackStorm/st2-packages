@@ -531,7 +531,7 @@ install_st2mistral() {
   fi
 
   # Configure database settings
-  sudo crudini --set /etc/mistral/mistral.conf database connection "postgresql://mistral:${ST2_POSTGRESQL_PASSWORD}@localhost/mistral"
+  sudo crudini --set /etc/mistral/mistral.conf database connection "postgresql://mistral:${ST2_POSTGRESQL_PASSWORD}@127.0.0.1/mistral"
 
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
