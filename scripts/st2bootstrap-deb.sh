@@ -220,7 +220,7 @@ install_mongodb() {
     sudo systemctl enable mongod
     sudo systemctl start mongod
   else
-    sudo service mongod start
+    sudo service mongod restart
   fi
 
   sleep 5
@@ -255,7 +255,6 @@ EOF
 
   # MongoDB needs to be restarted after enabling auth
   if [[ "$SUBTYPE" == 'xenial' ]]; then
-    sudo systemctl enable mongod
     sudo systemctl restart mongod
   else
     sudo service mongod restart
