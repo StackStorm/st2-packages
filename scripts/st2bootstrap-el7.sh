@@ -477,12 +477,12 @@ install_st2mistral_depdendencies() {
   # Setup postgresql at a first time
   sudo postgresql-setup initdb
 
+  # Configure service only listens on localhost
+  sudo sh -c "echo \"listen_addresses = '127.0.0.1'\" >> /var/lib/pgsql/data/postgresql.conf"
+
   # Make localhost connections to use an MD5-encrypted password for authentication
   sudo sed -i "s/\(host.*all.*all.*127.0.0.1\/32.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
   sudo sed -i "s/\(host.*all.*all.*::1\/128.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
-
-  # Configure service only listens on localhost
-  sudo sh -c "echo \"listen_addresses = '127.0.0.1'\" >> /var/lib/pgsql/data/postgresql.conf"
 
   # Start PostgreSQL service
   sudo systemctl start postgresql
