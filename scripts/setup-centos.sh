@@ -1,6 +1,10 @@
 #!/bin/bash
 
 TARGET=$1
+USER=$2
+PASSWD=$3
+INSTALL=$4
+VERIFY=$5
 
 if [ "$TARGET" != "el7" ]; then
   echo "[Error] I only grok the 'el7' target"
@@ -19,7 +23,20 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 sudo sh -c "(cd /vagrant && /usr/local/bin/docker-compose run --rm $TARGET)"
 
-# TODO: Optionally install the packages we just built
-sudo yum install -y /tmp/st2-packages/st2*.rpm
+if [ "$INSTALL" = "yes" ]; then
+  # Install the packages we just built
+  sudo yum install -y /tmp/st2-packages/st2*.rpm
 
-# TODO: Optionally run self-verification
+  HT='/usr/bin/htpasswd'
+  if [[ ! -x "$HT" ]]; then
+    sudo yum install -y httpd-tools
+  fi  
+
+  HP='/etc/st2/htpasswd'
+  echo $PASSWD | sudo htpasswd -i $HP $USER
+
+  if [ "$VERIFY" = "yes" ]; then
+    # Run self-verification
+    echo 'Running self-verification'
+  fi
+fi
