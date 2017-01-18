@@ -6,7 +6,7 @@ stages:
     steps:
       - type: checkout
       - type: shell
-        name: Verify Docker Works
+        name: Show Docker versions
         command: |
           docker --version
-          docker run hello-world
+          docker-compose --version
