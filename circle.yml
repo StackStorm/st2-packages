@@ -11,3 +11,15 @@ stages:
         command: |
           docker --version
           docker-compose --version
+      - type: shell
+        name: Pull Images
+        command: |
+          .circle/docker-compose.sh pull trusty
+      - type: shell
+        name: Build Packages
+        command: |
+          .circle/docker-compose.sh build trusty
+      - type: shell
+        name: Test Packages
+        command: |
+          .circle/docker-compose.sh test trusty
