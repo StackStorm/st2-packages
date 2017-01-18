@@ -17,6 +17,7 @@ stages:
         name: Initialize Build Environment
         command: |
           .circle/buildenv_st2.sh
+          .circle/buildenv_mistral.sh
       - type: shell
         name: Pull Images
         command: |
