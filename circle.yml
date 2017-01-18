@@ -2,6 +2,7 @@ version: 2
 executorType: machine
 stages:
   build:
+    workDir: ~/st2-packages
     steps:
       - type: checkout
       - type: shell
