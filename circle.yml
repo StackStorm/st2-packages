@@ -12,6 +12,10 @@ stages:
           docker --version
           docker-compose --version
       - type: shell
+        name: Initialize Build Environment
+        command: |
+          .circle/buildenv_st2.sh
+      - type: shell
         name: Pull Images
         command: |
           .circle/docker-compose.sh pull trusty
