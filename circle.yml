@@ -4,6 +4,8 @@ stages:
   build:
     parallel: 1
     workDir: ~/st2-packages
+    environment:
+      - DISTROS: trusty xenial el6 el7 wheezy jessie
     steps:
       - type: checkout
       - type: shell
@@ -18,12 +20,12 @@ stages:
       - type: shell
         name: Pull Images
         command: |
-          .circle/docker-compose.sh pull trusty
+          .circle/docker-compose.sh pull ${DISTRO}
       - type: shell
         name: Build Packages
         command: |
-          .circle/docker-compose.sh build trusty
+          .circle/docker-compose.sh build ${DISTRO}
       - type: shell
         name: Test Packages
         command: |
-          .circle/docker-compose.sh test trusty
+          .circle/docker-compose.sh test ${DISTRO}
