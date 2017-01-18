@@ -1,27 +1,27 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-install     = ENV['INSTALL_ST2'] ? ENV['INSTALL_ST2'] : 'yes'
-verify      = ENV['VERIFY_ST2'] ? ENV['VERIFY_ST2'] : 'yes'
 st2user     = ENV['ST2USER'] ? ENV['ST2USER'] : 'st2admin'
 st2passwd   = ENV['ST2PASSWORD'] ? ENV['ST2PASSWORD'] : 'Ch@ngeMe'
+install     = ENV['INSTALL_ST2'] ? ENV['INSTALL_ST2'] : 'yes'
+verify      = ENV['VERIFY_ST2'] ? ENV['VERIFY_ST2'] : 'yes'
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
 VIRTUAL_MACHINES = {
   :trusty => {
-    :hostname => 'st2-packages-ubuntu-trusty',
+    :hostname => 'st2-packages-trusty',
     :box => 'ubuntu/trusty64',
     :ip => '192.168.16.20',
   },
   :xenial => {
-    :hostname => 'st2-packages-ubuntu-xenial',
+    :hostname => 'st2-packages-xenial',
     :box => 'ubuntu/xenial64',
     :ip => '192.168.16.21',
   },
   :el7 => {
-    :hostname => 'st2-packages-centos-el7',
+    :hostname => 'st2-packages-el7',
     :box => 'centos/7',
     :ip => '192.168.16.22',
   },
@@ -36,6 +36,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # Box Specifications
       vm_config.vm.provider :virtualbox do |vb|
         vb.name = "#{cfg[:hostname]}"
+        # NOTE: With 2048MB, system slows due to kswapd. Recommend at least 4096MB.
         vb.customize ['modifyvm', :id, '--memory', '4096']
         vb.cpus = 2
       end
@@ -53,12 +54,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # Install docker-engine
       vm_config.vm.provision :docker
 
-      if vm_config.vm.hostname.include? "ubuntu"
-        vm_config.vm.provision :shell, :path => "scripts/setup-ubuntu.sh", :privileged => false, :args => ["#{name}", "#{st2user}", "#{st2passwd}", "#{install}", "#{verify}"]
-      end
-      if vm_config.vm.hostname.include? "centos"
-        vm_config.vm.provision :shell, :path => "scripts/setup-centos.sh", :privileged => false, :args => ["#{name}", "#{st2user}", "#{st2passwd}", "#{install}", "#{verify}"]
-      end
+      vm_config.vm.provision :shell, :path => "scripts/setup.sh", :privileged => false, :args => ["#{name}", "#{st2user}", "#{st2passwd}", "#{install}", "#{verify}"]
     end
   end
 end
