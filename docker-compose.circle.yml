@@ -9,6 +9,9 @@ wheezy:
   links:
     - wheezybuild
     - wheezytest
+    - rabbitmq
+    - mongodb
+    - postgres
 
 jessie:
   image: quay.io/stackstorm/packagingrunner
@@ -21,6 +24,9 @@ jessie:
   links:
     - jessiebuild
     - jessietest
+    - rabbitmq
+    - mongodb
+    - postgres
 
 trusty:
   image: quay.io/stackstorm/packagingrunner
@@ -33,6 +39,9 @@ trusty:
   links:
     - trustybuild
     - trustytest
+    - rabbitmq
+    - mongodb
+    - postgres
 
 xenial:
   image: quay.io/stackstorm/packagingrunner
@@ -45,6 +54,9 @@ xenial:
   links:
     - xenialbuild
     - xenialtest
+    - rabbitmq
+    - mongodb
+    - postgres
 
 el7:
   image: quay.io/stackstorm/packagingrunner
@@ -57,6 +69,9 @@ el7:
   links:
     - centos7build
     - centos7test
+    - rabbitmq
+    - mongodb
+    - postgres
 
 el6:
   image: quay.io/stackstorm/packagingrunner
@@ -70,6 +85,9 @@ el6:
   links:
     - centos6build
     - centos6test
+    - rabbitmq
+    - mongodb
+    - postgres
 
 ## Package build nodes
 #
@@ -151,3 +169,18 @@ centos7test:
     service: volumes-circle
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup
+
+mongodb:
+  extends:
+    file: docker-compose.override.yml
+    service: mongodb
+
+rabbitmq:
+  extends:
+    file: docker-compose.override.yml
+    service: rabbitmq
+
+postgres:
+  extends:
+    file: docker-compose.override.yml
+    service: postgres
