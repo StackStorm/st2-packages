@@ -20,12 +20,15 @@ stages:
       - type: shell
         name: Pull Images
         command: |
+          . ~/.buildenv
           .circle/docker-compose.sh pull ${DISTRO}
       - type: shell
         name: Build Packages
         command: |
+          . ~/.buildenv
           .circle/docker-compose.sh build ${DISTRO}
       - type: shell
         name: Test Packages
         command: |
+          . ~/.buildenv
           .circle/docker-compose.sh test ${DISTRO}
