@@ -10,6 +10,12 @@ stages:
     steps:
       - type: checkout
       - type: shell
+        name: Stop Default Services
+        command: |
+          sudo service postgresql stop
+          sudo service mongod stop
+          sudo service rabbitmq-server stop
+      - type: shell
         name: Show Docker versions
         command: |
           docker --version
