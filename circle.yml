@@ -6,6 +6,7 @@ stages:
     workDir: ~/st2-packages
     environment:
       - DISTROS: trusty xenial el6 el7 wheezy jessie
+      - ST2_PACKAGES: st2 st2mistral
     steps:
       - type: checkout
       - type: shell
