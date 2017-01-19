@@ -54,7 +54,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # Install docker-engine
       vm_config.vm.provision :docker
 
-      vm_config.vm.provision :shell, :path => "scripts/setup.sh", :privileged => false, :args => ["#{name}", "#{st2user}", "#{st2passwd}", "#{install}", "#{verify}"]
+      vm_config.vm.provision :shell, :path => "scripts/setup-vagrant.sh", :privileged => false, :args => ["#{name}", "#{st2user}", "#{st2passwd}", "#{install}", "#{verify}"]
     end
   end
 end
