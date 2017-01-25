@@ -48,7 +48,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
 
       # Sync folder using NFS
-      vm_config.vm.synced_folder '.', '/vagrant', nfs: true
+      # vm_config.vm.synced_folder '.', '/vagrant', nfs: true
 
       # Configure a private network
       vm_config.vm.network "private_network", ip: "#{cfg[:ip]}"
