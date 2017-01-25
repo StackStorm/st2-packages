@@ -28,12 +28,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vm_config.vm.hostname = cfg[:hostname]
       vm_config.vm.box = cfg[:box]
 
+      # Give VM access to all CPU cores on the host
+      # docker-compose & rake build can benefit from more CPUs
+      host_os = RbConfig::CONFIG['host_os']
+      if host_os =~ /darwin/
+        cpus = `sysctl -n hw.ncpu`.to_i
+      elsif host_os =~ /linux/
+        cpus = `nproc`.to_i
+      else # sorry Windows folks, I can't help you
+        cpus = 2
+      end
+
       # Box Specifications
       vm_config.vm.provider :virtualbox do |vb|
         vb.name = "#{cfg[:hostname]}"
         # NOTE: With 2048MB, system slows due to kswapd. Recommend at least 4096MB.
         vb.customize ['modifyvm', :id, '--memory', '4096']
-        vb.cpus = 2
+        vb.customize ["modifyvm", :id, "--cpus", cpus]
       end
 
       # Sync folder using NFS
