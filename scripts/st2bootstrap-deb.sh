@@ -474,8 +474,9 @@ install_st2mistral() {
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
 
-  # Register mistral actions
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
+  # Register mistral actions. Init of git is added here to temporarily fix
+  # to a bug in one of the OpenStack dependency related to pbr version checking.
+  git init && /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate && rm -rf .git
 
   # Start Mistral
   sudo service mistral start
