@@ -1,5 +1,13 @@
 #!/bin/bash
 
+set -e
+
+fail() {
+  exit 2
+}
+
+trap 'fail' EXIT
+
 case $ST2_TARGET in
   "el7")
     DC_TARGET=centos7
@@ -19,7 +27,7 @@ if [[ $ST2_TARGET != 'el7' ]]; then
 fi
 
 sudo $INSTALL_CMD install -y linux-image-extra-$(uname -r)
-sudo $INSTALL_CMD install -y git curl wget
+sudo $INSTALL_CMD install -y git curl wget gdebi-core
 
 # Install docker-compose
 DC_BIN="/usr/local/bin/docker-compose"
@@ -53,8 +61,8 @@ if [ "$ST2_INSTALL" = "yes" ]; then
 
   # Install the packages we just built
   if [[ $ST2_TARGET != 'el7' ]]; then
-    sudo sh -c '(cd /tmp/st2-packages && dpkg -i st2*.deb)'
-    sudo sh -c "($INSTALL_CMD install -y -f)"
+    sudo /usr/bin/gdebi -n /tmp/st2-packages/st2_*.deb
+    sudo /usr/bin/gdebi -n /tmp/st2-packages/st2mistral*.deb
   else
     sudo $INSTALL_CMD install -y /tmp/st2-packages/st2*.rpm
   fi
@@ -112,3 +120,7 @@ EOF'
     sudo sh -c "export ST2_AUTH_TOKEN=`st2 auth $ST2_USER -p $ST2_PASSWORD -t` && /usr/bin/st2-self-check"
   fi
 fi
+
+trap - EXIT
+
+exit 0
