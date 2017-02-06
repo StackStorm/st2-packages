@@ -23,5 +23,8 @@ script
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-  exec /opt/stackstorm/st2/bin/$NAME ${DAEMON_ARGS}
+  # Load global locale settings
+  test -f /etc/default/locale && . /etc/default/locale || true
+
+  LANG=$LANG LC_ALL=$LANG exec /opt/stackstorm/st2/bin/$NAME ${DAEMON_ARGS}
 end script

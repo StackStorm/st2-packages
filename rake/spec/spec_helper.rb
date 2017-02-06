@@ -17,7 +17,7 @@ SSH_OPTIONS = {
 set :backend, :ssh
 set :host, ENV['TESTNODE']
 set :ssh_options, SSH_OPTIONS
-
+set :env, LANG: 'en_US.UTF-8', LC_ALL: 'en_US.UTF-8'
 
 # ST2Spec
 class ST2Spec
