@@ -105,6 +105,11 @@ setup_args() {
     echo "Press \"ENTER\" to continue or \"CTRL+C\" to exit/abort"
     read -e -p "Admin username: " -i "st2admin" USERNAME
     read -e -s -p "Password: " PASSWORD
+
+    if [ "${PASSWORD}" = '' ]; then
+        echo "Password cannot be empty."
+        exit 1
+    fi
   fi
 }
 
@@ -129,7 +134,7 @@ function port_status() {
   #
   # Sample output:
   #   0.0.0.0:25000 7506/sshd
-  ret=$(sudo netstat -tunlp --inet | awk -v port=$1 '$4 ~ port && $6 ~ /LISTEN/ { print $4 " " $7 }' || echo 'Unbound');
+  ret=$(sudo netstat -tunlp --inet | awk -v port=:$1 '$4 ~ port && $6 ~ /LISTEN/ { print $4 " " $7 }' || echo 'Unbound');
   echo "$ret";
 }
 
@@ -173,6 +178,12 @@ check_st2_host_dependencies() {
   fi
 }
 
+generate_random_passwords() {
+  # Generate random password used for MongoDB and PostgreSQL user authentication
+  ST2_MONGODB_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
+  ST2_POSTGRESQL_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
+}
+
 install_st2_dependencies() {
   sudo apt-get update
 
@@ -180,7 +191,20 @@ install_st2_dependencies() {
   sudo apt-get install -y gnupg-curl
   sudo apt-get install -y curl
   sudo apt-get install -y rabbitmq-server
+
+  # Configure RabbitMQ to listen on localhost only
+  sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
+
+  if [[ "$SUBTYPE" == 'xenial' ]]; then
+    sudo systemctl restart rabbitmq-server
+  else
+    sudo service rabbitmq-server restart
+  fi
+
+  # Various other dependencies needed by st2 and installer script
+  sudo apt-get install -y crudini
 }
+
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB (3.2)
   sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
@@ -189,11 +213,55 @@ install_mongodb() {
   sudo apt-get update
   sudo apt-get install -y mongodb-org
 
+  # Configure MongoDB to listen on localhost only
+  sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
+
   if [[ "$SUBTYPE" == 'xenial' ]]; then
     sudo systemctl enable mongod
     sudo systemctl start mongod
+  else
+    sudo service mongod restart
   fi
+
+  sleep 5
+
+  # Create admin user and user used by StackStorm (MongoDB needs to be running)
+  mongo <<EOF
+use admin;
+db.createUser({
+    user: "admin",
+    pwd: "${ST2_MONGODB_PASSWORD}",
+    roles: [
+        { role: "userAdminAnyDatabase", db: "admin" }
+    ]
+});
+quit();
+EOF
+
+  mongo <<EOF
+use st2;
+db.createUser({
+    user: "stackstorm",
+    pwd: "${ST2_MONGODB_PASSWORD}",
+    roles: [
+        { role: "readWrite", db: "st2" }
+    ]
+});
+quit();
+EOF
+
+  # Require authentication to be able to acccess the database
+  sudo sh -c 'echo "security:\n  authorization: enabled" >> /etc/mongod.conf'
+
+  # MongoDB needs to be restarted after enabling auth
+  if [[ "$SUBTYPE" == 'xenial' ]]; then
+    sudo systemctl restart mongod
+  else
+    sudo service mongod restart
+  fi
+
 }
+
 get_full_pkg_versions() {
   if [ "$VERSION" != '' ];
   then
@@ -255,7 +323,11 @@ install_st2() {
     sudo apt-get install -yf
     rm ${PACKAGE_FILENAME}
   fi
-  
+
+  # Configure [database] section in st2.conf (username password for MongoDB access)
+  sudo crudini --set /etc/st2/st2.conf database username "stackstorm"
+  sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
+
   sudo st2ctl start
   sleep 5
   sudo st2ctl reload --register-all
@@ -290,8 +362,8 @@ configure_st2_user () {
 }
 
 configure_st2_authentication() {
-  # Install htpasswd and tool for editing ini files
-  sudo apt-get install -y apache2-utils crudini
+  # Install htpasswd tool for editing ini files
+  sudo apt-get install -y apache2-utils
 
   # Create a user record in a password file.
   sudo echo "${PASSWORD}" | sudo htpasswd -i /etc/st2/htpasswd $USERNAME
@@ -371,8 +443,13 @@ generate_symmetric_crypto_key_for_datastore() {
 install_st2mistral_depdendencies() {
   sudo apt-get install -y postgresql
 
+  # Configure service only listens on localhost
+  sudo crudini --set /etc/postgresql/*/main/postgresql.conf '' listen_addresses "'127.0.0.1'"
+
+  sudo service postgresql restart
+
   cat << EHD | sudo -u postgres psql
-CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD 'StackStorm';
+CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD '${ST2_POSTGRESQL_PASSWORD}';
 CREATE DATABASE mistral OWNER mistral;
 EHD
 }
@@ -391,9 +468,13 @@ install_st2mistral() {
     rm ${PACKAGE_FILENAME}
   fi
 
+  # Configure database settings
+  sudo crudini --set /etc/mistral/mistral.conf database connection "postgresql://mistral:${ST2_POSTGRESQL_PASSWORD}@127.0.0.1/mistral"
+
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
-  # Register mistral actions
+
+  # Register mistral actions.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
 
   # Start Mistral
@@ -527,6 +608,7 @@ ok_message() {
 trap 'fail' EXIT
 STEP="Setup args" && setup_args $@
 STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_dependencies
+STEP="Generate random password" && generate_random_passwords
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2 dependencies (MongoDB)" && install_mongodb
 STEP="Install st2" && install_st2

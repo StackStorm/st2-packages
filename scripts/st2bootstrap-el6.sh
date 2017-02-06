@@ -95,6 +95,11 @@ setup_args() {
     echo "Press \"ENTER\" to continue or \"CTRL+C\" to exit/abort"
     read -e -p "Admin username: " -i "st2admin" USERNAME
     read -e -s -p "Password: " PASSWORD
+
+    if [ "${PASSWORD}" = '' ]; then
+        echo "Password cannot be empty."
+        exit 1
+    fi
   fi
 }
 
@@ -214,7 +219,7 @@ function port_status() {
   #
   # Sample output:
   #   0.0.0.0:25000 7506/sshd
-  ret=$(sudo netstat -tunlp --inet | awk -v port=$1 '$4 ~ port && $6 ~ /LISTEN/ { print $4 " " $7 }' || echo 'Unbound');
+  ret=$(sudo netstat -tunlp --inet | awk -v port=:$1 '$4 ~ port && $6 ~ /LISTEN/ { print $4 " " $7 }' || echo 'Unbound');
   echo "$ret";
 }
 
@@ -258,14 +263,27 @@ check_st2_host_dependencies() {
   fi
 }
 
+generate_random_passwords() {
+  # Generate random password used for MongoDB and PostgreSQL user authentication
+  ST2_MONGODB_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
+  ST2_POSTGRESQL_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
+}
+
 install_st2_dependencies() {
   is_epel_installed=$(rpm -qa | grep epel-release || true)
   if [[ -z "$is_epel_installed" ]]; then
     sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
   fi
   sudo yum -y install curl rabbitmq-server
+
+  # Configure RabbitMQ to listen on localhost only
+  sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
+
   sudo service rabbitmq-server start
   sudo chkconfig rabbitmq-server on
+
+  # Various other dependencies needed by st2 and installer script
+  sudo yum -y install crudini
 }
 
 install_mongodb() {
@@ -281,8 +299,45 @@ gpgkey=https://www.mongodb.org/static/pgp/server-3.2.asc
 EOT"
 
   sudo yum -y install mongodb-org
+
+  # Configure MongoDB to listen on localhost only
+  sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
+
   sudo service mongod start
   sudo chkconfig mongod on
+
+  sleep 5
+
+  # Create admin user and user used by StackStorm (MongoDB needs to be running)
+  mongo <<EOF
+use admin;
+db.createUser({
+    user: "admin",
+    pwd: "${ST2_MONGODB_PASSWORD}",
+    roles: [
+        { role: "userAdminAnyDatabase", db: "admin" }
+    ]
+});
+quit();
+EOF
+
+  mongo <<EOF
+use st2;
+db.createUser({
+    user: "stackstorm",
+    pwd: "${ST2_MONGODB_PASSWORD}",
+    roles: [
+        { role: "readWrite", db: "st2" }
+    ]
+});
+quit();
+EOF
+
+  # Require authentication to be able to acccess the database
+  sudo sh -c 'echo -e "security:\n  authorization: enabled" >> /etc/mongod.conf'
+
+  # MongoDB needs to be restarted after enabling auth
+  sudo service mongod restart
 }
 
 install_st2() {
@@ -296,6 +351,10 @@ install_st2() {
     PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el6/st2-.*.rpm")"
     sudo yum -y install ${PACKAGE_URL}
   fi
+
+  # Configure [database] section in st2.conf (username password for MongoDB access)
+  sudo crudini --set /etc/st2/st2.conf database username "stackstorm"
+  sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
 
   sudo st2ctl start
   sleep 5
@@ -328,8 +387,8 @@ configure_st2_user() {
 }
 
 configure_st2_authentication() {
-  # Install htpasswd and tool for editing ini files
-  sudo yum -y install httpd-tools crudini
+  # Install htpasswd tool
+  sudo yum -y install httpd-tools
 
   # Create a user record in a password file.
   sudo htpasswd -bs /etc/st2/htpasswd $USERNAME $PASSWORD
@@ -444,6 +503,9 @@ install_st2mistral_depdendencies() {
   # Setup postgresql at a first time
   sudo service postgresql-9.4 initdb
 
+  # Configure service only listens on localhost
+  sudo sh -c "echo \"listen_addresses = '127.0.0.1'\" >> /var/lib/pgsql/9.4/data/postgresql.conf"
+
   # Make localhost connections to use an MD5-encrypted password for authentication
   sudo sed -i "s/\(host.*all.*all.*127.0.0.1\/32.*\)ident/\1md5/" /var/lib/pgsql/9.4/data/pg_hba.conf
   sudo sed -i "s/\(host.*all.*all.*::1\/128.*\)ident/\1md5/" /var/lib/pgsql/9.4/data/pg_hba.conf
@@ -453,7 +515,7 @@ install_st2mistral_depdendencies() {
   sudo chkconfig postgresql-9.4 on
 
   cat << EHD | sudo -u postgres psql
-CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD 'StackStorm';
+CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD '${ST2_POSTGRESQL_PASSWORD}';
 CREATE DATABASE mistral OWNER mistral;
 EHD
 }
@@ -468,9 +530,13 @@ install_st2mistral() {
     sudo yum -y install ${PACKAGE_URL}
   fi
 
+  # Configure database settings
+  sudo crudini --set /etc/mistral/mistral.conf database connection "postgresql://mistral:${ST2_POSTGRESQL_PASSWORD}@127.0.0.1/mistral"
+
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
-  # Register mistral actions
+
+  # Register mistral actions.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
 
   # start mistral
@@ -580,6 +646,7 @@ STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_depend
 STEP='Check libffi-devel availability' && check_libffi_devel
 STEP='Adjust SELinux policies' && adjust_selinux_policies
 STEP='Install repoquery tool' && install_yum_utils
+STEP="Generate random password" && generate_random_passwords
 
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2 dependencies (MongoDB)" && install_mongodb
