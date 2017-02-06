@@ -109,7 +109,7 @@ EOF'
 
   # Setup Mistral DB
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate
+  git init && /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate && rm -rf .git
 
   # Start ST2 services
   sudo st2ctl start
