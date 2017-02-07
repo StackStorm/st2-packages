@@ -63,6 +63,40 @@ export TERM=xterm
 ```
 At this point you can do any manual testing which is required.
 
+# Vagrant based build and test
+
+In order to build, package, install and test ST2 in an isolated Vagrant VM, run the following:
+
+```
+vagrant up $TARGET
+```
+
+Where `$TARGET` is one of `trusty`, `xenial` or `el7`. Note that `el6` does not reliably support docker,
+so it is not an available option.
+
+The following steps are run while provisioning the Vagrant VM:
+
+1. Install `docker` and `docker-compose`.
+2. Run `docker-compose run --rm $TARGET` to build, test and package ST2 as described in prior
+   sections.
+3. Install the packages built in step 2, unless the host `$ST2_INSTALL` environment variable is set to
+   a value other than `yes`.
+4. Execute the `st2-self-check` script, unless the host `$ST2_VERIFY` environment variable is set to
+   a value other than `yes`.
+
+As currently implemented, it is not possible to bypass steps 1 and 2. In the future, we may want to
+consider allowing the host to provide existing ST2 packages, and install/self-check those in the
+Vagrant VM.
+
+To specify the ST2 source URL and REV (i.e., branch), use `ST2_GITURL` and `ST2_GITREV` environment
+variables on the host prior to provisioning the VM. Likewise, to specify the ST2 Mistral source URL
+and REV, use `ST2MISTRAL_GITURL` and `ST2MISTRAL_GITREV` environment variables on the host prior to
+provisioning the VM.
+
+Prior to running `st2-self-check`, the required auth token is generated using `st2 auth`.  If necessary,
+you can change the default username and password passed to `st2 auth`.  To do this, set the `ST2USER`
+and `ST2PASSWORD` environment variables on the host prior to provisioning the VM. The default values
+are `st2admin` and `Ch@ngeMe` respectively.
 
 # Installation
 Current community packages are hosted on https://packagecloud.io/StackStorm. For detailed instructions how install st2 and perform basic configuration follow these instructions:

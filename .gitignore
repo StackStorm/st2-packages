@@ -2,3 +2,5 @@
 # Gemfile* will be copied on runtime.
 Gemfile
 Gemfile.lock
+.vagrant
+*.log
