@@ -207,6 +207,9 @@ function port_status() {
 }
 
 check_st2_host_dependencies() {
+  # Install netstat
+  sudo yum install -y net-tools
+
   # CHECK 1: Determine which, if any, of the required ports are used by an existing process.
 
   # Abort the installation early if the following ports are being used by an existing process.
