@@ -22,5 +22,5 @@ script
   # Read configuration variable file if it is present
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-  exec /opt/stackstorm/st2/bin/gunicorn_pecan /opt/stackstorm/st2/lib/python2.7/site-packages/st2auth/gunicorn_config.py $DAEMON_ARGS
+  exec /opt/stackstorm/st2/bin/gunicorn st2auth.wsgi:application $DAEMON_ARGS
 end script
