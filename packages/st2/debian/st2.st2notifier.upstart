@@ -1,7 +1,7 @@
 description     "StackStorm st2notifier service"
 author          "StackStorm Engineering <opsadmin@stackstorm.com>"
 
-start on filesystem and net-device-up IFACE!=lo
+start on rabbitmq-server-running and started mongodb filesystem and net-device-up IFACE!=lo
 stop on starting rc RUNLEVEL=[016]
 
 # Note: We disable upstart logging since the services manage logs themselves

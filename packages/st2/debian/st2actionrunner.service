@@ -1,6 +1,7 @@
 [Unit]
 Description=StackStorm service st2actionrunner
-After=network.target
+After=rabbitmq-server.service
+After=mongod.service
 
 [Service]
 Type=oneshot
