@@ -22,11 +22,12 @@ machine:
     ST2_DOCKERFILES_REPO: https://github.com/StackStorm/st2-dockerfiles
     ST2_PACKAGES: "st2 st2mistral"
 
-    # These should be set to an empty string, so that st2cd prep tasks are able to replace this
-    # with real gitrevs during releases. However, when not doing a release, .circle/buildenv_st2.sh
-    # will still default to using `master` for these if they are left empty.
-    ST2_GITREV: ""
-    ST2MISTRAL_GITREV: ""
+    # These should be set to an empty string, so that st2cd prep tasks are able to replace these
+    # with real gitrevs during releases. Note that they are commented out, so that they do not interfere
+    # with build parameters. st2cd prep tasks will uncomment these on a branch, and replace with proper
+    # gitrefs.
+    # ST2_GITREV: ""
+    # ST2MISTRAL_GITREV: ""
 
   pre:
     - mkdir -p ~/packages
