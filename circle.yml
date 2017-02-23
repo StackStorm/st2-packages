@@ -1,90 +1,62 @@
-# Setup in CircleCI account the following ENV variables:
-# IS_PRODUCTION (default: 0)
-# IS_ENTERPRISE (default: 0)
-# PACKAGECLOUD_ORGANIZATION (default: stackstorm)
-# PACKAGECLOUD_TOKEN
-# DOCKER_USER
-# DOCKER_EMAIL
-# DOCKER_PASSWORD
-general:
-  artifacts:
-    - ~/packages
-
-notify:
-  webhooks:
-    - url: https://webhooks.stackstorm.net:8531/webhooks/build/events
-
-machine:
-  environment:
-    DISTROS: "wheezy jessie trusty xenial el6 el7"
-    NOTESTS: "xenial el7"
-    ST2_GITURL: https://github.com/StackStorm/st2
-    ST2_DOCKERFILES_REPO: https://github.com/StackStorm/st2-dockerfiles
-    ST2_PACKAGES: "st2 st2mistral"
-  pre:
-    - mkdir -p ~/packages
-    # Need latest Docker version for some features to work (CircleCI by default works with outdated version)
-    - |
-      sudo curl -L -o /usr/bin/docker 'http://s3-external-1.amazonaws.com/circle-downloads/docker-1.9.0-circleci'
-      sudo chmod 0755 /usr/bin/docker
-  services:
-    - docker
-    - mongodb
-    - postgresql
-    - rabbitmq-server
-
-checkout:
-  post:
-    - .circle/buildenv_st2.sh
-    - .circle/buildenv_mistral.sh
-
-dependencies:
-  cache_directories:
-    - ~/.cache/pip
-  pre:
-    - sudo .circle/configure-services.sh
-    - sudo .circle/fix-cache-permissions.sh
-    - sudo apt-get -y install parallel jq
-    - gem install package_cloud
-    - sudo pip install wheel docker-compose
-    - docker-compose version
-    - docker version
-  override:
-    - .circle/docker-compose.sh pull ${DISTRO}
-  post:
-    - .circle/docker-compose.sh build ${DISTRO}
-
-test:
-  override:
-    - .circle/docker-compose.sh test ${DISTRO}:
-        parallel: true
-    # Copy all Packages to node0
-    - rsync -rv /tmp/st2-packages/ node0:~/packages/${DISTRO}:
-        parallel: true
-  post:
-    - .circle/docker.sh build st2
-    - .circle/docker.sh build st2actionrunner st2api st2stream st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
-    - .circle/docker.sh run st2api
-    - .circle/docker.sh test st2api 'st2 --version'
-
-deployment:
-  publish:
-    branch:
-      - master
-      - /v[0-9]+\.[0-9]+/
-      - feature/circleci
-    owner: StackStorm
-    commands:
-      # Deploy to PackageCloud all artifacts for respective distros in parallel
-      - |
-        DISTROS=($DISTROS)
-        parallel -v -j0 --line-buffer .circle/packagecloud.sh deploy {} ~/packages/{} ::: ${DISTROS[@]::$CIRCLE_NODE_TOTAL}
-      - .circle/docker.sh deploy st2actionrunner st2api st2stream st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
-      - .circle/save_payload.py ~/packages
-
-experimental:
-  notify:
-    branches:
-      only:
-        - master
-        - /v[0-9]+\.[0-9]+/
+version: 2
+executorType: machine
+stages:
+  build:
+    workDir: ~/st2-packages
+    environment:
+      - DISTROS: trusty xenial el6 el7 wheezy jessie
+      - ST2_PACKAGES: st2 st2mistral
+    steps:
+      - type: checkout
+      - type: shell
+        name: Stop Default Services
+        command: |
+          sudo service postgresql stop
+          sudo service mongod stop
+          sudo service rabbitmq-server stop
+      - type: shell
+        name: Show Docker versions
+        command: |
+          docker --version
+          docker-compose --version
+      - type: shell
+        name: Initialize Build Environment
+        command: |
+          .circle/buildenv_st2.sh
+          .circle/buildenv_mistral.sh
+      - type: shell
+        name: Node Auto-discovery
+        command: |
+          export DISCOVERY_ALIAS="${DISCOVERY_TOKEN}-${CIRCLE_SHA1}-${CIRCLE_BUILD_NUM}"
+          echo "export DISCOVERY_ALIAS=$DISCOVERY_ALIAS" >> .buildenv
+          if [[ $CIRCLE_NODE_INDEX = 0 ]]; then
+            curl -sI "https://tinyurl.com/create.php?alias=${DISCOVERY_ALIAS}&url=$(hostname -i)"
+          fi
+      - type: shell
+        name: Node Auto-discovery Retreival
+        command: |
+          . ~/.buildenv
+          curl -sI "https://tinyurl.com/$DISCOVERY_ALIAS" | sed -En 's/^Location: http:\/\/(.*)/\1/p'
+      - type: shell
+        name: Pull Images
+        command: |
+          . ~/.buildenv
+          .circle/docker-compose.sh pull ${DISTRO}
+      - type: shell
+        name: Build Packages
+        command: |
+          . ~/.buildenv
+          .circle/docker-compose.sh build ${DISTRO}
+      - type: shell
+        name: Test Packages
+        command: |
+          . ~/.buildenv
+          .circle/docker-compose.sh test ${DISTRO}
+      - type: shell
+        name: Copy Packages
+        command: |
+          . ~/.buildenv
+          rsync -rv /tmp/st2-packages/ node0:~/packages/${DISTRO}
+      - type: artifacts-store
+        path: ~/packages
+        destination: packages
