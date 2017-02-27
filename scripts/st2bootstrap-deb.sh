@@ -115,28 +115,28 @@ EOT"
 get_full_pkg_versions() {
   if [ "$VERSION" != '' ];
   then
-    local ST2_VER=$(apt-cache show st2 | grep Version | awk '{print $2}' | grep -F $VERSION | sort --version-sort | tail -n 1)
+    local ST2_VER=$(apt-cache show st2 | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
     if [ -z "$ST2_VER" ]; then
       echo "Could not find requested version of StackStorm!!!"
       sudo apt-cache policy st2
       exit 3
     fi
 
-    local ST2MISTRAL_VER=$(apt-cache show st2mistral | grep Version | awk '{print $2}' | grep -F $VERSION | sort --version-sort | tail -n 1)
+    local ST2MISTRAL_VER=$(apt-cache show st2mistral | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
     if [ -z "$ST2MISTRAL_VER" ]; then
       echo "Could not find requested version of st2mistral!!!"
       sudo apt-cache policy st2mistral
       exit 3
     fi
 
-    local ST2WEB_VER=$(apt-cache show st2web | grep Version | awk '{print $2}' | grep -F $VERSION | sort --version-sort | tail -n 1)
+    local ST2WEB_VER=$(apt-cache show st2web | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
     if [ -z "$ST2WEB_VER" ]; then
       echo "Could not find requested version of st2web."
       sudo apt-cache policy st2web
       exit 3
     fi
 
-    local ST2CHATOPS_VER=$(apt-cache show st2chatops | grep Version | awk '{print $2}' | grep -F $VERSION | sort --version-sort | tail -n 1)
+    local ST2CHATOPS_VER=$(apt-cache show st2chatops | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
     if [ -z "$ST2CHATOPS_VER" ]; then
       echo "Could not find requested version of st2chatops."
       sudo apt-cache policy st2chatops
