@@ -58,7 +58,8 @@ dependencies:
     - docker-compose version
     - docker version
   override:
-    - .circle/docker-compose.sh pull ${DISTRO}
+    # retry it 1 time
+    - .circle/docker-compose.sh pull ${DISTRO} || .circle/docker-compose.sh pull ${DISTRO}
   post:
     - .circle/docker-compose.sh build ${DISTRO}
 
