@@ -357,7 +357,6 @@ install_st2() {
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
 
   sudo st2ctl start
-  sleep 5
   sudo st2ctl reload --register-all
 }
 
