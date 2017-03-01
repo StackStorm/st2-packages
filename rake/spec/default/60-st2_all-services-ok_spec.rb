@@ -44,9 +44,6 @@ describe 'start st2 components and services' do
     puts "===> Starting st2 services #{spec[:service_list].join(', ')}..."
     remote_start_services(spec[:service_list])
 
-    puts "===> Wait for st2 services to start #{spec[:wait_for_start]} sec..."
-    sleep spec[:wait_for_start]
-
     puts
   end
 
