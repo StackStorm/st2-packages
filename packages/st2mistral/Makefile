@@ -73,7 +73,7 @@ inject-deps: .stamp-inject-deps
 .stamp-inject-deps: | bdist_wheel
 	echo "$$INJECT_DEPS" >> requirements.txt
 	grep -q 'gunicorn' requirements.txt || echo "gunicorn" >> requirements.txt
-	grep -q 'psycopg2' requirements.txt || echo "psycopg2" >> requirements.txt
+	grep -q 'psycopg2' requirements.txt || echo "psycopg2>=2.6.2,<2.7.0" >> requirements.txt
 	grep -q 'kombu' requirements.txt || echo "kombu>=3.0.0,<4.0.0" >> requirements.txt
 	grep -q 'amqp' requirements.txt || echo "amqp>=1.4.0,<2.0.0" >> requirements.txt
 
