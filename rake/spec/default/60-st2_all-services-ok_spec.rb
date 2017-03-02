@@ -91,3 +91,10 @@ describe 'st2 services' do
     end
   end
 end
+
+# all st2 services should work immediately after restart
+describe 'st2 services availability after restart' do
+  describe command("st2ctl restart && st2 action list") do
+    its(:exit_status) { is_expected.to eq 0 }
+  end
+end
