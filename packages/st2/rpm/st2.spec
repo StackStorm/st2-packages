@@ -60,8 +60,10 @@ Conflicts: st2common
 %postun
   %service_postun st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier
   %service_postun st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
-  # Wipe out st2 logrotate config, since there's no analog of apt-get purge avaialable
-  [ ! -f /etc/logrotate.d/st2 ] || rm /etc/logrotate.d/st2
+  # Remove st2 logrotate config, since there's no analog of apt-get purge available
+  if [ $1 -eq 0 ]; then
+    [ ! -f /etc/logrotate.d/st2 ] || rm /etc/logrotate.d/st2
+  fi
 
 %files
   %defattr(-,root,root,-)

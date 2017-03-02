@@ -24,10 +24,10 @@ echo "[Install] dependencies"
 sudo $INSTALL_CMD update
 if [[ $ST2_TARGET != 'el7' ]]; then
   sudo apt-get -y autoremove
+  sudo apt-get install -y gdebi-core
 fi
 
-sudo $INSTALL_CMD install -y linux-image-extra-$(uname -r)
-sudo $INSTALL_CMD install -y git curl wget gdebi-core
+sudo $INSTALL_CMD install -y git curl wget
 
 # Install docker-compose
 DC_BIN="/usr/local/bin/docker-compose"
