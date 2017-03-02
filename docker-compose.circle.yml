@@ -74,37 +74,37 @@ el6:
 ## Package build nodes
 #
 wheezybuild:
-  image: stackstorm/packagingenv:wheezy
+  image: stackstorm/packagingbuild:wheezy
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 jessiebuild:
-  image: stackstorm/packagingenv:jessie
+  image: stackstorm/packagingbuild:jessie
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 trustybuild:
-  image: stackstorm/packagingenv:trusty
+  image: stackstorm/packagingbuild:trusty
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 xenialbuild:
-  image: stackstorm/packagingenv:xenial
+  image: stackstorm/packagingbuild:xenial
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 centos6build:
-  image: stackstorm/packagingenv:centos6
+  image: stackstorm/packagingbuild:centos6
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 centos7build:
-  image: stackstorm/packagingenv:centos7
+  image: stackstorm/packagingbuild:centos7
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
@@ -112,25 +112,25 @@ centos7build:
 ## Package testing nodes
 #
 wheezytest:
-  image: stackstorm/packagingtest:wheezy
+  image: stackstorm/packagingtest:wheezy-sshd
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 jessietest:
-  image: stackstorm/packagingtest:jessie
+  image: stackstorm/packagingtest:jessie-sshd
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 trustytest:
-  image: stackstorm/packagingtest:trusty
+  image: stackstorm/packagingtest:trusty-upstart
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 xenialtest:
-  image: stackstorm/packagingtest:xenial
+  image: stackstorm/packagingtest:xenial-systemd
   privileged: true
   extends:
     file: docker-compose.override.yml
@@ -139,13 +139,13 @@ xenialtest:
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
 centos6test:
-  image: stackstorm/packagingtest:centos6
+  image: stackstorm/packagingtest:centos6-sshd
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
 
 centos7test:
-  image: stackstorm/packagingtest:centos7
+  image: stackstorm/packagingtest:centos7-systemd
   extends:
     file: docker-compose.override.yml
     service: volumes-circle

@@ -16,11 +16,14 @@
 Packages build environment is a *multi-container docker* application defined and managed with [docker-compose](https://github.com/docker/compose). It consists of four types of containers:
 
  - **Packaging runner** (https://quay.io/stackstorm/packagingrunner) - the main entry point, package build and test processing controller container.
- - **Build environment** (https://quay.io/stackstorm/packagingenv) - container where actual artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingenv:centos6*, *packagingenv:wheezy* correspondingly for CentOS 6 and Debian Wheezy.
- - **Test runner** (https://quay.io/dennybaa/droneunit) - containers where built artifacts are tested, i.e. *artifacts are installed, configuration is written and tests are performed*.
+ - **Packaging build** (https://hub.docker.com/r/stackstorm/packagingbuild/) - container where actual `.deb`/`.rpm` artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingbuild:centos6*, *packagingbuild:wheezy* correspondingly for CentOS 6 and Debian Wheezy.
+ - **Packaging test** (https://hub.docker.com/r/stackstorm/packagingtest/) - containers where built artifacts are tested, i.e. *artifacts are installed, configuration is written and tests are performed*.
  - **Services** - these are different containers required for testing such as *rabbitmq, mongodb and postgresql*
 
+`Dockerfiles` sources are available at [StackStorm/st2-dockerfiles](https://github.com/stackstorm/st2-dockerfiles).
+
 The Packages build environment compose application brings a self-sufficient pipeline to deliver ready to use packages.
+
 
 # Usage
 
