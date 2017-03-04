@@ -339,17 +339,22 @@ configure_st2_user () {
     sudo useradd stanley
   fi
 
-  sudo mkdir -p ~stanley/.ssh
+  if sudo test -f "~stanley/.ssh/stanley_rsa"; then
+    # Key already exists, leave as-is
+    :
+  else
+    sudo mkdir -p ~stanley/.ssh
 
-  # Generate ssh keys on StackStorm box and copy over public key into remote box.
-  sudo ssh-keygen -f ~stanley/.ssh/stanley_rsa -P ""
-  #sudo cp ${KEY_LOCATION}/stanley_rsa.pub ~stanley/.ssh/stanley_rsa.pub
+    # Generate ssh keys on StackStorm box and copy over public key into remote box.
+    sudo ssh-keygen -f ~stanley/.ssh/stanley_rsa -P ""
+    #sudo cp ${KEY_LOCATION}/stanley_rsa.pub ~stanley/.ssh/stanley_rsa.pub
 
-  # Authorize key-based access
-  sudo sh -c 'cat ~stanley/.ssh/stanley_rsa.pub >> ~stanley/.ssh/authorized_keys'
-  sudo chmod 0600 ~stanley/.ssh/authorized_keys
-  sudo chmod 0700 ~stanley/.ssh
-  sudo chown -R stanley ~stanley
+    # Authorize key-based access
+    sudo sh -c 'cat ~stanley/.ssh/stanley_rsa.pub >> ~stanley/.ssh/authorized_keys'
+    sudo chmod 0600 ~stanley/.ssh/authorized_keys
+    sudo chmod 0700 ~stanley/.ssh
+    sudo chown -R stanley ~stanley
+  fi
 
   # Enable passwordless sudo
   sudo sh -c 'echo "stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL" >> /etc/sudoers.d/st2'
@@ -425,7 +430,7 @@ generate_symmetric_crypto_key_for_datastore() {
   DATASTORE_ENCRYPTION_KEY_PATH="${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}/datastore_key.json"
 
   sudo mkdir -p ${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}
-  sudo st2-generate-symmetric-crypto-key --key-path ${DATASTORE_ENCRYPTION_KEY_PATH}
+  sudo st2-generate-symmetric-crypto-key --force --key-path ${DATASTORE_ENCRYPTION_KEY_PATH}
 
   # Make sure only st2 user can read the file
   sudo usermod -a -G st2 st2
