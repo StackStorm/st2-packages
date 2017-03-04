@@ -339,17 +339,17 @@ configure_st2_user () {
     sudo useradd stanley
   fi
 
-  sudo mkdir -p /home/stanley/.ssh
+  sudo mkdir -p ~stanley/.ssh
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
-  sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
-  #sudo cp ${KEY_LOCATION}/stanley_rsa.pub /home/stanley/.ssh/stanley_rsa.pub
+  sudo ssh-keygen -f ~stanley/.ssh/stanley_rsa -P ""
+  #sudo cp ${KEY_LOCATION}/stanley_rsa.pub ~stanley/.ssh/stanley_rsa.pub
 
-  # Authorize key-base acces
-  sudo sh -c 'cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys'
-  sudo chmod 0600 /home/stanley/.ssh/authorized_keys
-  sudo chmod 0700 /home/stanley/.ssh
-  sudo chown -R stanley:stanley /home/stanley
+  # Authorize key-based access
+  sudo sh -c 'cat ~stanley/.ssh/stanley_rsa.pub >> ~stanley/.ssh/authorized_keys'
+  sudo chmod 0600 ~stanley/.ssh/authorized_keys
+  sudo chmod 0700 ~stanley/.ssh
+  sudo chown -R stanley ~stanley
 
   # Enable passwordless sudo
   sudo sh -c 'echo "stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL" >> /etc/sudoers.d/st2'
@@ -384,7 +384,7 @@ configure_st2_cli_config() {
 
   : "${HOME:=`eval echo ~$(whoami)`}"
 
-  ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
+  ROOT_USER_CLI_CONFIG_DIRECTORY="~root/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
 
   CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
@@ -516,7 +516,7 @@ install_st2chatops() {
 }
 
 configure_st2chatops() {
-  # set API keys. This should work since CLI is configuered already.
+  # set API keys. This should work since CLI is configured already.
   ST2_API_KEY=`st2 apikey create -k`
   sudo sed -i -r "s/^(export ST2_API_KEY.).*/\1$ST2_API_KEY/" /opt/stackstorm/chatops/st2chatops.env
 
