@@ -12,9 +12,9 @@ Epoch: %{epoch}
 %endif
 
 %if 0%{?use_st2python}
-Requires: st2python, python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients
+Requires: st2python, python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash
 %else
-Requires: python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients
+Requires: python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash
 %endif
 
 Summary: StackStorm all components bundle
