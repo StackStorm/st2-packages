@@ -15,7 +15,7 @@ USERNAME=''
 PASSWORD=''
 
 # Note: This variable needs to default to a branch of the latest stable release
-BRANCH='v2.1'
+BRANCH='v2.2'
 
 setup_args() {
   for i in "$@"
