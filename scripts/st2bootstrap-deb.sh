@@ -329,7 +329,6 @@ install_st2() {
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
 
   sudo st2ctl start
-  sleep 5
   sudo st2ctl reload --register-all
 }
 
@@ -550,11 +549,6 @@ configure_st2chatops() {
 }
 
 verify_st2() {
-
-  # TODO: This is a temporary and nasty workaround for xenial CI failures.
-  if [[ "$SUBTYPE" == 'xenial' ]]; then
-    sleep 30
-  fi
   st2 --version
   st2 -h
 

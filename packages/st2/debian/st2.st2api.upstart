@@ -24,3 +24,8 @@ script
 
   exec /opt/stackstorm/st2/bin/gunicorn_pecan /opt/stackstorm/st2/lib/python2.7/site-packages/st2api/gunicorn_config.py $DAEMON_ARGS
 end script
+
+post-start script
+  # wait for st2api readiness to serve the requests
+  timeout 5 bash -c 'until echo > /dev/tcp/127.0.0.1/9101; do sleep 0.5; done'
+end script
