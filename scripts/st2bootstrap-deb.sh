@@ -329,6 +329,10 @@ install_st2() {
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
 
   sudo st2ctl start
+  # TODO: Fix https://github.com/StackStorm/st2-packages/issues/445 (under xenial register content fails on first boot)
+  if [[ "$SUBTYPE" == 'xenial' ]]; then
+    sleep 5
+  fi
   sudo st2ctl reload --register-all
 }
 
