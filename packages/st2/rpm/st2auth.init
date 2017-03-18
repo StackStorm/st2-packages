@@ -46,6 +46,10 @@ start() {
         $DAEMON $DAEMON_ARGS
     waitforpid --pidfile=${PIDFILE}
     retval=$?
+    [ $retval -ne 0 ] && return $retval
+    # wait for st2auth readiness to serve the requests
+    timeout 5 bash -c 'until echo > /dev/tcp/127.0.0.1/9100; do sleep 0.5; done'
+    retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile || return $retval
 }

@@ -12,9 +12,9 @@ Epoch: %{epoch}
 %endif
 
 %if 0%{?use_st2python}
-Requires: st2python, python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients
+Requires: st2python, python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash
 %else
-Requires: python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients
+Requires: python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash
 %endif
 
 Summary: StackStorm all components bundle
@@ -87,8 +87,11 @@ Conflicts: st2common
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
   %{_unitdir}/st2api.service
+  %{_unitdir}/st2api.socket
   %{_unitdir}/st2stream.service
+  %{_unitdir}/st2stream.socket
   %{_unitdir}/st2auth.service
+  %{_unitdir}/st2auth.socket
   %{_unitdir}/st2notifier.service
   %{_unitdir}/st2resultstracker.service
   %{_unitdir}/st2rulesengine.service

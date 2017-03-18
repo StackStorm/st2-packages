@@ -71,6 +71,8 @@ do_start()
   start-stop-daemon --start --quiet --chuid $RUNAS_USER:$RUNAS_GROUP --umask $UMASK --background --pidfile $PIDFILE \
      --exec $DAEMON -- $DAEMON_ARGS \
     || return 2
+  # wait for st2auth readiness to serve the requests
+  timeout 5 bash -c 'until echo > /dev/tcp/127.0.0.1/9100; do sleep 0.5; done' || return 2
 }
 
 #
