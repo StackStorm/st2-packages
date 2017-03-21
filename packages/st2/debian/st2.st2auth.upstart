@@ -24,3 +24,8 @@ script
 
   exec /opt/stackstorm/st2/bin/gunicorn st2auth.wsgi:application $DAEMON_ARGS
 end script
+
+post-start script
+  # wait for st2auth readiness to serve the requests
+  timeout 5 bash -c 'until echo > /dev/tcp/127.0.0.1/9100; do sleep 0.5; done'
+end script
