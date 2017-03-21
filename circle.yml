@@ -13,7 +13,6 @@ general:
 notify:
   webhooks:
     - url: https://webhooks.stackstorm.net:8531/webhooks/build/events
-    - url: https://ci-webhooks.stackstorm.net/api/v1/webhooks/circleci?st2-api-key=${ST2_API_KEY}
 
 machine:
   environment:
@@ -76,6 +75,9 @@ test:
     - .circle/docker.sh build st2actionrunner st2api st2stream st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
     - .circle/docker.sh run st2api
     - .circle/docker.sh test st2api 'st2 --version'
+    - "curl -H \"Content-Type: application/json\" -X POST -d '{\"build_url\":\"${CIRCLE_BUILD_URL}\"}' https://ci-webhooks.stackstorm.net/api/v1/webhooks/circleci?st2-api-key=${ST2_API_KEY}"
+    # Don't even ask about ^ - I wouldn't do it if I didn't have to
+
 
 deployment:
   publish:
