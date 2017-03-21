@@ -44,9 +44,6 @@ describe 'start st2 components and services' do
     puts "===> Starting st2 services #{spec[:service_list].join(', ')}..."
     remote_start_services(spec[:service_list])
 
-    puts "===> Wait for st2 services to start #{spec[:wait_for_start]} sec..."
-    sleep spec[:wait_for_start]
-
     puts
   end
 
@@ -92,5 +89,12 @@ describe 'st2 services' do
       subject { port(8989) }
       it { should be_listening }
     end
+  end
+end
+
+# all st2 services should work immediately after restart
+describe 'st2 services availability after restart' do
+  describe command("st2ctl restart && st2 action list") do
+    its(:exit_status) { is_expected.to eq 0 }
   end
 end

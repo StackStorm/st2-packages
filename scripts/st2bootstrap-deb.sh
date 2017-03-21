@@ -329,7 +329,10 @@ install_st2() {
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
 
   sudo st2ctl start
-  sleep 5
+  # TODO: Fix https://github.com/StackStorm/st2-packages/issues/445 (under xenial register content fails on first boot)
+  if [[ "$SUBTYPE" == 'xenial' ]]; then
+    sleep 5
+  fi
   sudo st2ctl reload --register-all
 }
 
@@ -552,9 +555,11 @@ configure_st2chatops() {
 verify_st2() {
 
   # TODO: This is a temporary and nasty workaround for xenial CI failures.
+  # TODO: Fix https://github.com/StackStorm/st2/issues/3290
   if [[ "$SUBTYPE" == 'xenial' ]]; then
     sleep 30
   fi
+
   st2 --version
   st2 -h
 
