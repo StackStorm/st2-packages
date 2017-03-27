@@ -84,6 +84,8 @@ deployment:
       - feature/circleci
     owner: StackStorm
     commands:
+      # Print artifact folder tree
+      - find ~/packages/ | sed 's|[^/]*/|  |g'
       # Deploy to PackageCloud all artifacts for respective distros in parallel
       - |
         DISTROS=($DISTROS)
