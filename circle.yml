@@ -93,6 +93,8 @@ deployment:
         parallel -v -j0 --line-buffer .circle/packagecloud.sh deploy {} ~/packages/{} ::: ${DISTROS[@]::$CIRCLE_NODE_TOTAL}
       - .circle/docker.sh deploy st2actionrunner st2api st2stream st2auth st2exporter st2notifier st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector
       - .circle/save_payload.py ~/packages
+      - "curl -H \"Content-Type: application/json\" -X POST -d '{\"build_num\":'\"${CIRCLE_BUILD_NUM}\"'}' https://ci-webhooks.stackstorm.net/api/v1/webhooks/circleci?st2-api-key=${ST2_API_KEY}"
+      # Don't even ask about ^ - I wouldn't do it if I didn't have to
 
 experimental:
   notify:
