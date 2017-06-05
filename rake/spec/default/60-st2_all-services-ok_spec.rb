@@ -66,10 +66,7 @@ describe 'st2 services' do
   spec[:service_list].each do |name|
     describe service(name), prompt_on_failure: true do
       it { is_expected.to be_running }
-      it { should be_enabled.with_level(2) }
-      it { should be_enabled.with_level(3) }
-      it { should be_enabled.with_level(4) }
-      it { should be_enabled.with_level(5) }
+      it { should be_enabled }
     end
   end
 
