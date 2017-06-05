@@ -10,7 +10,8 @@ ST2_COMPONENTS = %w(
   st2api st2stream st2actions st2common
   st2auth st2client st2exporter
   st2reactor
-  st2debug)
+  st2debug
+  st2tests)
 
 # Default list of packages to build
 BUILDLIST = 'st2 st2mistral'
@@ -81,8 +82,8 @@ end
 pipeopts 'st2mistral' do
   checkout true
   envpass :giturl,  'https://github.com/StackStorm/mistral', from: 'ST2MISTRAL_GITURL'
-  envpass :gitrev,  'st2-2.2.0',                                from: 'ST2MISTRAL_GITREV'
+  envpass :gitrev,  'master',                                from: 'ST2MISTRAL_GITREV'
   envpass :gitdir,  make_tmpname('mistral-')
-  envpass :mistral_version, '2.2.0'
+  envpass :mistral_version, '2.3dev'
   envpass :mistral_release, 1
 end

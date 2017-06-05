@@ -265,28 +265,28 @@ EOF
 get_full_pkg_versions() {
   if [ "$VERSION" != '' ];
   then
-    local ST2_VER=$(apt-cache show st2 | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    local ST2_VER=$(apt-cache show st2 | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
     if [ -z "$ST2_VER" ]; then
       echo "Could not find requested version of StackStorm!!!"
       sudo apt-cache policy st2
       exit 3
     fi
 
-    local ST2MISTRAL_VER=$(apt-cache show st2mistral | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    local ST2MISTRAL_VER=$(apt-cache show st2mistral | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
     if [ -z "$ST2MISTRAL_VER" ]; then
       echo "Could not find requested version of st2mistral!!!"
       sudo apt-cache policy st2mistral
       exit 3
     fi
 
-    local ST2WEB_VER=$(apt-cache show st2web | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    local ST2WEB_VER=$(apt-cache show st2web | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
     if [ -z "$ST2WEB_VER" ]; then
       echo "Could not find requested version of st2web."
       sudo apt-cache policy st2web
       exit 3
     fi
 
-    local ST2CHATOPS_VER=$(apt-cache show st2chatops | grep Version | awk '{print $2}' | grep $VERSION | sort --version-sort | tail -n 1)
+    local ST2CHATOPS_VER=$(apt-cache show st2chatops | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
     if [ -z "$ST2CHATOPS_VER" ]; then
       echo "Could not find requested version of st2chatops."
       sudo apt-cache policy st2chatops
@@ -329,7 +329,10 @@ install_st2() {
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
 
   sudo st2ctl start
-  sleep 5
+  # TODO: Fix https://github.com/StackStorm/st2-packages/issues/445 (under xenial register content fails on first boot)
+  if [[ "$SUBTYPE" == 'xenial' ]]; then
+    sleep 5
+  fi
   sudo st2ctl reload --register-all
 }
 
@@ -552,9 +555,11 @@ configure_st2chatops() {
 verify_st2() {
 
   # TODO: This is a temporary and nasty workaround for xenial CI failures.
+  # TODO: Fix https://github.com/StackStorm/st2/issues/3290
   if [[ "$SUBTYPE" == 'xenial' ]]; then
     sleep 30
   fi
+
   st2 --version
   st2 -h
 
