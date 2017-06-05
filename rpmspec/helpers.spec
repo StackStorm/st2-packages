@@ -92,6 +92,7 @@
   %else \
     for svc in %{?*}; do \
       /sbin/chkconfig --add $svc || : \
+      /sbin/chkconfig --level 2345 $svc on || : \
     done \
   %endif \
 %{nil}

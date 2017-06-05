@@ -62,13 +62,17 @@ describe 'start st2 components and services' do
   end
 end
 
-# Check if component services are running
+# Check if component services are running/enabled
 describe 'st2 services' do
   include_examples 'show service log on failure'
 
   spec[:service_list].each do |name|
     describe service(name), prompt_on_failure: true do
       it { is_expected.to be_running }
+      it { should be_enabled.with_level(2) }
+      it { should be_enabled.with_level(3) }
+      it { should be_enabled.with_level(4) }
+      it { should be_enabled.with_level(5) }
     end
   end
 
