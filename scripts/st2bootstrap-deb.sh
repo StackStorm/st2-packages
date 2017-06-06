@@ -190,6 +190,7 @@ install_st2_dependencies() {
   # Note: gnupg-curl is needed to be able to use https transport when fetching keys
   sudo apt-get install -y gnupg-curl
   sudo apt-get install -y curl
+  sudo apt-get install -y locales-all
   sudo apt-get install -y rabbitmq-server
 
   # Configure RabbitMQ to listen on localhost only
