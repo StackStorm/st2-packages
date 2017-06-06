@@ -12,7 +12,6 @@ general:
 
 notify:
   webhooks:
-    - url: https://webhooks.stackstorm.net:8531/webhooks/build/events
     - url: https://ci-webhooks.stackstorm.net/webhooks/build/events
 
 machine:
