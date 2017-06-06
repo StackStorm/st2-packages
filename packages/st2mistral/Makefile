@@ -77,6 +77,7 @@ inject-deps: .stamp-inject-deps
 
 ifeq (,$(findstring dev,$(MISTRAL_VERSION)))
 	sed -i "s/^python-mistralclient.*/git+https:\/\/github.com\/StackStorm\/python-mistralclient.git@st2-$(MISTRAL_VERSION)\#egg=python-mistralclient/g" requirements.txt
+	sed -i "s/^oslo.messaging.*/oslo.messaging==5.24.2/g" requirements.txt
 endif
 
 	touch $@
