@@ -74,7 +74,8 @@ inject-deps: .stamp-inject-deps
 	echo "$$INJECT_DEPS" >> requirements.txt
 	grep -q 'gunicorn' requirements.txt || echo "gunicorn" >> requirements.txt
 	grep -q 'psycopg2' requirements.txt || echo "psycopg2>=2.6.2,<2.7.0" >> requirements.txt
-	sed -i "s/^Babel.*/Babel>=2.3.4,!=2.4.0/g" requirements.txt
+	sed -i "s/^oslo.messaging.*/oslo.messaging==5.24.2/g" requirements.txt
+	sed -i "s/^Babel.*/Babel>=2.3.4,!=2.4.0 # BSD/g" requirements.txt
 
 ifeq (,$(findstring dev,$(MISTRAL_VERSION)))
 	sed -i "s/^python-mistralclient.*/git+https:\/\/github.com\/StackStorm\/python-mistralclient.git@st2-$(MISTRAL_VERSION)\#egg=python-mistralclient/g" requirements.txt
