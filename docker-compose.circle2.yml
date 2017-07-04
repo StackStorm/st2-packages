@@ -63,56 +63,48 @@ el6:
 #
 trustybuild:
   image: stackstorm/packagingbuild:trusty
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  volumes_from:
+    - st2-packages-vol
 
 xenialbuild:
   image: stackstorm/packagingbuild:xenial
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  volumes_from:
+    - st2-packages-vol
 
 centos6build:
   image: stackstorm/packagingbuild:centos6
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  volumes_from:
+    - st2-packages-vol
 
 centos7build:
   image: stackstorm/packagingbuild:centos7
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  volumes_from:
+    - st2-packages-vol
 
 ## Package testing nodes
 #
 trustytest:
   image: stackstorm/packagingtest:trusty-upstart
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  volumes_from:
+    - st2-packages-vol
 
 xenialtest:
   image: stackstorm/packagingtest:xenial-systemd
   privileged: true
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  volumes_from:
+    - st2-packages-vol
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
 centos6test:
   image: stackstorm/packagingtest:centos6-sshd
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  volumes_from:
+    - st2-packages-vol
 
 centos7test:
   image: stackstorm/packagingtest:centos7-systemd
   privileged: true
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  volumes_from:
+    - st2-packages-vol
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup
