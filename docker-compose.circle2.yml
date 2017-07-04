@@ -1,0 +1,110 @@
+trusty:
+  image: quay.io/stackstorm/packagingrunner
+  working_dir: /root/st2-packages
+  volumes_from:
+    - st2-packages-vol
+  environment:
+    - BUILDNODE=trustybuild
+    - TESTNODE=trustytest
+  links:
+    - trustybuild
+    - trustytest
+    - rabbitmq
+    - mongodb
+    - postgres
+
+xenial:
+  image: quay.io/stackstorm/packagingrunner
+  working_dir: /root/st2-packages
+  volumes_from:
+    - st2-packages-vol
+  environment:
+    - BUILDNODE=xenialbuild
+    - TESTNODE=xenialtest
+  links:
+    - xenialbuild
+    - xenialtest
+    - rabbitmq
+    - mongodb
+    - postgres
+
+el7:
+  image: quay.io/stackstorm/packagingrunner
+  working_dir: /root/st2-packages
+  volumes_from:
+    - st2-packages-vol
+  environment:
+    - BUILDNODE=centos7build
+    - TESTNODE=centos7test
+  links:
+    - centos7build
+    - centos7test
+    - rabbitmq
+    - mongodb
+    - postgres
+
+el6:
+  image: quay.io/stackstorm/packagingrunner
+  working_dir: /root/st2-packages
+  volumes_from:
+    - st2-packages-vol
+  environment:
+    - ST2_PYTHON=1
+    - BUILDNODE=centos6build
+    - TESTNODE=centos6test
+  links:
+    - centos6build
+    - centos6test
+    - rabbitmq
+    - mongodb
+    - postgres
+
+## Package build nodes
+#
+trustybuild:
+  image: stackstorm/packagingbuild:trusty
+  volumes_from:
+    - st2-packages-vol
+
+xenialbuild:
+  image: stackstorm/packagingbuild:xenial
+  volumes_from:
+    - st2-packages-vol
+
+centos6build:
+  image: stackstorm/packagingbuild:centos6
+  volumes_from:
+    - st2-packages-vol
+
+centos7build:
+  image: stackstorm/packagingbuild:centos7
+  volumes_from:
+    - st2-packages-vol
+
+## Package testing nodes
+#
+trustytest:
+  image: stackstorm/packagingtest:trusty-upstart
+  volumes_from:
+    - st2-packages-vol
+
+xenialtest:
+  image: stackstorm/packagingtest:xenial-systemd
+  privileged: true
+  volumes_from:
+    - st2-packages-vol
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+centos6test:
+  image: stackstorm/packagingtest:centos6-sshd
+  volumes_from:
+    - st2-packages-vol
+
+centos7test:
+  image: stackstorm/packagingtest:centos7-systemd
+  privileged: true
+  volumes_from:
+    - st2-packages-vol
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup
