@@ -1,8 +1,6 @@
 trusty:
   image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
+  working_dir: /root/st2-packages
   volumes_from:
     - st2-packages-vol
   environment:
@@ -17,9 +15,7 @@ trusty:
 
 xenial:
   image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
+  working_dir: /root/st2-packages
   volumes_from:
     - st2-packages-vol
   environment:
@@ -34,9 +30,7 @@ xenial:
 
 el7:
   image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
+  working_dir: /root/st2-packages
   volumes_from:
     - st2-packages-vol
   environment:
@@ -51,9 +45,7 @@ el7:
 
 el6:
   image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
+  working_dir: /root/st2-packages
   volumes_from:
     - st2-packages-vol
   environment:
