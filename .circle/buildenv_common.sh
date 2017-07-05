@@ -4,5 +4,11 @@ write_env() {
     eval "value=\$$e"
     [ -z "$value" ] || echo "export $e=$value" >> ~/.buildenv
   done
-  echo ". ~/.buildenv" >> ~/.circlerc
+
+  # compatibility with CircleCI 2.0
+  if [ -n "$CIRCLE_ENV" ]; then
+    CIRCLE_ENV="~/.circlerc"
+  fi
+
+  echo ". ~/.buildenv" >> $CIRCLE_ENV
 }
