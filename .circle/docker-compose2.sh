@@ -16,7 +16,7 @@ case "$1" in
   # Perform fake command invocation, technically provides images "pull" phase.
   pull)
     echo Pulling dependent Docker images for $2 ...
-    docker-compose -f docker-compose.circle2.yml run \
+    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
         -e ST2_GITURL=${ST2_GITURL} \
         -e ST2_GITREV=${ST2_GITREV} \
         -e ST2PKG_VERSION=${ST2PKG_VERSION} \
@@ -26,7 +26,7 @@ case "$1" in
   ;;
   build)
     echo Starting Packages Build for $2 ...
-    docker-compose -f docker-compose.circle2.yml run \
+    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
         -e ST2_GITURL=${ST2_GITURL} \
         -e ST2_GITREV=${ST2_GITREV} \
         -e ST2PKG_VERSION=${ST2PKG_VERSION} \
@@ -42,7 +42,7 @@ case "$1" in
   test)
     [ "$TESTING" = 0 ] && { echo "Omitting Tests for $2 ..." ; exit 0; }
     echo Starting Tests for $2 ...
-    docker-compose -f docker-compose.circle2.yml run \
+    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
         -e ST2_GITURL=${ST2_GITURL} \
         -e ST2_GITREV=${ST2_GITREV} \
         -e ST2PKG_VERSION=${ST2PKG_VERSION} \
