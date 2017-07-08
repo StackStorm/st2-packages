@@ -13,6 +13,14 @@ set -e
 
 set -x
 case "$1" in
+  # Clean up cached Docker containers from the previous CircleCI build
+  # With https://circleci.com/docs/2.0/docker-layer-caching/ and 'reusable: true' we may see
+  # containers running from the previous cached build
+  clean)
+    echo Cleaning cached Docker containers which could be there from the previous build for $2 ...
+    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml kill
+    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml rm -f
+  ;;
   # Perform fake command invocation, technically provides images "pull" phase.
   pull)
     echo Pulling dependent Docker images for $2 ...
