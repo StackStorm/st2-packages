@@ -17,7 +17,7 @@ case "$1" in
   # With https://circleci.com/docs/2.0/docker-layer-caching/ and 'reusable: true' we may see
   # containers running from the previous cached build
   clean)
-    echo Cleaning cached Docker containers which could be there from the previous build for $2 ...
+    echo Cleaning cached Docker containers which could be there from the previous build ...
     docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml kill
     docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml rm -f
   ;;
