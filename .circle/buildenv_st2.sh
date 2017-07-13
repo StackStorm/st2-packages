@@ -38,8 +38,6 @@ st2_giturl() {
 ST2_GITURL=${ST2_GITURL:-https://github.com/StackStorm/st2}
 ST2_GITREV=${ST2_GITREV:-master}
 ST2PKG_VERSION=$(fetch_version)
-# for Bintray
-#ST2PKG_RELEASE=$(.circle/bintray.sh next-revision ${DISTRO}_staging ${ST2PKG_VERSION} st2)
 # for PackageCloud
 if [ -n "$PACKAGECLOUD_TOKEN" ]; then
   ST2PKG_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${ST2PKG_VERSION} st2)
