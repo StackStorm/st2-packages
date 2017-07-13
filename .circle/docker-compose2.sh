@@ -24,13 +24,7 @@ case "$1" in
   # Perform fake command invocation, technically provides images "pull" phase.
   pull)
     echo Pulling dependent Docker images for $2 ...
-    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
-        -e ST2_GITURL=${ST2_GITURL} \
-        -e ST2_GITREV=${ST2_GITREV} \
-        -e ST2PKG_VERSION=${ST2PKG_VERSION} \
-        -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
-        -e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
-        $2 /bin/true
+    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml run $2 /bin/true
   ;;
   build)
     echo Starting Packages Build for $2 ...
