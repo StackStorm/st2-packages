@@ -32,12 +32,7 @@ mistral_giturl() {
 ST2MISTRAL_GITURL=${ST2MISTRAL_GITURL:-https://github.com/StackStorm/mistral}
 ST2MISTRAL_GITREV=${ST2MISTRAL_GITREV:-master}
 MISTRAL_VERSION=$(fetch_version)
-if [ -n "$PACKAGECLOUD_TOKEN" ]; then
-  MISTRAL_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${MISTRAL_VERSION} st2mistral)
-else
-  # is fork
-  MISTRAL_RELEASE=1
-fi
+MISTRAL_RELEASE=${CIRCLE_BUILD_NUM}
 
 write_env ST2MISTRAL_GITURL ST2MISTRAL_GITREV MISTRAL_VERSION MISTRAL_RELEASE DISTRO TESTING
 
