@@ -45,6 +45,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # NOTE: With 2048MB, system slows due to kswapd. Recommend at least 4096MB.
         vb.customize ['modifyvm', :id, '--memory', '4096']
         vb.customize ["modifyvm", :id, "--cpus", cpus]
+
+        # Docker connection fix
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+        vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+        vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
       end
 
       # Sync folder using NFS
