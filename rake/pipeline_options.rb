@@ -91,6 +91,9 @@ module Pipeline
         if opts[:reset]
           # don't parse env variable, just set value
           [caseattr, default, opts]
+        elsif value == ""
+          # use default, when passed env is empty
+          [caseattr, default, opts]
         else
           [caseattr, value || default, opts]
         end
