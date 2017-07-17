@@ -11,7 +11,7 @@ class Remote
     attr_reader :backend, :default_command_options
 
     # Methods which are passed as is
-    def_delegators  :backend, :as, :with, :within, :upload!, :download!
+    def_delegators  :backend, :as, :with, :within, :upload!, :download!, :debug, :info, :warn, :error, :fatal
 
     # Customized delegated methods, they automatically inject
     # options into the call argument list.
