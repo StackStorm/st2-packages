@@ -38,7 +38,7 @@ namespace :upload do
 
   ## Multitask checks out git source of a package (if pipopts.checkout == true)
   #
-  package_list = pipeopts.packages.select {|p| pipeopts(p).checkout}
+  package_list = pipeopts.packages.select {|p| defined?(pipeopts(p).checkout)}
   multitask :checkout => package_list.map {|p| :"%checkout_#{p}"}
 
   ## Rule generates %checkout_* tasks.
@@ -52,7 +52,9 @@ namespace :upload do
         with opts.env do
           execute :mkdir, '-p $ARTIFACT_DIR'
           within opts.basedir do
-            execute :git, :clone, '--depth 1 -b $GITREV $GITURL $GITDIR'
+            if opts.checkout == 1
+              execute :git, :clone, '--depth 1 -b $GITREV $GITURL $GITDIR'
+            end
           end
         end
       end

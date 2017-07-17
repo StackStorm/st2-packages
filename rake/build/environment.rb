@@ -70,7 +70,7 @@ end
 
 pipeopts 'st2' do
   env :components, ST2_COMPONENTS, proc: convert_to_array
-  checkout true
+  envpass :checkout,  1,                                  from: 'ST2_CHECKOUT', proc: convert_to_int
   envpass :giturl,   'https://github.com/StackStorm/st2', from: 'ST2_GITURL'
   envpass :gitrev,   'master',                            from: 'ST2_GITREV'
   envpass :gitdir,    make_tmpname('st2-'),               from: 'ST2_GITDIR'
@@ -80,10 +80,10 @@ pipeopts 'st2' do
 end
 
 pipeopts 'st2mistral' do
-  checkout true
+  envpass :checkout, 1,                                      from: 'ST2MISTRAL_CHECKOUT', proc: convert_to_int
   envpass :giturl,  'https://github.com/StackStorm/mistral', from: 'ST2MISTRAL_GITURL'
   envpass :gitrev,  'master',                                from: 'ST2MISTRAL_GITREV'
-  envpass :gitdir,  make_tmpname('mistral-')
+  envpass :gitdir,  make_tmpname('mistral-'),                from: 'ST2MISTRAL_GITDIR'
   envpass :mistral_version, '2.4dev'
   envpass :mistral_release, 1
 end
