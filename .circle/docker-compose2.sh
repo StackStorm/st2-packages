@@ -29,12 +29,16 @@ case "$1" in
   build)
     echo Starting Packages Build for $2 ...
     docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
+        -e ST2_CHECKOUT=${ST2_CHECKOUT} \
         -e ST2_GITURL=${ST2_GITURL} \
         -e ST2_GITREV=${ST2_GITREV} \
+        -e ST2_GITDIR=${ST2_GITDIR} \
         -e ST2PKG_VERSION=${ST2PKG_VERSION} \
         -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
+        -e ST2MISTRAL_CHECKOUT=${ST2MISTRAL_CHECKOUT} \
         -e ST2MISTRAL_GITURL=${ST2MISTRAL_GITURL} \
         -e ST2MISTRAL_GITREV=${ST2MISTRAL_GITREV} \
+        -e ST2MISTRAL_GITDIR=${ST2MISTRAL_GITDIR} \
         -e MISTRAL_VERSION=${MISTRAL_VERSION} \
         -e MISTRAL_RELEASE=${MISTRAL_RELEASE} \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
