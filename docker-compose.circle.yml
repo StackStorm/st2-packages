@@ -1,27 +1,3 @@
-wheezy:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-circle
-  environment:
-    - BUILDNODE=wheezybuild
-    - TESTNODE=wheezytest
-  links:
-    - wheezybuild
-    - wheezytest
-
-jessie:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-circle
-  environment:
-    - BUILDNODE=jessiebuild
-    - TESTNODE=jessietest
-  links:
-    - jessiebuild
-    - jessietest
-
 trusty:
   image: quay.io/stackstorm/packagingrunner
   extends:
@@ -73,18 +49,6 @@ el6:
 
 ## Package build nodes
 #
-wheezybuild:
-  image: stackstorm/packagingbuild:wheezy
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
-
-jessiebuild:
-  image: stackstorm/packagingbuild:jessie
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
-
 trustybuild:
   image: stackstorm/packagingbuild:trusty
   extends:
@@ -111,18 +75,6 @@ centos7build:
 
 ## Package testing nodes
 #
-wheezytest:
-  image: stackstorm/packagingtest:wheezy-sshd
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
-
-jessietest:
-  image: stackstorm/packagingtest:jessie-sshd
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
-
 trustytest:
   image: stackstorm/packagingtest:trusty-upstart
   extends:
