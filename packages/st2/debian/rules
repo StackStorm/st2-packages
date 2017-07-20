@@ -23,6 +23,8 @@ override_dh_installdirs:
 	# dh_auto_install same with:
 	$(MAKE) install
 
+# Packaging recognizes only 1 {package_name} service file (http://manpages.ubuntu.com/manpages/trusty/man1/dh_installinit.1.html)
+# We have many, and so force it to install multiple service files
 override_dh_installinit:
 ifeq (true, $(IS_SYSTEMD))
 	dh_systemd_enable --name=st2actionrunner st2actionrunner.service
