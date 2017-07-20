@@ -2,7 +2,9 @@ Source: st2
 Section: Python
 Priority: optional
 Maintainer: StackStorm Engineering <opsadmin@stackstorm.com>
-Build-Depends: debhelper (>= 9)
+Build-Depends: debhelper (>= 9),
+               dh-virtualenv,
+               dh-systemd
 Standards-Version: 3.9.5
 Homepage: http://stackstorm.com/
 
