@@ -3,8 +3,7 @@ Section: Python
 Priority: optional
 Maintainer: StackStorm Engineering <opsadmin@stackstorm.com>
 Build-Depends: debhelper (>= 9),
-               dh-virtualenv,
-               dh-systemd
+               dh-virtualenv
 Standards-Version: 3.9.5
 Homepage: http://stackstorm.com/
 
