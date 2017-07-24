@@ -170,7 +170,8 @@ If you still have questions, please contact support. Alternatively, you can use
 CentOS 6 for evaluation.
 EHD
 )
-  if [ -z "$(rpm -qa libffi-devel)" ]; then
+  sudo yum list libffi-devel 1>/dev/null 2>&1 || no_libffi_devel=$?
+  if [ ! -z "$no_libffi_devel" ]; then
     echo "$message"
     exit 2
   fi
