@@ -17,7 +17,7 @@ MAX_REVISIONS=5
 # packagecloud.sh deploy el7 /tmp/st2-packages
 # IS_ENTERPRISE=1 packagecloud.sh deploy trusty /tmp/st2-packages
 # packagecloud.sh next-revision trusty 0.14dev st2
-# packagecloud.sh next-revision wheezy 1.3.1 st2web
+# packagecloud.sh next-revision el7 1.3.1 st2web
 function main() {
   : ${PACKAGECLOUD_ORGANIZATION:=stackstorm}
   : ${PACKAGECLOUD_TOKEN:? PACKAGECLOUD_TOKEN env is required}
@@ -37,8 +37,8 @@ function main() {
       fi
       ;;
     *)
-      echo $"Usage: deploy {wheezy|jessie|trusty|el6|el7} /tmp/st2-packages"
-      echo $"Usage: next-revision {wheezy|jessie|trusty|el6|el7} 0.14dev st2"
+      echo $"Usage: deploy {trusty|xenial|el6|el7} /tmp/st2-packages"
+      echo $"Usage: next-revision {trusty|xenial|el6|el7} 0.14dev st2"
       exit 1
   esac
 }
