@@ -54,7 +54,7 @@ dependencies:
     - sudo .circle/fix-cache-permissions.sh
     - sudo apt-get -y install parallel jq
     - gem install package_cloud
-    - sudo pip install wheel docker-compose
+    - sudo pip install wheel "docker-compose==1.14.0"
     - docker-compose version
     - docker version
   override:
