@@ -329,12 +329,13 @@ EOF
 install_st2() {
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
 
-  if [ "$DEV_BUILD" = '' ]; then
+  # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
+  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo yum -y install ${ST2_PKG}
   else
     sudo yum -y install jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el7/st2-.*.rpm")"
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el7/st2-.*.rpm")"
     sudo yum -y install ${PACKAGE_URL}
   fi
 
@@ -497,12 +498,12 @@ EHD
 }
 
 install_st2mistral() {
-  # install mistral
-  if [ "$DEV_BUILD" = '' ]; then
+  # 'st2' repo builds single 'st2' package and so we have to install 'st2mistral' from repo
+  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
     sudo yum -y install ${ST2MISTRAL_PKG}
   else
     sudo yum -y install jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el7/st2mistral-.*.rpm")"
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el7/st2mistral-.*.rpm")"
     sudo yum -y install ${PACKAGE_URL}
   fi
 
