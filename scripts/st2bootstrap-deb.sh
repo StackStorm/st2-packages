@@ -311,12 +311,13 @@ install_st2() {
   # Following script adds a repo file, registers gpg key and runs apt-get update
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.deb.sh | sudo bash
 
-  if [ "$DEV_BUILD" = '' ]; then
+  # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
+  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo apt-get install -y st2${ST2_PKG_VERSION}
   else
     sudo apt-get install -y jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "${SUBTYPE}/st2_.*.deb")"
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "${SUBTYPE}/st2_.*.deb")"
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
     curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
     sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
@@ -454,12 +455,12 @@ EHD
 }
 
 install_st2mistral() {
-  # install mistral
-  if [ "$DEV_BUILD" = '' ]; then
+  # 'st2' repo builds single 'st2' package and so we have to install 'st2mistral' from repo
+  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
     sudo apt-get install -y st2mistral${ST2MISTRAL_PKG_VERSION}
   else
     sudo apt-get install -y jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "${SUBTYPE}/st2mistral_.*.deb")"
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "${SUBTYPE}/st2mistral_.*.deb")"
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
     curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
     sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
