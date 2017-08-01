@@ -242,7 +242,7 @@ check_st2_host_dependencies() {
   VAR_SPACE=`df -Pk /var/lib | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{print $4}'`
   if [ ${VAR_SPACE} -lt 358400 ]; then
     echo ""
-    echo "MongoDB 3.2 requires at least 350MB free in /var/lib/mongodb"
+    echo "MongoDB 3.4 requires at least 350MB free in /var/lib/mongodb"
     echo "There is not enough space for MongoDB. It will fail to start."
     echo "Please, add some space to /var or clean it up."
     exit 1
@@ -273,15 +273,15 @@ install_st2_dependencies() {
 }
 
 install_mongodb() {
-  # Add key and repo for the latest stable MongoDB (3.2)
-  sudo rpm --import https://www.mongodb.org/static/pgp/server-3.2.asc
-  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-3.2.repo
-[mongodb-org-3.2]
+  # Add key and repo for the latest stable MongoDB (3.4)
+  sudo rpm --import https://www.mongodb.org/static/pgp/server-3.4.asc
+  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-3.4.repo
+[mongodb-org-3.4]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/3.2/x86_64/
+baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/3.4/x86_64/
 gpgcheck=1
 enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-3.2.asc
+gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc
 EOT"
 
   sudo yum -y install mongodb-org
