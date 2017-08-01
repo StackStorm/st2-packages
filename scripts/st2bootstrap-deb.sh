@@ -207,7 +207,7 @@ install_st2_dependencies() {
 
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB (3.4)
-  wget -qO - https://www.mongodb.org/static/pgp/server-3.4.asc | sudo apt-key add -
+  wget -qO - https://www.mongodb.org/static/pgp/server-3.4.asc | sudo apt-key adv -
   echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
 
   sudo apt-get update
