@@ -553,13 +553,6 @@ configure_st2chatops() {
 }
 
 verify_st2() {
-
-  # TODO: This is a temporary and nasty workaround for xenial CI failures.
-  # TODO: Fix https://github.com/StackStorm/st2/issues/3290
-  if [[ "$SUBTYPE" == 'xenial' ]]; then
-    sleep 30
-  fi
-
   st2 --version
   st2 -h
 
