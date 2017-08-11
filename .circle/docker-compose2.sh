@@ -18,8 +18,7 @@ case "$1" in
   # containers running from the previous cached build
   clean)
     echo Cleaning cached Docker containers which could be there from the previous build ...
-    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml kill
-    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml rm -f
+    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml rm -v --stop --force || true
   ;;
   # Perform fake command invocation, technically provides images "pull" phase.
   pull)
