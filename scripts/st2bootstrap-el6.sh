@@ -486,7 +486,7 @@ verify_st2() {
   st2 run core.remote hosts='127.0.0.1' -- uname -a
 
   # Install a pack
-  st2 run packs.install packs=st2
+  st2 pack install st2
 }
 
 install_st2mistral_depdendencies() {
