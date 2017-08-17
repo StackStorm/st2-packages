@@ -242,7 +242,7 @@ check_st2_host_dependencies() {
   VAR_SPACE=`df -Pk /var/lib | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{print $4}'`
   if [ ${VAR_SPACE} -lt 358400 ]; then
     echo ""
-    echo "MongoDB 3.2 requires at least 350MB free in /var/lib/mongodb"
+    echo "MongoDB 3.4 requires at least 350MB free in /var/lib/mongodb"
     echo "There is not enough space for MongoDB. It will fail to start."
     echo "Please, add some space to /var or clean it up."
     exit 1
@@ -273,15 +273,15 @@ install_st2_dependencies() {
 }
 
 install_mongodb() {
-  # Add key and repo for the latest stable MongoDB (3.2)
-  sudo rpm --import https://www.mongodb.org/static/pgp/server-3.2.asc
-  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-3.2.repo
-[mongodb-org-3.2]
+  # Add key and repo for the latest stable MongoDB (3.4)
+  sudo rpm --import https://www.mongodb.org/static/pgp/server-3.4.asc
+  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-3.4.repo
+[mongodb-org-3.4]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/3.2/x86_64/
+baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/3.4/x86_64/
 gpgcheck=1
 enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-3.2.asc
+gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc
 EOT"
 
   sudo yum -y install mongodb-org
@@ -329,12 +329,13 @@ EOF
 install_st2() {
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
 
-  if [ "$DEV_BUILD" = '' ]; then
+  # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
+  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo yum -y install ${ST2_PKG}
   else
     sudo yum -y install jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el7/st2-.*.rpm")"
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el7/st2-.*.rpm")"
     sudo yum -y install ${PACKAGE_URL}
   fi
 
@@ -408,7 +409,7 @@ verify_st2() {
   st2 run core.remote hosts='127.0.0.1' -- uname -a
 
   # Install a pack
-  st2 run packs.install packs=st2
+  st2 pack install st2
 }
 
 configure_st2_cli_config() {
@@ -497,12 +498,12 @@ EHD
 }
 
 install_st2mistral() {
-  # install mistral
-  if [ "$DEV_BUILD" = '' ]; then
+  # 'st2' repo builds single 'st2' package and so we have to install 'st2mistral' from repo
+  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
     sudo yum -y install ${ST2MISTRAL_PKG}
   else
     sudo yum -y install jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el7/st2mistral-.*.rpm")"
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el7/st2mistral-.*.rpm")"
     sudo yum -y install ${PACKAGE_URL}
   fi
 

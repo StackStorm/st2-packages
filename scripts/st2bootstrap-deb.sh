@@ -171,7 +171,7 @@ check_st2_host_dependencies() {
   VAR_SPACE=`df -Pk /var/lib | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{print $4}'`
   if [ ${VAR_SPACE} -lt 358400 ]; then
     echo ""
-    echo "MongoDB 3.2 requires at least 350MB free in /var/lib/mongodb"
+    echo "MongoDB 3.4 requires at least 350MB free in /var/lib/mongodb"
     echo "There is not enough space for MongoDB. It will fail to start."
     echo "Please, add some space to /var or clean it up."
     exit 1
@@ -206,9 +206,9 @@ install_st2_dependencies() {
 }
 
 install_mongodb() {
-  # Add key and repo for the latest stable MongoDB (3.2)
-  sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+  # Add key and repo for the latest stable MongoDB (3.4)
+  wget -qO - https://www.mongodb.org/static/pgp/server-3.4.asc | sudo apt-key add -
+  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
 
   sudo apt-get update
   sudo apt-get install -y mongodb-org
@@ -311,12 +311,13 @@ install_st2() {
   # Following script adds a repo file, registers gpg key and runs apt-get update
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.deb.sh | sudo bash
 
-  if [ "$DEV_BUILD" = '' ]; then
+  # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
+  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo apt-get install -y st2${ST2_PKG_VERSION}
   else
     sudo apt-get install -y jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "${SUBTYPE}/st2_.*.deb")"
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "${SUBTYPE}/st2_.*.deb")"
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
     curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
     sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
@@ -454,12 +455,12 @@ EHD
 }
 
 install_st2mistral() {
-  # install mistral
-  if [ "$DEV_BUILD" = '' ]; then
+  # 'st2' repo builds single 'st2' package and so we have to install 'st2mistral' from repo
+  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
     sudo apt-get install -y st2mistral${ST2MISTRAL_PKG_VERSION}
   else
     sudo apt-get install -y jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/st2-packages/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "${SUBTYPE}/st2mistral_.*.deb")"
+    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "${SUBTYPE}/st2mistral_.*.deb")"
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
     curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
     sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
@@ -552,13 +553,6 @@ configure_st2chatops() {
 }
 
 verify_st2() {
-
-  # TODO: This is a temporary and nasty workaround for xenial CI failures.
-  # TODO: Fix https://github.com/StackStorm/st2/issues/3290
-  if [[ "$SUBTYPE" == 'xenial' ]]; then
-    sleep 30
-  fi
-
   st2 --version
   st2 -h
 
@@ -579,7 +573,7 @@ verify_st2() {
   st2 run core.remote hosts='127.0.0.1' -- uname -a
 
   # Install a pack
-  st2 run packs.install packs=st2
+  st2 pack install st2
 }
 
 ok_message() {
