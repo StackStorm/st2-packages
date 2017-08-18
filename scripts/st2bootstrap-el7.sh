@@ -554,6 +554,11 @@ EOT"
 }
 
 install_st2chatops() {
+  # Temporary hack until proper upstream fix https://bugs.centos.org/view.php?id=13669
+  if ! yum list http-parser 1>/dev/null 2>&1; then
+    sudo yum install -y https://kojipkgs.fedoraproject.org//packages/http-parser/2.7.1/3.el7/x86_64/http-parser-2.7.1-3.el7.x86_64.rpm
+  fi
+
   # Add NodeJS 6 repo
   curl -sL https://rpm.nodesource.com/setup_6.x | sudo -E bash -
 
