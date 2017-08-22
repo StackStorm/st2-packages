@@ -596,7 +596,7 @@ configure_st2chatops() {
     echo "  $ sudo service st2chatops restart"
     echo ""
     echo "For more information, please refer to documentation at  "
-    echo "https://docs.stackstorm.com/install/deb.html#setup-chatops"
+    echo "https://docs.stackstorm.com/install/rhel7.html#setup-chatops"
     echo "########################################################"
   fi
 }
