@@ -333,6 +333,7 @@ install_st2() {
 
     if [ -z "${PACKAGE_URL}" ]; then
         echo "Failed to find url for ${SUBTYPE} deb package"
+        echo "Circle CI response: ${PACKAGES_METADATA}"
         exit 2
     fi
 
