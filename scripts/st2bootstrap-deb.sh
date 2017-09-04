@@ -317,7 +317,19 @@ install_st2() {
     sudo apt-get install -y st2${ST2_PKG_VERSION}
   else
     sudo apt-get install -y jq
+
+    echo "Retrieving package from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts"
+
+    # Note: We disable global error handler because we want a more user-friendly error message
+    set +e
     PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "${SUBTYPE}/st2_.*.deb")"
+    set -e
+
+    if [ ! ${PACKAGE_URL} ]; then
+        echo "Failed to retrieve package from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts"
+        exit 2
+    fi
+
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
     curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
     sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
