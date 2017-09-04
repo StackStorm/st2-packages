@@ -127,8 +127,7 @@ if [[ "$DEV_BUILD" != '' ]]; then
 fi
 
 if [[ "${FORCE_BRANCH}" != "" ]]; then
-    echo "Using branch ${FORCE_BRANCH}"
-    BRANCH=${FORCE_BRANCH}
+  BRANCH=${FORCE_BRANCH}
 fi
 
 USERNAME="--user=${USERNAME}"
