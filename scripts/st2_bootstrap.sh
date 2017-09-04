@@ -16,6 +16,7 @@ PASSWORD=''
 
 # Note: This variable needs to default to a branch of the latest stable release
 BRANCH='v2.4'
+FORCE_BRANCH=""
 
 setup_args() {
   for i in "$@"
@@ -50,6 +51,9 @@ setup_args() {
           ;;
           --password=*)
           PASSWORD="${i#*=}"
+          shift
+          --force-branch=*)
+          FORCE_BRANCH="${i#*=}"
           shift
           ;;
           *)
@@ -119,6 +123,11 @@ fi
 
 if [[ "$DEV_BUILD" != '' ]]; then
   DEV_BUILD="--dev=${DEV_BUILD}"
+fi
+
+if [[ "${FORCE_BRANCH}" != "" ]]; then
+    echo "Using branch ${FORCE_BRANCH}"
+    BRANCH=${FORCE_BRANCH}
 fi
 
 USERNAME="--user=${USERNAME}"

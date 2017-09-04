@@ -318,17 +318,25 @@ install_st2() {
   else
     sudo apt-get install -y jq
 
-    echo "Retrieving package from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts"
+    echo "Retrieving packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts"
 
     # Note: We disable global error handler because we want a more user-friendly error message
     set +e
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "${SUBTYPE}/st2_.*.deb")"
-    set -e
+    PACKAGES_METADATA=$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
 
-    if [ ! ${PACKAGE_URL} ]; then
-        echo "Failed to retrieve package from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts"
+    if [ ! ${PACKAGES_METADATA} ]; then
+        echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts"
         exit 2
     fi
+
+    PACKAGE_URL="$(echo ${PACKAGES_METADATA}  | jq -r '.[].url' | egrep "${SUBTYPE}/st2_.*.deb")"
+
+    if [ ! ${PACKAGE_URL} ]; then
+        echo "Failed to find url for ${SUBTYPE} deb package"
+        exit 2
+    fi
+
+    set -e
 
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
     curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
