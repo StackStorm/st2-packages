@@ -324,14 +324,14 @@ install_st2() {
     set +e
     PACKAGES_METADATA=$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
 
-    if [ ! ${PACKAGES_METADATA} ]; then
+    if [ -z "${PACKAGES_METADATA}" ]; then
         echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts"
         exit 2
     fi
 
     PACKAGE_URL="$(echo ${PACKAGES_METADATA}  | jq -r '.[].url' | egrep "${SUBTYPE}/st2_.*.deb")"
 
-    if [ ! ${PACKAGE_URL} ]; then
+    if [ -z "${PACKAGE_URL}" ]; then
         echo "Failed to find url for ${SUBTYPE} deb package"
         exit 2
     fi
