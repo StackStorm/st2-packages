@@ -52,6 +52,7 @@ setup_args() {
           --password=*)
           PASSWORD="${i#*=}"
           shift
+          ;;
           --force-branch=*)
           FORCE_BRANCH="${i#*=}"
           shift
