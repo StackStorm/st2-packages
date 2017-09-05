@@ -127,8 +127,7 @@ function get_package_url() {
   fi
 
   PACKAGES_URLS="$(echo ${PACKAGES_METADATA}  | jq -r '.[].url')"
-  PACKAGE_URL=$(echo "${PACKAGES_URLS}" | egrep "${SUBTYPE}/build/${PACKAGE_NAME_REGEX}")
-
+  PACKAGE_URL=$(echo "${PACKAGES_URLS}" | egrep "${SUBTYPE}/.*${PACKAGE_NAME_REGEX}")
 
   if [ -z "${PACKAGE_URL}" ]; then
       echo "Failed to find url for ${SUBTYPE} deb package (${PACKAGE_NAME_REGEX})"
@@ -343,7 +342,6 @@ install_st2() {
     sudo apt-get install -y st2${ST2_PKG_VERSION}
   else
     sudo apt-get install -y jq
-
 
     # Note: We disable global error handler because we want to print a more user-friendly error message
     set +e
