@@ -122,7 +122,7 @@ function get_package_url() {
 
   if [ -z "${PACKAGES_METADATA}" ]; then
       echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts" 1>&2
-      exit 2
+      return 2
   fi
 
   PACKAGES_URLS="$(echo ${PACKAGES_METADATA}  | jq -r '.[].url')"
@@ -131,7 +131,7 @@ function get_package_url() {
   if [ -z "${PACKAGE_URL}" ]; then
       echo "Failed to find url for ${DISTRO} package (${PACKAGE_NAME_REGEX})" 1>&2
       echo "Circle CI response: ${PACKAGES_METADATA}" 1>&2
-      exit 2
+      return 2
   fi
 
   echo ${PACKAGE_URL}
