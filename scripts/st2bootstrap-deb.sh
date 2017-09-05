@@ -122,17 +122,17 @@ function get_package_url() {
   PACKAGES_METADATA=$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
 
   if [ -z "${PACKAGES_METADATA}" ]; then
-      echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts"
-      exit 2
+      echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts" 1>&2
+      return 2
   fi
 
   PACKAGES_URLS="$(echo ${PACKAGES_METADATA}  | jq -r '.[].url')"
   PACKAGE_URL=$(echo "${PACKAGES_URLS}" | egrep "${DISTRO}/${PACKAGE_NAME_REGEX}")
 
   if [ -z "${PACKAGE_URL}" ]; then
-      echo "Failed to find url for ${DISTRO} package (${PACKAGE_NAME_REGEX})"
-      echo "Circle CI response: ${PACKAGES_METADATA}"
-      exit 2
+      echo "Failed to find url for ${DISTRO} package (${PACKAGE_NAME_REGEX})" 1>&2
+      echo "Circle CI response: ${PACKAGES_METADATA}" 1>&2
+      return 2
   fi
 
   echo ${PACKAGE_URL}
@@ -343,16 +343,7 @@ install_st2() {
   else
     sudo apt-get install -y jq
 
-    # Note: We disable global error handler because we want to print a more user-friendly error message
-    set +e
     PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "${SUBTYPE}" "st2_.*.deb")
-
-    if [ -z "${PACKAGE_URL}" ]; then
-        exit 2
-    fi
-    # Re-enable a global error handler
-    set -e
-
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
     curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
     sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
@@ -496,16 +487,7 @@ install_st2mistral() {
   else
     sudo apt-get install -y jq
 
-    # Note: We disable global error handler because we want to print a more user-friendly error message
-    set +e
     PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "${SUBTYPE}" "st2mistral_.*.deb")
-
-    if [ -z "${PACKAGE_URL}" ]; then
-        exit 2
-    fi
-    # Re-enable a global error handler
-    set -e
-
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
     curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
     sudo dpkg -i --force-depends ${PACKAGE_FILENAME}

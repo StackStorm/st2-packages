@@ -121,7 +121,7 @@ function get_package_url() {
   PACKAGES_METADATA=$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
 
   if [ -z "${PACKAGES_METADATA}" ]; then
-      echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts"
+      echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts" 1>&2
       exit 2
   fi
 
@@ -129,8 +129,8 @@ function get_package_url() {
   PACKAGE_URL=$(echo "${PACKAGES_URLS}" | egrep "${DISTRO}/${PACKAGE_NAME_REGEX}")
 
   if [ -z "${PACKAGE_URL}" ]; then
-      echo "Failed to find url for ${DISTRO} package (${PACKAGE_NAME_REGEX})"
-      echo "Circle CI response: ${PACKAGES_METADATA}"
+      echo "Failed to find url for ${DISTRO} package (${PACKAGE_NAME_REGEX})" 1>&2
+      echo "Circle CI response: ${PACKAGES_METADATA}" 1>&2
       exit 2
   fi
 
@@ -376,16 +376,7 @@ install_st2() {
   else
     sudo yum -y install jq
 
-    # Note: We disable global error handler because we want to print a more user-friendly error message
-    set +e
     PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "el6" "st2-.*.rpm")
-
-    if [ -z "${PACKAGE_URL}" ]; then
-        exit 2
-    fi
-    # Re-enable a global error handler
-    set -e
-
     sudo yum -y install ${PACKAGE_URL}
   fi
 
@@ -563,16 +554,7 @@ install_st2mistral() {
   else
     sudo yum -y install jq
 
-    # Note: We disable global error handler because we want to print a more user-friendly error message
-    set +e
     PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "el6" "st2mistral-.*.rpm")
-
-    if [ -z "${PACKAGE_URL}" ]; then
-        exit 2
-    fi
-    # Re-enable a global error handler
-    set -e
-
     sudo yum -y install ${PACKAGE_URL}
   fi
 
