@@ -16,6 +16,7 @@ PASSWORD=''
 
 # Note: This variable needs to default to a branch of the latest stable release
 BRANCH='v2.4'
+FORCE_BRANCH=""
 
 setup_args() {
   for i in "$@"
@@ -50,6 +51,13 @@ setup_args() {
           ;;
           --password=*)
           PASSWORD="${i#*=}"
+          shift
+          ;;
+          # Used to specify which branch of st2-packages repo to use. This comes handy when you
+          # need to use a non-master branch of st2-package repo (e.g. when testing installer script
+          # changes which are in a branch)
+          --force-branch=*)
+          FORCE_BRANCH="${i#*=}"
           shift
           ;;
           *)
@@ -119,6 +127,10 @@ fi
 
 if [[ "$DEV_BUILD" != '' ]]; then
   DEV_BUILD="--dev=${DEV_BUILD}"
+fi
+
+if [[ "${FORCE_BRANCH}" != "" ]]; then
+  BRANCH=${FORCE_BRANCH}
 fi
 
 USERNAME="--user=${USERNAME}"

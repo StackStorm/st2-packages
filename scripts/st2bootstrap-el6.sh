@@ -112,6 +112,32 @@ install_yum_utils() {
 }
 
 
+function get_package_url() {
+  # Retrieve direct package URL for the provided dev build, subtype and package name regex.
+  DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
+  DISTRO=$2  # Distro name (e.g. trusty,xenial,el6,el7)
+  PACKAGE_NAME_REGEX=$3
+
+  PACKAGES_METADATA=$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
+
+  if [ -z "${PACKAGES_METADATA}" ]; then
+      echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts" 1>&2
+      return 2
+  fi
+
+  PACKAGES_URLS="$(echo ${PACKAGES_METADATA}  | jq -r '.[].url')"
+  PACKAGE_URL=$(echo "${PACKAGES_URLS}" | egrep "${DISTRO}/${PACKAGE_NAME_REGEX}")
+
+  if [ -z "${PACKAGE_URL}" ]; then
+      echo "Failed to find url for ${DISTRO} package (${PACKAGE_NAME_REGEX})" 1>&2
+      echo "Circle CI response: ${PACKAGES_METADATA}" 1>&2
+      return 2
+  fi
+
+  echo ${PACKAGE_URL}
+}
+
+
 get_full_pkg_versions() {
   if [ "$VERSION" != '' ];
   then
@@ -349,7 +375,8 @@ install_st2() {
     sudo yum -y install ${ST2_PKG}
   else
     sudo yum -y install jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el6/st2-.*.rpm")"
+
+    PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "el6" "st2-.*.rpm")
     sudo yum -y install ${PACKAGE_URL}
   fi
 
@@ -526,7 +553,8 @@ install_st2mistral() {
     sudo yum -y install ${ST2MISTRAL_PKG}
   else
     sudo yum -y install jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el6/st2mistral-.*.rpm")"
+
+    PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "el6" "st2mistral-.*.rpm")
     sudo yum -y install ${PACKAGE_URL}
   fi
 
