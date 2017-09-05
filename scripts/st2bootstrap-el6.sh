@@ -103,6 +103,30 @@ setup_args() {
   fi
 }
 
+function get_package_url() {
+  # Retrieve direct package URL for the provided dev build, subtype and package name regex.
+  DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
+  SUBTYPE=$2
+  PACKAGE_NAME_REGEX=$3
+
+  PACKAGES_METADATA=$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
+
+  if [ -z "${PACKAGES_METADATA}" ]; then
+      echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts"
+      exit 2
+  fi
+
+  PACKAGES_URLS="$(echo ${PACKAGES_METADATA}  | jq -r '.[].url')"
+  PACKAGE_URL=$(echo "${PACKAGES_URLS}" | egrep "${SUBTYPE}/.*${PACKAGE_NAME_REGEX}")
+
+  if [ -z "${PACKAGE_URL}" ]; then
+      echo "Failed to find url for ${SUBTYPE} deb package (${PACKAGE_NAME_REGEX})"
+      echo "Circle CI response: ${PACKAGES_METADATA}"
+      exit 2
+  fi
+
+  echo ${PACKAGE_URL}
+}
 
 install_yum_utils() {
   # We need repoquery tool to get package_name-package_ver-package_rev in RPM based distros
@@ -349,7 +373,17 @@ install_st2() {
     sudo yum -y install ${ST2_PKG}
   else
     sudo yum -y install jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el6/st2-.*.rpm")"
+
+    # Note: We disable global error handler because we want to print a more user-friendly error message
+    set +e
+    PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "el6" "st2-.*.rpm")
+
+    if [ -z "${PACKAGE_URL}" ]; then
+        exit 2
+    fi
+    # Re-enable a global error handler
+    set -e
+
     sudo yum -y install ${PACKAGE_URL}
   fi
 
@@ -526,7 +560,17 @@ install_st2mistral() {
     sudo yum -y install ${ST2MISTRAL_PKG}
   else
     sudo yum -y install jq
-    PACKAGE_URL="$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts | jq -r '.[].url' | egrep "el6/st2mistral-.*.rpm")"
+
+    # Note: We disable global error handler because we want to print a more user-friendly error message
+    set +e
+    PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "el6" "st2mistral-.*.rpm")
+
+    if [ -z "${PACKAGE_URL}" ]; then
+        exit 2
+    fi
+    # Re-enable a global error handler
+    set -e
+
     sudo yum -y install ${PACKAGE_URL}
   fi
 
