@@ -53,6 +53,9 @@ setup_args() {
           PASSWORD="${i#*=}"
           shift
           ;;
+          # Used to specify which branch of st2-packages repo to use. This comes handy when you
+          # need to use a non-master branch of st2-package repo (e.g. when testing installer script
+          # changes which are in a branch)
           --force-branch=*)
           FORCE_BRANCH="${i#*=}"
           shift
