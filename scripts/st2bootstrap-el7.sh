@@ -125,7 +125,7 @@ function get_package_url() {
   fi
 
   PACKAGES_URLS="$(echo ${PACKAGES_METADATA}  | jq -r '.[].url')"
-  PACKAGE_URL=$(echo "${PACKAGES_URLS}" | egrep "${DISTRO}/.*${PACKAGE_NAME_REGEX}")
+  PACKAGE_URL=$(echo "${PACKAGES_URLS}" | egrep "${DISTRO}/${PACKAGE_NAME_REGEX}")
 
   if [ -z "${PACKAGE_URL}" ]; then
       echo "Failed to find url for ${DISTRO} package (${PACKAGE_NAME_REGEX})"
