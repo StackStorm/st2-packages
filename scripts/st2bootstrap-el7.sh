@@ -114,7 +114,7 @@ install_yum_utils() {
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
-  SUBTYPE=$2
+  DISTRO=$2  # Distro name (e.g. trusty,xenial,el6,el7)
   PACKAGE_NAME_REGEX=$3
 
   PACKAGES_METADATA=$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
@@ -125,10 +125,10 @@ function get_package_url() {
   fi
 
   PACKAGES_URLS="$(echo ${PACKAGES_METADATA}  | jq -r '.[].url')"
-  PACKAGE_URL=$(echo "${PACKAGES_URLS}" | egrep "${SUBTYPE}/.*${PACKAGE_NAME_REGEX}")
+  PACKAGE_URL=$(echo "${PACKAGES_URLS}" | egrep "${DISTRO}/.*${PACKAGE_NAME_REGEX}")
 
   if [ -z "${PACKAGE_URL}" ]; then
-      echo "Failed to find url for ${SUBTYPE} deb package (${PACKAGE_NAME_REGEX})"
+      echo "Failed to find url for ${DISTRO} package (${PACKAGE_NAME_REGEX})"
       echo "Circle CI response: ${PACKAGES_METADATA}"
       exit 2
   fi
