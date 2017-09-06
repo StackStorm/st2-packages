@@ -34,7 +34,7 @@ def main():
 
     for script_filename in SCRIPT_FILES:
         script_file_path = os.path.join(SCRIPTS_PATH, script_filename)
-        template_file_path = script_file_path + '.template'
+        template_file_path = script_file_path.replace('.sh', '.template.sh')
 
         print('Generating script file "%s" -> "%s"' % (template_file_path, script_file_path))
 
