@@ -65,6 +65,7 @@ dependencies:
 
 test:
   override:
+    - make .generated-files-check
     - .circle/docker-compose.sh test ${DISTRO}:
         parallel: true
     # Copy all Packages to node0
