@@ -1,5 +1,3 @@
-#!/bin/bash
-
 set -eu
 
 HUBOT_ADAPTER='slack'
@@ -102,6 +100,10 @@ setup_args() {
     fi
   fi
 }
+
+
+# include:includes/common.sh
+# include:includes/rhel.sh
 
 
 check_libffi_devel() {

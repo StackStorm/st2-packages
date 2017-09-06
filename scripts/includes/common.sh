@@ -1,7 +1,3 @@
-#!/usr/bin/env bash
-
-# Common functionality used by all the installer scripts
-
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 set -eu
 
 HUBOT_ADAPTER='slack'
@@ -107,6 +105,9 @@ setup_args() {
     fi
   fi
 }
+
+
+# include:includes/common.sh
 
 
 install_st2_dependencies() {
