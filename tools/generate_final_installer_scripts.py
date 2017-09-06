@@ -6,7 +6,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS_PATH = os.path.abspath(os.path.join(BASE_DIR, '../scripts'))
 
 COMMON_INCLUDE_PATH = os.path.join(SCRIPTS_PATH, 'includes/common.sh')
-RHEL_INCLUDE_PATH = os.path.join(SCRIPTS_PATH, 'includes/common.sh')
+RHEL_INCLUDE_PATH = os.path.join(SCRIPTS_PATH, 'includes/rhel.sh')
 
 SCRIPT_FILES = [
     'st2bootstrap-deb.sh',
