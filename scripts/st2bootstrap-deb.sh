@@ -533,7 +533,7 @@ configure_st2_authentication() {
   sudo st2ctl restart-component st2stream
 }
 
-install_st2mistral_depdendencies() {
+install_st2mistral_dependencies() {
   sudo apt-get install -y postgresql
 
   # Configure service only listens on localhost
