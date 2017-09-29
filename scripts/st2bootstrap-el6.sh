@@ -221,7 +221,7 @@ configure_st2_user () {
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
 
-  # Authorize key-base acces
+  # Authorize key-base access
   sudo sh -c 'cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys'
   sudo chmod 0600 /home/stanley/.ssh/authorized_keys
   sudo chmod 0700 /home/stanley/.ssh
@@ -559,7 +559,7 @@ configure_st2_authentication() {
 }
 
 
-install_st2mistral_depdendencies() {
+install_st2mistral_dependencies() {
   if grep -q "CentOS" /etc/redhat-release; then
       sudo yum -y localinstall http://yum.postgresql.org/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-2.noarch.rpm
   fi
@@ -707,7 +707,7 @@ STEP="Configure st2 CLI config" && configure_st2_cli_config
 STEP="Generate symmetric crypto key for datastore" && generate_symmetric_crypto_key_for_datastore
 STEP="Verify st2" && verify_st2
 
-STEP="Install mistral dependencies" && install_st2mistral_depdendencies
+STEP="Install mistral dependencies" && install_st2mistral_dependencies
 STEP="Install mistral" && install_st2mistral
 
 STEP="Install st2web" && install_st2web

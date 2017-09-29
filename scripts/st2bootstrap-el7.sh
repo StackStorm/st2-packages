@@ -221,7 +221,7 @@ configure_st2_user () {
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
 
-  # Authorize key-base acces
+  # Authorize key-base access
   sudo sh -c 'cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys'
   sudo chmod 0600 /home/stanley/.ssh/authorized_keys
   sudo chmod 0700 /home/stanley/.ssh
@@ -430,6 +430,10 @@ adjust_selinux_policies() {
   fi
 }
 
+install_net_tools() {
+  # Install netstat
+  sudo yum install -y net-tools
+}
 
 install_st2_dependencies() {
   is_epel_installed=$(rpm -qa | grep epel-release || true)
@@ -542,7 +546,7 @@ configure_st2_authentication() {
 }
 
 
-install_st2mistral_depdendencies() {
+install_st2mistral_dependencies() {
   sudo yum -y install postgresql-server postgresql-contrib postgresql-devel
 
   # Setup postgresql at a first time
@@ -672,6 +676,7 @@ configure_st2chatops() {
 
 trap 'fail' EXIT
 STEP='Parse arguments' && setup_args $@
+STEP='Install net-tools' && install_net_tools
 STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_dependencies
 STEP='Adjust SELinux policies' && adjust_selinux_policies
 STEP='Install repoquery tool' && install_yum_utils
@@ -686,7 +691,7 @@ STEP="Configure st2 CLI config" && configure_st2_cli_config
 STEP="Generate symmetric crypto key for datastore" && generate_symmetric_crypto_key_for_datastore
 STEP="Verify st2" && verify_st2
 
-STEP="Install mistral dependencies" && install_st2mistral_depdendencies
+STEP="Install mistral dependencies" && install_st2mistral_dependencies
 STEP="Install mistral" && install_st2mistral
 
 STEP="Install st2web" && install_st2web

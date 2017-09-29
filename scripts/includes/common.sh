@@ -109,7 +109,7 @@ configure_st2_user () {
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
 
-  # Authorize key-base acces
+  # Authorize key-base access
   sudo sh -c 'cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys'
   sudo chmod 0600 /home/stanley/.ssh/authorized_keys
   sudo chmod 0700 /home/stanley/.ssh
