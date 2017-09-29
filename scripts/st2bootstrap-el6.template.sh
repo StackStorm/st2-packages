@@ -10,6 +10,7 @@ ST2_PKG_VERSION=''
 DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
+HOME=''
 ST2_PKG='st2'
 ST2MISTRAL_PKG='st2mistral'
 ST2WEB_PKG='st2web'
@@ -228,6 +229,9 @@ install_st2() {
   # Configure [database] section in st2.conf (username password for MongoDB access)
   sudo crudini --set /etc/st2/st2.conf database username "stackstorm"
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
+
+  sudo crudini --set /etc/st2/st2.conf system_user user $USERNAME
+  sudo crudini --set /etc/st2/st2.conf system_user ssh_key_file "${HOME}/.ssh/${USERNAME}_rsa"
 
   sudo st2ctl start
   sudo st2ctl reload --register-all

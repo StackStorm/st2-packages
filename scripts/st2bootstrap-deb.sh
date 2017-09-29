@@ -21,6 +21,7 @@ ST2CHATOPS_PKG_VERSION=''
 DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
+HOME=''
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
 if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' ]]; then
   echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) or 16.04 (xenial) as base system!"
@@ -112,6 +113,12 @@ setup_args() {
         exit 1
     fi
   fi
+}
+
+
+function get_home() {
+  USER=$1
+  eval echo "~$USER";
 }
 
 
@@ -217,23 +224,25 @@ generate_random_passwords() {
 
 configure_st2_user () {
   # Create an SSH system user (default `stanley` user may be already created)
-  if (! id stanley 2>/dev/null); then
-    sudo useradd stanley
+  if (! id $USERNAME 2>/dev/null); then
+    sudo useradd $USERNAME
   fi
 
-  sudo mkdir -p /home/stanley/.ssh
+  HOME=$(get_home $USERNAME)
+
+  sudo mkdir -p ${HOME}/.ssh
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
-  sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
+  sudo ssh-keygen -f ${HOME}/.ssh/${USERNAME}_rsa -P ""
 
   # Authorize key-base access
-  sudo sh -c 'cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys'
-  sudo chmod 0600 /home/stanley/.ssh/authorized_keys
-  sudo chmod 0700 /home/stanley/.ssh
-  sudo chown -R stanley:stanley /home/stanley
+  sudo sh -c "cat ${HOME}/.ssh/${USERNAME}_rsa.pub >> ${HOME}/.ssh/authorized_keys"
+  sudo chmod 0600 ${HOME}/.ssh/authorized_keys
+  sudo chmod 0700 ${HOME}/.ssh
+  sudo chown -R ${USERNAME}:${USERNAME} ${HOME}
 
   # Enable passwordless sudo
-  sudo sh -c 'echo "stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL" >> /etc/sudoers.d/st2'
+  sudo sh -c "echo '${USERNAME}    ALL=(ALL)       NOPASSWD: SETENV: ALL' >> /etc/sudoers.d/st2"
   sudo chmod 0440 /etc/sudoers.d/st2
 
   # Disable requiretty for all users
@@ -244,15 +253,13 @@ configure_st2_user () {
 configure_st2_cli_config() {
   # Configure CLI config (write credentials for the root user and user which ran the script)
   ROOT_USER="root"
-  CURRENT_USER=$(whoami)
-
-  : "${HOME:=`eval echo ~$(whoami)`}"
+  SYSTEM_USER=${USERNAME}
 
   ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
 
-  CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
-  CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
+  SYSTEM_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
+  SYSTEM_USER_CLI_CONFIG_PATH="${SYSTEM_USER_CLI_CONFIG_DIRECTORY}/config"
 
   if [ ! -d ${ROOT_USER_CLI_CONFIG_DIRECTORY} ]; then
     sudo mkdir -p ${ROOT_USER_CLI_CONFIG_DIRECTORY}
@@ -265,23 +272,23 @@ password = ${PASSWORD}
 EOT"
 
   # Write config for root user
-  if [ "${CURRENT_USER}" == "${ROOT_USER}" ]; then
+  if [ "${SYSTEM_USER}" == "${ROOT_USER}" ]; then
       return
   fi
 
   # Write config for current user (in case current user != root)
-  if [ ! -d ${CURRENT_USER_CLI_CONFIG_DIRECTORY} ]; then
-    sudo mkdir -p ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
+  if [ ! -d ${SYSTEM_USER_CLI_CONFIG_DIRECTORY} ]; then
+    sudo mkdir -p ${SYSTEM_USER_CLI_CONFIG_DIRECTORY}
   fi
 
-  sudo sh -c "cat <<EOT > ${CURRENT_USER_CLI_CONFIG_PATH}
+  sudo sh -c "cat <<EOT > ${SYSTEM_USER_CLI_CONFIG_PATH}
 [credentials]
 username = ${USERNAME}
 password = ${PASSWORD}
 EOT"
 
   # Fix the permissions
-  sudo chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
+  sudo chown -R ${SYSTEM_USER}:${SYSTEM_USER} ${SYSTEM_USER_CLI_CONFIG_DIRECTORY}
 }
 
 
@@ -310,7 +317,7 @@ verify_st2() {
   st2 --version
   st2 -h
 
-  st2 auth $USERNAME -p $PASSWORD
+  st2 login -p $PASSWORD -w $USERNAME
   # A shortcut to authenticate and export the token
   export ST2_AUTH_TOKEN=$(st2 auth $USERNAME -p $PASSWORD -t)
 
@@ -511,6 +518,9 @@ install_st2() {
   # Configure [database] section in st2.conf (username password for MongoDB access)
   sudo crudini --set /etc/st2/st2.conf database username "stackstorm"
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
+
+  sudo crudini --set /etc/st2/st2.conf system_user user ${USERNAME}
+  sudo crudini --set /etc/st2/st2.conf system_user ssh_key_file "${HOME}/.ssh/${USERNAME}_rsa"
 
   sudo st2ctl start
   sudo st2ctl reload --register-all

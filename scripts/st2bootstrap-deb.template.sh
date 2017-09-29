@@ -13,6 +13,7 @@ ST2CHATOPS_PKG_VERSION=''
 DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
+HOME=''
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
 if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' ]]; then
   echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) or 16.04 (xenial) as base system!"
@@ -255,6 +256,9 @@ install_st2() {
   # Configure [database] section in st2.conf (username password for MongoDB access)
   sudo crudini --set /etc/st2/st2.conf database username "stackstorm"
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
+
+  sudo crudini --set /etc/st2/st2.conf system_user user ${USERNAME}
+  sudo crudini --set /etc/st2/st2.conf system_user ssh_key_file "${HOME}/.ssh/${USERNAME}_rsa"
 
   sudo st2ctl start
   sudo st2ctl reload --register-all
