@@ -228,7 +228,7 @@ configure_st2_user () {
     sudo useradd $USERNAME
   fi
 
-  HOME=$(get_home $USERNAME)
+  HOME=$(get_home ${USERNAME})
 
   sudo mkdir -p ${HOME}/.ssh
 
@@ -253,9 +253,10 @@ configure_st2_user () {
 configure_st2_cli_config() {
   # Configure CLI config (write credentials for the root user and user which ran the script)
   ROOT_USER="root"
+  ROOT_HOME=$(get_home ${ROOT_USER})
   SYSTEM_USER=${USERNAME}
 
-  ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
+  ROOT_USER_CLI_CONFIG_DIRECTORY="${ROOT_HOME}/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
 
   SYSTEM_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
