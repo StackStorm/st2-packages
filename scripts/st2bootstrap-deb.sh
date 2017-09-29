@@ -349,7 +349,6 @@ ok_message() {
   echo "for you:"
   echo ""
   echo "* Documentation  - https://docs.stackstorm.com"
-  echo "* Knowledge Base - https://stackstorm.reamaze.com"
   echo ""
   echo "Thanks for installing StackStorm! Come visit us in our Slack Channel"
   echo "and tell us how it's going. We'd love to hear from you!"
