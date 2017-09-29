@@ -1,4 +1,4 @@
-.PHONY: scripstgen
+.PHONY: scriptsgen
 scriptsgen:
 	@echo
 	@echo "================== scripts gen ===================="
