@@ -115,11 +115,6 @@ setup_args() {
 }
 
 
-function get_home() {
-  eval echo "~$1";
-}
-
-
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
@@ -222,26 +217,25 @@ generate_random_passwords() {
 
 configure_st2_user () {
   # Create an SSH system user (default `stanley` user may be already created)
-  SYSTEM_USER=stanley
-  if (! id ${SYSTEM_USER} 2>/dev/null); then
-    sudo useradd ${SYSTEM_USER}
+  if (! id stanley 2>/dev/null); then
+    sudo useradd stanley
   fi
 
-  SYSTEM_HOME=$(get_home ${SYSTEM_USER})
+  SYSTEM_HOME=$(echo ~stanley)
 
   sudo mkdir -p ${SYSTEM_HOME}/.ssh
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
-  sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/${SYSTEM_USER}_rsa -P ""
+  sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P ""
 
   # Authorize key-base access
-  sudo sh -c "cat ${SYSTEM_HOME}/.ssh/${SYSTEM_USER}_rsa.pub >> ${SYSTEM_HOME}/.ssh/authorized_keys"
+  sudo sh -c "cat ${SYSTEM_HOME}/.ssh/stanley_rsa.pub >> ${SYSTEM_HOME}/.ssh/authorized_keys"
   sudo chmod 0600 ${SYSTEM_HOME}/.ssh/authorized_keys
   sudo chmod 0700 ${SYSTEM_HOME}/.ssh
-  sudo chown -R ${SYSTEM_USER}:${SYSTEM_USER} ${SYSTEM_HOME}
+  sudo chown -R stanley:stanley ${SYSTEM_HOME}
 
   # Enable passwordless sudo
-  sudo sh -c "echo '${SYSTEM_USER}    ALL=(ALL)       NOPASSWD: SETENV: ALL' >> /etc/sudoers.d/st2"
+  sudo sh -c 'echo "stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL" >> /etc/sudoers.d/st2'
   sudo chmod 0440 /etc/sudoers.d/st2
 
   # Disable requiretty for all users
@@ -253,8 +247,8 @@ configure_st2_cli_config() {
   # Configure CLI config (write credentials for the root user and user which ran the script)
   CURRENT_USER=$(whoami)
 
-  ROOT_HOME=$(get_home root)
-  : "${HOME:=$(get_home ${CURRENT_USER})}"
+  ROOT_HOME=$(echo ~root)
+  : "${HOME:=$(echo ~${CURRENT_USER})}"
 
   ROOT_USER_CLI_CONFIG_DIRECTORY="${ROOT_HOME}/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
@@ -318,7 +312,7 @@ verify_st2() {
   st2 --version
   st2 -h
 
-  st2 login -p $PASSWORD -w $USERNAME
+  st2 auth $USERNAME -p $PASSWORD
   # A shortcut to authenticate and export the token
   export ST2_AUTH_TOKEN=$(st2 auth $USERNAME -p $PASSWORD -t)
 
@@ -519,9 +513,6 @@ install_st2() {
   # Configure [database] section in st2.conf (username password for MongoDB access)
   sudo crudini --set /etc/st2/st2.conf database username "stackstorm"
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
-
-  sudo crudini --set /etc/st2/st2.conf system_user user ${USERNAME}
-  sudo crudini --set /etc/st2/st2.conf system_user ssh_key_file "${HOME}/.ssh/${USERNAME}_rsa"
 
   sudo st2ctl start
   sudo st2ctl reload --register-all
