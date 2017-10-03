@@ -1,6 +1,5 @@
 function get_home() {
-  USER=$1
-  eval echo "~$USER";
+  eval echo "~$1";
 }
 
 
@@ -106,25 +105,26 @@ generate_random_passwords() {
 
 configure_st2_user () {
   # Create an SSH system user (default `stanley` user may be already created)
-  if (! id $USERNAME 2>/dev/null); then
-    sudo useradd $USERNAME
+  SYSTEM_USER=stanley
+  if (! id ${SYSTEM_USER} 2>/dev/null); then
+    sudo useradd ${SYSTEM_USER}
   fi
 
-  HOME=$(get_home ${USERNAME})
+  SYSTEM_HOME=$(get_home ${SYSTEM_USER})
 
-  sudo mkdir -p ${HOME}/.ssh
+  sudo mkdir -p ${SYSTEM_HOME}/.ssh
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
-  sudo ssh-keygen -f ${HOME}/.ssh/${USERNAME}_rsa -P ""
+  sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/${SYSTEM_USER}_rsa -P ""
 
   # Authorize key-base access
-  sudo sh -c "cat ${HOME}/.ssh/${USERNAME}_rsa.pub >> ${HOME}/.ssh/authorized_keys"
-  sudo chmod 0600 ${HOME}/.ssh/authorized_keys
-  sudo chmod 0700 ${HOME}/.ssh
-  sudo chown -R ${USERNAME}:${USERNAME} ${HOME}
+  sudo sh -c "cat ${SYSTEM_HOME}/.ssh/${SYSTEM_USER}_rsa.pub >> ${SYSTEM_HOME}/.ssh/authorized_keys"
+  sudo chmod 0600 ${SYSTEM_HOME}/.ssh/authorized_keys
+  sudo chmod 0700 ${SYSTEM_HOME}/.ssh
+  sudo chown -R ${SYSTEM_USER}:${SYSTEM_USER} ${SYSTEM_HOME}
 
   # Enable passwordless sudo
-  sudo sh -c "echo '${USERNAME}    ALL=(ALL)       NOPASSWD: SETENV: ALL' >> /etc/sudoers.d/st2"
+  sudo sh -c "echo '${SYSTEM_USER}    ALL=(ALL)       NOPASSWD: SETENV: ALL' >> /etc/sudoers.d/st2"
   sudo chmod 0440 /etc/sudoers.d/st2
 
   # Disable requiretty for all users
@@ -134,15 +134,16 @@ configure_st2_user () {
 
 configure_st2_cli_config() {
   # Configure CLI config (write credentials for the root user and user which ran the script)
-  ROOT_USER="root"
-  ROOT_HOME=$(get_home ${ROOT_USER})
-  SYSTEM_USER=${USERNAME}
+  CURRENT_USER=$(whoami)
+
+  ROOT_HOME=$(get_home root)
+  : "${HOME:=$(get_home ${CURRENT_USER})}"
 
   ROOT_USER_CLI_CONFIG_DIRECTORY="${ROOT_HOME}/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
 
-  SYSTEM_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
-  SYSTEM_USER_CLI_CONFIG_PATH="${SYSTEM_USER_CLI_CONFIG_DIRECTORY}/config"
+  CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
+  CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
 
   if [ ! -d ${ROOT_USER_CLI_CONFIG_DIRECTORY} ]; then
     sudo mkdir -p ${ROOT_USER_CLI_CONFIG_DIRECTORY}
@@ -155,23 +156,23 @@ password = ${PASSWORD}
 EOT"
 
   # Write config for root user
-  if [ "${SYSTEM_USER}" == "${ROOT_USER}" ]; then
+  if [ "${CURRENT_USER}" == "${ROOT_USER}" ]; then
       return
   fi
 
   # Write config for current user (in case current user != root)
-  if [ ! -d ${SYSTEM_USER_CLI_CONFIG_DIRECTORY} ]; then
-    sudo mkdir -p ${SYSTEM_USER_CLI_CONFIG_DIRECTORY}
+  if [ ! -d ${CURRENT_USER_CLI_CONFIG_DIRECTORY} ]; then
+    sudo mkdir -p ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
   fi
 
-  sudo sh -c "cat <<EOT > ${SYSTEM_USER_CLI_CONFIG_PATH}
+  sudo sh -c "cat <<EOT > ${CURRENT_USER_CLI_CONFIG_PATH}
 [credentials]
 username = ${USERNAME}
 password = ${PASSWORD}
 EOT"
 
   # Fix the permissions
-  sudo chown -R ${SYSTEM_USER}:${SYSTEM_USER} ${SYSTEM_USER_CLI_CONFIG_DIRECTORY}
+  sudo chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
 }
 
 

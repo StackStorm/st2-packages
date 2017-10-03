@@ -13,7 +13,6 @@ ST2CHATOPS_PKG_VERSION=''
 DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
-HOME=''
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
 if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' ]]; then
   echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) or 16.04 (xenial) as base system!"
