@@ -173,10 +173,14 @@ generate_symmetric_crypto_key_for_datastore() {
   DATASTORE_ENCRYPTION_KEY_PATH="${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}/datastore_key.json"
 
   sudo mkdir -p ${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}
-  sudo st2-generate-symmetric-crypto-key --key-path ${DATASTORE_ENCRYPTION_KEY_PATH}
+
+  # If the file ${DATASTORE_ENCRYPTION_KEY_PATH} exists and is not empty, then do not generate
+  # a new key. st2-generate-symmetric-crypto-key fails if the key file already exists.
+  if [ ! -s ${DATASTORE_ENCRYPTION_KEY_PATH} ]; then
+    sudo st2-generate-symmetric-crypto-key --key-path ${DATASTORE_ENCRYPTION_KEY_PATH}
+  fi
 
   # Make sure only st2 user can read the file
-  sudo usermod -a -G st2 st2
   sudo chgrp st2 ${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}
   sudo chmod o-r ${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}
   sudo chgrp st2 ${DATASTORE_ENCRYPTION_KEY_PATH}
