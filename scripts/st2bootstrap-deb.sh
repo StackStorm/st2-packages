@@ -230,7 +230,8 @@ configure_st2_user () {
     sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
   fi
 
-  if ! grep -q -f /home/stanley/.ssh/stanley_rsa.pub /home/stanley/.ssh/authorized_keys; then
+  if ! sudo grep -s -q -f /home/stanley/.ssh/stanley_rsa.pub /home/stanley/.ssh/authorized_keys;
+  then
     # Authorize key-base access
     sudo sh -c 'cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys'
   fi
@@ -241,7 +242,7 @@ configure_st2_user () {
 
   # Enable passwordless sudo
   local STANLEY_SUDOERS="stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL"
-  if ! grep ^"${STANLEY_SUDOERS}" /etc/sudoers.d/st2; then
+  if ! sudo grep -s -q ^"${STANLEY_SUDOERS}" /etc/sudoers.d/st2; then
     sudo sh -c "echo '${STANLEY_SUDOERS}' >> /etc/sudoers.d/st2"
   fi
 
