@@ -293,7 +293,7 @@ generate_symmetric_crypto_key_for_datastore() {
 
   # If the file ${DATASTORE_ENCRYPTION_KEY_PATH} exists and is not empty, then do not generate
   # a new key. st2-generate-symmetric-crypto-key fails if the key file already exists.
-  if [ ! -s ${DATASTORE_ENCRYPTION_KEY_PATH} ]; then
+  if ! sudo test -s ${DATASTORE_ENCRYPTION_KEY_PATH}; then
     sudo st2-generate-symmetric-crypto-key --key-path ${DATASTORE_ENCRYPTION_KEY_PATH}
   fi
 
