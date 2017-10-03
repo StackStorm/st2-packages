@@ -224,16 +224,27 @@ configure_st2_user () {
   sudo mkdir -p /home/stanley/.ssh
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
-  sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
+  # NOTE: If the file already exists and is non-empty, then assume the key does not need
+  # to be generated again.
+  if [ ! -s /home/stanley/.ssh/stanley_rsa ]; then
+    sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
+  fi
 
-  # Authorize key-base access
-  sudo sh -c 'cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys'
+  if ! grep -q -f /home/stanley/.ssh/stanley_rsa.pub /home/stanley/.ssh/authorized_keys; then
+    # Authorize key-base access
+    sudo sh -c 'cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys'
+  fi
+
   sudo chmod 0600 /home/stanley/.ssh/authorized_keys
   sudo chmod 0700 /home/stanley/.ssh
   sudo chown -R stanley:stanley /home/stanley
 
   # Enable passwordless sudo
-  sudo sh -c 'echo "stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL" >> /etc/sudoers.d/st2'
+  local STANLEY_SUDOERS="stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL"
+  if ! grep ^"${STANLEY_SUDOERS}" /etc/sudoers.d/st2; then
+    sudo sh -c "echo '${STANLEY_SUDOERS}' >> /etc/sudoers.d/st2"
+  fi
+
   sudo chmod 0440 /etc/sudoers.d/st2
 
   # Disable requiretty for all users
@@ -246,7 +257,7 @@ configure_st2_cli_config() {
   ROOT_USER="root"
   CURRENT_USER=$(whoami)
 
-  : "${HOME:=`eval echo ~$(whoami)`}"
+  : "${HOME:=$(get_home ${CURRENT_USER})}"
 
   ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
