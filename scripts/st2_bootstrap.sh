@@ -18,6 +18,12 @@ PASSWORD=''
 BRANCH='v2.4'
 FORCE_BRANCH=""
 
+adddate() {
+    while IFS= read -r line; do
+        echo "$(date +%Y%m%dT%H%M%S%z) $line"
+    done
+}
+
 setup_args() {
   for i in "$@"
     do
@@ -181,5 +187,6 @@ else
 
     echo "Running deployment script for st2 ${VERSION}..."
     echo "OS specific script cmd: bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${USERNAME} ${PASSWORD}"
-    bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${DEV_BUILD} ${USERNAME} ${PASSWORD}
+    TS=$(date +%Y%m%dT%H%M%S)
+    bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${DEV_BUILD} ${USERNAME} ${PASSWORD} | adddate | sudo tee /var/log/st2-install.${TS}.log
 fi
