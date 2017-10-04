@@ -221,16 +221,28 @@ configure_st2_user () {
   sudo mkdir -p ${SYSTEM_HOME}/.ssh
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
-  sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P ""
+  # NOTE: If the file already exists and is non-empty, then assume the key does not need
+  # to be generated again.
+  if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
+    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P ""
+  fi
 
-  # Authorize key-base access
-  sudo sh -c "cat ${SYSTEM_HOME}/.ssh/stanley_rsa.pub >> ${SYSTEM_HOME}/.ssh/authorized_keys"
+  if ! sudo grep -s -q -f ${SYSTEM_HOME}/.ssh/stanley_rsa.pub ${SYSTEM_HOME}/.ssh/authorized_keys;
+  then
+    # Authorize key-base access
+    sudo sh -c "cat ${SYSTEM_HOME}/.ssh/stanley_rsa.pub >> ${SYSTEM_HOME}/.ssh/authorized_keys"
+  fi
+
   sudo chmod 0600 ${SYSTEM_HOME}/.ssh/authorized_keys
   sudo chmod 0700 ${SYSTEM_HOME}/.ssh
   sudo chown -R stanley:stanley ${SYSTEM_HOME}
 
   # Enable passwordless sudo
-  sudo sh -c 'echo "stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL" >> /etc/sudoers.d/st2'
+  local STANLEY_SUDOERS="stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL"
+  if ! sudo grep -s -q ^"${STANLEY_SUDOERS}" /etc/sudoers.d/st2; then
+    sudo sh -c "echo '${STANLEY_SUDOERS}' >> /etc/sudoers.d/st2"
+  fi
+
   sudo chmod 0440 /etc/sudoers.d/st2
 
   # Disable requiretty for all users
@@ -240,10 +252,11 @@ configure_st2_user () {
 
 configure_st2_cli_config() {
   # Configure CLI config (write credentials for the root user and user which ran the script)
+  ROOT_USER="root"
   CURRENT_USER=$(whoami)
 
-  ROOT_HOME=$(echo ~root)
-  : "${HOME:=$(echo ~${CURRENT_USER})}"
+  ROOT_HOME=$(eval echo ~${ROOT_USER})
+  : "${HOME:=$(eval echo ~${CURRENT_USER})}"
 
   ROOT_USER_CLI_CONFIG_DIRECTORY="${ROOT_HOME}/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
@@ -251,7 +264,7 @@ configure_st2_cli_config() {
   CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
   CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
 
-  if [ ! -d ${ROOT_USER_CLI_CONFIG_DIRECTORY} ]; then
+  if ! sudo test -d ${ROOT_USER_CLI_CONFIG_DIRECTORY}; then
     sudo mkdir -p ${ROOT_USER_CLI_CONFIG_DIRECTORY}
   fi
 
