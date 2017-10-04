@@ -216,16 +216,18 @@ configure_st2_user () {
     sudo useradd stanley
   fi
 
-  sudo mkdir -p /home/stanley/.ssh
+  SYSTEM_HOME=$(echo ~stanley)
+
+  sudo mkdir -p ${SYSTEM_HOME}/.ssh
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
-  sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
+  sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P ""
 
   # Authorize key-base access
-  sudo sh -c 'cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys'
-  sudo chmod 0600 /home/stanley/.ssh/authorized_keys
-  sudo chmod 0700 /home/stanley/.ssh
-  sudo chown -R stanley:stanley /home/stanley
+  sudo sh -c "cat ${SYSTEM_HOME}/.ssh/stanley_rsa.pub >> ${SYSTEM_HOME}/.ssh/authorized_keys"
+  sudo chmod 0600 ${SYSTEM_HOME}/.ssh/authorized_keys
+  sudo chmod 0700 ${SYSTEM_HOME}/.ssh
+  sudo chown -R stanley:stanley ${SYSTEM_HOME}
 
   # Enable passwordless sudo
   sudo sh -c 'echo "stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL" >> /etc/sudoers.d/st2'
@@ -238,12 +240,12 @@ configure_st2_user () {
 
 configure_st2_cli_config() {
   # Configure CLI config (write credentials for the root user and user which ran the script)
-  ROOT_USER="root"
   CURRENT_USER=$(whoami)
 
-  : "${HOME:=`eval echo ~$(whoami)`}"
+  ROOT_HOME=$(echo ~root)
+  : "${HOME:=$(echo ~${CURRENT_USER})}"
 
-  ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
+  ROOT_USER_CLI_CONFIG_DIRECTORY="${ROOT_HOME}/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
 
   CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
