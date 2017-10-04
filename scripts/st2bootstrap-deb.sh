@@ -226,7 +226,7 @@ configure_st2_user () {
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   # NOTE: If the file already exists and is non-empty, then assume the key does not need
   # to be generated again.
-  if [ ! -s /home/stanley/.ssh/stanley_rsa ]; then
+  if ! sudo test -s /home/stanley/.ssh/stanley_rsa; then
     sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
   fi
 
