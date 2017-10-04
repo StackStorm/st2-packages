@@ -216,24 +216,26 @@ configure_st2_user () {
     sudo useradd stanley
   fi
 
-  sudo mkdir -p /home/stanley/.ssh
+  SYSTEM_HOME=$(echo ~stanley)
+
+  sudo mkdir -p ${SYSTEM_HOME}/.ssh
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   # NOTE: If the file already exists and is non-empty, then assume the key does not need
   # to be generated again.
-  if ! sudo test -s /home/stanley/.ssh/stanley_rsa; then
-    sudo ssh-keygen -f /home/stanley/.ssh/stanley_rsa -P ""
+  if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
+    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P ""
   fi
 
-  if ! sudo grep -s -q -f /home/stanley/.ssh/stanley_rsa.pub /home/stanley/.ssh/authorized_keys;
+  if ! sudo grep -s -q -f ${SYSTEM_HOME}/.ssh/stanley_rsa.pub ${SYSTEM_HOME}/.ssh/authorized_keys;
   then
     # Authorize key-base access
-    sudo sh -c 'cat /home/stanley/.ssh/stanley_rsa.pub >> /home/stanley/.ssh/authorized_keys'
+    sudo sh -c "cat ${SYSTEM_HOME}/.ssh/stanley_rsa.pub >> ${SYSTEM_HOME}/.ssh/authorized_keys"
   fi
 
-  sudo chmod 0600 /home/stanley/.ssh/authorized_keys
-  sudo chmod 0700 /home/stanley/.ssh
-  sudo chown -R stanley:stanley /home/stanley
+  sudo chmod 0600 ${SYSTEM_HOME}/.ssh/authorized_keys
+  sudo chmod 0700 ${SYSTEM_HOME}/.ssh
+  sudo chown -R stanley:stanley ${SYSTEM_HOME}
 
   # Enable passwordless sudo
   local STANLEY_SUDOERS="stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL"
@@ -253,9 +255,10 @@ configure_st2_cli_config() {
   ROOT_USER="root"
   CURRENT_USER=$(whoami)
 
-  : "${HOME:=$(get_home ${CURRENT_USER})}"
+  ROOT_HOME=$(eval echo ~${ROOT_USER})
+  : "${HOME:=$(eval echo ~${CURRENT_USER})}"
 
-  ROOT_USER_CLI_CONFIG_DIRECTORY="/root/.st2"
+  ROOT_USER_CLI_CONFIG_DIRECTORY="${ROOT_HOME}/.st2"
   ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
 
   CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
