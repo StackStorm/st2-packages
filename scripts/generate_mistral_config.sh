@@ -16,7 +16,7 @@ MISTRAL=$(cat <<EHD
     [DEFAULT]
     transport_url = rabbit://guest:guest@$RABBITMQHOST:5672
     [database]
-    connection = postgresql://mistral:StackStorm@$POSTGRESHOST/mistral
+    connection = postgresql+psycopg2://mistral:StackStorm@$POSTGRESHOST/mistral
     max_pool_size = 50
     [pecan]
     auth_enable = false

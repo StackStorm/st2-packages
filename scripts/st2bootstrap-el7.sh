@@ -300,7 +300,7 @@ generate_symmetric_crypto_key_for_datastore() {
 
   # If the file ${DATASTORE_ENCRYPTION_KEY_PATH} exists and is not empty, then do not generate
   # a new key. st2-generate-symmetric-crypto-key fails if the key file already exists.
-  if [ ! -s ${DATASTORE_ENCRYPTION_KEY_PATH} ]; then
+  if ! sudo test -s ${DATASTORE_ENCRYPTION_KEY_PATH}; then
     sudo st2-generate-symmetric-crypto-key --key-path ${DATASTORE_ENCRYPTION_KEY_PATH}
   fi
 
@@ -597,7 +597,7 @@ install_st2mistral() {
   fi
 
   # Configure database settings
-  sudo crudini --set /etc/mistral/mistral.conf database connection "postgresql://mistral:${ST2_POSTGRESQL_PASSWORD}@127.0.0.1/mistral"
+  sudo crudini --set /etc/mistral/mistral.conf database connection "postgresql+psycopg2://mistral:${ST2_POSTGRESQL_PASSWORD}@127.0.0.1/mistral"
 
   # Setup Mistral DB tables, etc.
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
