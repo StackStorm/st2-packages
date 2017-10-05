@@ -190,4 +190,5 @@ else
     TS=$(date +%Y%m%dT%H%M%S)
     sudo mkdir -p /var/log/st2
     bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${DEV_BUILD} ${USERNAME} ${PASSWORD} 2>&1 | adddate | sudo tee /var/log/st2/st2-install.${TS}.log
+    exit ${PIPESTATUS[0]}
 fi
