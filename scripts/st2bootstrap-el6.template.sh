@@ -384,6 +384,7 @@ configure_st2chatops() {
 
 trap 'fail' EXIT
 STEP='Parse arguments' && setup_args $@
+STEP="Configure Proxy" && configure_proxy
 STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_dependencies
 STEP='Check libffi-devel availability' && check_libffi_devel
 STEP='Adjust SELinux policies' && adjust_selinux_policies
