@@ -126,7 +126,7 @@ function configure_proxy() {
     sudo test -e ${service_config} || sudo touch ${service_config}
     for env_var in http_proxy https_proxy no_proxy proxy_ca_bundle_path; do
       # delete line from file if specific proxy env var is unset
-      if sudo test -z ${!env_var}; then
+      if sudo test -z "${!env_var:-}"; then
         sudo sed -i "/^${env_var}=/d" ${service_config}
       # add proxy env var if it doesn't exist yet
       elif ! sudo grep -s -q ^"${env_var}=" ${service_config}; then
