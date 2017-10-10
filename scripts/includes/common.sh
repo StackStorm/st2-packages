@@ -1,3 +1,11 @@
+function configure_proxy() {
+  # Allow bypassing 'proxy' env vars via sudo
+  local sudoers_proxy='Defaults env_keep += "http_proxy https_proxy no_proxy proxy_ca_bundle_path"'
+  if ! sudo grep -s -q ^"${sudoers_proxy}" /etc/sudoers.d/st2; then
+    echo "${sudoers_proxy}" | sudo tee -a /etc/sudoers.d/st2
+  fi
+}
+
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
