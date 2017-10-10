@@ -121,6 +121,27 @@ function configure_proxy() {
   if ! sudo grep -s -q ^"${sudoers_proxy}" /etc/sudoers.d/st2; then
     sudo sh -c "echo '${sudoers_proxy}' >> /etc/sudoers.d/st2"
   fi
+
+  # Configure proxy env vars for 'st2api' and 'st2actionrunner' system configs
+  # See: https://docs.stackstorm.com/packs.html#installing-packs-from-behind-a-proxy
+  local service_config_path=$(hash apt-get >/dev/null 2>&1 && echo '/etc/default' || echo '/etc/sysconfig')
+  for service in st2api st2actionrunner; do
+    service_config="${service_config_path}/${service}"
+    # create file if doesn't exist yet
+    sudo test -e ${service_config} || sudo touch ${service_config}
+    for env_var in http_proxy https_proxy no_proxy proxy_ca_bundle_path; do
+      # delete line from file if specific proxy env var is unset
+      if sudo test -z ${!env_var}; then
+        sudo sed -i "/^${env_var}=/d" ${service_config}
+      # add proxy env var if it doesn't exist yet
+      elif ! sudo grep -s -q ^"${env_var}=" ${service_config}; then
+        sudo sh -c "echo '${env_var}=${!env_var}' >> ${service_config}"
+      # modify existing proxy env var value
+      elif ! sudo grep -s -q ^"${env_var}=${!env_var}$" ${service_config}; then
+        sudo sed -i "s#^${env_var}=.*#${env_var}=${!env_var}#" ${service_config}
+      fi
+    done
+  done
 }
 
 function get_package_url() {
