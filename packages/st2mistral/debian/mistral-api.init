@@ -33,7 +33,9 @@ UMASK=022
 [ -x "$DAEMON" ] || exit 0
 
 # Read configuration variable file if it is present
+set -o allexport
 [ -r /etc/default/mistral ] && . /etc/default/mistral
+set +o allexport
 DAEMON_ARGS="${API_ARGS}"
 
 # Load the VERBOSE setting and other rcS variables
