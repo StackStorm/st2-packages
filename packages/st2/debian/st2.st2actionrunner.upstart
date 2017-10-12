@@ -34,7 +34,9 @@ post-stop script
   WORKERS=${WORKERS:-10}
 
   # Read configuration variable file if it is present
+  set -o allexport
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
+  set +o allexport
   for i in `seq 1 $WORKERS`; do
     stop st2actionrunner-worker WORKERID=$i || :
   done
