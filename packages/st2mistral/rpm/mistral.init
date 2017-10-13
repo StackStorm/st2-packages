@@ -20,7 +20,9 @@ DESC="mistral"
 NAME=mistral
 
 # Read configuration variable file if it is present
+set -o allexport
 [ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
+set +o allexport
 
 
 # Mistral wrapper passes execution to mistral-api and mistral-server

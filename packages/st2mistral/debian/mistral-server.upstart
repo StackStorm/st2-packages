@@ -23,7 +23,9 @@ script
   SERVER_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral-server.log"
 
   # Read configuration variable file if it is present
+  set -o allexport
   [ -r /etc/default/$NAME ] && . /etc/default/$NAME
+  set +o allexport
 
   # Exit if server components are disabled, otherwise inject them into args.
   . /opt/stackstorm/mistral/share/sysvinit/helpers

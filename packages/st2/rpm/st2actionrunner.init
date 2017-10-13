@@ -25,7 +25,9 @@ export WORKERS
 [ -x "$DAEMON" ] || exit 5
 
 # Read configuration variable file if it is present
+set -o allexport
 [ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
+set +o allexport
 
 
 start() {
