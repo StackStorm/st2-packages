@@ -202,7 +202,7 @@ check_st2_host_dependencies() {
 
   for i in "${ports[@]}"
   do
-    rv=$(port_status $i | sed 's/.*-$\|.*systemd\|.*beam.smp.*\|.*epmd\|.*st2.*\|.*nginx.*\|.*python.*\|.*postgres\|.*postmaster.*\|.*mongod//')
+    rv=$(port_status $i | sed 's/.*-$\|.*systemd\|.*beam.smp.*\|.*epmd\|.*st2.*\|.*nginx.*\|.*python.*\|.*postgres\|.*postmaster.*\|.*mongod\|.*init//')
     if [ "$rv" != "Unbound" ] && [ "$rv" != "" ]; then
       used+=("$rv")
     fi
