@@ -396,6 +396,7 @@ trap 'fail' EXIT
 STEP="Setup args" && setup_args $@
 STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_dependencies
 STEP="Generate random password" && generate_random_passwords
+STEP="Configure Proxy" && configure_proxy
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2 dependencies (MongoDB)" && install_mongodb
 STEP="Install st2" && install_st2
