@@ -53,7 +53,7 @@ dependencies:
     - sudo .circle/configure-services.sh
     - sudo .circle/fix-cache-permissions.sh
     - sudo apt-get -y install parallel jq
-    - gem install package_cloud
+    - gem install package_cloud -v 0.2.45
     - sudo pip install wheel "docker-compose==1.14.0"
     - docker-compose version
     - docker version
