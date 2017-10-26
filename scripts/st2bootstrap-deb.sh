@@ -191,7 +191,7 @@ function port_status() {
   #
   # Sample output:
   #   0.0.0.0:25000 7506/sshd
-  ret=$(sudo netstat -tunlp --inet | awk -v port=:$1 '$4 ~ port && $6 ~ /LISTEN/ { print $4 " " $7 }' || echo 'Unbound');
+  ret=$(sudo netstat -tunlp --inet | awk -v port=":$1$" '$4 ~ port && $6 ~ /LISTEN/ { print $4 " " $7 }' || echo 'Unbound');
   echo "$ret";
 }
 
