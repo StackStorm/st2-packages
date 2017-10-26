@@ -15,6 +15,8 @@ notify:
     - url: https://ci-webhooks.stackstorm.net/webhooks/build/events
 
 machine:
+  ruby:
+    version: ruby-2.0.0-p645
   environment:
     DISTROS: "trusty xenial el6 el7"
     NOTESTS: "xenial el7"
@@ -53,7 +55,7 @@ dependencies:
     - sudo .circle/configure-services.sh
     - sudo .circle/fix-cache-permissions.sh
     - sudo apt-get -y install parallel jq
-    - gem install package_cloud -v 0.2.45
+    - gem install package_cloud
     - sudo pip install wheel "docker-compose==1.14.0"
     - docker-compose version
     - docker version
