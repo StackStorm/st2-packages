@@ -84,13 +84,15 @@ class ST2Spec
                     /opt/stackstorm/packs),
       mistral: [
         '/etc/mistral',
+        '/etc/logrotate.d',
+        '/opt/stackstorm/mistral',
         [ '/var/log/mistral', example: Proc.new {|_| be_writable.by('owner')} ]
       ]
     },
 
     package_has_files: {
-      st2common: %w(/etc/st2/st2.conf),
-      mistral: %w(/etc/mistral/mistral.conf)
+      st2common: %w(/etc/st2/st2.conf /etc/logrotate.d/st2),
+      mistral: %w(/etc/mistral/mistral.conf /etc/logrotate.d/mistral)
     },
 
     package_has_users: {
