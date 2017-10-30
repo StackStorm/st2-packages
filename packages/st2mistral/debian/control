@@ -11,7 +11,7 @@ Vcs-Browser: https://github.com/stackstorm/mistral
 Package: st2mistral
 Architecture: any
 Pre-Depends: dpkg (>= 1.16.16), python2.7, adduser
-Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, procps
 Description: st2 Mistral workflow service.
  Task orchestration and workflow engine with powerful strategies like parallelism, loops, retries,
  nested tasks, execution order capabilities. Rules defined in YAML, extended with YAQL expressions.
