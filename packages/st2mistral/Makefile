@@ -35,6 +35,7 @@ post_install:
 pre_install:
 	install -D conf/policy.json $(DESTDIR)/etc/mistral/policy.json
 	install -D etc/logging.conf.sample $(DESTDIR)/etc/mistral/logging.conf
+	install -m644 conf/logrotate.conf $(DESTDIR)/etc/logrotate.d/mistral
 	install -D etc/wf_trace_logging.conf.sample $(DESTDIR)/etc/mistral/wf_trace_logging.conf
 	install -D -m644 conf/helpers-sysvinit $(DESTDIR)/opt/stackstorm/mistral/share/sysvinit/helpers
 	sed -i "s%/var/log/%/var/log/mistral/%" $(DESTDIR)/etc/mistral/*logging.conf

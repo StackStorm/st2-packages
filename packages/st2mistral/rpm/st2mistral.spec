@@ -16,6 +16,7 @@ Group: System/Management
 License: Apache 2.0
 Url: https://github.com/StackStorm/mistral
 Source0: .
+Requires: bash, procps
 Provides: openstack-mistral
 Summary: st2 Mistral workflow service
 
@@ -59,6 +60,7 @@ Summary: st2 Mistral workflow service
   %{_bindir}/mistral
   /opt/stackstorm/mistral
   %config(noreplace) %{_sysconfdir}/mistral/*
+  %config(noreplace) %{_sysconfdir}/logrotate.d/mistral
   %attr(755, %{svc_user}, root) %{_localstatedir}/log/mistral
   %attr(755, %{svc_user}, root) %{_localstatedir}/run/mistral
 %if 0%{?use_systemd}
