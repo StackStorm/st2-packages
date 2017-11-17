@@ -27,7 +27,7 @@ machine:
     # with build parameters. st2cd prep tasks will uncomment these on a branch, and replace with proper
     # gitrefs.
     ST2_GITREV: v2.5
-    ST2MISTRAL_GITREV: st2-2.5.0
+    ST2MISTRAL_GITREV: st2-2.5.1
 
   pre:
     - mkdir -p ~/packages
