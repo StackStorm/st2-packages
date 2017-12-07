@@ -31,6 +31,9 @@ machine:
     ST2_GITREV: v2.5
     ST2MISTRAL_GITREV: st2-2.5.1
 
+  ruby:
+    version: ruby-2.0.0-p645
+
   pre:
     - mkdir -p ~/packages
     # Need latest Docker version for some features to work (CircleCI by default works with outdated version)
