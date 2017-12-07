@@ -333,7 +333,7 @@ EOT"
   # Generate self-signed certificate or place your existing certificate under /etc/ssl/st2
   sudo mkdir -p /etc/ssl/st2
   sudo openssl req -x509 -newkey rsa:2048 -keyout /etc/ssl/st2/st2.key -out /etc/ssl/st2/st2.crt \
-  -days XXX -nodes -subj "/C=US/ST=California/L=Palo Alto/O=StackStorm/OU=Information \
+  -days 365 -nodes -subj "/C=US/ST=California/L=Palo Alto/O=StackStorm/OU=Information \
   Technology/CN=$(hostname)"
 
   # Remove default site, if present
