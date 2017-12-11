@@ -616,13 +616,7 @@ install_st2mistral_dependencies() {
       sudo yum -y localinstall http://yum.postgresql.org/9.4/redhat/rhel-6-x86_64/pgdg-redhat94-9.4-2.noarch.rpm
   fi
 
-  # Temporarily removing this - see note below regarding initdb failure
-  # sudo yum -y install postgresql94-server postgresql94-contrib postgresql94-devel
-
-  # Installing a specific version of postgres for now, postgresql94-9.4.15-3 broke initdb
-  sudo yum remove -y postgresql94
-  sudo yum install -y postgresql94-9.4.15-2PGDG.rhel6 postgresql94-contrib-9.4.15-2PGDG.rhel6.x86_64 postgresql94-server-9.4.15-2PGDG.rhel6.x86_64 postgresql94-devel-9.4.15-2PGDG.rhel6.x86_64 postgresql94-libs-9.4.15-2PGDG.rhel6.x86_64
-  sudo rm -rf /var/lib/pgsql/9.4/data
+  sudo yum -y install postgresql94-server postgresql94-contrib postgresql94-devel
 
   # Setup postgresql at a first time
   sudo service postgresql-9.4 initdb
