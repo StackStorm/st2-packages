@@ -28,7 +28,7 @@
 DESC="mistral"
 NAME=mistral-api
 DAEMON=/opt/stackstorm/mistral/bin/gunicorn
-COMPONENTS="api,engine,executor"
+COMPONENTS="api,engine,executor,notifier"
 PIDFILE=/var/run/mistral/$NAME.pid
 API_ARGS="--log-file /var/log/mistral/mistral-api.log -b 127.0.0.1:8989 -w 2 mistral.api.wsgi --graceful-timeout 10 --pid ${PIDFILE}"
 RUNAS_USER="mistral"

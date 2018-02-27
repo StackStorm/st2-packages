@@ -27,7 +27,7 @@
 DESC="mistral"
 NAME=mistral-server
 DAEMON=/opt/stackstorm/mistral/bin/mistral-server
-COMPONENTS="api,engine,executor"
+COMPONENTS="api,engine,executor,notifier"
 SERVER_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral-server.log"
 PIDFILE=/var/run/mistral/$NAME.pid
 RUNAS_USER="mistral"
