@@ -7,7 +7,7 @@ enabled_list() {
   service="$1"
 
   [ "$service" = api ] && components="api"
-  [ "$service" = server ] && components="engine executor"
+  [ "$service" = server ] && components="engine executor notifier"
 
   # build up the component list
   for comp in $components; do

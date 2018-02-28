@@ -19,7 +19,7 @@ kill timeout 60
 
 script
   NAME=mistral
-  COMPONENTS="api,engine,executor"
+  COMPONENTS="api,engine,executor,notifier"
   SERVER_ARGS="--config-file /etc/mistral/mistral.conf --log-file /var/log/mistral/mistral-server.log"
 
   # Read configuration variable file if it is present
