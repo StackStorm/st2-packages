@@ -652,8 +652,10 @@ gpgcheck=1
 enabled=1
 EOT"
 
-  # Install st2web and nginx
-  sudo yum install -y ${ST2WEB_PKG} nginx
+  # Install nginx
+  sudo yum --disablerepo='epel' install -y nginx
+  # Install st2web
+  sudo yum install -y ${ST2WEB_PKG}
 
   # Generate self-signed certificate or place your existing certificate under /etc/ssl/st2
   sudo mkdir -p /etc/ssl/st2
