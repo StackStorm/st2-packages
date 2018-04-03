@@ -6,7 +6,7 @@
 
 version: 2
 jobs:
-  # Build & Test st2 packages
+  # Build & Test st2 & st2mistral packages
   packages:
     parallelism: 4
     # 4CPUs & 8GB RAM CircleCI machine
@@ -72,7 +72,6 @@ jobs:
           command: |
             .circle/docker-compose2.sh build ${DISTRO}
             # Once build container finishes we can copy packages directly from it
-            ### HERE!!!
             mkdir -p ~/st2-packages/build/${DISTRO}/log/
             docker cp st2-packages-vol:/root/build/. ~/st2-packages/build/${DISTRO}
 #      # TODO: It works! (~0.5-1min speed-up) Enable CircleCI2.0 cache for pip and wheelhouse later
@@ -97,7 +96,7 @@ jobs:
           root: ~/st2-packages/build
           paths:
             - .
-      # Verify that Docker environment is properle cleaned up, and there is nothing left for the next build
+      # Verify that Docker environment is properly cleaned up, and there is nothing left for the next build
       # See issue: https://discuss.circleci.com/t/no-space-left-on-device-while-creating-mongo/11532/13
       - run:
           name: Post Docker cleanup
@@ -140,7 +139,7 @@ jobs:
 # Putting everything together
 workflows:
   version: 2
-  package-test-and-deploy:
+  package-test-deploy:
     jobs:
       - packages
       - deploy:
