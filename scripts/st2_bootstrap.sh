@@ -186,7 +186,7 @@ else
     chmod +x ${BOOTSTRAP_FILE}
 
     echo "Running deployment script for st2 ${VERSION}..."
-    echo "OS specific script cmd: bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${USERNAME} ${PASSWORD}"
+    echo "OS specific script cmd: bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${USERNAME} --password=****"
     TS=$(date +%Y%m%dT%H%M%S)
     sudo mkdir -p /var/log/st2
     bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${DEV_BUILD} ${USERNAME} ${PASSWORD} 2>&1 | adddate | sudo tee /var/log/st2/st2-install.${TS}.log
