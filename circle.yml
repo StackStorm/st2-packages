@@ -32,6 +32,9 @@ jobs:
           reusable: true    # default - false
           exclusive: true   # default - true
       - run:
+          name: Ensure installation scripts are synced with their templates
+          command: make .generated-files-check
+      - run:
           name: Docker version
           command: |
             set -x
