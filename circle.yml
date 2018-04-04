@@ -96,9 +96,10 @@ jobs:
           path: ~/st2-packages/build
           destination: packages
       - persist_to_workspace:
-          root: ~/st2-packages/build
+          root: ~/st2-packages
           paths:
-            - .
+            - .circle/packagecloud.sh
+            - build
       # Verify that Docker environment is properly cleaned up, and there is nothing left for the next build
       # See issue: https://discuss.circleci.com/t/no-space-left-on-device-while-creating-mongo/11532/13
       - run:
@@ -136,7 +137,7 @@ jobs:
             gem install package_cloud
       - run:
           name: Deploy deb/rpm packages to PackageCloud
-          command: "parallel -v -j0 --line-buffer .circle/packagecloud.sh deploy {} {} ::: ${DISTROS}"
+          command: "parallel -v -j0 --line-buffer .circle/packagecloud.sh deploy {} build/{} ::: ${DISTROS}"
 
 # TODO: Return to workflows when "Auto-cancel redundant builds” feature is implemented for Workflows: https://discuss.circleci.com/t/auto-cancel-redundant-builds-not-working-for-workflow/13852
 # Putting everything together
