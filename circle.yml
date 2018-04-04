@@ -96,9 +96,10 @@ jobs:
           path: ~/st2-packages/build
           destination: packages
       - persist_to_workspace:
-          root: ~/st2-packages/build
+          root: ~/st2-packages
           paths:
-            - .
+            - .circle/packagecloud.sh
+            - build
       # Verify that Docker environment is properly cleaned up, and there is nothing left for the next build
       # See issue: https://discuss.circleci.com/t/no-space-left-on-device-while-creating-mongo/11532/13
       - run:
