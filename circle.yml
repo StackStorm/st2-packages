@@ -137,7 +137,7 @@ jobs:
             gem install package_cloud
       - run:
           name: Deploy deb/rpm packages to PackageCloud
-          command: "parallel -v -j0 --line-buffer .circle/packagecloud.sh deploy {} {} ::: ${DISTROS}"
+          command: "parallel -v -j0 --line-buffer .circle/packagecloud.sh deploy {} build/{} ::: ${DISTROS}"
 
 # TODO: Return to workflows when "Auto-cancel redundant builds” feature is implemented for Workflows: https://discuss.circleci.com/t/auto-cancel-redundant-builds-not-working-for-workflow/13852
 # Putting everything together
