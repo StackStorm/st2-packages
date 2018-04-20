@@ -4,9 +4,6 @@ require 'serverspec'
 require 'remote_helpers'
 require './rake/pipeline_options'
 
-# Monkey patch to disable systemd operation on debian v8
-klass = Class.new(::Specinfra::Command::Debian::Base::Service)
-::Specinfra::Command::Debian::V8::Service = klass
 
 SSH_OPTIONS = {
   user: 'root',
@@ -31,7 +28,7 @@ class ST2Spec
     bin_prefix: '/usr/bin',
     conf_dir: '/etc/st2',
     log_dir: '/var/log/st2',
-    mistral_enabled: Array(pipeopts.packages_to_test).include?('st2mistral'),
+    mistral_enabled: pipeopts.packages.include?('st2mistral'),
     package_list: pipeopts.packages,
     rabbitmqhost: pipeopts.rabbitmqhost,
     postgreshost: pipeopts.postgreshost,
