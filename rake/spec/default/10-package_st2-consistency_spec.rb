@@ -13,10 +13,14 @@ shared_examples 'os package' do |name, _opts|
 
   # Check for presence of users
   #
-  get_users do |u, opts|
-    describe user(u) do
-      it { is_expected.to exist }
-      it { is_expected.to instance_eval(&opts[:example])} if opts[:example]
+  context 'users' do
+    set_context_vars(name, _opts)
+
+    get_users do |u, opts|
+      describe user(u) do
+        it { is_expected.to exist }
+        it { is_expected.to instance_eval(&opts[:example])} if opts[:example]
+      end
     end
   end
 

@@ -23,39 +23,51 @@ describe 'external services' do
   end
 end
 
-describe 'start st2 components and services' do
-  before(:all) do
-    # run upgrade head
-    # run populate
-    # and only after that start mistral
-    if spec[:mistral_enabled]
-      puts "===> Invoking mistral-db-manage migration commands..."
-      res = spec.backend.run_command(spec[:mistral_db_head_command])
-      if res.exit_status > 0
-        puts "===> command: #{spec[:mistral_db_head_command]}, failed (code #{res.exit_status})"
-        puts res.stderr
-      end
-      res = spec.backend.run_command(spec[:mistral_db_populate_command])
-      if res.exit_status > 0
-        puts "===> command: #{spec[:mistral_db_populate_command]}, failed (code #{res.exit_status})"
-        puts res.stderr
+describe 'run mistral DB migration' do
+  if spec[:mistral_enabled]
+    # Run mistral DB upgrade head
+    describe command(spec[:mistral_db_head_command]) do
+      its(:exit_status) { is_expected.to eq 0 }
+      after(:all) do
+        if described_class.exit_status > 0
+          puts "\nMistral DB upgrade head has failed (:", '>>>>>',
+               described_class.stderr
+          puts
+        end
       end
     end
+
+    # Run mistral DB populate
+    describe command(spec[:mistral_db_populate_command]) do
+      its(:exit_status) { is_expected.to eq 0 }
+      after(:all) do
+        if described_class.exit_status > 0
+          puts "Mistral DB populate has failed!", '>>>>>',
+               described_class.stderr
+          puts
+        end
+      end
+    end
+  end
+end
+
+describe 'start st2 components and services' do
+  before(:all) do
     puts "===> Starting st2 services #{spec[:service_list].join(', ')}..."
     remote_start_services(spec[:service_list])
-
     puts
   end
 
   # Run register content
   describe command(spec[:register_content_command]) do
+    its(:exit_status) { is_expected.to eq 0 }
     after(:all) do
       if described_class.exit_status > 0
-        puts "\nRegister content has failed (:", '>>>>>',
+        puts "Register content has failed!", '>>>>>',
              described_class.stderr
+        puts
       end
     end
-    its(:exit_status) { is_expected.to eq 0 }
   end
 end
 

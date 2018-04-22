@@ -4,9 +4,6 @@ require 'serverspec'
 require 'remote_helpers'
 require './rake/pipeline_options'
 
-# Monkey patch to disable systemd operation on debian v8
-klass = Class.new(::Specinfra::Command::Debian::Base::Service)
-::Specinfra::Command::Debian::V8::Service = klass
 
 SSH_OPTIONS = {
   user: 'root',
@@ -31,7 +28,7 @@ class ST2Spec
     bin_prefix: '/usr/bin',
     conf_dir: '/etc/st2',
     log_dir: '/var/log/st2',
-    mistral_enabled: Array(pipeopts.packages_to_test).include?('st2mistral'),
+    mistral_enabled: pipeopts.packages.include?('st2mistral'),
     package_list: pipeopts.packages,
     rabbitmqhost: pipeopts.rabbitmqhost,
     postgreshost: pipeopts.postgreshost,
@@ -53,36 +50,28 @@ class ST2Spec
     package_opts: {},
 
     package_has_services: {
-      st2actions: %w(st2actionrunner st2notifier st2resultstracker),
-      st2reactor: %w(st2rulesengine st2sensorcontainer st2garbagecollector),
-      st2: %w(st2api st2stream st2auth st2actionrunner st2notifier
-                     st2resultstracker st2rulesengine st2sensorcontainer st2garbagecollector),
-      mistral: [
+      st2: ST2_SERVICES,
+      st2mistral: [
         ['mistral', binary_name: 'mistral-server']
       ]
     },
 
     package_has_binaries: {
-      st2common: %w(st2-bootstrap-rmq st2-register-content st2-self-check st2-track-result st2ctl st2-validate-pack-config st2-check-license st2-run-pack-tests),
-      st2reactor: %w(st2-rule-tester st2-trigger-refire),
-      st2client: %w(st2),
-      st2debug: %w(st2-submit-debug-info),
-      st2: %w(st2-bootstrap-rmq st2-register-content st2-rule-tester st2-run-pack-tests
-              st2-apply-rbac-definitions st2-trigger-refire st2 st2-self-check st2-track-result st2-validate-pack-config st2-check-license st2ctl
+      st2: %w(st2 st2ctl st2-bootstrap-rmq st2-register-content st2-rule-tester st2-run-pack-tests
+              st2-apply-rbac-definitions st2-trigger-refire st2 st2-self-check st2-track-result
+              st2-validate-pack-config st2-check-license
               st2-generate-symmetric-crypto-key st2-submit-debug-info),
-      mistral: %w(mistral)
+      st2mistral: %w(mistral)
     },
 
     package_has_directories: {
-      st2common: [
+      st2: [
         '/etc/st2',
         '/etc/logrotate.d',
         '/opt/stackstorm/packs',
         [ '/var/log/st2', example: Proc.new {|_| be_writable.by('owner')} ]
       ],
-      st2: %w(/etc/st2 /var/log/st2 /etc/logrotate.d
-                    /opt/stackstorm/packs),
-      mistral: [
+      st2mistral: [
         '/etc/mistral',
         '/etc/logrotate.d',
         '/opt/stackstorm/mistral',
@@ -91,16 +80,16 @@ class ST2Spec
     },
 
     package_has_files: {
-      st2common: %w(/etc/st2/st2.conf /etc/logrotate.d/st2),
-      mistral: %w(/etc/mistral/mistral.conf /etc/logrotate.d/mistral)
+      st2: %w(/etc/st2/st2.conf /etc/logrotate.d/st2),
+      st2mistral: %w(/etc/mistral/mistral.conf /etc/logrotate.d/mistral)
     },
 
     package_has_users: {
-      st2common: [
+      st2: [
         'st2',
         ['stanley', example: Proc.new {|_| have_home_directory '/home/stanley'} ]
       ],
-      mistral: %w(mistral)
+      st2mistral: %w(mistral)
     }
   }
 
