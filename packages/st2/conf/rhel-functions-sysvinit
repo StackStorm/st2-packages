@@ -121,7 +121,7 @@ daemon() {
 
 
 # Write pid of a starting daemon into the pidfile.
-# By default wait for the pid up to 3 seconds.
+# By default wait for the pid up to 5 seconds.
 pgrep_waitforpid() {
   local pid= pid_file= base= trailer=
   local pgrep_opts="-n" timeout="5.0"
