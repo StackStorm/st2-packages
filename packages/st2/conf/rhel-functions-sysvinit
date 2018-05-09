@@ -124,7 +124,7 @@ daemon() {
 # By default wait for the pid up to 3 seconds.
 pgrep_waitforpid() {
   local pid= pid_file= base= trailer=
-  local pgrep_opts="-n" timeout="3.0"
+  local pgrep_opts="-n" timeout="5.0"
 
   while [ "$1" != "${1##--}" ]; do
     case $1 in
