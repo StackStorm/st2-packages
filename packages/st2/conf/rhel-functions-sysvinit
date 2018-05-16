@@ -193,7 +193,7 @@ pgrep_waitforpid() {
 
 # Waits for a process startup and when it writes the pidfile.
 waitforpid() {
-  local pid= pid_file= base= timeout="3.0"
+  local pid= pid_file= base= timeout="5.0"
 
   while [ "$1" != "${1##--}" ]; do
     case $1 in
