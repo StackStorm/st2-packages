@@ -31,7 +31,7 @@ sudo $INSTALL_CMD install -y git curl wget
 
 # Install docker-compose
 DC_BIN="/usr/local/bin/docker-compose"
-DC_URL="https://github.com/docker/compose/releases/download/1.9.0/docker-compose-`uname -s`-`uname -m`"
+DC_URL="https://github.com/docker/compose/releases/download/1.21.0/docker-compose-`uname -s`-`uname -m`"
 if [[ ! -x $DC_BIN ]]; then
   echo "[Install] docker-compose $ST2_TARGET"
   sudo sh -c "curl -sL $DC_URL > $DC_BIN"
