@@ -298,15 +298,9 @@ configure_st2_cli_config() {
   CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
   CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
 
-  if ! sudo test -d ${ROOT_USER_CLI_CONFIG_DIRECTORY}; then
-    sudo mkdir -p ${ROOT_USER_CLI_CONFIG_DIRECTORY}
-  fi
-
-  sudo sh -c "cat <<EOT > ${ROOT_USER_CLI_CONFIG_PATH}
-[credentials]
-username = ${USERNAME}
-password = ${PASSWORD}
-EOT"
+  sudo st2 login --config-file ${ROOT_USER_CLI_CONFIG_PATH} \
+                 --write-password \
+                 --username ${USERNAME} --password ${PASSWORD}
 
   # Write config for root user
   if [ "${CURRENT_USER}" == "${ROOT_USER}" ]; then
@@ -314,18 +308,12 @@ EOT"
   fi
 
   # Write config for current user (in case current user != root)
-  if [ ! -d ${CURRENT_USER_CLI_CONFIG_DIRECTORY} ]; then
-    sudo mkdir -p ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
-  fi
-
-  sudo sh -c "cat <<EOT > ${CURRENT_USER_CLI_CONFIG_PATH}
-[credentials]
-username = ${USERNAME}
-password = ${PASSWORD}
-EOT"
+  st2 login --config-file ${CURRENT_USER_CLI_CONFIG_PATH} \
+            --write-password \
+            --username ${USERNAME} --password ${PASSWORD}
 
   # Fix the permissions
-  sudo chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
+  chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
 }
 
 
