@@ -61,7 +61,7 @@ post_install:
 	install -m644 ../st2reactor/conf/logging.timersengine.conf $(DESTDIR)/etc/st2/logging.timersengine.conf
 	install -m644 ../st2reactor/conf/syslog.timersengine.conf $(DESTDIR)/etc/st2/syslog.timersengine.conf
 	install -m644 ../st2reactor/conf/logging.sensorcontainer.conf $(DESTDIR)/etc/st2/logging.sensorcontainer.conf
-	install -m644 ../st2reactor/conf/syslog.sensorcontainerconf $(DESTDIR)/etc/st2/syslog.sensorcontainer.conf
+	install -m644 ../st2reactor/conf/syslog.sensorcontainer.conf $(DESTDIR)/etc/st2/syslog.sensorcontainer.conf
 	install -m644 ../st2reactor/conf/logging.rulesengine.conf $(DESTDIR)/etc/st2/logging.rulesengine.conf
 	install -m644 ../st2reactor/conf/syslog.rulesengine.conf $(DESTDIR)/etc/st2/syslog.rulesengine.conf
 	install -m644 ../st2reactor/conf/logging.garbagecollector.conf $(DESTDIR)/etc/st2/logging.garbagecollector.conf
