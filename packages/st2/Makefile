@@ -48,7 +48,6 @@ post_install:
 	install -m644 ../conf/logrotate.conf $(DESTDIR)/etc/logrotate.d/st2
 	install -m644 ../st2actions/conf/logging.conf $(DESTDIR)/etc/st2/logging.actionrunner.conf
 	install -m644 ../st2actions/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.actionrunner.conf
-	install -m644 ../st2actions/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.actionrunner.conf
 	install -m644 ../st2actions/conf/logging.notifier.conf $(DESTDIR)/etc/st2/logging.notifier.conf
 	install -m644 ../st2actions/conf/syslog.notifier.conf $(DESTDIR)/etc/st2/syslog.notifier.conf
 	install -m644 ../st2actions/conf/logging.resultstracker.conf $(DESTDIR)/etc/st2/logging.resultstracker.conf
