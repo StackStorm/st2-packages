@@ -15,6 +15,11 @@ VIRTUAL_MACHINES = {
     :box => 'ubuntu/xenial64',
     :ip => '192.168.16.21',
   },
+  :bionic => {
+    :hostname => 'st2-packages-bionic',
+    :box => 'ubuntu/bionic64',
+    :ip => '192.168.16.23',
+  },
   :el7 => {
     :hostname => 'st2-packages-el7',
     :box => 'centos/7',

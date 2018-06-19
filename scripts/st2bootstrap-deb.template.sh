@@ -14,8 +14,8 @@ DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
-if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' ]]; then
-  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) or 16.04 (xenial) as base system!"
+if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
+  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty), 16.04 (xenial), or 18.04 (bionic) as base system!"
   exit 2
 fi
 
@@ -121,10 +121,10 @@ install_st2_dependencies() {
   # Configure RabbitMQ to listen on localhost only
   sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
 
-  if [[ "$SUBTYPE" == 'xenial' ]]; then
-    sudo systemctl restart rabbitmq-server
-  else
+  if [[ "$SUBTYPE" == 'trusty' ]]; then
     sudo service rabbitmq-server restart
+  else
+    sudo systemctl restart rabbitmq-server
   fi
 
   # Various other dependencies needed by st2 and installer script
@@ -142,11 +142,11 @@ install_mongodb() {
   # Configure MongoDB to listen on localhost only
   sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
 
-  if [[ "$SUBTYPE" == 'xenial' ]]; then
+  if [[ "$SUBTYPE" == 'trusty' ]]; then
+    sudo service mongod restart
+  else
     sudo systemctl enable mongod
     sudo systemctl start mongod
-  else
-    sudo service mongod restart
   fi
 
   sleep 5
@@ -180,10 +180,10 @@ EOF
   sudo sh -c 'echo "security:\n  authorization: enabled" >> /etc/mongod.conf'
 
   # MongoDB needs to be restarted after enabling auth
-  if [[ "$SUBTYPE" == 'xenial' ]]; then
-    sudo systemctl restart mongod
-  else
+  if [[ "$SUBTYPE" == 'trusty' ]]; then
     sudo service mongod restart
+  else
+    sudo systemctl restart mongod
   fi
 
 }
