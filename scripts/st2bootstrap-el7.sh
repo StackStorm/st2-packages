@@ -293,8 +293,8 @@ configure_st2_cli_config() {
   CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
   CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
 
-  sudo st2 login --config-file ${ROOT_USER_CLI_CONFIG_PATH} \
-                 --write-password \
+  sudo st2 --config-file ${ROOT_USER_CLI_CONFIG_PATH} \
+           login --write-password \
                  --username ${USERNAME} --password ${PASSWORD}
 
   # Write config for root user
@@ -303,8 +303,8 @@ configure_st2_cli_config() {
   fi
 
   # Write config for current user (in case current user != root)
-  st2 login --config-file ${CURRENT_USER_CLI_CONFIG_PATH} \
-            --write-password \
+  st2 --config-file ${CURRENT_USER_CLI_CONFIG_PATH} \
+      login --write-password \
             --username ${USERNAME} --password ${PASSWORD}
 
   # Fix the permissions
