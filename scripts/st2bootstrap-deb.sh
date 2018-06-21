@@ -311,9 +311,6 @@ configure_st2_cli_config() {
   st2 --config-file ${CURRENT_USER_CLI_CONFIG_PATH} \
       login --write-password \
             --username ${USERNAME} --password ${PASSWORD}
-
-  # Fix the permissions
-  chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
 }
 
 
