@@ -49,6 +49,7 @@ post_install:
 	install -m644 ../st2actions/conf/logging.conf $(DESTDIR)/etc/st2/logging.actionrunner.conf
 	install -m644 ../st2actions/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.actionrunner.conf
 	install -m644 ../st2actions/conf/logging.workflowengine.conf $(DESTDIR)/etc/st2/logging.workflowengine.conf
+	install -m644 ../st2actions/conf/syslog.workflowengine.conf $(DESTDIR)/etc/st2/syslog.workflowengine.conf
 	install -m644 ../st2api/conf/logging.conf $(DESTDIR)/etc/st2/logging.api.conf
 	install -m644 ../st2api/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.api.conf
 	install -m644 ../st2stream/conf/logging.conf $(DESTDIR)/etc/st2/logging.stream.conf
