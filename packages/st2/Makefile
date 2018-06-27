@@ -51,10 +51,13 @@ post_install:
 	install -m644 ../st2actions/conf/logging.workflowengine.conf $(DESTDIR)/etc/st2/logging.workflowengine.conf
 	install -m644 ../st2actions/conf/syslog.workflowengine.conf $(DESTDIR)/etc/st2/syslog.workflowengine.conf
 	install -m644 ../st2api/conf/logging.conf $(DESTDIR)/etc/st2/logging.api.conf
+	install -m644 ../st2api/conf/logging.gunicorn.conf $(DESTDIR)/etc/st2/logging.api.gunicorn.conf
 	install -m644 ../st2api/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.api.conf
 	install -m644 ../st2stream/conf/logging.conf $(DESTDIR)/etc/st2/logging.stream.conf
+	install -m644 ../st2stream/conf/logging.gunicorn.conf $(DESTDIR)/etc/st2/logging.stream.gunicorn.conf
 	install -m644 ../st2stream/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.stream.conf
 	install -m644 ../st2auth/conf/logging.conf $(DESTDIR)/etc/st2/logging.auth.conf
+	install -m644 ../st2auth/conf/logging.gunicorn.conf $(DESTDIR)/etc/st2/logging.auth.gunicorn.conf
 	install -m644 ../st2auth/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.auth.conf
 	install -m755 ../st2client/conf/st2.complete.sh $(DESTDIR)/etc/bash_completion.d/st2
 	install -m755 bin/runners.sh $(DESTDIR)/opt/stackstorm/st2/bin/runners.sh
