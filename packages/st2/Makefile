@@ -3,6 +3,7 @@ ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
 ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
 CHANGELOG_COMMENT ?= "automated build, version: $(ST2PKG_VERSION)"
+RUNNERS := $(shell ls ../contrib/runners)
 
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
@@ -84,11 +85,22 @@ ifeq ($(DEBIAN),1)
 		dch -m --force-distribution -v$${_epoch}$(ST2PKG_VERSION)-$(ST2PKG_RELEASE) -D$(DEB_DISTRO) $(CHANGELOG_COMMENT)
 endif
 
-wheelhouse: .stamp-wheelhouse
+wheelhouse: .build-runners .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements inject-deps
 	cat requirements.txt
 	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
 		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	touch $@
+
+.build-runners:
+	@echo "##########################################"
+	@echo "#            Building Runners            #"
+	@echo "##########################################"
+	@echo $(RUNNERS)
+	@for runner in $(RUNNERS); do \
+		echo "Installing $$runner"; \
+		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner; \
+	done
 	touch $@
 
 # Note: We want to dynamically inject "st2client" dependency. This way we can
