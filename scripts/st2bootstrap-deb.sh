@@ -300,7 +300,7 @@ configure_st2_cli_config() {
 
   sudo st2 --config-file ${ROOT_USER_CLI_CONFIG_PATH} \
            login --write-password \
-                 --username ${USERNAME} --password ${PASSWORD}
+                 ${USERNAME} --password ${PASSWORD}
 
   # Write config for root user
   if [ "${CURRENT_USER}" == "${ROOT_USER}" ]; then
@@ -310,7 +310,7 @@ configure_st2_cli_config() {
   # Write config for current user (in case current user != root)
   st2 --config-file ${CURRENT_USER_CLI_CONFIG_PATH} \
       login --write-password \
-            --username ${USERNAME} --password ${PASSWORD}
+            ${USERNAME} --password ${PASSWORD}
 }
 
 
