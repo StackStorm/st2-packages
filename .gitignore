@@ -1,6 +1,58 @@
+*.py[cod]
+*.sqlite
+*.swp
+*.log
+*/requirements.txt
+!st2client/requirements.txt
+.stamp*
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+.venv
+eggs
+parts
+#bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib64
+virtualenv
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.coverage.integration.*
+.coverage.integration
+.coverage.unit
+cover
+coverage*.xml
+.tox
+nosetests.xml
+htmlcov
+
+# Mr Developer
+.idea
+.DS_Store
+._*
+.vscode
+*.sublime-project
+*.sublime-workspace
+
+# Editor Saves
+*~
+\#*\#
+
 # Cut out Gemfile*, since they are built into packagingrunner container.
 # Gemfile* will be copied on runtime.
 Gemfile
 Gemfile.lock
 .vagrant
-*.log
