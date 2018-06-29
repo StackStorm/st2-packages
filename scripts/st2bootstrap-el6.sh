@@ -279,33 +279,17 @@ configure_st2_user () {
 }
 
 
+# Configure CLI config (write credentials for the root user and user which ran the script)
 configure_st2_cli_config() {
-  # Configure CLI config (write credentials for the root user and user which ran the script)
-  ROOT_USER="root"
-  CURRENT_USER=$(whoami)
+  # Write config for the root user
+  sudo -i st2 login "${USERNAME}" --password "${PASSWORD}" --write-password
 
-  ROOT_HOME=$(eval echo ~${ROOT_USER})
-  : "${HOME:=$(eval echo ~${CURRENT_USER})}"
-
-  ROOT_USER_CLI_CONFIG_DIRECTORY="${ROOT_HOME}/.st2"
-  ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
-
-  CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
-  CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
-
-  sudo st2 --config-file ${ROOT_USER_CLI_CONFIG_PATH} \
-           login --write-password \
-                 ${USERNAME} --password ${PASSWORD}
-
-  # Write config for root user
-  if [ "${CURRENT_USER}" == "${ROOT_USER}" ]; then
+  if [ "$(whoami)" == "root" ]; then
       return
   fi
 
   # Write config for current user (in case current user != root)
-  st2 --config-file ${CURRENT_USER_CLI_CONFIG_PATH} \
-      login --write-password \
-            ${USERNAME} --password ${PASSWORD}
+  st2 login "${USERNAME}" --password "${PASSWORD}" --write-password
 }
 
 
