@@ -234,10 +234,10 @@ generate_symmetric_crypto_key_for_datastore() {
   sudo crudini --set /etc/st2/st2.conf keyvalue encryption_key_path ${DATASTORE_ENCRYPTION_KEY_PATH}
 
   # NOTE: We need to restart all the affected services so they pick the key and load it in memory
-  sudo st2ctl restart-component st2api
-  sudo st2ctl restart-component st2sensorcontainer
-  sudo st2ctl restart-component st2workflowengine
-  sudo st2ctl restart-component st2actionrunner
+  # NOTE: Only st2api, st2sensorcontainer, st2workflowengine and st2actionrunner work with
+  # encrypted datastore values, but we restart all the services to be on the safe side and for
+  # future proofing reasons.
+  sudo st2ctl restart
 }
 
 
