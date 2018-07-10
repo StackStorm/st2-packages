@@ -696,9 +696,6 @@ EOT"
 
   sudo service nginx start
   sudo chkconfig nginx on
-
-  # st2web logs shouldn't be read by others
-  sudo chmod o-r /var/log/nginx/st2webui.* /var/log/nginx/ssl-st2webui.*
 }
 
 install_st2chatops() {
