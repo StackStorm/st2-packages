@@ -21,7 +21,7 @@ class ST2Spec
   extend Pipeline::Options
   instance_eval(File.read('rake/build/environment.rb'))
 
-  ST2_SERVICES = %w(st2api st2stream st2auth st2actionrunner st2notifier
+  ST2_SERVICES = %w(st2api st2stream st2auth st2actionrunner st2notifier st2workflowengine
                     st2resultstracker st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector)
 
   SPECCONF = {

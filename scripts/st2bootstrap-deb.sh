@@ -350,7 +350,11 @@ generate_symmetric_crypto_key_for_datastore() {
   # set path to the key file in the config
   sudo crudini --set /etc/st2/st2.conf keyvalue encryption_key_path ${DATASTORE_ENCRYPTION_KEY_PATH}
 
+  # NOTE: We need to restart all the affected services so they pick the key and load it in memory
   sudo st2ctl restart-component st2api
+  sudo st2ctl restart-component st2sensorcontainer
+  sudo st2ctl restart-component st2workflowengine
+  sudo st2ctl restart-component st2actionrunner
 }
 
 
@@ -646,9 +650,6 @@ EOT"
   sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
 
   sudo service nginx restart
-
-  # st2web logs shouldn't be read by others
-  sudo chmod o-r /var/log/nginx/st2webui.* /var/log/nginx/ssl-st2webui.*
 }
 
 install_st2chatops() {

@@ -3,6 +3,7 @@ ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
 ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
 CHANGELOG_COMMENT ?= "automated build, version: $(ST2PKG_VERSION)"
+RUNNERS := $(shell ls ../contrib/runners)
 
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
@@ -52,11 +53,16 @@ post_install:
 	install -m644 ../st2actions/conf/syslog.notifier.conf $(DESTDIR)/etc/st2/syslog.notifier.conf
 	install -m644 ../st2actions/conf/logging.resultstracker.conf $(DESTDIR)/etc/st2/logging.resultstracker.conf
 	install -m644 ../st2actions/conf/syslog.resultstracker.conf $(DESTDIR)/etc/st2/syslog.resultstracker.conf
+	install -m644 ../st2actions/conf/logging.workflowengine.conf $(DESTDIR)/etc/st2/logging.workflowengine.conf
+	install -m644 ../st2actions/conf/syslog.workflowengine.conf $(DESTDIR)/etc/st2/syslog.workflowengine.conf
 	install -m644 ../st2api/conf/logging.conf $(DESTDIR)/etc/st2/logging.api.conf
+	install -m644 ../st2api/conf/logging.gunicorn.conf $(DESTDIR)/etc/st2/logging.api.gunicorn.conf
 	install -m644 ../st2api/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.api.conf
 	install -m644 ../st2stream/conf/logging.conf $(DESTDIR)/etc/st2/logging.stream.conf
+	install -m644 ../st2stream/conf/logging.gunicorn.conf $(DESTDIR)/etc/st2/logging.stream.gunicorn.conf
 	install -m644 ../st2stream/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.stream.conf
 	install -m644 ../st2auth/conf/logging.conf $(DESTDIR)/etc/st2/logging.auth.conf
+	install -m644 ../st2auth/conf/logging.gunicorn.conf $(DESTDIR)/etc/st2/logging.auth.gunicorn.conf
 	install -m644 ../st2auth/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.auth.conf
 	install -m644 ../st2reactor/conf/logging.timersengine.conf $(DESTDIR)/etc/st2/logging.timersengine.conf
 	install -m644 ../st2reactor/conf/syslog.timersengine.conf $(DESTDIR)/etc/st2/syslog.timersengine.conf
@@ -82,7 +88,7 @@ populate_version: .stamp-populate_version
 	touch $@
 
 requirements:
-	python ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt -f ../fixed-requirements.txt
+	python ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
 	cat requirements.txt
 
 changelog: populate_version
@@ -91,11 +97,22 @@ ifeq ($(DEBIAN),1)
 		dch -m --force-distribution -v$${_epoch}$(ST2PKG_VERSION)-$(ST2PKG_RELEASE) -D$(DEB_DISTRO) $(CHANGELOG_COMMENT)
 endif
 
-wheelhouse: .stamp-wheelhouse
+wheelhouse: .build-runners .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements inject-deps
 	cat requirements.txt
 	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
 		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	touch $@
+
+.build-runners:
+	@echo "##########################################"
+	@echo "#            Building Runners            #"
+	@echo "##########################################"
+	@echo $(RUNNERS)
+	@for runner in $(RUNNERS); do \
+		echo "Installing $$runner"; \
+		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner; \
+	done
 	touch $@
 
 # Note: We want to dynamically inject "st2client" dependency. This way we can
