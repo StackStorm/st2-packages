@@ -7,5 +7,4 @@ st2reactor
 st2exporter
 st2debug
 st2tests
-stackstorm-runner-orchestra
 git+https://github.com/StackStorm/st2-auth-backend-pam.git@master#egg=st2-auth-backend-pam
