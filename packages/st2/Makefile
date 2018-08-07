@@ -49,6 +49,10 @@ post_install:
 	install -m644 ../conf/logrotate.conf $(DESTDIR)/etc/logrotate.d/st2
 	install -m644 ../st2actions/conf/logging.conf $(DESTDIR)/etc/st2/logging.actionrunner.conf
 	install -m644 ../st2actions/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.actionrunner.conf
+	install -m644 ../st2actions/conf/logging.notifier.conf $(DESTDIR)/etc/st2/logging.notifier.conf
+	install -m644 ../st2actions/conf/syslog.notifier.conf $(DESTDIR)/etc/st2/syslog.notifier.conf
+	install -m644 ../st2actions/conf/logging.resultstracker.conf $(DESTDIR)/etc/st2/logging.resultstracker.conf
+	install -m644 ../st2actions/conf/syslog.resultstracker.conf $(DESTDIR)/etc/st2/syslog.resultstracker.conf
 	install -m644 ../st2actions/conf/logging.workflowengine.conf $(DESTDIR)/etc/st2/logging.workflowengine.conf
 	install -m644 ../st2actions/conf/syslog.workflowengine.conf $(DESTDIR)/etc/st2/syslog.workflowengine.conf
 	install -m644 ../st2api/conf/logging.conf $(DESTDIR)/etc/st2/logging.api.conf
@@ -60,6 +64,14 @@ post_install:
 	install -m644 ../st2auth/conf/logging.conf $(DESTDIR)/etc/st2/logging.auth.conf
 	install -m644 ../st2auth/conf/logging.gunicorn.conf $(DESTDIR)/etc/st2/logging.auth.gunicorn.conf
 	install -m644 ../st2auth/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.auth.conf
+	install -m644 ../st2reactor/conf/logging.timersengine.conf $(DESTDIR)/etc/st2/logging.timersengine.conf
+	install -m644 ../st2reactor/conf/syslog.timersengine.conf $(DESTDIR)/etc/st2/syslog.timersengine.conf
+	install -m644 ../st2reactor/conf/logging.sensorcontainer.conf $(DESTDIR)/etc/st2/logging.sensorcontainer.conf
+	install -m644 ../st2reactor/conf/syslog.sensorcontainer.conf $(DESTDIR)/etc/st2/syslog.sensorcontainer.conf
+	install -m644 ../st2reactor/conf/logging.rulesengine.conf $(DESTDIR)/etc/st2/logging.rulesengine.conf
+	install -m644 ../st2reactor/conf/syslog.rulesengine.conf $(DESTDIR)/etc/st2/syslog.rulesengine.conf
+	install -m644 ../st2reactor/conf/logging.garbagecollector.conf $(DESTDIR)/etc/st2/logging.garbagecollector.conf
+	install -m644 ../st2reactor/conf/syslog.garbagecollector.conf $(DESTDIR)/etc/st2/syslog.garbagecollector.conf
 	install -m755 ../st2client/conf/st2.complete.sh $(DESTDIR)/etc/bash_completion.d/st2
 	install -m755 bin/runners.sh $(DESTDIR)/opt/stackstorm/st2/bin/runners.sh
 	sed -i -r "/args\s*=\s*/s%logs%/var/log/st2%g" $(DESTDIR)/etc/st2/logging.*conf
