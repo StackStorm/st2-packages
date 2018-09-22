@@ -328,11 +328,11 @@ EOT"
   sudo openssl req -x509 -newkey rsa:2048 -keyout /etc/ssl/st2/st2.key -out /etc/ssl/st2/st2.crt \
   -days 365 -nodes -subj "/C=US/ST=California/L=Palo Alto/O=StackStorm/OU=Information Technology/CN=$(hostname)"
 
+  # Remove default site, if present
+  sudo rm -f /etc/nginx/conf.d/default.conf
+
   # Copy and enable StackStorm's supplied config file
   sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
-
-  # Disable default_server configuration in existing /etc/nginx/conf.d/default.conf
-  sudo sed -i 's/default_server//g' /etc/nginx/conf.d/default.conf
 
   sudo service nginx start
   sudo chkconfig nginx on
