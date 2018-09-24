@@ -134,7 +134,7 @@ install_st2_dependencies() {
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB (3.4)
   wget -qO - https://www.mongodb.org/static/pgp/server-3.4.asc | sudo apt-key add -
-  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+  echo "deb https://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
 
   sudo apt-get update
   sudo apt-get install -y mongodb-org
@@ -320,10 +320,10 @@ install_st2mistral() {
 
 install_st2web() {
   # Add key and repo for the latest stable nginx
-  sudo apt-key adv --fetch-keys http://nginx.org/keys/nginx_signing.key
+  sudo apt-key adv --fetch-keys https://nginx.org/keys/nginx_signing.key
   sudo sh -c "cat <<EOT > /etc/apt/sources.list.d/nginx.list
-deb http://nginx.org/packages/ubuntu/ ${SUBTYPE} nginx
-deb-src http://nginx.org/packages/ubuntu/ ${SUBTYPE} nginx
+deb https://nginx.org/packages/ubuntu/ ${SUBTYPE} nginx
+deb-src https://nginx.org/packages/ubuntu/ ${SUBTYPE} nginx
 EOT"
   sudo apt-get update
 
