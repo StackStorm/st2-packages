@@ -1,4 +1,3 @@
-../contrib/runners opt/stackstorm/
 ../contrib/core opt/stackstorm/packs/
 ../contrib/packs opt/stackstorm/packs/
 ../contrib/linux opt/stackstorm/packs/
