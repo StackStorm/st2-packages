@@ -33,6 +33,7 @@ Conflicts: st2common
   %pip_install_venv
   %service_install st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier st2workflowengine
   %service_install st2resultstracker st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
+  %service_install st2scheduler
   make post_install DESTDIR=%{buildroot}
   %{!?use_systemd:install -D -m644 conf/rhel-functions-sysvinit %{buildroot}/opt/stackstorm/st2/share/sysvinit/functions}
 
@@ -51,15 +52,18 @@ Conflicts: st2common
 %post
   %service_post st2actionrunner st2api st2stream st2auth st2notifier st2workflowengine
   %service_post st2resultstracker st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
+  %service_post st2scheduler
   %include rpm/postinst_script.spec
 
 %preun
   %service_preun st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier st2workflowengine
   %service_preun st2resultstracker st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
+  %service_prerun st2scheduler
 
 %postun
   %service_postun st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier st2workflowengine
   %service_postun st2resultstracker st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
+  %service_postrun st2scheduler
   # Remove st2 logrotate config, since there's no analog of apt-get purge available
   if [ $1 -eq 0 ]; then
     [ ! -f /etc/logrotate.d/st2 ] || rm /etc/logrotate.d/st2
@@ -99,6 +103,7 @@ Conflicts: st2common
   %{_unitdir}/st2garbagecollector.service
   %{_unitdir}/st2timersengine.service
   %{_unitdir}/st2workflowengine.service
+  %{_unitdir}/st2scheduler.service
 %else
   %{_sysconfdir}/rc.d/init.d/st2actionrunner
   %{_sysconfdir}/rc.d/init.d/%{worker_name}
@@ -112,4 +117,5 @@ Conflicts: st2common
   %{_sysconfdir}/rc.d/init.d/st2sensorcontainer
   %{_sysconfdir}/rc.d/init.d/st2garbagecollector
   %{_sysconfdir}/rc.d/init.d/st2workflowengine
+  %{_sysconfdir}/rc.d/init.d/st2scheduler
 %endif

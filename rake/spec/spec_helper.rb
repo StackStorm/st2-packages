@@ -22,7 +22,7 @@ class ST2Spec
   instance_eval(File.read('rake/build/environment.rb'))
 
   ST2_SERVICES = %w(st2api st2stream st2auth st2actionrunner st2notifier st2workflowengine
-                    st2resultstracker st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector)
+                    st2resultstracker st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector st2scheduler)
 
   SPECCONF = {
     bin_prefix: '/usr/bin',
