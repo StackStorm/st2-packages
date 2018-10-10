@@ -39,6 +39,7 @@ ifeq (true, $(IS_SYSTEMD))
 	dh_systemd_enable --name=st2garbagecollector st2garbagecollector.service
 	dh_systemd_enable --name=st2timersengine st2timersengine.service
 	dh_systemd_enable --name=st2workflowengine st2workflowengine.service
+	dh_systemd_enable --name=st2scheduler st2scheduler.service
 else
 	# So far don't start services
 	dh_installinit --no-start --name=st2actionrunner-worker
@@ -53,6 +54,7 @@ else
 	dh_installinit --no-start --name=st2garbagecollector
 	dh_installinit --no-start --name=st2timersengine
 	dh_installinit --no-start --name=st2workflowengine
+	dh_installinit --no-start --name=st2scheduler
 endif
 
 override_dh_installdeb:

@@ -72,6 +72,8 @@ post_install:
 	install -m644 ../st2reactor/conf/syslog.rulesengine.conf $(DESTDIR)/etc/st2/syslog.rulesengine.conf
 	install -m644 ../st2reactor/conf/logging.garbagecollector.conf $(DESTDIR)/etc/st2/logging.garbagecollector.conf
 	install -m644 ../st2reactor/conf/syslog.garbagecollector.conf $(DESTDIR)/etc/st2/syslog.garbagecollector.conf
+	install -m644 ../st2actions/conf/logging.scheduler.conf $(DESTDIR)/etc/st2/logging.scheduler.conf
+	install -m644 ../st2actions/conf/syslog.scheduler.conf $(DESTDIR)/etc/st2/syslog.scheduler.conf
 	install -m755 ../st2client/conf/st2.complete.sh $(DESTDIR)/etc/bash_completion.d/st2
 	install -m755 bin/runners.sh $(DESTDIR)/opt/stackstorm/st2/bin/runners.sh
 	sed -i -r "/args\s*=\s*/s%logs%/var/log/st2%g" $(DESTDIR)/etc/st2/logging.*conf
