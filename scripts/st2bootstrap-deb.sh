@@ -620,7 +620,7 @@ install_st2mistral() {
   /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
 
   # Register mistral actions.
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate | grep -v openstack
+  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate | grep -v openstack | grep -v "ironicclient"
 
   # Start Mistral
   sudo service mistral start
