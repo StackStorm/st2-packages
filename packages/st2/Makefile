@@ -4,10 +4,13 @@ ST2PKG_RELEASE ?= 1
 ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
 CHANGELOG_COMMENT ?= "automated build, version: $(ST2PKG_VERSION)"
 RUNNERS := $(shell ls ../contrib/runners)
+DEB_DISTRO := $(shell lsb_release -cs)
 
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
+else ifeq ($(DEB_DISTRO),bionic)
+	PYTHON_BINARY := /usr/bin/python3
 else
 	PYTHON_BINARY := python
 endif
@@ -38,6 +41,13 @@ retry = $(2) $(foreach t,$(shell seq 1 ${1}),|| (echo -e "\033[33m Failed ($$?):
 
 .PHONY: all install wheelhouse
 all: install
+
+.PHONY: info
+info:
+	@echo "DEBIAN=$(DEBIAN)"
+	@echo "REDHAT=$(REDHAT)"
+	@echo "DEB_DISTRO=$(DEB_DISTRO)"
+	@echo "PYTHON_BINARY=$(PYTHON_BINARY)"
 
 install: wheelhouse changelog
 
