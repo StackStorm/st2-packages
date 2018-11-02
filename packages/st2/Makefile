@@ -100,7 +100,7 @@ populate_version: .stamp-populate_version
 	touch $@
 
 requirements:
-	python ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
 	cat requirements.txt
 
 changelog: populate_version
