@@ -123,6 +123,8 @@ bionicbuild:
     service: volumes-compose
 ```
 
+NOTE: Main ``distro`` definition (e.g. ``bionic``, ``xenial``, etc.) needs to use packaging runner image.
+
 As you can see, ``image`` attribute references local image tagged ``bionicbuild`` instead of a
 remote image (e.g. ``stackstorm/packagingbuild:bionic`` or similar).
 
