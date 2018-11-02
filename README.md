@@ -4,7 +4,6 @@
 [![Go to Docker Hub](https://img.shields.io/badge/Docker%20Hub-%E2%86%92-blue.svg)](https://hub.docker.com/r/stackstorm/)
 [![Download deb/rpm](https://img.shields.io/badge/Download-deb/rpm-blue.svg)](https://packagecloud.io/StackStorm/)
 
-
 ## Highlights
 
  - **Docker based**. Leveraging docker it's possible to deliver packages for any OS distro in a fast and reliable way.
@@ -23,7 +22,6 @@ Packages build environment is a *multi-container docker* application defined and
 `Dockerfiles` sources are available at [StackStorm/st2-dockerfiles](https://github.com/stackstorm/st2-dockerfiles).
 
 The Packages build environment compose application brings a self-sufficient pipeline to deliver ready to use packages.
-
 
 # Usage
 
@@ -107,6 +105,35 @@ Current community packages are hosted on https://packagecloud.io/StackStorm. For
 - [RHEL7/CentOS7](https://docs.stackstorm.com/install/rhel7.html)
 - [RHEL6/CentOS6](https://docs.stackstorm.com/install/rhel6.html)
 
+## Adding Support For a New Distribution
+
+If you are adding support for a new distribution for which ``packagingbuild`` and ``packagingtest``
+images are not yet published to Docker Hub and you want to test the build pipeline locally, you
+need to update ``docker-compose.yml`` file to use locally built Docker images.
+
+For example:
+
+```yaml
+image: stackstorm/packagingbuild:centos7
+
+bionicbuild:
+  image: bionicbuild
+  extends:
+    file: docker-compose.override.yml
+    service: volumes-compose
+```
+
+As you can see, ``image`` attribute references local image tagged ``bionicbuild`` instead of a
+remote image (e.g. ``stackstorm/packagingbuild:bionic`` or similar).
+
+Before that will work, you of course also need to build those images locally.
+
+For example:
+
+```bash
+cd ~/st2packaging-dockerfiles/packagingbuild
+docker build -t bionicbuild .
+```
 
 # License and Authors
 
