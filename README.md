@@ -114,13 +114,43 @@ need to update ``docker-compose.yml`` file to use locally built Docker images.
 For example:
 
 ```yaml
-image: stackstorm/packagingbuild:centos7
+...
+
+bionic:
+  image: quay.io/stackstorm/packagingrunner
+  extends:
+    file: docker-compose.override.yml
+    service: suite-compose
+  environment:
+    - BUILDNODE=bionicbuild
+    - TESTNODE=bionictest
+  links:
+    - bionicbuild
+    - bionictest
+    - rabbitmq
+    - mongodb
+    - postgres
+
+...
 
 bionicbuild:
   image: bionicbuild
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
+
+...
+
+bionictest:
+  image: bionictest
+  privileged: true
+  extends:
+    file: docker-compose.override.yml
+    service: volumes-compose
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+...
 ```
 
 NOTE: Main ``distro`` definition (e.g. ``bionic``, ``xenial``, etc.) needs to use packaging runner image.
