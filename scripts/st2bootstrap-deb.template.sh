@@ -14,8 +14,9 @@ DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
-if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' ]]; then
-  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) or 16.04 (xenial) as base system!"
+
+if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
+  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty), 16.04 (xenial) or Ubuntu 18.04 (bionic) as base system!"
   exit 2
 fi
 
@@ -74,6 +75,14 @@ setup_args() {
     fi
   fi
 
+  # Right now Bionic is not officially supported yet so we only support using staging unstable packages
+  if [[ "$SUBTYPE" == 'bionic' && "${REPO_TYPE}" != "staging"]]; then
+    if [[ "${RELEASE}" != "unstable" ]]; then
+      echo "Ubuntu 18.04 (Bionic) is not officially supported yet and only staging unstable (--staging --unstable) packages can be used on Bionic"
+      exit 2
+    fi
+  fi
+
   echo "########################################################"
   echo "          Installing StackStorm $RELEASE $VERSION              "
   echo "########################################################"
@@ -121,7 +130,7 @@ install_st2_dependencies() {
   # Configure RabbitMQ to listen on localhost only
   sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
 
-  if [[ "$SUBTYPE" == 'xenial' ]]; then
+  if [[ "$SUBTYPE" == 'xenial' || "${SUBTYPE}" == "bionic" ]]; then
     sudo systemctl restart rabbitmq-server
   else
     sudo service rabbitmq-server restart
@@ -133,6 +142,7 @@ install_st2_dependencies() {
 
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB (3.4)
+  # TODO: Install MongoDB 4.0 on Bionic
   wget -qO - https://www.mongodb.org/static/pgp/server-3.4.asc | sudo apt-key add -
   echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
 
@@ -142,7 +152,7 @@ install_mongodb() {
   # Configure MongoDB to listen on localhost only
   sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
 
-  if [[ "$SUBTYPE" == 'xenial' ]]; then
+  if [[ "$SUBTYPE" == 'xenial' || "${SUBTYPE}" == "bionic" ]]; then
     sudo systemctl enable mongod
     sudo systemctl start mongod
   else
@@ -180,7 +190,7 @@ EOF
   sudo sh -c 'echo "security:\n  authorization: enabled" >> /etc/mongod.conf'
 
   # MongoDB needs to be restarted after enabling auth
-  if [[ "$SUBTYPE" == 'xenial' ]]; then
+  if [[ "$SUBTYPE" == 'xenial'  || "${SUBTYPE}" == "bionic" ]]; then
     sudo systemctl restart mongod
   else
     sudo service mongod restart
