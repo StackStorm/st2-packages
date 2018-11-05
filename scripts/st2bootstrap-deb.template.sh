@@ -418,8 +418,10 @@ STEP="Configure st2 CLI config" && configure_st2_cli_config
 STEP="Generate symmetric crypto key for datastore" && generate_symmetric_crypto_key_for_datastore
 STEP="Verify st2" && verify_st2
 
-STEP="Install mistral dependencies" && install_st2mistral_dependencies
-STEP="Install mistral" && install_st2mistral
+if [[ "${SUBTYPE}" != "bionic" ]]; then
+    STEP="Install mistral dependencies" && install_st2mistral_dependencies
+    STEP="Install mistral" && install_st2mistral
+fi
 
 STEP="Install st2web" && install_st2web
 
