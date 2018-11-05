@@ -143,8 +143,13 @@ install_st2_dependencies() {
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB (3.4)
   # TODO: Install MongoDB 4.0 on Bionic
-  wget -qO - https://www.mongodb.org/static/pgp/server-3.4.asc | sudo apt-key add -
-  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+  if [[ "$SUBTYPE" == 'bionic' ]]; then
+    wget -qO - https://www.mongodb.org/static/pgp/server-4.0.asc | sudo apt-key add -
+    echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+  else
+    wget -qO - https://www.mongodb.org/static/pgp/server-3.4.asc | sudo apt-key add -
+    echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+  fi
 
   sudo apt-get update
   sudo apt-get install -y mongodb-org

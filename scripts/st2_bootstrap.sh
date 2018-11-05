@@ -163,8 +163,8 @@ elif [[ -n "$DEBTEST" ]]; then
   echo "*** Detected Distro is ${DEBTEST} ***"
   SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
   echo "*** Detected flavor ${SUBTYPE} ***"
-  if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' ]]; then
-    echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) or 16.04 (xenial) as base system!"
+  if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
+    echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty), 16.04 (xenial) or 18.04 (bionic) as base system!"
     exit 2
   fi
   ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-deb.sh"
