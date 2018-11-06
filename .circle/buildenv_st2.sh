@@ -7,17 +7,20 @@ source "$my_dir/buildenv_common.sh"
 distros=($DISTROS)
 DISTRO=${distros[$CIRCLE_NODE_INDEX]}
 
-echo "Using distros: ${DISTRO}"
+echo "Using distro: ${DISTRO}"
+echo "Using Python: $(python --version 2>&1)"
+echo "ST2_GITURL: ${ST2_GITURL}"
+echo "ST2_GITREV: ${ST2_GITREV}"
 
 fetch_version() {
   if [ -f ../st2/st2common/st2common/__init__.py ]; then
     # Get st2 version based on hardcoded string in st2common
     # build takes place in `st2` repo
-    python -c 'execfile("../st2/st2common/st2common/__init__.py"); print __version__'
+    python -c 'execfile("../st2/st2common/st2common/__init__.py"); print(__version__)'
   else
     # build takes place in `st2-packages` repo
     curl -sSL -o /tmp/st2_version.py ${ST2_GITURL}/raw/${ST2_GITREV}/st2common/st2common/__init__.py
-    python -c 'execfile("/tmp/st2_version.py"); print __version__'
+    python -c 'execfile("/tmp/st2_version.py"); print(__version__)'
   fi
 }
 
