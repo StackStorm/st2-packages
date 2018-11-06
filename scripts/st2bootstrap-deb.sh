@@ -84,7 +84,7 @@ setup_args() {
   fi
 
   # Right now Bionic is not officially supported yet so we only support using staging unstable packages
-  if [[ "$SUBTYPE" == 'bionic' && "${REPO_TYPE}" != "staging"]]; then
+  if [[ "$SUBTYPE" == 'bionic' ]] && [[ "${REPO_TYPE}" != "staging" ]]; then
     if [[ "${RELEASE}" != "unstable" ]]; then
       echo "Ubuntu 18.04 (Bionic) is not officially supported yet and only staging unstable (--staging --unstable) packages can be used on Bionic"
       exit 2
