@@ -7,6 +7,8 @@ source "$my_dir/buildenv_common.sh"
 distros=($DISTROS)
 DISTRO=${distros[$CIRCLE_NODE_INDEX]}
 
+echo "Using distros: ${DISTRO}"
+
 fetch_version() {
   if [ -f ../st2/st2common/st2common/__init__.py ]; then
     # Get st2 version based on hardcoded string in st2common
