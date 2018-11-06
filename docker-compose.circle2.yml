@@ -39,7 +39,6 @@ bionic:
     # NOTE: We don't build st2mistral package so we don't mix Python 3
     # (StackStorm components) and Python 2 (Mistral)
     # Bionic will be first release without a Mistral
-    - ST2_GITREV=fix_py3_issues
     - ST2_PACKAGES=st2
   links:
     - bionicbuild
