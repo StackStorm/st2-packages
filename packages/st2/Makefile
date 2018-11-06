@@ -7,7 +7,7 @@ RUNNERS := $(shell ls ../contrib/runners)
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
-	DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
+	#DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
 	DEB_DISTRO := $(shell lsb_release -cs)
 else
 	REDHAT := 1
