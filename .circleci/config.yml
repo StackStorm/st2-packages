@@ -18,7 +18,6 @@ jobs:
     working_directory: ~/st2-packages
     environment:
       DISTROS: "trusty xenial bionic el6 el7"
-      ST2_PACKAGES: "st2 st2mistral"
       BASH_ENV: ~/.buildenv
       # These should be set to an empty string, so that st2cd prep tasks are able to replace these
       # with real gitrevs during releases. Note that they are commented out, so that they do not interfere

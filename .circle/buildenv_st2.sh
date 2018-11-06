@@ -40,6 +40,7 @@ st2_giturl() {
 # ST2_GITREV - st2 branch name (ex: master, v1.2.1). This will be used to determine correct Docker Tag: `latest`, `1.2.1`
 # ST2PKG_VERSION - st2 version, will be reused in Docker image metadata (ex: 1.2dev)
 # ST2PKG_RELEASE - Release number aka revision number for `st2` package, will be reused in Docker metadata (ex: 4)
+# ST2_PACKAGES - Which packages to build (defautls to st2 mistral).
 
 ST2_GITURL=${ST2_GITURL:-https://github.com/StackStorm/st2}
 ST2_GITREV=${ST2_GITREV:-master}
@@ -57,6 +58,13 @@ re="\\b$DISTRO\\b"
 
 ST2_CIRCLE_URL=${CIRCLE_BUILD_URL}
 
-write_env ST2_GITURL ST2_GITREV ST2PKG_VERSION ST2PKG_RELEASE DISTRO TESTING ST2_CIRCLE_URL
+# NOTE: We don't build Mistral package on Ubuntu Bionic
+if [ "${DISTRO}" = "bionic"} ]; then
+    ST2_PACKAGES="st2"
+else
+    ST2_PACKAGES=${ST2_PACKAGES:-st2 mistral}
+fi
+
+write_env ST2_GITURL ST2_GITREV ST2PKG_VERSION ST2PKG_RELEASE DISTRO TESTING ST2_CIRCLE_URL ST2_PACKAGES
 
 cat ~/.buildenv
