@@ -30,9 +30,9 @@ xenial:
 
 bionic:
   image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
+  working_dir: /root/st2-packages
+  volumes_from:
+    - st2-packages-vol
   environment:
     - BUILDNODE=bionicbuild
     - TESTNODE=bionictest
