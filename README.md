@@ -117,40 +117,22 @@ For example:
 ...
 
 bionic:
+  ...
   image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
-  environment:
-    - BUILDNODE=bionicbuild
-    - TESTNODE=bionictest
-  links:
-    - bionicbuild
-    - bionictest
-    - rabbitmq
-    - mongodb
-    - postgres
-
+  ...
 ...
 
 bionicbuild:
+  ...
   image: bionicbuild
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  ...
 
 ...
 
 bionictest:
+  ...
   image: bionictest
-  privileged: true
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
-...
+  ...
 ```
 
 NOTE: Main ``distro`` definition (e.g. ``bionic``, ``xenial``, etc.) needs to use packaging runner image.
@@ -163,8 +145,11 @@ Before that will work, you of course also need to build those images locally.
 For example:
 
 ```bash
-cd ~/st2packaging-dockerfiles/packagingbuild
+cd ~/st2packaging-dockerfiles/packagingbuild/bionic
 docker build -t bionicbuild .
+
+cd ~/st2packaging-dockerfiles/packagingtest/bionic/systemd
+docker build -t bionictest .
 ```
 
 # License and Authors
