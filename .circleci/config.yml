@@ -122,6 +122,7 @@ jobs:
       - image: circleci/ruby:2.4
     working_directory: /tmp/deploy
     environment:
+      # TODO: Add support for deploying Bionic to Staging Unstable
       - DISTROS: "trusty xenial el6 el7"
     steps:
       - attach_workspace:
