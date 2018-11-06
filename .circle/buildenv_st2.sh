@@ -9,8 +9,6 @@ DISTRO=${distros[$CIRCLE_NODE_INDEX]}
 
 echo "Using distro: ${DISTRO}"
 echo "Using Python: $(python --version 2>&1)"
-echo "ST2_GITURL: ${ST2_GITURL}"
-echo "ST2_GITREV: ${ST2_GITREV}"
 
 fetch_version() {
   if [ -f ../st2/st2common/st2common/__init__.py ]; then
