@@ -93,7 +93,12 @@ xenialbuild:
 bionicbuild:
   image: stackstorm/packagingbuild:bionic
   volumes_from:
+  environment:
     - st2-packages-vol
+    # NOTE: We don't build st2mistral package so we don't mix Python 3
+    # (StackStorm components) and Python 2 (Mistral)
+    # Bionic will be first release without a Mistral
+    - ST2_PACKAGES=st2
 
 centos6build:
   image: stackstorm/packagingbuild:centos6
@@ -127,6 +132,12 @@ bionictest:
     - st2-packages-vol
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  environment:
+    - st2-packages-vol
+    # NOTE: We don't build st2mistral package so we don't mix Python 3
+    # (StackStorm components) and Python 2 (Mistral)
+    # Bionic will be first release without a Mistral
+    - ST2_PACKAGES=st2
 
 centos6test:
   image: stackstorm/packagingtest:centos6-sshd

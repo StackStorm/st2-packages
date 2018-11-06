@@ -97,6 +97,10 @@ bionicbuild:
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
+  environment:
+    # (StackStorm components) and Python 2 (Mistral)
+    # Bionic will be first release without a Mistral
+    - ST2_PACKAGES=st2
 
 centos6build:
   image: stackstorm/packagingbuild:centos6
@@ -135,6 +139,10 @@ bionictest:
     service: volumes-compose
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  environment:
+    # (StackStorm components) and Python 2 (Mistral)
+    # Bionic will be first release without a Mistral
+    - ST2_PACKAGES=st2
 
 centos6test:
   image: stackstorm/packagingtest:centos6-sshd
