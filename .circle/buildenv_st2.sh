@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 my_dir="$(dirname "$0")"
 source "$my_dir/buildenv_common.sh"
