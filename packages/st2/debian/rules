@@ -31,11 +31,9 @@ override_dh_installdirs:
 
 ifeq ($(DEB_DISTRO),bionic)
 	SUBSTVARS = -Vpre:Depends="python3 (>= 3.6)"
-	SUBSTVARS = -Vbuild:Depends="python3 (>= 3.6)"
 	SUBSTVARS = -VDepends="python3-distutils python3-dev"
 else
 	SUBSTVARS = -Vpre:Depends="python2.7"
-	SUBSTVARS = -Vbuild:VDepends="python2.7"
 	SUBSTVARS = -VDepends="libpython-dev | python-dev"
 endif
 
