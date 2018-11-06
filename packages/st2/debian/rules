@@ -29,6 +29,19 @@ override_dh_installdirs:
 	# dh_auto_install same with:
 	$(MAKE) install
 
+ifeq ($(DEB_DISTRO),bionic)
+	SUBSTVARS = -Vpre:Depends="python3 (>= 3.6)"
+	SUBSTVARS = -Vbuild:Depends="python3 (>= 3.6)"
+	SUBSTVARS = -VDepends="python3-distutils python3-dev"
+else
+	SUBSTVARS = -Vpre:Depends="python2.7"
+	SUBSTVARS = -Vbuild:VDepends="python2.7"
+	SUBSTVARS = -VDepends="libpython-dev | python-dev"
+endif
+
+override_dh_gencontrol:
+	dh_gencontrol -- $(SUBSTVARS)
+
 # Packaging recognizes only 1 {package_name} service file (http://manpages.ubuntu.com/manpages/trusty/man1/dh_installinit.1.html)
 # We have many, and so force it to install multiple service files
 override_dh_installinit:
