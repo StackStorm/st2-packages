@@ -58,6 +58,13 @@ re="\\b$DISTRO\\b"
 
 ST2_CIRCLE_URL=${CIRCLE_BUILD_URL}
 
-write_env ST2_GITURL ST2_GITREV ST2PKG_VERSION ST2PKG_RELEASE DISTRO TESTING ST2_CIRCLE_URL
+# NOTE: We don't build Mistral package on Ubuntu Bionic
+if [ "${DISTRO}" = "bionic"} ]; then
+    ST2_PACKAGES="st2"
+else
+    ST2_PACKAGES=${ST2_PACKAGES:-st2 mistral}
+fi
+
+write_env ST2_GITURL ST2_GITREV ST2PKG_VERSION ST2PKG_RELEASE DISTRO TESTING ST2_CIRCLE_URL ST2_PACKAGES
 
 cat ~/.buildenv
