@@ -132,11 +132,6 @@ install_st2_dependencies() {
     sudo apt-get install -y gnupg-curl
   fi
 
-  # python3-distutils is needed on Bionic
-  if [[ "$SUBTYPE" == 'bionic' ]]; then
-    sudo apt-get install -y python3-distutils
-  fi
-
   sudo apt-get install -y curl
   sudo apt-get install -y rabbitmq-server
 
