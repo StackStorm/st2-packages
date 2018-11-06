@@ -35,6 +35,7 @@ info:
 	@echo "REDHAT=$(REDHAT)"
 	@echo "DEB_DISTRO=$(DEB_DISTRO)"
 	@echo "PYTHON_BINARY=$(PYTHON_BINARY)"
+	@echo "PIP_BINARY=$(PIP_BINARY)"
 
 .PHONY: populate_version requirements wheelhouse bdist_wheel
 all: info populate_version requirements bdist_wheel
