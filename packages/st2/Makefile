@@ -7,16 +7,11 @@ RUNNERS := $(shell ls ../contrib/runners)
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
-	#DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
+	DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
+	DEB_DISTRO := $(shell lsb_release -cs)
 else
 	REDHAT := 1
-endif
-
-# Only useful for debian builds
-ifeq ($(DEB_EPOCH),)
 	DEB_DISTRO := unstable
-else
-	DEB_DISTRO := $(shell lsb_release -cs)
 endif
 
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
@@ -39,7 +34,7 @@ ST2PKG_NORMALIZED_VERSION ?= $(shell $(PYTHON_BINARY) setup.py --version || echo
 retry = $(2) $(foreach t,$(shell seq 1 ${1}),|| (echo -e "\033[33m Failed ($$?): '$(2)'\n Retrying $t ... \033[0m"; $(2)))
 
 .PHONY: all install wheelhouse
-all: install
+all: info install
 
 .PHONY: info
 info:

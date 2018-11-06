@@ -2,7 +2,15 @@ WHEELDIR ?= /tmp/wheelhouse
 ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
 ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
-DEB_DISTRO := $(shell lsb_release -cs)
+
+ifneq (,$(wildcard /etc/debian_version))
+	DEBIAN := 1
+	DEB_DISTRO := $(shell lsb_release -cs)
+	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
+else
+	REDHAT := 1
+	DEB_DISTRO := unstable
+endif
 
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
@@ -21,15 +29,15 @@ endif
 # and we need setup.py to normalize it (e.g. 1.4dev -> 1.4.dev0)
 ST2PKG_NORMALIZED_VERSION ?= $(shell $(PYTHON_BINARY) setup.py --version || echo "failed_to_retrieve_version")
 
-ifneq (,$(wildcard /etc/debian_version))
-	DEBIAN := 1
-	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
-else
-	REDHAT := 1
-endif
+.PHONY: info
+info:
+	@echo "DEBIAN=$(DEBIAN)"
+	@echo "REDHAT=$(REDHAT)"
+	@echo "DEB_DISTRO=$(DEB_DISTRO)"
+	@echo "PYTHON_BINARY=$(PYTHON_BINARY)"
 
 .PHONY: populate_version requirements wheelhouse bdist_wheel
-all: populate_version requirements bdist_wheel
+all: info populate_version requirements bdist_wheel
 
 populate_version: .stamp-populate_version
 .stamp-populate_version:
