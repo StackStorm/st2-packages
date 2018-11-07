@@ -16,19 +16,13 @@ IS_SYSTEMD = $(shell command -v dh_systemd_enable > /dev/null 2>&1 && echo true)
 DEB_DISTRO := $(shell lsb_release -cs)
 
 # Trusty, Xenial and Bionic depend on different libraries.
-# Most important, Bionic uses Python 3 and others use Python 2.7
-BIONIC_PRE_DEPENDS := python3 (>= 3.6)
-BIONIC_DEPENDS := python3-distutils, python3-dev
-
-OTHER_PRE_DEPENDS := python2.7
-OTHER_DEPENDS = libpython-dev | python-dev
-
+# Most important, Bionic uses Python 3 and others use Python 2.7.
 ifeq ($(DEB_DISTRO),bionic)
-	BUILD_PRE_DEPENDS := $(BIONIC_PRE_DEPENDS)
-	BUILD_DEPENDS := $(BIONIC_DEPENDS)
+	BUILD_PRE_DEPENDS := python3 (>= 3.6)
+	BUILD_DEPENDS := python3-distutils, python3-dev
 else
-	BUILD_PRE_DEPENDS := $(OTHER_PRE_DEPENDS)
-	BUILD_DEPENDS := $(OTHER_DEPENDS)
+	BUILD_PRE_DEPENDS := python2.7
+	BUILD_DEPENDS := libpython-dev | python-dev
 endif
 
 %:
