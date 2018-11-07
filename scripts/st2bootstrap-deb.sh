@@ -653,8 +653,26 @@ EOT"
 }
 
 install_st2chatops() {
-  # Add NodeJS 10 repo
-  curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+  INSTALLABLE_ST2CHATOPS_VERSION=$(apt show st2chatops | grep 'Version:' | sed 's/^Version: \([[:digit:]]\+\)\.\([[:digit:]]\).*/\1.\2')
+
+  # Check if the st2chatops version is >= 3.0
+  python -c <<EOF
+import sys
+if '${INSTALLABLE_ST2CHATOPS_VERSION}' >= '3.0':
+    sys.exit(0)
+else:
+    sys.exit(1)
+EOF
+
+  # st2chatops >= 3.0 requires Node.js >= 8.0, < 11.0
+  if [ $? ]; then
+    NODE_VERSION=10
+  else
+    NODE_VERSION=6
+  fi
+
+  # Add NodeJS repo
+  curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash -
 
   # Install st2chatops
   sudo apt-get install -y st2chatops${ST2CHATOPS_PKG_VERSION}
