@@ -683,26 +683,8 @@ install_st2chatops() {
     sudo yum install -y https://kojipkgs.fedoraproject.org//packages/http-parser/2.7.1/3.el7/x86_64/http-parser-2.7.1-3.el7.x86_64.rpm
   fi
 
-  INSTALLABLE_ST2CHATOPS_VERSION=$(yum info st2chatops | grep '^Version' | sed 's/^Version[[:space:]]*:[[:space:]]*\([[:digit:]]\+\)\.\([[:digit:]]\+\).*/\1.\2/')
-
-  # Check if the st2chatops version is >= 3.0
-  python -c <<EOF
-import sys
-if '${INSTALLABLE_ST2CHATOPS_VERSION}' >= '3.0':
-    sys.exit(0)
-else:
-    sys.exit(1)
-EOF
-
-  # st2chatops >= 3.0 requires Node.js >= 8.0, < 11.0
-  if [ $? ]; then
-    NODE_VERSION=10
-  else
-    NODE_VERSION=6
-  fi
-
-  # Add NodeJS repo
-  curl -sL https://rpm.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash -
+  # Add NodeJS 10 repo
+  curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
 
   # Install st2chatops
   sudo yum install -y ${ST2CHATOPS_PKG}
