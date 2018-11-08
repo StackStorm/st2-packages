@@ -683,8 +683,8 @@ install_st2chatops() {
     sudo yum install -y https://kojipkgs.fedoraproject.org//packages/http-parser/2.7.1/3.el7/x86_64/http-parser-2.7.1-3.el7.x86_64.rpm
   fi
 
-  # Add NodeJS 6 repo
-  curl -sL https://rpm.nodesource.com/setup_6.x | sudo -E bash -
+  # Add NodeJS 10 repo
+  curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
 
   # Install st2chatops
   sudo yum install -y ${ST2CHATOPS_PKG}

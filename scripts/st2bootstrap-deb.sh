@@ -653,8 +653,8 @@ EOT"
 }
 
 install_st2chatops() {
-  # Add NodeJS 6 repo
-  curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+  # Add NodeJS 10 repo
+  curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 
   # Install st2chatops
   sudo apt-get install -y st2chatops${ST2CHATOPS_PKG_VERSION}
