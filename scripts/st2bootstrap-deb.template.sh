@@ -14,8 +14,9 @@ DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
-if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' ]]; then
-  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) or 16.04 (xenial) as base system!"
+
+if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
+  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty), 16.04 (xenial) or Ubuntu 18.04 (bionic) as base system!"
   exit 2
 fi
 
@@ -74,6 +75,19 @@ setup_args() {
     fi
   fi
 
+   # Right now Bionic is not officially supported yet so we only support using staging unstable packages
+  if [[ "$SUBTYPE" == 'bionic' ]] && [[ "${DEV_BUILD}" = "" ]]; then
+    if [[ "${REPO_TYPE}" != "staging" ]]; then
+      echo "Ubuntu 18.04 (Bionic) is not officially supported yet and only staging unstable (--staging --unstable) packages can be used on Bionic"
+      exit 2
+    fi
+
+    if [[ "${RELEASE}" != "unstable" ]]; then
+      echo "Ubuntu 18.04 (Bionic) is not officially supported yet and only staging unstable (--staging --unstable) packages can be used on Bionic"
+      exit 2
+    fi
+  fi
+
   echo "########################################################"
   echo "          Installing StackStorm $RELEASE $VERSION              "
   echo "########################################################"
@@ -114,14 +128,17 @@ install_st2_dependencies() {
   sudo apt-get update
 
   # Note: gnupg-curl is needed to be able to use https transport when fetching keys
-  sudo apt-get install -y gnupg-curl
+  if [[ "$SUBTYPE" != 'bionic' ]]; then
+    sudo apt-get install -y gnupg-curl
+  fi
+
   sudo apt-get install -y curl
   sudo apt-get install -y rabbitmq-server
 
   # Configure RabbitMQ to listen on localhost only
   sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
 
-  if [[ "$SUBTYPE" == 'xenial' ]]; then
+  if [[ "$SUBTYPE" == 'xenial' || "${SUBTYPE}" == "bionic" ]]; then
     sudo systemctl restart rabbitmq-server
   else
     sudo service rabbitmq-server restart
@@ -133,8 +150,14 @@ install_st2_dependencies() {
 
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB (3.4)
-  wget -qO - https://www.mongodb.org/static/pgp/server-3.4.asc | sudo apt-key add -
-  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+  # TODO: Install MongoDB 4.0 on Bionic
+  if [[ "$SUBTYPE" == 'bionic' ]]; then
+    wget -qO - https://www.mongodb.org/static/pgp/server-4.0.asc | sudo apt-key add -
+    echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+  else
+    wget -qO - https://www.mongodb.org/static/pgp/server-3.4.asc | sudo apt-key add -
+    echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+  fi
 
   sudo apt-get update
   sudo apt-get install -y mongodb-org
@@ -142,7 +165,7 @@ install_mongodb() {
   # Configure MongoDB to listen on localhost only
   sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
 
-  if [[ "$SUBTYPE" == 'xenial' ]]; then
+  if [[ "$SUBTYPE" == 'xenial' || "${SUBTYPE}" == "bionic" ]]; then
     sudo systemctl enable mongod
     sudo systemctl start mongod
   else
@@ -180,7 +203,7 @@ EOF
   sudo sh -c 'echo "security:\n  authorization: enabled" >> /etc/mongod.conf'
 
   # MongoDB needs to be restarted after enabling auth
-  if [[ "$SUBTYPE" == 'xenial' ]]; then
+  if [[ "$SUBTYPE" == 'xenial'  || "${SUBTYPE}" == "bionic" ]]; then
     sudo systemctl restart mongod
   else
     sudo service mongod restart
@@ -403,8 +426,10 @@ STEP="Configure st2 CLI config" && configure_st2_cli_config
 STEP="Generate symmetric crypto key for datastore" && generate_symmetric_crypto_key_for_datastore
 STEP="Verify st2" && verify_st2
 
-STEP="Install mistral dependencies" && install_st2mistral_dependencies
-STEP="Install mistral" && install_st2mistral
+if [[ "${SUBTYPE}" != "bionic" ]]; then
+    STEP="Install mistral dependencies" && install_st2mistral_dependencies
+    STEP="Install mistral" && install_st2mistral
+fi
 
 STEP="Install st2web" && install_st2web
 

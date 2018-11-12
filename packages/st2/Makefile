@@ -5,9 +5,20 @@ ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; p
 CHANGELOG_COMMENT ?= "automated build, version: $(ST2PKG_VERSION)"
 RUNNERS := $(shell ls ../contrib/runners)
 
+ifneq (,$(wildcard /etc/debian_version))
+	DEBIAN := 1
+	#DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
+	DEB_DISTRO := $(shell lsb_release -cs)
+else
+	REDHAT := 1
+	DEB_DISTRO := unstable
+endif
+
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
+else ifeq ($(DEB_DISTRO),bionic)
+	PYTHON_BINARY := /usr/bin/python3
 else
 	PYTHON_BINARY := python
 endif
@@ -17,27 +28,20 @@ endif
 # and we need setup.py to normalize it (e.g. 1.4dev -> 1.4.dev0)
 ST2PKG_NORMALIZED_VERSION ?= $(shell $(PYTHON_BINARY) setup.py --version || echo "failed_to_retrieve_version")
 
-ifneq (,$(wildcard /etc/debian_version))
-	DEBIAN := 1
-	#DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
-else
-	REDHAT := 1
-endif
-
-# Only useful for debian builds
-ifeq ($(DEB_EPOCH),)
-	DEB_DISTRO := unstable
-else
-	DEB_DISTRO := $(shell lsb_release -cs)
-endif
-
 # Makefile function to retry the failed command 'N' times
 # Make sure you use it for nothing but networking stuff (think about race conditons)
 # Example: $(call retry,3,some_script.sh)
 retry = $(2) $(foreach t,$(shell seq 1 ${1}),|| (echo -e "\033[33m Failed ($$?): '$(2)'\n Retrying $t ... \033[0m"; $(2)))
 
 .PHONY: all install wheelhouse
-all: install
+all: info install
+
+.PHONY: info
+info:
+	@echo "DEBIAN=$(DEBIAN)"
+	@echo "REDHAT=$(REDHAT)"
+	@echo "DEB_DISTRO=$(DEB_DISTRO)"
+	@echo "PYTHON_BINARY=$(PYTHON_BINARY)"
 
 install: wheelhouse changelog
 
@@ -90,7 +94,7 @@ populate_version: .stamp-populate_version
 	touch $@
 
 requirements:
-	python ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
 	cat requirements.txt
 
 changelog: populate_version

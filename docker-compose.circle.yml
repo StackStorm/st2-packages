@@ -22,6 +22,25 @@ xenial:
     - xenialbuild
     - xenialtest
 
+bionic:
+  image: quay.io/stackstorm/packagingrunner
+  extends:
+    file: docker-compose.override.yml
+    service: suite-compose
+  environment:
+    - BUILDNODE=bionicbuild
+    - TESTNODE=bionictest
+    # NOTE: We don't build st2mistral package so we don't mix Python 3
+    # (StackStorm components) and Python 2 (Mistral)
+    # Bionic will be first release without a Mistral
+    - ST2_PACKAGES=st2
+  links:
+    - bionicbuild
+    - bionictest
+    - rabbitmq
+    - mongodb
+    - postgres
+
 el7:
   image: quay.io/stackstorm/packagingrunner
   extends:
@@ -61,6 +80,11 @@ xenialbuild:
     file: docker-compose.override.yml
     service: volumes-circle
 
+bionicbuild:
+  image: stackstorm/packagingbuild:bionic
+  volumes_from:
+    - st2-packages-vol
+
 centos6build:
   image: stackstorm/packagingbuild:centos6
   extends:
@@ -87,6 +111,14 @@ xenialtest:
   extends:
     file: docker-compose.override.yml
     service: volumes-circle
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+bionictest:
+  image: stackstorm/packagingtest:bionic-systemd
+  privileged: true
+  volumes_from:
+    - st2-packages-vol
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
 

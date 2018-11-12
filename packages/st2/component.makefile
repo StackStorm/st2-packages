@@ -3,11 +3,25 @@ ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
 ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
 
+ifneq (,$(wildcard /etc/debian_version))
+	DEBIAN := 1
+	DEB_DISTRO := $(shell lsb_release -cs)
+	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
+else
+	REDHAT := 1
+	DEB_DISTRO := unstable
+endif
+
 ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
+	PIP_BINARY := pip
+else ifeq ($(DEB_DISTRO),bionic)
+	PYTHON_BINARY := /usr/bin/python3
+	PIP_BINARY := /usr/bin/pip3
 else
 	PYTHON_BINARY := python
+	PIP_BINARY := pip
 endif
 
 # Note: We dynamically obtain the version, this is required because dev
@@ -15,15 +29,16 @@ endif
 # and we need setup.py to normalize it (e.g. 1.4dev -> 1.4.dev0)
 ST2PKG_NORMALIZED_VERSION ?= $(shell $(PYTHON_BINARY) setup.py --version || echo "failed_to_retrieve_version")
 
-ifneq (,$(wildcard /etc/debian_version))
-	DEBIAN := 1
-	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
-else
-	REDHAT := 1
-endif
+.PHONY: info
+info:
+	@echo "DEBIAN=$(DEBIAN)"
+	@echo "REDHAT=$(REDHAT)"
+	@echo "DEB_DISTRO=$(DEB_DISTRO)"
+	@echo "PYTHON_BINARY=$(PYTHON_BINARY)"
+	@echo "PIP_BINARY=$(PIP_BINARY)"
 
 .PHONY: populate_version requirements wheelhouse bdist_wheel
-all: populate_version requirements bdist_wheel
+all: info populate_version requirements bdist_wheel
 
 populate_version: .stamp-populate_version
 .stamp-populate_version:
@@ -33,22 +48,22 @@ populate_version: .stamp-populate_version
 
 requirements: .stamp-requirements
 .stamp-requirements:
-	python ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 	cat requirements.txt
 
 wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements
 	# Install wheels into shared location
 	cat requirements.txt
-	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
-		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+		$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | populate_version requirements inject-deps
 	cat requirements.txt
-	python setup.py bdist_wheel -d $(WHEELDIR) || \
-		python setup.py bdist_wheel -d $(WHEELDIR)
+	$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR) || \
+		$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@
 
 # Note: We want to dynamically inject "st2client" dependency. This way we can

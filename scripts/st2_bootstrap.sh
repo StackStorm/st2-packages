@@ -163,8 +163,8 @@ elif [[ -n "$DEBTEST" ]]; then
   echo "*** Detected Distro is ${DEBTEST} ***"
   SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
   echo "*** Detected flavor ${SUBTYPE} ***"
-  if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' ]]; then
-    echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty) or 16.04 (xenial) as base system!"
+  if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
+    echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty), 16.04 (xenial) or 18.04 (bionic) as base system!"
     exit 2
   fi
   ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-deb.sh"
@@ -186,7 +186,7 @@ else
     chmod +x ${BOOTSTRAP_FILE}
 
     echo "Running deployment script for st2 ${VERSION}..."
-    echo "OS specific script cmd: bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${USERNAME} --password=****"
+    echo "OS specific script cmd: bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${DEV_BUILD} ${USERNAME} --password=****"
     TS=$(date +%Y%m%dT%H%M%S)
     sudo mkdir -p /var/log/st2
     bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${DEV_BUILD} ${USERNAME} ${PASSWORD} 2>&1 | adddate | sudo tee /var/log/st2/st2-install.${TS}.log
