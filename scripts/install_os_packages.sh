@@ -15,7 +15,8 @@ install_rpm() {
 }
 
 install_deb() {
-  sudo apt-get -y update
+  echo 3 | sudo tee /proc/sys/vm/drop_caches
+  sudo apt-get -o Acquire::ForceIPv4=true update -y
 
   for fpath in $(lookup_fullnames $@); do
     gdebi -qn "$fpath"
