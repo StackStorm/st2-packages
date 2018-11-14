@@ -16,8 +16,17 @@ install_rpm() {
 
 install_deb() {
   export DEBIAN_FRONTEND=noninteractive
+  export LANG=en_US.UTF-8
+  export LANGUAGE=en
+
+  sudo dpkg --clear-avail
+  sudo apt-get clean -y
+  sudo apt-get install -f
+
+  sudo apt-get -o Acquire::ForceIPv4=true update -y
 
   for fpath in $(lookup_fullnames $@); do
+    echo "Installing package: $fpath"
     gdebi -qn "$fpath"
   done
 }
