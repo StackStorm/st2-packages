@@ -6,7 +6,7 @@ describe 'st2 packages uninstall test' do
         its(:exit_status) { is_expected.to eq 0 }
       end
     elsif os[:family] == 'ubuntu'
-      describe command("sudo apt-get remove -y #{pkg_name}") do
+      describe command("sudo apt-get remove -y --purge #{pkg_name}") do
         its(:exit_status) { is_expected.to eq 0 }
       end
     end
