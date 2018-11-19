@@ -40,7 +40,6 @@ bionic:
     # (StackStorm components) and Python 2 (Mistral)
     # Bionic will be first release without a Mistral
     - ST2_PACKAGES=st2
-    - ST2_GITREV=dont_bundle_mistral_runner_on_bionic
   links:
     - bionicbuild
     - bionictest
