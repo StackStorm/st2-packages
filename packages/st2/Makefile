@@ -3,7 +3,6 @@ ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
 ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
 CHANGELOG_COMMENT ?= "automated build, version: $(ST2PKG_VERSION)"
-RUNNERS := $(shell ls ../contrib/runners)
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
@@ -21,6 +20,13 @@ else ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
 else
 	PYTHON_BINARY := python
+endif
+
+# Don't include Mistral runner on Bionic
+ifeq ($(DEB_DISTRO),bionic)
+	RUNNERS := $(shell ls -I mistral* ../contrib/runners)
+else
+	RUNNERS := $(shell ls ../contrib/runners)
 endif
 
 # Note: We dynamically obtain the version, this is required because dev
