@@ -10,7 +10,6 @@ st2tests
 git+https://github.com/StackStorm/st2-auth-backend-pam.git@master#egg=st2-auth-backend-pam
 stackstorm-runner-action-chain
 stackstorm-runner-announcement
-stackstorm-runner-cloudslang
 stackstorm-runner-http
 stackstorm-runner-inquirer
 stackstorm-runner-local
@@ -19,5 +18,4 @@ stackstorm-runner-noop
 stackstorm-runner-orquesta
 stackstorm-runner-python
 stackstorm-runner-remote
-stackstorm-runner-windows
 stackstorm-runner-winrm
