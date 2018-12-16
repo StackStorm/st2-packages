@@ -529,11 +529,17 @@ get_full_pkg_versions() {
       exit 3
     fi
 
-    local ST2MISTRAL_VER=$(apt-cache show st2mistral | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
-    if [ -z "$ST2MISTRAL_VER" ]; then
-      echo "Could not find requested version of st2mistral!!!"
-      sudo apt-cache policy st2mistral
-      exit 3
+    if [[ "$SUBTYPE" != 'bionic' ]]; then
+        # Bionic doesn't support Mistral
+        local ST2MISTRAL_VER=$(apt-cache show st2mistral | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
+
+        if [ -z "$ST2MISTRAL_VER" ]; then
+          echo "Could not find requested version of st2mistral!!!"
+          sudo apt-cache policy st2mistral
+          exit 3
+        fi
+     else
+        local ST2MISTRAL_VER="none"
     fi
 
     local ST2WEB_VER=$(apt-cache show st2web | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
