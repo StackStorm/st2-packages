@@ -74,6 +74,7 @@ inject-deps: .stamp-inject-deps
 .stamp-inject-deps: | bdist_wheel
 	echo "$$INJECT_DEPS" >> requirements.txt
 	grep -q 'gunicorn' requirements.txt || echo "gunicorn" >> requirements.txt
+	grep -q 'openstacksdk' requirements.txt || echo "openstacksdk<0.21.0" >> requirements.txt
 	grep -q 'psycopg2' requirements.txt || echo "psycopg2>=2.6.2,<2.7.0" >> requirements.txt
 	grep -q 'pika' requirements.txt || echo "pika<0.11,>=0.9" >> requirements.txt
 	grep -q 'python-memcached' requirements.txt || echo "python-memcached" >> requirements.txt
