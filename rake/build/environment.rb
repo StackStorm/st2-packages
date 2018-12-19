@@ -82,8 +82,8 @@ end
 pipeopts 'st2mistral' do
   envpass :checkout, 1,                                      from: 'ST2MISTRAL_CHECKOUT', proc: convert_to_int
   envpass :giturl,  'https://github.com/StackStorm/mistral', from: 'ST2MISTRAL_GITURL'
-  envpass :gitrev,  'st2-2.10.0',                                from: 'ST2MISTRAL_GITREV'
+  envpass :gitrev,  'st2-2.10.1',                                from: 'ST2MISTRAL_GITREV'
   envpass :gitdir,  make_tmpname('mistral-'),                from: 'ST2MISTRAL_GITDIR'
-  envpass :mistral_version, '2.10.0'
+  envpass :mistral_version, '2.10.1'
   envpass :mistral_release, 1
 end
