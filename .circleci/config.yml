@@ -23,7 +23,7 @@ jobs:
       # with real gitrevs during releases. Note that they are commented out, so that they do not interfere
       # with build parameters. st2cd prep tasks will uncomment these on a branch, and replace with proper
       # gitrefs.
-      ST2_GITREV: "remove_obsolete_runners_v310"
+      # ST2_GITREV: ""
       # ST2MISTRAL_GITREV: ""
     steps:
       - checkout
