@@ -317,8 +317,12 @@ gpgcheck=1
 enabled=1
 EOT"
 
+  # Ensure that EPEL repo is not used for nginx
+  sed -i 's/^\(enabled=1\)$/exclude=nginx\n\1/g' /etc/yum.repos.d/epel.repo
+
   # Install nginx
-  sudo yum --disablerepo='epel' install -y nginx
+  sudo yum install -y nginx
+
   # Install st2web
   sudo yum install -y ${ST2WEB_PKG}
 
