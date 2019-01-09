@@ -678,7 +678,7 @@ enabled=1
 EOT"
 
   # Ensure that EPEL repo is not used for nginx
-  sed -i 's/^\(enabled=1\)$/exclude=nginx\n\1/g' /etc/yum.repos.d/epel.repo
+  sudo sed -i 's/^\(enabled=1\)$/exclude=nginx\n\1/g' /etc/yum.repos.d/epel.repo
 
   # Install nginx
   sudo yum install -y nginx
