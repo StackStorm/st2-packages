@@ -81,6 +81,7 @@ inject-deps: .stamp-inject-deps
 	grep -q 'python-memcached' requirements.txt || echo "python-memcached" >> requirements.txt
 	sed -i "s/^oslo.messaging.*/oslo.messaging==5.24.2/g" requirements.txt
 	sed -i "s/^Babel.*/Babel>=2.3.4,!=2.4.0 # BSD/g" requirements.txt
+	sed -i "s/^python-senlinclient.*/python-senlinclient<1.10.0 # Apache-2.0/g" requirements.txt
 
 ifeq (,$(findstring dev,$(MISTRAL_VERSION)))
 	sed -i "s/^python-mistralclient.*/git+https:\/\/github.com\/StackStorm\/python-mistralclient.git@st2-$(MISTRAL_VERSION)\#egg=python-mistralclient/g" requirements.txt
