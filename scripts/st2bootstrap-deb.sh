@@ -136,10 +136,10 @@ function configure_proxy() {
     sudo sh -c "echo '${sudoers_proxy}' >> /etc/sudoers.d/st2"
   fi
 
-  # Configure proxy env vars for 'st2api' and 'st2actionrunner' system configs
+  # Configure proxy env vars for 'st2api', 'st2actionrunner' and 'st2chatops' system configs
   # See: https://docs.stackstorm.com/packs.html#installing-packs-from-behind-a-proxy
   local service_config_path=$(hash apt-get >/dev/null 2>&1 && echo '/etc/default' || echo '/etc/sysconfig')
-  for service in st2api st2actionrunner; do
+  for service in st2api st2actionrunner st2chatops; do
     service_config="${service_config_path}/${service}"
     # create file if doesn't exist yet
     sudo test -e ${service_config} || sudo touch ${service_config}
