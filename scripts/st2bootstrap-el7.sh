@@ -354,6 +354,9 @@ generate_symmetric_crypto_key_for_datastore() {
 
 
 verify_st2() {
+  # Give all services some time to start up after restart in generate_symmetric_crypto_key_for_datastore
+  sleep 5
+
   st2 --version
   st2 -h
 
