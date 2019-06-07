@@ -81,13 +81,9 @@ override_dh_installdeb:
 	dh_installdeb
 
 override_dh_virtualenv:
-	# NB! Wheels must be pre-populated by now, we use --no-index to skip
+	# NP! Wheels must be pre-populated by now, we use --no-index to skip
 	# querying pypi and rely only on --find-links.
-	#
-	# NB! Use '--no-download' arg for 'virtualenv' is required,
-	# otherwise it downloads latest PIP version instead of bundled/pinned one.
-	dh_virtualenv --extra-virtualenv-arg='--no-download' \
-								--extra-pip-arg '--find-links=$(WHEELDIR)' \
+	dh_virtualenv --extra-pip-arg '--find-links=$(WHEELDIR)' \
 								--extra-pip-arg '--no-index' --no-test
 
 override_dh_compress:
