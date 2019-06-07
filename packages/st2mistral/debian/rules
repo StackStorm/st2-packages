@@ -33,8 +33,5 @@ override_dh_installdeb:
 	dh_installdeb
 
 override_dh_virtualenv:
-	# NB! Use '--no-download' arg for 'virtualenv' is required,
-	# otherwise it downloads latest PIP version instead of bundled/pinned one.
-	dh_virtualenv --extra-virtualenv-arg='--no-download' \
-								--extra-pip-arg '--find-links=$(WHEELDIR)' \
+	dh_virtualenv --extra-pip-arg '--find-links=$(WHEELDIR)' \
 								--extra-pip-arg '--no-index' --install-suffix mistral --no-test
