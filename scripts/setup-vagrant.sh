@@ -39,6 +39,9 @@ if [[ ! -x $DC_BIN ]]; then
 fi
 
 # Using docker-compose, 1) build packages, and 2) run quick tests
+if [[ "${ST2_PACKAGES}" != "" ]]; then
+  ST2PACKAGES="-e ST2_PACKAGES='$ST2_PACKAGES'"
+fi
 if [[ "${ST2_GITURL}" != "" ]]; then
   ST2URL="-e ST2_GITURL=$ST2_GITURL"
 fi
@@ -51,7 +54,7 @@ fi
 if [[ "${ST2MISTRAL_GITREV}" != "" ]]; then
   ST2MISTRALREV="-e ST2MISTRAL_GITREV=$ST2MISTRAL_GITREV"
 fi
-sudo sh -c "(cd /vagrant && $DC_BIN run $ST2URL $ST2REV $ST2MISTRALURL $ST2MISTRALREV --rm $ST2_TARGET)"
+sudo sh -c "(cd /vagrant && $DC_BIN run $ST2PACKAGES $ST2URL $ST2REV $ST2MISTRALURL $ST2MISTRALREV --rm $ST2_TARGET)"
 
 if [ "$ST2_INSTALL" = "yes" ]; then
   echo 'Install st2 packages'
