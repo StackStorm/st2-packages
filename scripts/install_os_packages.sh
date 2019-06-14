@@ -15,6 +15,8 @@ install_rpm() {
 }
 
 install_deb() {
+  export DEBIAN_FRONTEND=noninteractive
+
   sudo apt-get -o Acquire::ForceIPv4=true update -y
 
   for fpath in $(lookup_fullnames $@); do
