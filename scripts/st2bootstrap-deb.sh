@@ -577,7 +577,7 @@ install_st2() {
   # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
   if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
-    sudo apt-get install -y st2${ST2_PKG_VERSION}
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y st2${ST2_PKG_VERSION}
   else
     sudo apt-get install -y jq
 
