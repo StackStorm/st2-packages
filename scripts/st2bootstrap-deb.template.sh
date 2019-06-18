@@ -276,8 +276,8 @@ install_st2() {
     PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "${SUBTYPE}" "st2_.*.deb")
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
     curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
-    sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
-    sudo apt-get install -yf
+    sudo DEBIAN_FRONTEND=noninteractive dpkg -i --force-depends ${PACKAGE_FILENAME}
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -yf
     rm ${PACKAGE_FILENAME}
   fi
 
