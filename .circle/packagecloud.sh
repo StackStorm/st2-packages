@@ -120,14 +120,6 @@ function deploy() {
      continue
     fi
 
-    # NOTE: At the moment we only support staging unstable Bionic packages
-    if [ "${PKG_OS}" = "bionic" ]; then
-      if [[ "${PACKAGECLOUD_REPO}" != "staging-unstable" ]] && [[ "${PACKAGECLOUD_REPO}" != "staging-enterprise-unstable" ]]; then
-        echo "Skipping upload for ${PKG_OS} packages, right now it's only enabled for staging unstable."
-        continue
-      fi
-    fi
-
     debug "PACKAGECLOUD_ORGANIZATION:  ${PACKAGECLOUD_ORGANIZATION}"
     debug "PACKAGECLOUD_REPO:          ${PACKAGECLOUD_REPO}"
     debug "PKG_PATH:                   ${PKG_PATH}"
