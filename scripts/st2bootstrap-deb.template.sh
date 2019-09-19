@@ -189,7 +189,7 @@ quit();
 EOF
 
   # Require authentication to be able to acccess the database
-  sudo sh -c 'echo "security:\n  authorization: enabled" >> /etc/mongod.conf'
+  sudo sh -c 'printf "security:\n  authorization: enabled" >> /etc/mongod.conf'
 
   # MongoDB needs to be restarted after enabling auth
   if [[ "$SUBTYPE" == 'xenial'  || "${SUBTYPE}" == "bionic" ]]; then
