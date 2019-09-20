@@ -192,7 +192,7 @@ quit();
 EOF
 
   # Require authentication to be able to acccess the database
-  sudo sh -c 'echo -e "security:\n  authorization: enabled" >> /etc/mongod.conf'
+  sudo sh -c 'printf "security:\n  authorization: enabled\n" >> /etc/mongod.conf'
 
   # MongoDB needs to be restarted after enabling auth
   sudo systemctl restart mongod
