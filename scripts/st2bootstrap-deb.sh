@@ -118,7 +118,7 @@ setup_args() {
 
 function configure_proxy() {
   # Allow bypassing 'proxy' env vars via sudo
-  local sudoers_proxy='Defaults env_keep += "http_proxy https_proxy no_proxy proxy_ca_bundle_path"'
+  local sudoers_proxy='Defaults env_keep += "http_proxy https_proxy no_proxy proxy_ca_bundle_path DEBIAN_FRONTEND"'
   if ! sudo grep -s -q ^"${sudoers_proxy}" /etc/sudoers.d/st2; then
     sudo sh -c "echo '${sudoers_proxy}' >> /etc/sudoers.d/st2"
   fi
@@ -420,6 +420,8 @@ fail() {
 
 
 install_st2_dependencies() {
+  # Silence debconf prompt, raised during some dep installations. This will be passed to sudo via 'env_keep'.
+  export DEBIAN_FRONTEND=noninteractive
   sudo apt-get update
 
   # Note: gnupg-curl is needed to be able to use https transport when fetching keys
@@ -495,7 +497,7 @@ quit();
 EOF
 
   # Require authentication to be able to acccess the database
-  sudo sh -c 'echo "security:\n  authorization: enabled" >> /etc/mongod.conf'
+  sudo sh -c 'printf "security:\n  authorization: enabled\n" >> /etc/mongod.conf'
 
   # MongoDB needs to be restarted after enabling auth
   if [[ "$SUBTYPE" == 'xenial'  || "${SUBTYPE}" == "bionic" ]]; then
@@ -564,15 +566,15 @@ install_st2() {
   # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
   if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y st2${ST2_PKG_VERSION}
+    sudo apt-get install -y st2${ST2_PKG_VERSION}
   else
     sudo apt-get install -y jq
 
     PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "${SUBTYPE}" "st2_.*.deb")
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
     curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
-    sudo DEBIAN_FRONTEND=noninteractive dpkg -i --force-depends ${PACKAGE_FILENAME}
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -yf
+    sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
+    sudo apt-get install -yf
     rm ${PACKAGE_FILENAME}
   fi
 
