@@ -47,6 +47,22 @@ bionic:
     - mongodb
     - postgres
 
+el8:
+  image: packagingrunner:trusty
+  extends:
+    file: docker-compose.override.yml
+    service: suite-compose
+  environment:
+    - BUILDNODE=centos8build
+    - TESTNODE=centos8test
+  links:
+    - centos8build
+    - centos8test
+    - rabbitmq
+    - mongodb
+    - postgres
+
+
 el7:
   image: quay.io/stackstorm/packagingrunner
   extends:
@@ -110,6 +126,12 @@ centos7build:
     file: docker-compose.override.yml
     service: volumes-compose
 
+centos8build:
+  image: packagingbuild:centos8
+  extends:
+    file: docker-compose.override.yml
+    service: volumes-compose
+
 ## Package testing nodes
 #
 trustytest:
@@ -150,3 +172,17 @@ centos7test:
     service: volumes-compose
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup
+
+centos8test:
+  image: packagingtest:centos8-systemd
+  privileged: true
+  cap_add:
+    - SYS_ADMIN
+  security_opt:
+    - seccomp:unconfined
+  extends:
+    file: docker-compose.override.yml
+    service: volumes-compose
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup
+

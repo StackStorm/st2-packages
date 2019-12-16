@@ -7,18 +7,27 @@ ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	DEB_DISTRO := $(shell lsb_release -cs)
 	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
+else ifeq (,$(wildcard /etc/centos-release))
+   EL_DISTRO:=centos
+   EL_VERSION:=$(shell cat /etc/centos-release | awk 'NF>1{print $4}' | cut -d. -f1)
+else ifeq (,$(wildcard /etc/redhat-release))
+   EL_DISTRO:=redhat
+   EL_VERSION:=$(shell shell cat /etc/redhat-release | awk 'NF>1{print $4}' | cut -d. -f1)
 else
 	REDHAT := 1
 	DEB_DISTRO := unstable
 endif
 
-ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
+ifeq ($(DEB_DISTRO),bionic)
+	PYTHON_BINARY := /usr/bin/python3
+	PIP_BINARY := /usr/bin/pip3
+else ifeq ($(EL_VERSION),8)
+    PYTHON_BINARY := /usr/bin/python3
+    PIP_BINARY := /usr/bin/pip3
+else ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
 	PIP_BINARY := pip
-else ifeq ($(DEB_DISTRO),bionic)
-	PYTHON_BINARY := /usr/bin/python3
-	PIP_BINARY := /usr/bin/pip3
 else
 	PYTHON_BINARY := python
 	PIP_BINARY := pip
@@ -51,6 +60,8 @@ requirements: .stamp-requirements
 # Don't include Mistral runner on Bionic
 ifeq ($(DEB_DISTRO),bionic)
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
+else ifeq ($(EL_VERSION),8)
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
 else
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 endif
@@ -67,6 +78,7 @@ wheelhouse: .stamp-wheelhouse
 bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | populate_version requirements inject-deps
 	cat requirements.txt
+	pip2 install wheel --upgrade
 	$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR) || \
 		$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@

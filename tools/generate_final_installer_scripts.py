@@ -12,6 +12,7 @@ SCRIPT_FILES = [
     'st2bootstrap-deb.sh',
     'st2bootstrap-el6.sh',
     'st2bootstrap-el7.sh',
+    'st2bootstrap-el8.sh'
 ]
 
 HEADER_WARNING = """

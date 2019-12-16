@@ -19,3 +19,4 @@ stackstorm-runner-orquesta
 stackstorm-runner-python
 stackstorm-runner-remote
 stackstorm-runner-winrm
+wheel

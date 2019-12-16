@@ -42,5 +42,6 @@ setup(
     test_suite=ST2_COMPONENT,
     zip_safe=False,
     include_package_data=True,
+    setup_requires=['wheel'],
     packages=find_packages(exclude=['setuptools', 'tests'])
 )

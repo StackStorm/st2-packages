@@ -8,16 +8,24 @@ ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	#DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
 	DEB_DISTRO := $(shell lsb_release -cs)
+else ifeq (,$(wildcard /etc/centos-release))
+   EL_DISTRO:=centos
+   EL_VERSION:=$(shell cat /etc/centos-release | awk 'NF>1{print $4}' | cut -d. -f1)
+else ifeq (,$(wildcard /etc/redhat-release))
+   EL_DISTRO:=redhat
+   EL_VERSION:=$(shell shell cat /etc/redhat-release | awk 'NF>1{print $4}' | cut -d. -f1)
 else
 	REDHAT := 1
 	DEB_DISTRO := unstable
 endif
 
-ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
+ifeq ($(DEB_DISTRO),bionic)
+	PYTHON_BINARY := /usr/bin/python3
+else ifeq ($(EL_VERSION),8)
+    PYTHON_BINARY := /usr/bin/python3
+else ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
-else ifeq ($(DEB_DISTRO),bionic)
-	PYTHON_BINARY := /usr/bin/python3
 else
 	PYTHON_BINARY := python
 endif
@@ -25,6 +33,8 @@ endif
 # Don't include Mistral runner on Bionic
 ifeq ($(DEB_DISTRO),bionic)
 	RUNNERS := $(shell ls -I mistral* ../contrib/runners)
+else ifeq ($(EL_VERSION),8)
+    RUNNERS := $(shell ls -I mistral* ../contrib/runners)
 else
 	RUNNERS := $(shell ls ../contrib/runners)
 endif
@@ -102,6 +112,8 @@ populate_version: .stamp-populate_version
 requirements:
 # Don't include Mistral runner on Bionic
 ifeq ($(DEB_DISTRO),bionic)
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
+else ifeq ($(EL_VERSION),8)
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
 else
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
