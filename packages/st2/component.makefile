@@ -78,7 +78,7 @@ wheelhouse: .stamp-wheelhouse
 bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | populate_version requirements inject-deps
 	cat requirements.txt
-	pip2 install wheel --upgrade
+	$(PIP_BINARY) install wheel --upgrade
 	$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR) || \
 		$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@
