@@ -77,8 +77,13 @@ wheelhouse: .stamp-wheelhouse
 
 bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | populate_version requirements inject-deps
+	pip3 -V
+	python3 -V
+	echo "${EL_VERSION}"
+	cat /etc/centos-release
 	cat requirements.txt
-	$(PIP_BINARY) install wheel --upgrade
+	# pip2 uninstall -y wheel setuptools
+	pip2 install wheel setuptools
 	$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR) || \
 		$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@
