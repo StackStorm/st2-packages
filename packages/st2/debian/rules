@@ -20,6 +20,9 @@ DEB_DISTRO := $(shell lsb_release -cs)
 ifeq ($(DEB_DISTRO),bionic)
 	BUILD_PRE_DEPENDS := python3 (>= 3.6)
 	BUILD_DEPENDS := python3-distutils, python3-dev
+else ifeq ($(DEB_DISTRO),buster)
+	BUILD_PRE_DEPENDS := python3 (>= 3.7)
+	BUILD_DEPENDS := python3-distutils, python3-dev
 else
 	BUILD_PRE_DEPENDS := python2.7
 	BUILD_DEPENDS := libpython-dev | python-dev
@@ -29,6 +32,8 @@ endif
 # Use Python 3 binary on Ubuntu Bionic
 ifeq ($(DEB_DISTRO),bionic)
 	dh $@ --with python-virtualenv --python /usr/bin/python3
+else ifeq ($(DEB_DISTRO),buster)
+	dh $@ --with python-virtualenv --python /usr/bin/python3.7
 else
 	dh $@ --with python-virtualenv
 endif

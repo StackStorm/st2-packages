@@ -19,6 +19,9 @@ ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 else ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := /usr/bin/pip3
+else ifeq ($(DEB_DISTRO),buster)
+	PYTHON_BINARY := /usr/bin/python3
+	PIP_BINARY := /usr/bin/pip3
 else
 	PYTHON_BINARY := python
 	PIP_BINARY := pip
@@ -50,6 +53,8 @@ requirements: .stamp-requirements
 .stamp-requirements:
 # Don't include Mistral runner on Bionic
 ifeq ($(DEB_DISTRO),bionic)
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
+else ifeq ($(DEB_DISTRO),buster)
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
 else
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt

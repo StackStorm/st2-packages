@@ -17,13 +17,17 @@ ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
 else ifeq ($(DEB_DISTRO),bionic)
-	PYTHON_BINARY := /usr/bin/python3
+	PYTHON_BINARY := /usr/bin/python3.6
+else ifeq ($(DEB_DISTRO),buster)
+	PYTHON_BINARY := /usr/bin/python3.7
 else
 	PYTHON_BINARY := python
 endif
 
 # Don't include Mistral runner on Bionic
 ifeq ($(DEB_DISTRO),bionic)
+	RUNNERS := $(shell ls -I mistral* ../contrib/runners)
+else ifeq ($(DEB_DISTRO),buster)
 	RUNNERS := $(shell ls -I mistral* ../contrib/runners)
 else
 	RUNNERS := $(shell ls ../contrib/runners)
@@ -101,7 +105,9 @@ populate_version: .stamp-populate_version
 
 requirements:
 # Don't include Mistral runner on Bionic
-ifeq ($(DEB_DISTRO),bionic)
+ifeq ($(DEB_DISTRO),buster)
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
+else ifeq ($(DEB_DISTRO),bionic)
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
 else
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
@@ -117,8 +123,13 @@ endif
 wheelhouse: .build-runners .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements inject-deps
 	cat requirements.txt
+ifeq ($(DEB_DISTRO),buster)
+	pip3 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+		pip3 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+else
 	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
 		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+endif
 	touch $@
 
 .build-runners:
@@ -128,7 +139,11 @@ wheelhouse: .build-runners .stamp-wheelhouse
 	@echo $(RUNNERS)
 	@for runner in $(RUNNERS); do \
 		echo "Installing $$runner"; \
+ifeq ($(DEB_DISTRO),buster)
+		pip3 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner; \
+else
 		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner; \
+endif
 	done
 	touch $@
 

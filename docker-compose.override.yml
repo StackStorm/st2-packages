@@ -50,6 +50,11 @@ mongodb:
   ports:
     - "27017:27017"
 
+mongodb42:
+  image: mongo:4.2
+  ports:
+    - "27017:27017"
+
 postgres:
   image: postgres
   ports:

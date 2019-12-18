@@ -41,6 +41,25 @@ bionic:
     - mongodb
     - postgres
 
+buster:
+  image: quay.io/stackstorm/packagingrunner
+  extends:
+    file: docker-compose.override.yml
+    service: suite-compose
+  environment:
+    - BUILDNODE=busterbuild
+    - TESTNODE=bustertest
+    # NOTE: We don't build st2mistral package so we don't mix Python 3
+    # (StackStorm components) and Python 2 (Mistral)
+    # Bionic will be first release without a Mistral
+    - ST2_PACKAGES=st2
+  links:
+    - busterbuild
+    - bustertest
+    - rabbitmq
+    - mongodb42
+    - postgres
+
 el7:
   image: quay.io/stackstorm/packagingrunner
   extends:
@@ -85,6 +104,11 @@ bionicbuild:
   volumes_from:
     - st2-packages-vol
 
+busterbuild:
+  image: packagingbuild:buster
+  volumes_from:
+    - st2-packages-vol
+
 centos6build:
   image: stackstorm/packagingbuild:centos6
   extends:
@@ -116,6 +140,14 @@ xenialtest:
 
 bionictest:
   image: stackstorm/packagingtest:bionic-systemd
+  privileged: true
+  volumes_from:
+    - st2-packages-vol
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+bustertest:
+  image: packagingtest:buster-systemd
   privileged: true
   volumes_from:
     - st2-packages-vol
