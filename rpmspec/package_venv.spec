@@ -9,13 +9,14 @@
 %define venv_python %{venv_bin}/python
 %define venv_pip %{venv_python} %{venv_bin}/pip install --find-links=%{wheel_dir} --no-index
 
-# Change the virtualenv path to the target installation direcotry.
+# Change the virtualenv path to the target installation directory.
 #   - Install dependencies
 #   - Install package itself
 %define pip_install_venv \
   %if 0%{?use_st2python} \
     export PATH=/usr/share/python/st2python/bin:$PATH \
   %endif \
+  pip3 install virtualenv \
   virtualenv --no-download %{venv_dir} \
   %{venv_pip} -r requirements.txt \
   %{venv_pip} . \

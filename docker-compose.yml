@@ -55,6 +55,10 @@ el8:
   environment:
     - BUILDNODE=centos8build
     - TESTNODE=centos8test
+    # NOTE: We don't build st2mistral package so we don't mix Python 3
+    # (StackStorm components) and Python 2 (Mistral)
+    # Bionic will be first release without a Mistral
+    - ST2_PACKAGES=st2
   links:
     - centos8build
     - centos8test

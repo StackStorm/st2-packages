@@ -16,8 +16,7 @@
 from __future__ import absolute_import
 import os.path
 
-from setuptools import find_packages, wheel
-import setuptools
+from setuptools import find_packages
 from distutils.core import setup
 
 from dist_utils import fetch_requirements

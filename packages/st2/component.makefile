@@ -22,8 +22,8 @@ ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := /usr/bin/pip3
 else ifeq ($(EL_VERSION),8)
-    PYTHON_BINARY := /usr/bin/python3
-    PIP_BINARY := /usr/bin/pip3
+	PYTHON_BINARY := /usr/bin/python3
+	PIP_BINARY := /usr/bin/pip3
 else ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
@@ -61,7 +61,7 @@ requirements: .stamp-requirements
 ifeq ($(DEB_DISTRO),bionic)
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
 else ifeq ($(EL_VERSION),8)
-	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2, python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt || $(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2, python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
 else
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 endif
@@ -80,7 +80,7 @@ bdist_wheel: .stamp-bdist_wheel
 	cat requirements.txt
 	# pip2 uninstall -y wheel setuptools
 	pip2 install wheel setuptools
-	$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR) || \
+	$(PYTHON_BINARY) setup.py bdist_wheel --universal -d $(WHEELDIR) || \
 		$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@
 

@@ -11,9 +11,11 @@ ifneq (,$(wildcard /etc/debian_version))
 else ifeq (,$(wildcard /etc/centos-release))
    EL_DISTRO:=centos
    EL_VERSION:=$(shell cat /etc/centos-release | awk 'NF>1{print $4}' | cut -d. -f1)
+   REDHAT := 1
 else ifeq (,$(wildcard /etc/redhat-release))
    EL_DISTRO:=redhat
    EL_VERSION:=$(shell shell cat /etc/redhat-release | awk 'NF>1{print $4}' | cut -d. -f1)
+   REDHAT := 1
 else
 	REDHAT := 1
 	DEB_DISTRO := unstable
@@ -30,7 +32,7 @@ else
 	PYTHON_BINARY := python
 endif
 
-# Don't include Mistral runner on Bionic
+# Don't include Mistral runner on Bionic or EL8
 ifeq ($(DEB_DISTRO),bionic)
 	RUNNERS := $(shell ls -I mistral* ../contrib/runners)
 else ifeq ($(EL_VERSION),8)
@@ -56,6 +58,8 @@ all: info install
 info:
 	@echo "DEBIAN=$(DEBIAN)"
 	@echo "REDHAT=$(REDHAT)"
+	@echo "EL_DISTRO=$(EL_DISTRO)"
+	@echo "EL_VERSION=$(EL_VERSION)"
 	@echo "DEB_DISTRO=$(DEB_DISTRO)"
 	@echo "PYTHON_BINARY=$(PYTHON_BINARY)"
 
@@ -100,7 +104,7 @@ post_install:
 	sed -i "/\[logger_root\]/,/\[.*\]\|\s*$$/ {s/level=DEBUG/level=INFO/}" $(DESTDIR)/etc/st2/logging.*conf
 	sed -i "/\[logger_root\]/,/\[.*\]\|\s*$$/ {s/level=DEBUG/level=INFO/}" $(DESTDIR)/etc/st2/syslog.*conf
 ifeq ($(REDHAT),1)
-	if [ `/root/scripts/platform_major_version.py` = 7 ]; then sed -i -r 's/virtualenv_opts\s*=.*/virtualenv_opts =/' $(DESTDIR)/etc/st2/st2.conf; fi
+	if [ `/root/scripts/platform_major_version.py` = 7 ] || [ `/root/scripts/platform_major_version.py` = 7 ]; then sed -i -r 's/virtualenv_opts\s*=.*/virtualenv_opts =/' $(DESTDIR)/etc/st2/st2.conf; fi
 endif
 
 populate_version: .stamp-populate_version
@@ -129,8 +133,7 @@ endif
 wheelhouse: .build-runners .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements inject-deps
 	cat requirements.txt
-	pip2 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
-		pip2 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	pip3 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || pip2 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 .build-runners:
@@ -140,6 +143,7 @@ wheelhouse: .build-runners .stamp-wheelhouse
 	@echo $(RUNNERS)
 	@for runner in $(RUNNERS); do \
 		echo "Installing $$runner"; \
+		pip3 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner || \
 		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner; \
 	done
 	touch $@
