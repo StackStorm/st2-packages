@@ -16,8 +16,7 @@
   %if 0%{?use_st2python} \
     export PATH=/usr/share/python/st2python/bin:$PATH \
   %endif \
-  pip3 install virtualenv \
-  virtualenv --no-download %{venv_dir} \
+  virtualenv --no-download %{venv_dir} --python=python3 \
   %{venv_pip} -r requirements.txt \
   %{venv_pip} . \
   venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir} \
