@@ -56,8 +56,8 @@ el8:
     - BUILDNODE=centos8build
     - TESTNODE=centos8test
   links:
-    - centos7build
-    - centos7test
+    - centos8build
+    - centos8test
     - rabbitmq
     - mongodb
     - postgres
@@ -121,7 +121,7 @@ centos7build:
     - st2-packages-vol
 
 centos8build:
-  image: stackstorm/packagingbuild:centos7
+  image: stackstorm/packagingbuild:centos8
   volumes_from:
     - st2-packages-vol
 
@@ -162,7 +162,7 @@ centos7test:
     - /sys/fs/cgroup:/sys/fs/cgroup
 
 centos8test:
-  image: packagingtest:centos8-systemd
+  image: stackstorm/packagingtest:centos8-systemd
   privileged: true
   cap_add:
     - SYS_ADMIN
