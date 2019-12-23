@@ -145,7 +145,7 @@ wheelhouse: .build-runners .stamp-wheelhouse
 	@for runner in $(RUNNERS); do \
 		echo "Installing $$runner"; \
 		pip3 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner || \
-		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner;
+		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner
 	done
 	touch $@
 
