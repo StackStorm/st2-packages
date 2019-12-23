@@ -25,6 +25,7 @@ ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
 else ifeq ($(EL_VERSION),8)
     PYTHON_BINARY := /usr/bin/python3
+    PIP := pip3
 else ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
@@ -144,7 +145,7 @@ wheelhouse: .build-runners .stamp-wheelhouse
 	@echo $(RUNNERS)
 	@for runner in $(RUNNERS); do \
 		echo "Installing $$runner"; \
-		pip3 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner; \
+		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner; \
 	done
 	touch $@
 
