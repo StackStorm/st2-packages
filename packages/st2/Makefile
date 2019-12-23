@@ -14,7 +14,7 @@ else ifeq (,$(wildcard /etc/centos-release))
    REDHAT := 1
 else ifeq (,$(wildcard /etc/redhat-release))
    EL_DISTRO:=redhat
-   EL_VERSION:=$(shell shell cat /etc/redhat-release | awk 'NF>1{print $4}' | cut -d. -f1)
+   EL_VERSION:=$(shell cat /etc/redhat-release | awk 'NF>1{print $4}' | cut -d. -f1)
    REDHAT := 1
 else
 	REDHAT := 1
@@ -104,7 +104,7 @@ post_install:
 	sed -i "/\[logger_root\]/,/\[.*\]\|\s*$$/ {s/level=DEBUG/level=INFO/}" $(DESTDIR)/etc/st2/logging.*conf
 	sed -i "/\[logger_root\]/,/\[.*\]\|\s*$$/ {s/level=DEBUG/level=INFO/}" $(DESTDIR)/etc/st2/syslog.*conf
 ifeq ($(REDHAT),1)
-	if [ `/root/scripts/platform_major_version.py` = 7 ] || [ `/root/scripts/platform_major_version.py` = 7 ]; then sed -i -r 's/virtualenv_opts\s*=.*/virtualenv_opts =/' $(DESTDIR)/etc/st2/st2.conf; fi
+	if [ `/root/scripts/platform_major_version.py` = 7 ] || [ `/root/scripts/platform_major_version.py` = 8 ]; then sed -i -r 's/virtualenv_opts\s*=.*/virtualenv_opts =/' $(DESTDIR)/etc/st2/st2.conf; fi
 endif
 
 populate_version: .stamp-populate_version
@@ -133,7 +133,8 @@ endif
 wheelhouse: .build-runners .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements inject-deps
 	cat requirements.txt
-	pip3 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || pip2 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+	pip3 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 .build-runners:
@@ -143,8 +144,7 @@ wheelhouse: .build-runners .stamp-wheelhouse
 	@echo $(RUNNERS)
 	@for runner in $(RUNNERS); do \
 		echo "Installing $$runner"; \
-		pip3 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner || \
-		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner; \
+		pip3 wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner; \
 	done
 	touch $@
 

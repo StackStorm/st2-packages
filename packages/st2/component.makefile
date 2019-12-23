@@ -78,8 +78,10 @@ wheelhouse: .stamp-wheelhouse
 bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | populate_version requirements inject-deps
 	cat requirements.txt
-	# pip2 uninstall -y wheel setuptools
-	pip2 install wheel setuptools
+	# pip2 install wheel required to build packages
+	pip2 install wheel setuptools virtualenv
+	pip install virtualenv
+	echo ${PYTHON_BINARY}
 	$(PYTHON_BINARY) setup.py bdist_wheel --universal -d $(WHEELDIR) || \
 		$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@

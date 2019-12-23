@@ -56,3 +56,5 @@ htmlcov
 Gemfile
 Gemfile.lock
 .vagrant
+# Custom pypi creds
+*pip.conf

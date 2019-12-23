@@ -53,7 +53,7 @@
   %define st2pkg_version %(python -c "from %{package} import __version__; print __version__,")
 %endif
 
-## Set macro indicating that we're useing our python
+## Set macro indicating that we're using our python
 #
 %if %(echo ${ST2_PYTHON:-0}) == 1
   %define use_st2python 1
