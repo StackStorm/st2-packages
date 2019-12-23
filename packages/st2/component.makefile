@@ -7,12 +7,12 @@ ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	DEB_DISTRO := $(shell lsb_release -cs)
 	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
-else ifeq (,$(wildcard /etc/centos-release))
-   EL_DISTRO:=centos
-   EL_VERSION:=$(shell cat /etc/centos-release | awk 'NF>1{print $4}' | cut -d. -f1)
-else ifeq (,$(wildcard /etc/redhat-release))
-   EL_DISTRO:=redhat
-   EL_VERSION:=$(shell shell cat /etc/redhat-release | awk 'NF>1{print $4}' | cut -d. -f1)
+else ifneq (,$(wildcard /etc/centos-release))
+   EL_DISTRO := centos
+   EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
+else ifneq (,$(wildcard /etc/redhat-release))
+   EL_DISTRO := redhat
+   EL_VERSION := $(shell cat /etc/redhat-release | grep -oP '(?<= )[0-9]+(?=\.)')
 else
 	REDHAT := 1
 	DEB_DISTRO := unstable
@@ -45,6 +45,8 @@ info:
 	@echo "DEB_DISTRO=$(DEB_DISTRO)"
 	@echo "PYTHON_BINARY=$(PYTHON_BINARY)"
 	@echo "PIP_BINARY=$(PIP_BINARY)"
+	@echo "EL_VERSION=$(EL_VERSION)"
+	@echo "EL_DISTRO=$(EL_DISTRO)"
 
 .PHONY: populate_version requirements wheelhouse bdist_wheel
 all: info populate_version requirements bdist_wheel
@@ -61,7 +63,7 @@ requirements: .stamp-requirements
 ifeq ($(DEB_DISTRO),bionic)
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
 else ifeq ($(EL_VERSION),8)
-	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2, python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt || $(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2, python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt || $(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
 else
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 endif
@@ -76,12 +78,13 @@ wheelhouse: .stamp-wheelhouse
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
-.stamp-bdist_wheel: | populate_version requirements inject-deps
+.stamp-bdist_wheel: | info populate_version requirements inject-deps
 	cat requirements.txt
 	# pip2 install wheel required to build packages
-    ifeq ($(EL_VERSION),8)
-        pip2 install wheel setuptools virtualenv
-    endif
+ifeq ($(EL_VERSION),8)
+	pip2 install wheel setuptools virtualenv
+
+endif
 	echo ${PYTHON_BINARY}
 	$(PYTHON_BINARY) setup.py bdist_wheel --universal -d $(WHEELDIR) || \
 		$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR)
