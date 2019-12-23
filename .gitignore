@@ -53,7 +53,9 @@ htmlcov
 
 # Cut out Gemfile*, since they are built into packagingrunner container.
 # Gemfile* will be copied on runtime.
-Gemfile
+
+# Need Gemfile for EL8
+# Gemfile
 Gemfile.lock
 .vagrant
 # Custom pypi creds
