@@ -4,7 +4,8 @@
 %define stanley_user stanley
 %define packs_group st2packs
 %define epoch %(_epoch=`echo $ST2PKG_VERSION | grep -q dev || echo 1`; echo "${_epoch:-0}")
-
+# %global debug_package %{nil} # Try to fix python executable conflict in CentOS8
+%global _build_id_links none
 %include ../rpmspec/st2pkg_toptags.spec
 
 %if 0%{?epoch}

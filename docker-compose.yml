@@ -131,7 +131,7 @@ centos7build:
     service: volumes-compose
 
 centos8build:
-  image: packagingbuild:centos8
+  image: stackstorm/packagingbuild:centos8
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
@@ -178,7 +178,7 @@ centos7test:
     - /sys/fs/cgroup:/sys/fs/cgroup
 
 centos8test:
-  image: packagingtest:centos8-systemd
+  image: stackstorm/packagingtest:centos8-systemd
   privileged: true
   cap_add:
     - SYS_ADMIN

@@ -22,7 +22,7 @@ ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := /usr/bin/pip3
 else ifeq ($(EL_VERSION),8)
-	PYTHON_BINARY := /usr/bin/python
+	PYTHON_BINARY := /usr/bin/python2
 	PIP_BINARY := /usr/bin/pip
 else ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)

@@ -1,20 +1,19 @@
 WHEELDIR ?= /tmp/wheelhouse
 ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
-ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
+ST2PKG_VERSION ?= $(shell python2 -c "from $(ST2_COMPONENT) import __version__; print __version__,")
 CHANGELOG_COMMENT ?= "automated build, version: $(ST2PKG_VERSION)"
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	#DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
 	DEB_DISTRO := $(shell lsb_release -cs)
-else ifeq (,$(wildcard /etc/centos-release))
+else ifneq (,$(wildcard /etc/centos-release))
    EL_DISTRO:=centos
-   EL_VERSION:=$(shell cat /etc/centos-release | awk 'NF>1{print $4}' | cut -d. -f1)
-   REDHAT := 1
-else ifeq (,$(wildcard /etc/redhat-release))
+   EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
+else ifneq (,$(wildcard /etc/redhat-release))
    EL_DISTRO:=redhat
-   EL_VERSION:=$(shell cat /etc/redhat-release | awk 'NF>1{print $4}' | cut -d. -f1)
+   EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
    REDHAT := 1
 else
 	REDHAT := 1
@@ -24,7 +23,7 @@ endif
 ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
 else ifeq ($(EL_VERSION),8)
-    PYTHON_BINARY := /usr/bin/python
+	PYTHON_BINARY := python2
 else ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
@@ -113,7 +112,7 @@ populate_version: .stamp-populate_version
 	sh ../scripts/populate-version.sh
 	touch $@
 
-requirements:
+requirements: info
 # Don't include Mistral runner on Bionic
 ifeq ($(DEB_DISTRO),bionic)
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
