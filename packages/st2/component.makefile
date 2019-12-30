@@ -81,7 +81,7 @@ bdist_wheel: .stamp-bdist_wheel
 	cat requirements.txt
 	# pip2 install wheel required to build packages
 ifeq ($(EL_VERSION),8)
-	pip install wheel setuptools virtualenv
+	pip2 install wheel setuptools virtualenv
 endif
 	echo ${PYTHON_BINARY}
 	$(PYTHON_BINARY) setup.py bdist_wheel --universal -d $(WHEELDIR)
