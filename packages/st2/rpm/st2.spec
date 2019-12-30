@@ -12,9 +12,9 @@ Epoch: %{epoch}
 %endif
 
 %if 0%{?use_st2python}
-Requires: st2python, python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
+Requires: openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
 %else
-Requires: python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
+Requires: python2-devel openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
 %endif
 
 Summary: StackStorm all components bundle
@@ -36,7 +36,6 @@ Conflicts: st2common
   %service_install st2scheduler
   make post_install DESTDIR=%{buildroot}
   %{!?use_systemd:install -D -m644 conf/rhel-functions-sysvinit %{buildroot}/opt/stackstorm/st2/share/sysvinit/functions}
-
   %cleanup_python_abspath
 
 %prep

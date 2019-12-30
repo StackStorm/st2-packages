@@ -24,8 +24,7 @@ endif
 ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
 else ifeq ($(EL_VERSION),8)
-    PYTHON_BINARY := /usr/bin/python3
-    PIP := pip3
+    PYTHON_BINARY := /usr/bin/python
 else ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python

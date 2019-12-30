@@ -22,8 +22,8 @@ ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := /usr/bin/pip3
 else ifeq ($(EL_VERSION),8)
-	PYTHON_BINARY := /usr/bin/python3
-	PIP_BINARY := /usr/bin/pip3
+	PYTHON_BINARY := /usr/bin/python
+	PIP_BINARY := /usr/bin/pip
 else ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
@@ -63,7 +63,7 @@ requirements: .stamp-requirements
 ifeq ($(DEB_DISTRO),bionic)
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
 else ifeq ($(EL_VERSION),8)
-	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt || $(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
 else
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 endif
@@ -73,8 +73,7 @@ wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements
 	# Install wheels into shared location
 	cat requirements.txt
-	$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
-		$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
@@ -82,12 +81,10 @@ bdist_wheel: .stamp-bdist_wheel
 	cat requirements.txt
 	# pip2 install wheel required to build packages
 ifeq ($(EL_VERSION),8)
-	pip2 install wheel setuptools virtualenv
-
+	pip install wheel setuptools virtualenv
 endif
 	echo ${PYTHON_BINARY}
-	$(PYTHON_BINARY) setup.py bdist_wheel --universal -d $(WHEELDIR) || \
-		$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR)
+	$(PYTHON_BINARY) setup.py bdist_wheel --universal -d $(WHEELDIR)
 	touch $@
 
 # Note: We want to dynamically inject "st2client" dependency. This way we can

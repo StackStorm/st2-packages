@@ -6,12 +6,13 @@
 %if "%([ -x /usr/local/bin/python ] && echo -n 1)" == "1"
   %define __python /usr/local/bin/python
   %define __os_install_post() \
-      /usr/lib/rpm/redhat/brp-compress \
-      %{!?__debug_package:/usr/lib/rpm/redhat/brp-strip %{__strip}} \
-      /usr/lib/rpm/redhat/brp-strip-static-archive %{__strip} \
-      /usr/lib/rpm/redhat/brp-strip-comment-note %{__strip} %{__objdump} \
+      /usr/lib/rpm/brp-compress \
+      %{!?__debug_package:/usr/lib/rpm/brp-strip %{__strip}} \
+      /usr/lib/rpm/brp-strip-static-archive %{__strip} \
+      /usr/lib/rpm/brp-strip-comment-note %{__strip} %{__objdump} \
       /usr/lib/rpm/brp-python-bytecompile %{__python} \
-      /usr/lib/rpm/redhat/brp-python-hardlink \
+      #/usr/lib/rpm/redhat/brp-python-hardlink
+      /usr/lib/rpm/brp-python-hardlink \
       %{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars} \
   %{nil}
 %endif
