@@ -48,7 +48,7 @@ bionic:
     - postgres
 
 el8:
-  image: packagingrunner:trusty
+  image: quay.io/stackstorm/packagingrunner
   extends:
     file: docker-compose.override.yml
     service: suite-compose
