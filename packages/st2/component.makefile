@@ -8,11 +8,11 @@ ifneq (,$(wildcard /etc/debian_version))
 	DEB_DISTRO := $(shell lsb_release -cs)
 	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
 else ifneq (,$(wildcard /etc/centos-release))
-   EL_DISTRO := centos
-   EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	EL_DISTRO := centos
+	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
 else ifneq (,$(wildcard /etc/redhat-release))
-   EL_DISTRO := redhat
-   EL_VERSION := $(shell cat /etc/redhat-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	EL_DISTRO := redhat
+	EL_VERSION := $(shell cat /etc/redhat-release | grep -oP '(?<= )[0-9]+(?=\.)')
 else
 	REDHAT := 1
 	DEB_DISTRO := unstable

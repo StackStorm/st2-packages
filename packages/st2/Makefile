@@ -9,12 +9,13 @@ ifneq (,$(wildcard /etc/debian_version))
 	#DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
 	DEB_DISTRO := $(shell lsb_release -cs)
 else ifneq (,$(wildcard /etc/centos-release))
-   EL_DISTRO:=centos
-   EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	EL_DISTRO:=centos
+	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	REDHAT := 1
 else ifneq (,$(wildcard /etc/redhat-release))
-   EL_DISTRO:=redhat
-   EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
-   REDHAT := 1
+	EL_DISTRO:=redhat
+	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	REDHAT := 1
 else
 	REDHAT := 1
 	DEB_DISTRO := unstable
@@ -35,7 +36,7 @@ endif
 ifeq ($(DEB_DISTRO),bionic)
 	RUNNERS := $(shell ls -I mistral* ../contrib/runners)
 else ifeq ($(EL_VERSION),8)
-    RUNNERS := $(shell ls -I mistral* ../contrib/runners)
+	RUNNERS := $(shell ls -I mistral* ../contrib/runners)
 else
 	RUNNERS := $(shell ls ../contrib/runners)
 endif
