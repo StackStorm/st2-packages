@@ -4,8 +4,8 @@
 %define stanley_user stanley
 %define packs_group st2packs
 %define epoch %(_epoch=`echo $ST2PKG_VERSION | grep -q dev || echo 1`; echo "${_epoch:-0}")
-# %global debug_package %{nil} # Try to fix python executable conflict in CentOS8
-%global _build_id_links none
+# Resolve conflict with python exe in st2 rpm
+# %global _build_id_links none
 %include ../rpmspec/st2pkg_toptags.spec
 
 %if 0%{?epoch}
@@ -15,8 +15,22 @@ Epoch: %{epoch}
 %if 0%{?use_st2python}
 Requires: openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
 %else
-Requires: python2-devel openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
+Requires: python3-devel openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
 %endif
+
+%if 0%{?rhel} >= 8
+# Will use the python3 stdlib venv
+BuildRequires: python3-devel
+BuildRequires: python3-setuptools
+Requires: python3-virtualenv
+BuildRequires: python3-virtualenv
+
+%else
+%if 0%{?rhel} >= 7
+Requires: python-virtualenv
+BuildRequires: python-virtualenv
+%endif  # Requires for RHEL 7
+%endif  # Requires for RHEL 8
 
 Summary: StackStorm all components bundle
 Conflicts: st2common
