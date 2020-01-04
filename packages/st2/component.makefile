@@ -35,6 +35,8 @@ else
 	PIP_BINARY := pip
 endif
 
+ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
+
 # Note: We dynamically obtain the version, this is required because dev
 # build versions don't store correct version identifier in __init__.py
 # and we need setup.py to normalize it (e.g. 1.4dev -> 1.4.dev0)
@@ -81,6 +83,7 @@ wheelhouse: .stamp-wheelhouse
 bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | info populate_version requirements inject-deps
 	cat requirements.txt
+# We need to install these python packages to handle rpmbuild 4.14 in EL8
 ifeq ($(EL_VERSION),8)
 	$(PIP_BINARY) install wheel setuptools virtualenv
 	$(PIP_BINARY) install cryptography --no-binary cryptography

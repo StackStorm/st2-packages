@@ -1,7 +1,6 @@
 WHEELDIR ?= /tmp/wheelhouse
 ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
-ST2PKG_VERSION ?= $(shell python3 -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
 CHANGELOG_COMMENT ?= "automated build, version: $(ST2PKG_VERSION)"
 
 ifneq (,$(wildcard /etc/debian_version))
@@ -47,6 +46,8 @@ else ifeq ($(EL_VERSION),8)
 else
 	RUNNERS := $(shell ls ../contrib/runners)
 endif
+
+ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) python3 -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
 
 # Note: We dynamically obtain the version, this is required because dev
 # build versions don't store correct version identifier in __init__.py
