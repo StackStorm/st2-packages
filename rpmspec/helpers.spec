@@ -54,8 +54,8 @@
   %define st2pkg_version %(python3 -c "from %{package} import __version__; print(__version__),")
 %else
   %define st2pkg_version %(python -c "from %{package} import __version__; print(__version__),")
-%endif
-%endif
+%endif  # if rhel8
+%endif  # st2 package version parsing
 
 ## Set macro indicating that we're using our python
 #
