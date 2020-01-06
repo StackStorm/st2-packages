@@ -7,7 +7,7 @@
 %define venv_dir %{buildroot}/%{venv_install_dir}
 %define venv_bin %{venv_dir}/bin
 
-%if 0%{?rhel} >= 8  # define py3 and commands needed in EL8
+%if 0%{?rhel} == 8  # define py3 and commands needed in EL8
 %define venv_python %{venv_bin}/python3
 %define install_crypto %{venv_python} %{venv_bin}/pip install cryptography==2.8 --no-binary cryptography
 %define install_venvctrl python3 -m pip install venvctrl
