@@ -17,7 +17,8 @@ Requires: st2python, python-devel, openssl-devel, libffi-devel, git, pam, openss
 Requires: python3-devel openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
 %endif
 
-# EL8 needs to require a few python packages needed from 'BUILDROOT' when outside venv
+# EL8 requires a few python packages available within 'BUILDROOT' when outside venv
+# These are in the el8 packagingbuild dockerfile
 # Reference https://fossies.org/linux/ansible/packaging/rpm/ansible.spec
 %if 0%{?rhel} >= 8
 # Will use the python3 stdlib venv
