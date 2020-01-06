@@ -88,7 +88,6 @@ ifeq ($(EL_VERSION),8)
 	$(PIP_BINARY) install wheel setuptools virtualenv
 	$(PIP_BINARY) install cryptography --no-binary cryptography
 endif
-	echo ${PYTHON_BINARY}
 	$(PYTHON_BINARY) setup.py bdist_wheel --universal -d $(WHEELDIR)
 	touch $@
 
