@@ -1,7 +1,6 @@
 WHEELDIR ?= /tmp/wheelhouse
 ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
-ST2PKG_VERSION ?= $(shell python3 -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
@@ -35,6 +34,7 @@ else
 	PIP_BINARY := pip
 endif
 
+# Moved from top of file to handle when only py2 or py3 available
 ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
 
 # Note: We dynamically obtain the version, this is required because dev
@@ -81,7 +81,7 @@ wheelhouse: .stamp-wheelhouse
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
-.stamp-bdist_wheel: | info populate_version requirements inject-deps
+.stamp-bdist_wheel: | populate_version requirements inject-deps
 	cat requirements.txt
 # We need to install these python packages to handle rpmbuild 4.14 in EL8
 ifeq ($(EL_VERSION),8)

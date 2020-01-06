@@ -13,6 +13,6 @@ Name: %{package}
 Version: %{version}
 Release: %{release}
 Group: System/Management
-License: Apache
+License: ASL 2.0
 Url: https://github.com/StackStorm/st2
 Source0: %{package}

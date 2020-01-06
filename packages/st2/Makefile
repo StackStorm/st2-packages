@@ -47,6 +47,7 @@ else
 	RUNNERS := $(shell ls ../contrib/runners)
 endif
 
+# Moved from top of file to handle when only py2 or py3 available
 ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) python3 -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
 
 # Note: We dynamically obtain the version, this is required because dev
