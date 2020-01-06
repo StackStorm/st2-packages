@@ -22,7 +22,7 @@ endif
 
 ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
-	PIP_BINARY := /usr/bin/pip3
+	PIP_BINARY := pip
 else ifeq ($(EL_VERSION),8)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := /usr/local/bin/pip3
