@@ -9,8 +9,12 @@
 
 %if 0%{?rhel} >= 8
 %define venv_python %{venv_bin}/python3
+%define install_crypto %{venv_python} %{venv_bin}/pip install cryptography==2.8 --no-binary cryptography
+%define install_venvctrl python3 -m pip install venvctrl
 %else
 %define venv_python %{venv_bin}/python
+%define install_crypto %{nil}
+%define install_venvctrl %{nil}
 %endif
 
 %define venv_pip %{venv_python} %{venv_bin}/pip install --find-links=%{wheel_dir} --no-index
@@ -20,22 +24,11 @@
 #   - Install package itself
 
 # EL8 requires crypto built locally and venvctrl available outside of venv
-%if 0%{?rhel} >= 8
 %define pip_install_venv \
 virtualenv --no-download %{venv_dir} \
-%{venv_python} %{venv_bin}/pip install cryptography==2.8 --no-binary cryptography \
+%{install_crypto} \
 %{venv_pip} -r requirements.txt \
 %{venv_pip} . \
-python3 -m pip install venvctrl \
+%{install_venvctrl} \
 venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir} \
-%else
-%define pip_install_venv \
-%if 0%{?use_st2python} \
-  export PATH=/usr/share/python/st2python/bin:$PATH \
-%endif \
-virtualenv --no-download %{venv_dir} \
-%{venv_pip} -r requirements.txt \
-%{venv_pip} . \
-venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir} \
-%endif
 %{nil}

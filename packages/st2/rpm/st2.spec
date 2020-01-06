@@ -25,12 +25,6 @@ BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 Requires: python3-virtualenv
 BuildRequires: python3-virtualenv
-
-%else
-%if 0%{?rhel} >= 7
-Requires: python-virtualenv
-BuildRequires: python-virtualenv
-%endif  # Requires for RHEL 7
 %endif  # Requires for RHEL 8
 
 Summary: StackStorm all components bundle
