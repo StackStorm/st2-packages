@@ -47,6 +47,7 @@ Conflicts: st2common
   %service_install st2scheduler
   make post_install DESTDIR=%{buildroot}
   %{!?use_systemd:install -D -m644 conf/rhel-functions-sysvinit %{buildroot}/opt/stackstorm/st2/share/sysvinit/functions}
+
   %cleanup_python_abspath
 
 %prep
