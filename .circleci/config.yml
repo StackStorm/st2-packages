@@ -8,7 +8,7 @@ version: 2
 jobs:
   # Build & Test st2 & st2mistral packages
   packages:
-    parallelism: 1
+    parallelism: 5
     # 4CPUs & 8GB RAM CircleCI machine
     # sadly, it doesn't work with 'setup_remote_docker'
     resource_class: large
@@ -17,7 +17,7 @@ jobs:
       - image: circleci/python:2.7
     working_directory: ~/st2-packages
     environment:
-      DISTROS: "el8"
+      DISTROS: "trusty xenial bionic el7 el8"
       BASH_ENV: ~/.buildenv
       # These should be set to an empty string, so that st2cd prep tasks are able to replace these
       # with real gitrevs during releases. Note that they are commented out, so that they do not interfere
@@ -124,7 +124,7 @@ jobs:
       - image: circleci/ruby:2.4
     working_directory: /tmp/deploy
     environment:
-      - DISTROS: "el8"
+      - DISTROS: "trusty xenial bionic el7 el8"
     steps:
       - attach_workspace:
           at: .
