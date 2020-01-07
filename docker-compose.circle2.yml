@@ -171,5 +171,7 @@ centos8test:
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
+  volumes_from:
+    - st2-packages-vol
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup
