@@ -15,8 +15,8 @@ export DH_VIRTUALENV_INSTALL_ROOT
 IS_SYSTEMD = $(shell command -v dh_systemd_enable > /dev/null 2>&1 && echo true)
 DEB_DISTRO := $(shell lsb_release -cs)
 ifneq (,$(wildcard /etc/centos-release))
-   EL_DISTRO := centos
-   EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	EL_DISTRO := centos
+	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
 endif
 
 # Trusty, Xenial and Bionic depend on different libraries.
