@@ -27,18 +27,20 @@ lookup_fullnames() {
   list=""
   for name_or_path in "$@"; do
     path=""
-    if [ -r "$name_or_path" ]; then
+    # If file exists and is readable
+    if [[ -r "$name_or_path" ]]; then
       path="$name_or_path"
+    # Try and find the st2* package file
     else
       regex="${name_or_path}$(version_delemiter)"'[0-9].*'
       path=$(ls -1 ${name_or_path}$(version_delemiter)*".$(platform)" | grep "$regex" | head -n1)
     fi
-    [ -z "$path" ] && { echo "Couldn't find package: \`'$name_or_path'"; exit 1; }
-    [ -z "$list" ] && list="$path" || list="$list $path"
+    [[ -z "$path" ]] && { echo "Couldn't find package: \`'$name_or_path'"; exit 1; }
+    [[ -z "$list" ]] && list="$path" || list="$list $path"
   done
   echo $list
 }
 
-[ $# -eq 0 ] && { echo "usage: $0 (name | path) ..." && exit 1; }
+[[ $# -eq 0 ]] && { echo "usage: $0 (name | path) ..." && exit 1; }
 
 install_$(platform) "$@"
