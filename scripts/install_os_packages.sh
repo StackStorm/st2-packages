@@ -11,6 +11,7 @@ version_delemiter() {
 }
 
 install_rpm() {
+  sudo yum deplist $(lookup_fullnames $@)
   sudo yum -y install $(lookup_fullnames $@);
 }
 

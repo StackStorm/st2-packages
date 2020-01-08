@@ -48,7 +48,7 @@ else
 endif
 
 # Moved from top of file to handle when only py2 or py3 available
-ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) python3 -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
+ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
 
 # Note: We dynamically obtain the version, this is required because dev
 # build versions don't store correct version identifier in __init__.py
@@ -144,7 +144,7 @@ wheelhouse: .build-runners .stamp-wheelhouse
 	cat requirements.txt
 	# Try to install wheels 2x in case the first one fails
 	$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
-	$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+		$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 .build-runners:

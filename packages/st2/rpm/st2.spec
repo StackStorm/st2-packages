@@ -3,7 +3,6 @@
 %define svc_user st2
 %define stanley_user stanley
 %define packs_group st2packs
-%define epoch %(_epoch=`echo $ST2PKG_VERSION | grep -q dev || echo 1`; echo "${_epoch:-0}")
 
 %include ../rpmspec/st2pkg_toptags.spec
 
@@ -13,12 +12,14 @@ Epoch: %{epoch}
 
 %if 0%{?use_st2python}
 Requires: st2python, python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
+%endif
+
 %if 0%{?rhel} == 7
 Requires: python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
+%endif
+
 %if 0%{?rhel} >= 8
 Requires: python3-devel openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
-%endif
-%endif
 %endif
 
 # EL8 requires a few python packages available within 'BUILDROOT' when outside venv
@@ -29,7 +30,7 @@ Requires: python3-devel openssl-devel, libffi-devel, git, pam, openssh-server, o
 BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 Requires: python3-virtualenv
-BuildRequires: python3-virtualenv
+# BuildRequires: python3-virtualenv
 %endif  # Requires for RHEL 8
 
 Summary: StackStorm all components bundle
