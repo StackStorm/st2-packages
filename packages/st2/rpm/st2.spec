@@ -29,8 +29,6 @@ Requires: python3-devel openssl-devel, libffi-devel, git, pam, openssh-server, o
 # Will use the python3 stdlib venv
 BuildRequires: python3-devel
 BuildRequires: python3-setuptools
-# Requires: python3-virtualenv
-# BuildRequires: python3-virtualenv
 %endif  # Requires for RHEL 8
 
 Summary: StackStorm all components bundle
