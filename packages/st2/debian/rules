@@ -6,7 +6,7 @@
 #include /usr/share/dpkg/default.mk
 
 # Virtualenv and pip should be updated (better not to use the distro defaults).
-# Updated ones can be found under /usr/local.
+# Updated ones can be found under /use/local.
 PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 WHEELDIR ?= /tmp/wheelhouse
 DH_VIRTUALENV_INSTALL_ROOT := /opt/stackstorm
@@ -14,18 +14,11 @@ export DH_VIRTUALENV_INSTALL_ROOT
 
 IS_SYSTEMD = $(shell command -v dh_systemd_enable > /dev/null 2>&1 && echo true)
 DEB_DISTRO := $(shell lsb_release -cs)
-ifneq (,$(wildcard /etc/centos-release))
-	EL_DISTRO := centos
-	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
-endif
 
 # Trusty, Xenial and Bionic depend on different libraries.
-# Most important, Bionic and EL8 uses Python 3 and others use Python 2.7.
+# Most important, Bionic uses Python 3 and others use Python 2.7.
 ifeq ($(DEB_DISTRO),bionic)
 	BUILD_PRE_DEPENDS := python3 (>= 3.6)
-	BUILD_DEPENDS := python3-distutils, python3-dev
-else ifeq ($(EL_VERSION),8))
-    BUILD_PRE_DEPENDS := python3 (>= 3.6)
 	BUILD_DEPENDS := python3-distutils, python3-dev
 else
 	BUILD_PRE_DEPENDS := python2.7
@@ -33,11 +26,9 @@ else
 endif
 
 %:
-# Use Python 3 binary on Ubuntu Bionic and EL8
+# Use Python 3 binary on Ubuntu Bionic
 ifeq ($(DEB_DISTRO),bionic)
 	dh $@ --with python-virtualenv --python /usr/bin/python3
-else ifeq ($(EL_VERSION),8))
-    dh $@ --with python-virtualenv --python /usr/bin/python3
 else
 	dh $@ --with python-virtualenv
 endif
