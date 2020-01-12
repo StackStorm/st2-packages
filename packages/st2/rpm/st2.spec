@@ -19,6 +19,7 @@ Requires: python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, o
 %endif
 
 %if 0%{?rhel} >= 8
+%global _build_id_links none
 Requires: python3-devel openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
 %endif
 
