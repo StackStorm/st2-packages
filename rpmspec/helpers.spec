@@ -50,10 +50,14 @@
 #   if package name starts with st2 then it's st2 component.
 #
 %if %(PKG=%{package}; [ "${PKG##st2}" != "$PKG" ] && echo 1 || echo 0 ) == 1
-  %define st2pkg_version %(python -c "from %{package} import __version__; print __version__,")
-%endif
+%if 0%{?rhel} >= 8
+  %define st2pkg_version %(python3 -c "from %{package} import __version__; print(__version__),")
+%else
+  %define st2pkg_version %(python -c "from %{package} import __version__; print(__version__),")
+%endif  # if rhel8
+%endif  # st2 package version parsing
 
-## Set macro indicating that we're useing our python
+## Set macro indicating that we're using our python
 #
 %if %(echo ${ST2_PYTHON:-0}) == 1
   %define use_st2python 1
@@ -62,10 +66,10 @@
 # Redefine and to drop python brp bytecompile
 #
 %define __os_install_post() \
-    /usr/lib/rpm/redhat/brp-compress \
-    %{!?__debug_package:/usr/lib/rpm/redhat/brp-strip %{__strip}} \
-    /usr/lib/rpm/redhat/brp-strip-static-archive %{__strip} \
-    /usr/lib/rpm/redhat/brp-strip-comment-note %{__strip} %{__objdump} \
+    /usr/lib/rpm/brp-compress \
+    %{!?__debug_package:/usr/lib/rpm/brp-strip %{__strip}} \
+    /usr/lib/rpm/brp-strip-static-archive %{__strip} \
+    /usr/lib/rpm/brp-strip-comment-note %{__strip} %{__objdump} \
 %{nil}
 
 # Install systemd or sysv service into the package

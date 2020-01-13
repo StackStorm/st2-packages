@@ -49,8 +49,8 @@ pipeopts do
   #     visible to remote nodes.
   #
   # basedir - base directory (intermediate files are copied there)
-  # artifact_directory - directory on the main node where artificats are copied
-  # wheeldir - direcotory where wheels are prefetched (cache directory)
+  # artifact_directory - directory on the main node where artifacts are copied
+  # wheeldir - directory where wheels are prefetched (cache directory)
   # st2_python - if variable is set that means that our version of python is used
   envpass :basedir,  '/root'
   envpass :debug_level, 1, proc: convert_to_int

@@ -37,8 +37,8 @@ function main() {
       fi
       ;;
     *)
-      echo $"Usage: deploy {trusty|xenial|bionic|el6|el7} /tmp/st2-packages"
-      echo $"Usage: next-revision {trusty|xenial|bionic|el6|el7} 0.14dev st2"
+      echo $"Usage: deploy {trusty|xenial|bionic|el6|el7|el8} /tmp/st2-packages"
+      echo $"Usage: next-revision {trusty|xenial|bionic|el6|el7|el8} 0.14dev st2"
       exit 1
   esac
 }
@@ -235,7 +235,7 @@ function get_pkg_os() {
       PKG_OS_VERSION=$PKG_OS
       PKG_TYPE="deb"
       ;;
-    el5|el6|el7)
+    el6|el7|el8)
       PKG_OS_NAME=el
       PKG_OS_VERSION=${PKG_OS//[^0-9]/}
       PKG_TYPE="rpm"

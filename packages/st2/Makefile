@@ -1,33 +1,54 @@
 WHEELDIR ?= /tmp/wheelhouse
 ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
-ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
 CHANGELOG_COMMENT ?= "automated build, version: $(ST2PKG_VERSION)"
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	#DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
 	DEB_DISTRO := $(shell lsb_release -cs)
+else ifneq (,$(wildcard /etc/centos-release))
+	EL_DISTRO:=centos
+	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	REDHAT := 1
+else ifneq (,$(wildcard /etc/redhat-release))
+	EL_DISTRO:=redhat
+	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	REDHAT := 1
 else
 	REDHAT := 1
 	DEB_DISTRO := unstable
 endif
 
-ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
+ifeq ($(DEB_DISTRO),bionic)
+	PYTHON_BINARY := /usr/bin/python3
+	PIP_BINARY := pip
+else ifeq ($(EL_VERSION),8)
+	PYTHON_BINARY := /usr/bin/python3
+	PIP_BINARY := /usr/local/bin/pip3
+	PYTHON_ALT_BINARY := python3
+else ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
-else ifeq ($(DEB_DISTRO),bionic)
-	PYTHON_BINARY := /usr/bin/python3
+	PIP_BINARY := pip
+	PYTHON_ALT_BINARY := python
 else
 	PYTHON_BINARY := python
+	PIP_BINARY := pip
+	PYTHON_ALT_BINARY := python
 endif
 
-# Don't include Mistral runner on Bionic
+# Don't include Mistral runner on Bionic or EL8
 ifeq ($(DEB_DISTRO),bionic)
+	RUNNERS := $(shell ls -I mistral* ../contrib/runners)
+else ifeq ($(EL_VERSION),8)
 	RUNNERS := $(shell ls -I mistral* ../contrib/runners)
 else
 	RUNNERS := $(shell ls ../contrib/runners)
 endif
+
+# Moved from top of file to handle when only py2 or py3 available
+ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
 
 # Note: We dynamically obtain the version, this is required because dev
 # build versions don't store correct version identifier in __init__.py
@@ -46,6 +67,8 @@ all: info install
 info:
 	@echo "DEBIAN=$(DEBIAN)"
 	@echo "REDHAT=$(REDHAT)"
+	@echo "EL_DISTRO=$(EL_DISTRO)"
+	@echo "EL_VERSION=$(EL_VERSION)"
 	@echo "DEB_DISTRO=$(DEB_DISTRO)"
 	@echo "PYTHON_BINARY=$(PYTHON_BINARY)"
 
@@ -90,7 +113,7 @@ post_install:
 	sed -i "/\[logger_root\]/,/\[.*\]\|\s*$$/ {s/level=DEBUG/level=INFO/}" $(DESTDIR)/etc/st2/logging.*conf
 	sed -i "/\[logger_root\]/,/\[.*\]\|\s*$$/ {s/level=DEBUG/level=INFO/}" $(DESTDIR)/etc/st2/syslog.*conf
 ifeq ($(REDHAT),1)
-	if [ `/root/scripts/platform_major_version.py` = 7 ]; then sed -i -r 's/virtualenv_opts\s*=.*/virtualenv_opts =/' $(DESTDIR)/etc/st2/st2.conf; fi
+	if [[ `$(PYTHON_ALT_BINARY) /root/scripts/platform_major_version.py` = 7 ]] || [[ `$(PYTHON_ALT_BINARY) /root/scripts/platform_major_version.py` = 8 ]]; then sed -i -r 's/virtualenv_opts\s*=.*/virtualenv_opts =/' $(DESTDIR)/etc/st2/st2.conf; fi
 endif
 
 populate_version: .stamp-populate_version
@@ -102,6 +125,8 @@ populate_version: .stamp-populate_version
 requirements:
 # Don't include Mistral runner on Bionic
 ifeq ($(DEB_DISTRO),bionic)
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
+else ifeq ($(EL_VERSION),8)
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
 else
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
@@ -117,8 +142,9 @@ endif
 wheelhouse: .build-runners .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements inject-deps
 	cat requirements.txt
-	pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
-		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	# Try to install wheels 2x in case the first one fails
+	$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+		$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 .build-runners:
@@ -128,7 +154,7 @@ wheelhouse: .build-runners .stamp-wheelhouse
 	@echo $(RUNNERS)
 	@for runner in $(RUNNERS); do \
 		echo "Installing $$runner"; \
-		pip wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner; \
+		$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner; \
 	done
 	touch $@
 
