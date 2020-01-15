@@ -119,12 +119,12 @@ if __name__ == '__main__':
     with open(payload_file, 'w') as f:
         f.write(json.dumps(Payload.data))
 
-    print 'Build metadata will be available via URL:'
-    print 'https://circle-artifacts.com/gh/{0}/{1}/{2}/artifacts/0{3}'.format(
+    print('Build metadata will be available via URL:')
+    print('https://circle-artifacts.com/gh/{0}/{1}/{2}/artifacts/0{3}'.format(
         os.environ.get('CIRCLE_PR_USERNAME') or env('CIRCLE_PROJECT_USERNAME'),
         os.environ.get('CIRCLE_PR_REPONAME') or env('CIRCLE_PROJECT_REPONAME'),
-        env('CIRCLE_BUILD_NUM'),
+        env('CIRCLE_BUILD_NUM')),
         payload_file
     )
-    print ""
-    print json.dumps(Payload.data)
+    print("")
+    print(json.dumps(Payload.data))

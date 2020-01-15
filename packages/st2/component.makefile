@@ -1,28 +1,41 @@
 WHEELDIR ?= /tmp/wheelhouse
 ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
-ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	DEB_DISTRO := $(shell lsb_release -cs)
 	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
+else ifneq (,$(wildcard /etc/centos-release))
+	EL_DISTRO := centos
+	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	REDHAT := 1
+else ifneq (,$(wildcard /etc/redhat-release))
+	EL_DISTRO := redhat
+	EL_VERSION := $(shell cat /etc/redhat-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	REDHAT := 1
 else
 	REDHAT := 1
 	DEB_DISTRO := unstable
 endif
 
-ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
+ifeq ($(DEB_DISTRO),bionic)
+	PYTHON_BINARY := /usr/bin/python3
+	PIP_BINARY := /usr/bin/pip3
+else ifeq ($(EL_VERSION),8)
+	PYTHON_BINARY := /usr/bin/python3
+	PIP_BINARY := /usr/local/bin/pip3
+else ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
 	PIP_BINARY := pip
-else ifeq ($(DEB_DISTRO),bionic)
-	PYTHON_BINARY := /usr/bin/python3
-	PIP_BINARY := /usr/bin/pip3
 else
 	PYTHON_BINARY := python
 	PIP_BINARY := pip
 endif
+
+# Moved from top of file to handle when only py2 or py3 available
+ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
 
 # Note: We dynamically obtain the version, this is required because dev
 # build versions don't store correct version identifier in __init__.py
@@ -36,6 +49,8 @@ info:
 	@echo "DEB_DISTRO=$(DEB_DISTRO)"
 	@echo "PYTHON_BINARY=$(PYTHON_BINARY)"
 	@echo "PIP_BINARY=$(PIP_BINARY)"
+	@echo "EL_VERSION=$(EL_VERSION)"
+	@echo "EL_DISTRO=$(EL_DISTRO)"
 
 .PHONY: populate_version requirements wheelhouse bdist_wheel
 all: info populate_version requirements bdist_wheel
@@ -51,6 +66,8 @@ requirements: .stamp-requirements
 # Don't include Mistral runner on Bionic
 ifeq ($(DEB_DISTRO),bionic)
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
+else ifeq ($(EL_VERSION),8)
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
 else
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 endif
@@ -60,6 +77,7 @@ wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements
 	# Install wheels into shared location
 	cat requirements.txt
+	# Try to install wheels 2x in case the first one fails
 	$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
 		$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
@@ -67,6 +85,11 @@ wheelhouse: .stamp-wheelhouse
 bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | populate_version requirements inject-deps
 	cat requirements.txt
+# We need to install these python packages to handle rpmbuild 4.14 in EL8
+ifeq ($(EL_VERSION),8)
+	$(PIP_BINARY) install wheel setuptools virtualenv
+	$(PIP_BINARY) install cryptography --no-binary cryptography
+endif
 	$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR) || \
 		$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@

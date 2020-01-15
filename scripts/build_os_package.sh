@@ -9,7 +9,7 @@ cores_num=$(/usr/bin/nproc)
 export WHEELDIR
 
 platform() {
-  [ -f /etc/debian_version ] && { echo 'deb'; return 0; }
+  [[ -f /etc/debian_version ]] && { echo 'deb'; return 0; }
   echo 'rpm'
 }
 
@@ -22,7 +22,7 @@ copy_deb() {
   sudo cp -v ../"$package_name"{*.changes,*.dsc} "$artifact_dir" || :;
 }
 
-[ -z "$package_name" ] && { echo "usage: $0 package_name" && exit 1; }
+[[ -z "$package_name" ]] && { echo "usage: $0 package_name" && exit 1; }
 
 build_$(platform)
 copy_$(platform)
