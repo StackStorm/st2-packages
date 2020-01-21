@@ -491,6 +491,11 @@ install_st2_dependencies() {
   if [[ -z "$is_epel_installed" ]]; then
     sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
   fi
+
+  # Install rabbit from packagecloud
+  curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
+  sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'
+
   sudo yum -y install curl rabbitmq-server
 
   # Configure RabbitMQ to listen on localhost only
@@ -506,13 +511,13 @@ install_st2_dependencies() {
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB (3.4)
   sudo rpm --import https://www.mongodb.org/static/pgp/server-3.4.asc
-  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-3.4.repo
-[mongodb-org-3.4]
+  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-4.repo
+[mongodb-org-4]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/3.4/x86_64/
+baseurl=https://repo.mongodb.org/yum/redhat/8/mongodb-org/4.0/x86_64/
 gpgcheck=1
 enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc
+gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
 EOT"
 
   sudo yum -y install mongodb-org
@@ -651,7 +656,7 @@ install_st2web() {
   sudo sh -c "cat <<EOT > /etc/yum.repos.d/nginx.repo
 [nginx]
 name=nginx repo
-baseurl=http://nginx.org/packages/rhel/7/x86_64/
+baseurl=http://nginx.org/packages/rhel/8/x86_64/
 gpgcheck=1
 enabled=1
 EOT"
