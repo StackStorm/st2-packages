@@ -19,7 +19,6 @@ DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
 ST2_PKG='st2'
-ST2MISTRAL_PKG='st2mistral'
 ST2WEB_PKG='st2web'
 ST2CHATOPS_PKG='st2chatops'
 
@@ -748,13 +747,10 @@ STEP="Configure st2 CLI config" && configure_st2_cli_config
 STEP="Generate symmetric crypto key for datastore" && generate_symmetric_crypto_key_for_datastore
 STEP="Verify st2" && verify_st2
 
-# Disable for EL8, mistral not supported
-# STEP="Install mistral dependencies" && install_st2mistral_dependencies
-# STEP="Install mistral" && install_st2mistral
 
 STEP="Install st2web" && install_st2web
 STEP="Install st2chatops" && install_st2chatops
-STEP="Configure st2chatops" && configure_st2chatops
+# STEP="Configure st2chatops" && configure_st2chatops
 trap - EXIT
 
 ok_message
