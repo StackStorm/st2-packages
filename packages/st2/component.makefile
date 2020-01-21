@@ -1,7 +1,6 @@
 WHEELDIR ?= /tmp/wheelhouse
 ST2_COMPONENT := $(notdir $(CURDIR))
 ST2PKG_RELEASE ?= 1
-ST2PKG_VERSION ?= $(shell python -c "from $(ST2_COMPONENT) import __version__; print __version__,")
 
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
@@ -10,9 +9,11 @@ ifneq (,$(wildcard /etc/debian_version))
 else ifneq (,$(wildcard /etc/centos-release))
 	EL_DISTRO := centos
 	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	REDHAT := 1
 else ifneq (,$(wildcard /etc/redhat-release))
 	EL_DISTRO := redhat
 	EL_VERSION := $(shell cat /etc/redhat-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	REDHAT := 1
 else
 	REDHAT := 1
 	DEB_DISTRO := unstable
@@ -22,8 +23,8 @@ ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := /usr/bin/pip3
 else ifeq ($(EL_VERSION),8)
-	PYTHON_BINARY := /usr/bin/python2
-	PIP_BINARY := /usr/bin/pip
+	PYTHON_BINARY := /usr/bin/python3
+	PIP_BINARY := /usr/local/bin/pip3
 else ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
@@ -32,6 +33,9 @@ else
 	PYTHON_BINARY := python
 	PIP_BINARY := pip
 endif
+
+# Moved from top of file to handle when only py2 or py3 available
+ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
 
 # Note: We dynamically obtain the version, this is required because dev
 # build versions don't store correct version identifier in __init__.py
@@ -73,18 +77,21 @@ wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements
 	# Install wheels into shared location
 	cat requirements.txt
-	$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	# Try to install wheels 2x in case the first one fails
+	$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+		$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel
-.stamp-bdist_wheel: | info populate_version requirements inject-deps
+.stamp-bdist_wheel: | populate_version requirements inject-deps
 	cat requirements.txt
-	# pip2 install wheel required to build packages
+# We need to install these python packages to handle rpmbuild 4.14 in EL8
 ifeq ($(EL_VERSION),8)
-	pip2 install wheel setuptools virtualenv
+	$(PIP_BINARY) install wheel setuptools virtualenv
+	$(PIP_BINARY) install cryptography --no-binary cryptography
 endif
-	echo ${PYTHON_BINARY}
-	$(PYTHON_BINARY) setup.py bdist_wheel --universal -d $(WHEELDIR)
+	$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR) || \
+		$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@
 
 # Note: We want to dynamically inject "st2client" dependency. This way we can

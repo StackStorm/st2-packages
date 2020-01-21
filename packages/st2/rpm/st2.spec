@@ -3,9 +3,7 @@
 %define svc_user st2
 %define stanley_user stanley
 %define packs_group st2packs
-%define epoch %(_epoch=`echo $ST2PKG_VERSION | grep -q dev || echo 1`; echo "${_epoch:-0}")
-# %global debug_package %{nil} # Try to fix python executable conflict in CentOS8
-%global _build_id_links none
+
 %include ../rpmspec/st2pkg_toptags.spec
 
 %if 0%{?epoch}
@@ -13,10 +11,26 @@ Epoch: %{epoch}
 %endif
 
 %if 0%{?use_st2python}
-Requires: openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
-%else
-Requires: python2-devel openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
+Requires: st2python, python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
 %endif
+
+%if 0%{?rhel} == 7
+Requires: python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
+%endif
+
+%if 0%{?rhel} >= 8
+%global _build_id_links none
+Requires: python3-devel openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
+%endif
+
+# EL8 requires a few python packages available within 'BUILDROOT' when outside venv
+# These are in the el8 packagingbuild dockerfile
+# Reference https://fossies.org/linux/ansible/packaging/rpm/ansible.spec
+%if 0%{?rhel} >= 8
+# Will use the python3 stdlib venv
+BuildRequires: python3-devel
+BuildRequires: python3-setuptools
+%endif  # Requires for RHEL 8
 
 Summary: StackStorm all components bundle
 Conflicts: st2common
@@ -37,6 +51,7 @@ Conflicts: st2common
   %service_install st2scheduler
   make post_install DESTDIR=%{buildroot}
   %{!?use_systemd:install -D -m644 conf/rhel-functions-sysvinit %{buildroot}/opt/stackstorm/st2/share/sysvinit/functions}
+
   %cleanup_python_abspath
 
 %prep

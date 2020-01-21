@@ -14,13 +14,11 @@ fetch_version() {
   if [ -f ../st2/st2common/st2common/__init__.py ]; then
     # Get st2 version based on hardcoded string in st2common
     # build takes place in `st2` repo
-    python2 -c 'exec(open("../st2/st2common/st2common/__init__.py").read()); print(__version__)' || \
-    python3 -c 'exec(open("../st2/st2common/st2common/__init__.py").read()); print(__version__)'
+    python -c 'exec(open("../st2/st2common/st2common/__init__.py").read()); print(__version__)'
   else
     # build takes place in `st2-packages` repo
     curl -sSL -o /tmp/st2_version.py ${ST2_GITURL}/raw/${ST2_GITREV}/st2common/st2common/__init__.py
-    python2 -c 'exec(open("/tmp/st2_version.py").read()); print(__version__)' || \
-    python3 -c 'exec (open("/tmp/st2_version.py").read()); print(__version__)'
+    python -c 'exec(open("/tmp/st2_version.py").read()); print(__version__)'
   fi
 }
 

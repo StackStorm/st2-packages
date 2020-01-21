@@ -50,8 +50,12 @@
 #   if package name starts with st2 then it's st2 component.
 #
 %if %(PKG=%{package}; [ "${PKG##st2}" != "$PKG" ] && echo 1 || echo 0 ) == 1
-  %define st2pkg_version %(python -c "from %{package} import __version__; print __version__,")
-%endif
+%if 0%{?rhel} >= 8
+  %define st2pkg_version %(python3 -c "from %{package} import __version__; print(__version__),")
+%else
+  %define st2pkg_version %(python -c "from %{package} import __version__; print(__version__),")
+%endif  # if rhel8
+%endif  # st2 package version parsing
 
 ## Set macro indicating that we're using our python
 #

@@ -11,7 +11,6 @@
       /usr/lib/rpm/brp-strip-static-archive %{__strip} \
       /usr/lib/rpm/brp-strip-comment-note %{__strip} %{__objdump} \
       /usr/lib/rpm/brp-python-bytecompile %{__python} \
-      #/usr/lib/rpm/redhat/brp-python-hardlink
       /usr/lib/rpm/brp-python-hardlink \
       %{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars} \
   %{nil}
