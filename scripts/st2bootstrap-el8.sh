@@ -493,6 +493,8 @@ install_st2_dependencies() {
   fi
 
   # Install rabbit from packagecloud
+  # Package are not in EPEL or CentOS repos -
+  # recommended by rabbit: https://www.rabbitmq.com/install-rpm.html#package-cloud
   curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
   sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'
 
@@ -603,53 +605,6 @@ configure_st2_authentication() {
 }
 
 
-install_st2mistral_dependencies() {
-  sudo yum -y install postgresql-server postgresql-contrib postgresql-devel
-
-  # Setup postgresql at a first time
-  sudo postgresql-setup initdb
-
-  # Configure service only listens on localhost
-  sudo sh -c "echo \"listen_addresses = '127.0.0.1'\" >> /var/lib/pgsql/data/postgresql.conf"
-
-  # Make localhost connections to use an MD5-encrypted password for authentication
-  sudo sed -i "s/\(host.*all.*all.*127.0.0.1\/32.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
-  sudo sed -i "s/\(host.*all.*all.*::1\/128.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
-
-  # Start PostgreSQL service
-  sudo systemctl start postgresql
-  sudo systemctl enable postgresql
-
-  cat << EHD | sudo -u postgres psql
-CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD '${ST2_POSTGRESQL_PASSWORD}';
-CREATE DATABASE mistral OWNER mistral;
-EHD
-}
-
-install_st2mistral() {
-  # 'st2' repo builds single 'st2' package and so we have to install 'st2mistral' from repo
-  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
-    sudo yum -y install ${ST2MISTRAL_PKG}
-  else
-    sudo yum -y install jq
-
-    PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "el8" "st2mistral-.*.rpm")
-    sudo yum -y install ${PACKAGE_URL}
-  fi
-
-  # Configure database settings
-  sudo crudini --set /etc/mistral/mistral.conf database connection "postgresql+psycopg2://mistral:${ST2_POSTGRESQL_PASSWORD}@127.0.0.1/mistral"
-
-  # Setup Mistral DB tables, etc.
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
-
-  # Register mistral actions.
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate | grep -v openstack | grep -v "ironicclient"
-
-  # start mistral
-  sudo systemctl start mistral
-}
-
 install_st2web() {
   # Add key and repo for the latest stable nginx
   sudo rpm --import http://nginx.org/keys/nginx_signing.key
@@ -685,6 +640,7 @@ EOT"
   sudo systemctl restart nginx
   sudo systemctl enable nginx
 }
+
 
 install_st2chatops() {
   # Temporary hack until proper upstream fix https://bugs.centos.org/view.php?id=13669
