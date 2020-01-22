@@ -252,7 +252,8 @@ configure_st2_user () {
   # NOTE: If the file already exists and is non-empty, then assume the key does not need
   # to be generated again.
   if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
-    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P ""
+    # EL8 added -m PEM to force RSA PEM format
+    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" -m PEM
   fi
 
   if ! sudo grep -s -q -f ${SYSTEM_HOME}/.ssh/stanley_rsa.pub ${SYSTEM_HOME}/.ssh/authorized_keys;
