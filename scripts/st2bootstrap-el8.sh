@@ -637,7 +637,7 @@ EOT"
 
   # EL8: Comment out server { block } in nginx.conf and clean up
   sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
-  sudo awk '/^    server {/{f=1}f{$0 = "#" $0}{print}' /etc/nginx/nginx.conf.bak < /etc/nginx/nginx.conf
+  sudo awk '/^    server {/{f=1}f{$0 = "#" $0}{print}' /etc/nginx/nginx.conf.bak > /etc/nginx/nginx.conf
   sudo sed -i -e 's/##/#/' /etc/nginx/nginx.conf
   sudo sed -i -e 's/#}/}/' /etc/nginx/nginx.conf
 
