@@ -252,8 +252,13 @@ configure_st2_user () {
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   # NOTE: If the file already exists and is non-empty, then assume the key does not need
   # to be generated again.
+  ELMAJVER=$(cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/')
   if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
-    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P ""
+    if [[ "$ELMAJVER" == 8 ]]; then
+        # EL8 added -m PEM to force RSA PEM format
+        PEM="-m PEM"
+    fi
+    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" ${PEM}
   fi
 
   if ! sudo grep -s -q -f ${SYSTEM_HOME}/.ssh/stanley_rsa.pub ${SYSTEM_HOME}/.ssh/authorized_keys;

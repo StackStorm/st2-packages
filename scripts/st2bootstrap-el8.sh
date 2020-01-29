@@ -251,9 +251,13 @@ configure_st2_user () {
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   # NOTE: If the file already exists and is non-empty, then assume the key does not need
   # to be generated again.
+  ELMAJVER=$(cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/')
   if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
-    # EL8 added -m PEM to force RSA PEM format
-    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" -m PEM
+    if [[ "$ELMAJVER" == 8 ]]; then
+        # EL8: added -m PEM to force RSA PEM format
+        PEM="-m PEM"
+    fi
+    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" ${PEM}
   fi
 
   if ! sudo grep -s -q -f ${SYSTEM_HOME}/.ssh/stanley_rsa.pub ${SYSTEM_HOME}/.ssh/authorized_keys;
@@ -650,7 +654,6 @@ EOT"
   sudo systemctl enable nginx
 }
 
-
 install_st2chatops() {
   # Temporary hack until proper upstream fix https://bugs.centos.org/view.php?id=13669
   if ! yum list http-parser 1>/dev/null 2>&1; then
@@ -674,7 +677,7 @@ configure_st2chatops() {
   sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
 
   # Setup adapter
-  if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
+  if [[ "$HUBOT_ADAPTER"="slack" ]] && [[ ! -z "$HUBOT_SLACK_TOKEN" ]]
   then
     sudo sed -i -r "s/^# (export HUBOT_ADAPTER=slack)/\1/" /opt/stackstorm/chatops/st2chatops.env
     sudo sed -i -r "s/^# (export HUBOT_SLACK_TOKEN.).*/\1/" /opt/stackstorm/chatops/st2chatops.env

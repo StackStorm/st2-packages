@@ -11,7 +11,6 @@ DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
 ST2_PKG='st2'
-ST2MISTRAL_PKG='st2mistral'
 ST2WEB_PKG='st2web'
 ST2CHATOPS_PKG='st2chatops'
 
@@ -132,6 +131,13 @@ install_st2_dependencies() {
   if [[ -z "$is_epel_installed" ]]; then
     sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
   fi
+
+  # Install rabbit from packagecloud
+  # Package are not in EPEL or CentOS repos -
+  # recommended by rabbit: https://www.rabbitmq.com/install-rpm.html#package-cloud
+  curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
+  sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'
+
   sudo yum -y install curl rabbitmq-server
 
   # Configure RabbitMQ to listen on localhost only
@@ -147,13 +153,13 @@ install_st2_dependencies() {
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB (3.4)
   sudo rpm --import https://www.mongodb.org/static/pgp/server-3.4.asc
-  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-3.4.repo
-[mongodb-org-3.4]
+  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-4.repo
+[mongodb-org-4]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/3.4/x86_64/
+baseurl=https://repo.mongodb.org/yum/redhat/8/mongodb-org/4.0/x86_64/
 gpgcheck=1
 enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc
+gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
 EOT"
 
   sudo yum -y install mongodb-org
@@ -239,60 +245,13 @@ configure_st2_authentication() {
 }
 
 
-install_st2mistral_dependencies() {
-  sudo yum -y install postgresql-server postgresql-contrib postgresql-devel
-
-  # Setup postgresql at a first time
-  sudo postgresql-setup initdb
-
-  # Configure service only listens on localhost
-  sudo sh -c "echo \"listen_addresses = '127.0.0.1'\" >> /var/lib/pgsql/data/postgresql.conf"
-
-  # Make localhost connections to use an MD5-encrypted password for authentication
-  sudo sed -i "s/\(host.*all.*all.*127.0.0.1\/32.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
-  sudo sed -i "s/\(host.*all.*all.*::1\/128.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
-
-  # Start PostgreSQL service
-  sudo systemctl start postgresql
-  sudo systemctl enable postgresql
-
-  cat << EHD | sudo -u postgres psql
-CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD '${ST2_POSTGRESQL_PASSWORD}';
-CREATE DATABASE mistral OWNER mistral;
-EHD
-}
-
-install_st2mistral() {
-  # 'st2' repo builds single 'st2' package and so we have to install 'st2mistral' from repo
-  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
-    sudo yum -y install ${ST2MISTRAL_PKG}
-  else
-    sudo yum -y install jq
-
-    PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "el8" "st2mistral-.*.rpm")
-    sudo yum -y install ${PACKAGE_URL}
-  fi
-
-  # Configure database settings
-  sudo crudini --set /etc/mistral/mistral.conf database connection "postgresql+psycopg2://mistral:${ST2_POSTGRESQL_PASSWORD}@127.0.0.1/mistral"
-
-  # Setup Mistral DB tables, etc.
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
-
-  # Register mistral actions.
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate | grep -v openstack | grep -v "ironicclient"
-
-  # start mistral
-  sudo systemctl start mistral
-}
-
 install_st2web() {
   # Add key and repo for the latest stable nginx
   sudo rpm --import http://nginx.org/keys/nginx_signing.key
   sudo sh -c "cat <<EOT > /etc/yum.repos.d/nginx.repo
 [nginx]
 name=nginx repo
-baseurl=http://nginx.org/packages/rhel/7/x86_64/
+baseurl=http://nginx.org/packages/rhel/8/x86_64/
 gpgcheck=1
 enabled=1
 EOT"
@@ -314,6 +273,14 @@ EOT"
 
   # Remove default site, if present
   sudo rm -f /etc/nginx/conf.d/default.conf
+
+  # EL8: Comment out server { block } in nginx.conf and clean up
+  sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+  sudo awk '/^    server {/{f=1}f{$0 = "#" $0}{print}' /etc/nginx/nginx.conf.bak > /tmp/nginx.conf
+  sudo mv /tmp/nginx.conf /etc/nginx/nginx.conf
+  sudo sed -i -e 's/##/#/' /etc/nginx/nginx.conf
+  sudo sed -i -e 's/#}/}/' /etc/nginx/nginx.conf
+
 
   # Copy and enable StackStorm's supplied config file
   sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
@@ -345,7 +312,7 @@ configure_st2chatops() {
   sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
 
   # Setup adapter
-  if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
+  if [[ "$HUBOT_ADAPTER"="slack" ]] && [[ ! -z "$HUBOT_SLACK_TOKEN" ]]
   then
     sudo sed -i -r "s/^# (export HUBOT_ADAPTER=slack)/\1/" /opt/stackstorm/chatops/st2chatops.env
     sudo sed -i -r "s/^# (export HUBOT_SLACK_TOKEN.).*/\1/" /opt/stackstorm/chatops/st2chatops.env
@@ -388,9 +355,6 @@ STEP="Configure st2 CLI config" && configure_st2_cli_config
 STEP="Generate symmetric crypto key for datastore" && generate_symmetric_crypto_key_for_datastore
 STEP="Verify st2" && verify_st2
 
-# Disable for EL8, mistral not supported
-# STEP="Install mistral dependencies" && install_st2mistral_dependencies
-# STEP="Install mistral" && install_st2mistral
 
 STEP="Install st2web" && install_st2web
 STEP="Install st2chatops" && install_st2chatops
