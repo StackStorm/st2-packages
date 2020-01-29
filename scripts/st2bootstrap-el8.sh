@@ -720,7 +720,7 @@ STEP="Verify st2" && verify_st2
 
 STEP="Install st2web" && install_st2web
 STEP="Install st2chatops" && install_st2chatops
-# STEP="Configure st2chatops" && configure_st2chatops
+STEP="Configure st2chatops" && configure_st2chatops
 trap - EXIT
 
 ok_message
