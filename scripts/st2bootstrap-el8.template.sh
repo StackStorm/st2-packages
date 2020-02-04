@@ -151,8 +151,8 @@ install_st2_dependencies() {
 }
 
 install_mongodb() {
-  # Add key and repo for the latest stable MongoDB (3.4)
-  sudo rpm --import https://www.mongodb.org/static/pgp/server-3.4.asc
+  # Add key and repo for the latest stable MongoDB (4.0)
+  sudo rpm --import https://www.mongodb.org/static/pgp/server-4.0.asc
   sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-4.repo
 [mongodb-org-4]
 name=MongoDB Repository
