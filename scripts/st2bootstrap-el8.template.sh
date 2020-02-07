@@ -135,6 +135,7 @@ install_st2_dependencies() {
   # Install rabbit from packagecloud
   # Package are not in EPEL or CentOS repos -
   # recommended by rabbit: https://www.rabbitmq.com/install-rpm.html#package-cloud
+  # Leaving epel repo to switch out with rpm when released
   curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
   sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'
 
