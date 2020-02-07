@@ -304,7 +304,7 @@ EOT"
 
   # RHEL 8 runs firewalld so we need to open http/https
   # Don't run this on ec2
-  if [[ "$RHEL" == "1" ]] && [[ $(grep -q "ec2" /sys/hypervisor/uuid)  ]]; then
+  if [[ "$RHEL" == "1" ]] && [[ $(grep -q "ec2" /sys/hypervisor/uuid) == 1 ]]; then
     sudo firewall-cmd --zone=public --add-service=http --add-service=https
     sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https
   fi
