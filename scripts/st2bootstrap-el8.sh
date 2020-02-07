@@ -497,7 +497,8 @@ install_st2_dependencies() {
   # Install rabbit from packagecloud
   # Package are not in EPEL or CentOS repos -
   # recommended by rabbit: https://www.rabbitmq.com/install-rpm.html#package-cloud
-  # Leaving epel repo to switch out with rpm when released
+  # TODO: Migrate install back to EPEL rpm when available
+  # https://github.com/StackStorm/st2-packages/issues/632
   curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
   sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'
 
@@ -664,7 +665,8 @@ EOT"
   sudo systemctl enable nginx
 
   # RHEL 8 runs firewalld so we need to open http/https
-  if [[ "$RHEL" == "1" ]]; then
+  # Don't run this on ec2
+  if [[ "$RHEL" == "1" ]] && [[ $(grep -q "ec2" /sys/hypervisor/uuid)  ]]; then
     sudo firewall-cmd --zone=public --add-service=http --add-service=https
     sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https
   fi
