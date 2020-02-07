@@ -514,6 +514,12 @@ install_st2_dependencies() {
 }
 
 install_mongodb() {
+
+  # Need yum perl module enabled on RHEL 8
+  if [[ "$RHEL" == "1" ]]; then
+    yum module enable perl:5.26
+  fi
+
   # Add key and repo for the latest stable MongoDB (4.0)
   sudo rpm --import https://www.mongodb.org/static/pgp/server-4.0.asc
   sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-4.repo
@@ -656,6 +662,12 @@ EOT"
 
   sudo systemctl restart nginx
   sudo systemctl enable nginx
+
+  # RHEL 8 runs firewalld so we need to open http/https
+  if [[ "$RHEL" == "1" ]]; then
+    sudo firewall-cmd --zone=public --add-service=http --add-service=https
+    sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https
+  fi
 }
 
 install_st2chatops() {
@@ -707,6 +719,13 @@ configure_st2chatops() {
 }
 
 trap 'fail' EXIT
+
+# check for RHEL 8
+ELMAJVER=$(cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/')
+if [[ "$ELMAJVER" == "8" ]] && [[ $(cat /etc/os-release | grep 'ID="rhel"') ]]; then
+    RHEL=1
+fi
+
 STEP='Parse arguments' && setup_args $@
 STEP="Configure Proxy" && configure_proxy
 STEP='Install net-tools' && install_net_tools
