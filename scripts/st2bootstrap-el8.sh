@@ -517,7 +517,7 @@ install_mongodb() {
 
   # Need yum perl module enabled on RHEL 8
   if [[ "$RHEL" == "1" ]]; then
-    yum module enable perl:5.26
+    sudo yum -y module enable perl:5.26
   fi
 
   # Add key and repo for the latest stable MongoDB (4.0)
