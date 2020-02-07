@@ -80,14 +80,14 @@ setup_args() {
   echo "          Installing st2 $RELEASE $VERSION              "
   echo "########################################################"
 
-  if [ "$REPO_TYPE" == "staging" ]; then
+  if [[ "$REPO_TYPE" == "staging" ]]; then
     printf "\n\n"
     echo "################################################################"
     echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
     echo "################################################################"
   fi
 
-  if [ "$DEV_BUILD" != '' ]; then
+  if [[ "$DEV_BUILD" != '' ]]; then
     printf "\n\n"
     echo "###############################################################################"
     echo "### Installing from dev build artifacts!!! REALLY, ANYTHING COULD HAPPEN!!! ###"
@@ -101,7 +101,7 @@ setup_args() {
     read -e -p "Admin username: " -i "st2admin" USERNAME
     read -e -s -p "Password: " PASSWORD
 
-    if [ "${PASSWORD}" = '' ]; then
+    if [[ "${PASSWORD}" = '' ]]; then
         echo "Password cannot be empty."
         exit 1
     fi
@@ -253,10 +253,8 @@ configure_st2_user () {
   # to be generated again.
   ELMAJVER=$(cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/')
   if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
-    if [[ "$ELMAJVER" == 8 ]]; then
-        # EL8 added -m PEM to force RSA PEM format
-        PEM="-m PEM"
-    fi
+    # added PEM to enforce PEM ssh key type in EL8 to maintain consistency
+    PEM="-m PEM"
     sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" ${PEM}
   fi
 
@@ -573,7 +571,7 @@ install_st2() {
   curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
 
   # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
-  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
+  if [[ "$DEV_BUILD" = '' ]] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo yum -y install ${ST2_PKG}
   else
@@ -640,12 +638,18 @@ EOT"
   sudo rm -f /etc/nginx/conf.d/default.conf
 
   # EL8: Comment out server { block } in nginx.conf and clean up
-  sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
-  sudo awk '/^    server {/{f=1}f{$0 = "#" $0}{print}' /etc/nginx/nginx.conf.bak > /tmp/nginx.conf
-  sudo mv /tmp/nginx.conf /etc/nginx/nginx.conf
-  sudo sed -i -e 's/##/#/' /etc/nginx/nginx.conf
-  sudo sed -i -e 's/#}/}/' /etc/nginx/nginx.conf
+  # nginx 1.6 in EL8 ships with a server block enabled which needs to be disabled
 
+  # back up conf
+  sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+  # comment out server block eg. server {...}
+  sudo awk '/^    server {/{f=1}f{$0 = "#" $0}{print}' /etc/nginx/nginx.conf.bak > /tmp/nginx.conf
+  # copy modified file over
+  sudo mv /tmp/nginx.conf /etc/nginx/nginx.conf
+  # remove double comments
+  sudo sed -i -e 's/##/#/' /etc/nginx/nginx.conf
+  # remove comment closing out server block
+  sudo sed -i -e 's/#}/}/' /etc/nginx/nginx.conf
 
   # Copy and enable StackStorm's supplied config file
   sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/

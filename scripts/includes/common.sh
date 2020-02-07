@@ -142,10 +142,8 @@ configure_st2_user () {
   # to be generated again.
   ELMAJVER=$(cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/')
   if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
-    if [[ "$ELMAJVER" == 8 ]]; then
-        # EL8 added -m PEM to force RSA PEM format
-        PEM="-m PEM"
-    fi
+    # added PEM to enforce PEM ssh key type in EL8 to maintain consistency
+    PEM="-m PEM"
     sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" ${PEM}
   fi
 
