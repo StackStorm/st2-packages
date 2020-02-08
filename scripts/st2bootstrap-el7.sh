@@ -527,6 +527,10 @@ EOT"
   sleep 5
 
   # Create admin user and user used by StackStorm (MongoDB needs to be running)
+  # NOTE: mongo shell will automatically exit when piping from stdin. There is
+  # no need to put quit(); at the end. This way last command exit code will be
+  # correctly preserved and install script will correctly fail and abort if this
+  # command fails.
   mongo <<EOF
 use admin;
 db.createUser({
@@ -536,7 +540,6 @@ db.createUser({
         { role: "userAdminAnyDatabase", db: "admin" }
     ]
 });
-quit();
 EOF
 
   mongo <<EOF
@@ -548,7 +551,6 @@ db.createUser({
         { role: "readWrite", db: "st2" }
     ]
 });
-quit();
 EOF
 
   # Require authentication to be able to acccess the database
