@@ -724,8 +724,10 @@ trap 'fail' EXIT
 
 # check for RHEL 8
 ELMAJVER=$(cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/')
-if [[ "$ELMAJVER" == "8" ]] && [[ $(cat /etc/os-release | grep 'ID="rhel"') ]]; then
-    RHEL=1
+if [[ $(cat /etc/os-release | grep 'ID="rhel"') ]]; then
+  RHEL=1
+else
+  RHEL=0
 fi
 
 STEP='Parse arguments' && setup_args $@
