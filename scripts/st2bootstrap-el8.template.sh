@@ -162,10 +162,10 @@ install_st2_dependencies() {
 
 install_mongodb() {
 
-  # Need yum perl module enabled on RHEL 8
-  if [[ "$RHEL" == "1" ]]; then
-    sudo yum -y module enable perl:5.26
-  fi
+#  # Need yum perl module enabled on RHEL 8
+#  if [[ "$RHEL" == "1" ]]; then
+#    sudo yum -y module enable perl:5.26
+#  fi
 
   # Add key and repo for the latest stable MongoDB (4.0)
   sudo rpm --import https://www.mongodb.org/static/pgp/server-4.0.asc
