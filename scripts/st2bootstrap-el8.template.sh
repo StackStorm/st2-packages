@@ -14,6 +14,14 @@ ST2_PKG='st2'
 ST2WEB_PKG='st2web'
 ST2CHATOPS_PKG='st2chatops'
 
+check_for_rhel() {
+  if [[ $(cat /etc/os-release | grep 'ID="rhel"') ]]; then
+    RHEL=1
+  else
+    RHEL=0
+  fi
+}
+
 setup_args() {
   for i in "$@"
     do
@@ -360,14 +368,7 @@ configure_st2chatops() {
 
 trap 'fail' EXIT
 
-# check for RHEL 8
-ELMAJVER=$(cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/')
-if [[ $(cat /etc/os-release | grep 'ID="rhel"') ]]; then
-  RHEL=1
-else
-  RHEL=0
-fi
-
+STEP='Check for RHEL' && check_for_rhel
 STEP='Parse arguments' && setup_args $@
 STEP="Configure Proxy" && configure_proxy
 STEP='Install net-tools' && install_net_tools
