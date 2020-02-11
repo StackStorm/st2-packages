@@ -135,6 +135,11 @@ install_net_tools() {
 }
 
 install_st2_dependencies() {
+  # RabbitMQ on RHEL8 requires module(perl:5.26
+  if [[ "$RHEL" == "1" ]]; then
+    sudo yum -y module enable perl:5.26
+  fi
+
   is_epel_installed=$(rpm -qa | grep epel-release || true)
   if [[ -z "$is_epel_installed" ]]; then
     sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
@@ -161,11 +166,6 @@ install_st2_dependencies() {
 }
 
 install_mongodb() {
-
-#  # Need yum perl module enabled on RHEL 8
-#  if [[ "$RHEL" == "1" ]]; then
-#    sudo yum -y module enable perl:5.26
-#  fi
 
   # Add key and repo for the latest stable MongoDB (4.0)
   sudo rpm --import https://www.mongodb.org/static/pgp/server-4.0.asc
