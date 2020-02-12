@@ -25,6 +25,11 @@ VIRTUAL_MACHINES = {
     :box => 'centos/7',
     :ip => '192.168.16.22',
   },
+  :el8 => {
+    :hostname => 'st2-packages-el8',
+    :box => 'centos/8',
+    :ip => '192.168.16.24',
+  },
 }
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|

@@ -72,8 +72,10 @@ In order to build, package, install and test ST2 in an isolated Vagrant VM, run 
 vagrant up $TARGET
 ```
 
-Where `$TARGET` is one of `trusty`, `xenial` or `el7`. Note that `el6` does not reliably support docker,
-so it is not an available option.
+Where `$TARGET` is one of `trusty`, `xenial`, `el7`, or `el8`. Note that `el6` does not reliably
+ support docker, so it is not an available option. If you are using `el8`, comment out the 
+ `vm_config.vm.provision :docker` line in the Vagrantfile. There is logic in `setup-vagrant.sh` to 
+ install docker in `el8`.
 
 The following steps are run while provisioning the Vagrant VM:
 
