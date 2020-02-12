@@ -23,11 +23,7 @@ ST2WEB_PKG='st2web'
 ST2CHATOPS_PKG='st2chatops'
 
 is_rhel() {
-  if [[ $(cat /etc/os-release | grep 'ID="rhel"') ]]; then
-    RHEL=1
-  else
-    RHEL=0
-  fi
+  return $(cat /etc/os-release | grep 'ID="rhel"')
 }
 
 setup_args() {
