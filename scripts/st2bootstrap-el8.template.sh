@@ -14,7 +14,7 @@ ST2_PKG='st2'
 ST2WEB_PKG='st2web'
 ST2CHATOPS_PKG='st2chatops'
 
-check_for_rhel() {
+is_rhel() {
   if [[ $(cat /etc/os-release | grep 'ID="rhel"') ]]; then
     RHEL=1
   else
@@ -136,7 +136,7 @@ install_net_tools() {
 
 install_st2_dependencies() {
   # RabbitMQ on RHEL8 requires module(perl:5.26
-  if [[ "$RHEL" == "1" ]]; then
+  if is_rhel; then
     sudo yum -y module enable perl:5.26
   fi
 
@@ -312,7 +312,7 @@ EOT"
 
   # RHEL 8 runs firewalld so we need to open http/https
   # Don't run this on ec2
-  if [[ "$RHEL" == "1" ]] && [[ $(grep -q "ec2" /sys/hypervisor/uuid) == 1 ]]; then
+  if is_rhel && [[ $(grep -q "ec2" /sys/hypervisor/uuid) == 1 ]]; then
     sudo firewall-cmd --zone=public --add-service=http --add-service=https
     sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https
   fi
@@ -368,7 +368,6 @@ configure_st2chatops() {
 
 trap 'fail' EXIT
 
-STEP='Check for RHEL' && check_for_rhel
 STEP='Parse arguments' && setup_args $@
 STEP="Configure Proxy" && configure_proxy
 STEP='Install net-tools' && install_net_tools
