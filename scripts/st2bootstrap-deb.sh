@@ -116,6 +116,7 @@ setup_args() {
 }
 
 
+#!/usr/bin/env bash
 function configure_proxy() {
   # Allow bypassing 'proxy' env vars via sudo
   local sudoers_proxy='Defaults env_keep += "http_proxy https_proxy no_proxy proxy_ca_bundle_path DEBIAN_FRONTEND"'
@@ -254,15 +255,19 @@ configure_st2_user () {
   SYSTEM_HOME=$(echo ~stanley)
 
   sudo mkdir -p ${SYSTEM_HOME}/.ssh
-
+  if [[ -f 'etc/redhat-release' ]]; then
+    RHMAJVER=`cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/'`
+  else
+    RHMAJVER=''
+  fi
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   # NOTE: If the file already exists and is non-empty, then assume the key does not need
   # to be generated again.
   if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
     # added PEM to enforce PEM ssh key type in EL8 to maintain consistency
-    if [[ "$RHMAJVER" != '6' ]]; then
+    if [[ "$RHMAJVER" = '8' ]] || [[ "$RHMAJVER" = '8' ]]; then
       PEM="-m PEM"
-    else
+    elif [[ "$RHMAJVER" = '6' ]]; then
       # PEM flag not present in ssh-keygen version in EL6
       PEM=""
     fi
