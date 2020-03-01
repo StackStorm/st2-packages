@@ -146,7 +146,7 @@ configure_st2_user () {
   # to be generated again.
   if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
     # added PEM to enforce PEM ssh key type in EL8 to maintain consistency
-    if [[ "$RHMAJVER" = '8' ]] || [[ "$RHMAJVER" = '8' ]]; then
+    if [[ "$RHMAJVER" = '8' ]] || [[ "$RHMAJVER" = '7' ]]; then
       PEM="-m PEM"
     elif [[ "$RHMAJVER" = '6' ]] || [[ -z "$RHMAJVER" ]]; then
       # PEM flag not present in ssh-keygen version in EL6
