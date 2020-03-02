@@ -253,20 +253,15 @@ configure_st2_user () {
 
   SYSTEM_HOME=$(echo ~stanley)
 
-  sudo mkdir -p ${SYSTEM_HOME}/.ssh
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   # NOTE: If the file already exists and is non-empty, then assume the key does not need
   # to be generated again.
   if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
     # added PEM to enforce PEM ssh key type in EL8 to maintain consistency
-    if [[ "$RHMAJVER" != '6' ]]; then
-      PEM="-m PEM"
-    else
-      # PEM flag not present in ssh-keygen version in EL6
-      PEM=""
-    fi
-    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" ${PEM}
+    # Hotfix for EL6 which doesn't have '-m' param for ssh-keygen
+    # TODO: Revert once EL6 is deprecated, may need testing
+    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" -m PEM || sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P ""
   fi
 
   if ! sudo grep -s -q -f ${SYSTEM_HOME}/.ssh/stanley_rsa.pub ${SYSTEM_HOME}/.ssh/authorized_keys;
