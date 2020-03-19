@@ -17,7 +17,7 @@ ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
 	PATH := /usr/share/python/st2python/bin:$(PATH)
 	PYTHON_BINARY := /usr/share/python/st2python/bin/python
 else ifeq ($(DEB_DISTRO),bionic)
-	PYTHON_BINARY := /usr/bin/python3.6
+	PYTHON_BINARY := /usr/bin/python3
 else ifeq ($(DEB_DISTRO),buster)
 	PYTHON_BINARY := /usr/bin/python3.7
 else
