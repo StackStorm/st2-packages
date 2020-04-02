@@ -1,18 +1,3 @@
-trusty:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
-  environment:
-    - BUILDNODE=trustybuild
-    - TESTNODE=trustytest
-  links:
-    - trustybuild
-    - trustytest
-    - rabbitmq
-    - mongodb
-    - postgres
-
 xenial:
   image: quay.io/stackstorm/packagingrunner
   extends:
@@ -100,12 +85,6 @@ el6:
 
 ## Package build nodes
 #
-trustybuild:
-  image: stackstorm/packagingbuild:trusty
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
-
 xenialbuild:
   image: stackstorm/packagingbuild:xenial
   extends:
@@ -138,12 +117,6 @@ centos8build:
 
 ## Package testing nodes
 #
-trustytest:
-  image: stackstorm/packagingtest:trusty-upstart
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
-
 xenialtest:
   image: stackstorm/packagingtest:xenial-systemd
   privileged: true

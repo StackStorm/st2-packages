@@ -1,15 +1,3 @@
-trusty:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-circle
-  environment:
-    - BUILDNODE=trustybuild
-    - TESTNODE=trustytest
-  links:
-    - trustybuild
-    - trustytest
-
 xenial:
   image: quay.io/stackstorm/packagingrunner
   extends:
@@ -87,12 +75,6 @@ el6:
 
 ## Package build nodes
 #
-trustybuild:
-  image: stackstorm/packagingbuild:trusty
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
-
 xenialbuild:
   image: stackstorm/packagingbuild:xenial
   extends:
@@ -124,12 +106,6 @@ centos8build:
 
 ## Package testing nodes
 #
-trustytest:
-  image: stackstorm/packagingtest:trusty-upstart
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
-
 xenialtest:
   image: stackstorm/packagingtest:xenial-systemd
   privileged: true
