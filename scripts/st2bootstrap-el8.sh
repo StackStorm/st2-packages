@@ -439,8 +439,9 @@ get_full_pkg_versions() {
     fi
     ST2_PKG=${ST2_VER}
 
+    local RHMAJVER=`cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/'`
     local ST2MISTRAL_VER=$(repoquery -y --nvr --show-duplicates st2mistral | grep -F st2mistral-${VERSION} | sort --version-sort | tail -n 1)
-    if [ -z "$ST2MISTRAL_VER" ]; then
+    if [ -z "$ST2MISTRAL_VER" && "$RHMAJVER" != '8' ]; then
       echo "Could not find requested version of st2mistral!!!"
       sudo repoquery -y --nvr --show-duplicates st2mistral
       exit 3
