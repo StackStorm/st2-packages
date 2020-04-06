@@ -254,7 +254,8 @@ configure_st2_user () {
   SYSTEM_HOME=$(echo ~stanley)
 
   if [ ! -d "${SYSTEM_HOME}/.ssh" ]; then
-  	sudo mkdir ${SYSTEM_HOME}/.ssh
+    sudo mkdir ${SYSTEM_HOME}/.ssh
+    sudo chmod 700 ${SYSTEM_HOME}/.ssh
   fi
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
