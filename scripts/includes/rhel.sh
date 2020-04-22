@@ -26,7 +26,7 @@ get_full_pkg_versions() {
 
     local ST2MISTRAL_VER=$(repoquery ${YES_FLAG} --nvr --show-duplicates st2mistral | grep -F st2mistral-${VERSION} | sort --version-sort | tail -n 1)
     # RHEL 8 and newer does not install Mistral
-    if [ -z "$ST2MISTRAL_VER" -a "$RHMAJVER" -lt "8" ]; then
+    if [[ -z "$ST2MISTRAL_VER" && "$RHMAJVER" -lt "8" ]]; then
       echo "Could not find requested version of st2mistral!!!"
       sudo repoquery ${YES_FLAG} --nvr --show-duplicates st2mistral
       exit 3
