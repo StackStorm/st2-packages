@@ -15,7 +15,7 @@ USERNAME=''
 PASSWORD=''
 
 # Note: This variable needs to default to a branch of the latest stable release
-BRANCH='v3.1'
+BRANCH='v3.2'
 FORCE_BRANCH=""
 
 adddate() {
