@@ -692,7 +692,7 @@ EOT"
 
 install_st2chatops() {
   # Temporary hack until proper upstream fix https://bugs.centos.org/view.php?id=13669
-  if ! yum list http-parser 1>/dev/null 2>&1; then
+  if ! yum -y list http-parser 1>/dev/null 2>&1; then
     sudo yum install -y http://repo.okay.com.mx/centos/8/x86_64/release//http-parser-2.8.0-2.el8.x86_64.rpm
   fi
 
