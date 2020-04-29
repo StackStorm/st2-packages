@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# NOTE: This file is auto-generated - DO NOT EDIT MANUALLY
+#       Instead copy from https://github.com/StackStorm/st2/blob/master/scripts/dist_utils.py
+
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +25,17 @@ import sys
 from distutils.version import StrictVersion
 
 # NOTE: This script can't rely on any 3rd party dependency so we need to use this code here
+#
+# TODO: Why can't this script rely on 3rd party dependencies? Is it because it has to import
+#       from pip?
+#
+# TODO: Dear future developer, if you are back here fixing a bug with how we parse
+#       requirements files, please look into using the packaging package on PyPI:
+#       https://packaging.pypa.io/en/latest/requirements/
+#       and specifying that in the `setup_requires` argument to `setuptools.setup()`
+#       for subpackages.
+#       At the very least we can vendorize some of their code instead of reimplementing
+#       each piece of their code every time our parsing breaks.
 PY3 = sys.version_info[0] == 3
 
 if PY3:
@@ -31,16 +45,8 @@ else:
 
 GET_PIP = 'curl https://bootstrap.pypa.io/get-pip.py | python'
 
-try:
-    import pip
-except ImportError as e:
-    print('Failed to import pip: %s' % (text_type(e)))
-    print('')
-    print('Download pip:\n%s' % (GET_PIP))
-    sys.exit(1)
-
-
 __all__ = [
+    'check_pip_is_installed',
     'check_pip_version',
     'fetch_requirements',
     'apply_vagrant_workaround',
@@ -49,16 +55,37 @@ __all__ = [
 ]
 
 
+def check_pip_is_installed():
+    """
+    Ensure that pip is installed.
+    """
+    try:
+        import pip  # NOQA
+    except ImportError as e:
+        print('Failed to import pip: %s' % (text_type(e)))
+        print('')
+        print('Download pip:\n%s' % (GET_PIP))
+        sys.exit(1)
+
+    return True
+
+
 def check_pip_version(min_version='6.0.0'):
     """
     Ensure that a minimum supported version of pip is installed.
     """
+    check_pip_is_installed()
+
+    import pip
+
     if StrictVersion(pip.__version__) < StrictVersion(min_version):
         print("Upgrade pip, your version '{0}' "
               "is outdated. Minimum required version is '{1}':\n{2}".format(pip.__version__,
                                                                             min_version,
                                                                             GET_PIP))
         sys.exit(1)
+
+    return True
 
 
 def fetch_requirements(requirements_file_path):
@@ -101,6 +128,9 @@ def fetch_requirements(requirements_file_path):
                 links.append(link)
             else:
                 req_name = line
+
+                if ';' in req_name:
+                    req_name = req_name.split(';')[0].strip()
 
             reqs.append(req_name)
 
