@@ -182,7 +182,7 @@ if [ $? -ne 0 ]; then
     exit 2
 else
     echo "Downloading deployment script from: ${ST2BOOTSTRAP}..."
-    curl -Ss -k -o ${BOOTSTRAP_FILE} ${ST2BOOTSTRAP}
+    curl -sSL -k -o ${BOOTSTRAP_FILE} ${ST2BOOTSTRAP}
     chmod +x ${BOOTSTRAP_FILE}
 
     echo "Running deployment script for st2 ${VERSION}..."
