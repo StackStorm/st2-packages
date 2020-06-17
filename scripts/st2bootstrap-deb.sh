@@ -23,8 +23,8 @@ USERNAME=''
 PASSWORD=''
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
 
-if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
-  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty), 16.04 (xenial) or Ubuntu 18.04 (bionic) as base system!"
+if [[ "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
+  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 16.04 (xenial) or Ubuntu 18.04 (bionic) as base system!"
   exit 2
 fi
 
@@ -148,7 +148,7 @@ function configure_proxy() {
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
-  DISTRO=$2  # Distro name (e.g. trusty,xenial,bionic,el6,el7)
+  DISTRO=$2  # Distro name (e.g. xenial,bionic,el6,el7)
   PACKAGE_NAME_REGEX=$3
 
   PACKAGES_METADATA=$(curl -sSL -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
