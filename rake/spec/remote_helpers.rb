@@ -12,7 +12,6 @@ module RemoteHelpers
   # Use different ways to grab logs on a remote spec instance.
   def remote_init_type
     probe_cmd = <<-EOS
-      ls -1 /etc/debian_version 1>/dev/null 2>&1 && dpkg -l upstart 1>/dev/null 2>&1 && echo upstart && exit
       ls -1 /etc/debian_version 1>/dev/null 2>&1 && echo debian && exit
       ls -1 /usr/bin/systemctl 1>/dev/null 2>&1 && echo systemd && exit
     EOS
