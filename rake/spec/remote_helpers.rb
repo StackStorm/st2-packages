@@ -12,7 +12,6 @@ module RemoteHelpers
   # Use different ways to grab logs on a remote spec instance.
   def remote_init_type
     probe_cmd = <<-EOS
-      ls -1 /etc/debian_version 1>/dev/null 2>&1 && dpkg -l upstart 1>/dev/null 2>&1 && echo upstart && exit
       ls -1 /etc/debian_version 1>/dev/null 2>&1 && echo debian && exit
       ls -1 /usr/bin/systemctl 1>/dev/null 2>&1 && echo systemd && exit
     EOS
@@ -24,9 +23,6 @@ module RemoteHelpers
   def remote_grab_service_stdout(service_name, lines_num = 30)
     init_type = remote_init_type
     output =  case init_type
-              when :upstart
-                path = File.join('/var/log/upstart', service_name)
-                remote_tail_logfile(path, lines_num)
               when :systemd
                 spec.backend.run_command("journalctl -n #{lines_num} -u #{service_name}").stdout
               else
