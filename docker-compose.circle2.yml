@@ -1,18 +1,3 @@
-trusty:
-  image: quay.io/stackstorm/packagingrunner
-  working_dir: /root/st2-packages
-  volumes_from:
-    - st2-packages-vol
-  environment:
-    - BUILDNODE=trustybuild
-    - TESTNODE=trustytest
-  links:
-    - trustybuild
-    - trustytest
-    - rabbitmq
-    - mongodb
-    - postgres
-
 xenial:
   image: quay.io/stackstorm/packagingrunner
   working_dir: /root/st2-packages
@@ -95,11 +80,6 @@ el6:
 
 ## Package build nodes
 #
-trustybuild:
-  image: stackstorm/packagingbuild:trusty
-  volumes_from:
-    - st2-packages-vol
-
 xenialbuild:
   image: stackstorm/packagingbuild:xenial
   volumes_from:
@@ -127,11 +107,6 @@ centos8build:
 
 ## Package testing nodes
 #
-trustytest:
-  image: stackstorm/packagingtest:trusty-upstart
-  volumes_from:
-    - st2-packages-vol
-
 xenialtest:
   image: stackstorm/packagingtest:xenial-systemd
   privileged: true
