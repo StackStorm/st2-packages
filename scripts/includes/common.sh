@@ -33,7 +33,7 @@ function get_package_url() {
   DISTRO=$2  # Distro name (e.g. xenial,bionic,el6,el7)
   PACKAGE_NAME_REGEX=$3
 
-  PACKAGES_METADATA=$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
+  PACKAGES_METADATA=$(curl -sSL -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
 
   if [ -z "${PACKAGES_METADATA}" ]; then
       echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts" 1>&2
@@ -135,6 +135,10 @@ configure_st2_user () {
 
   SYSTEM_HOME=$(echo ~stanley)
 
+  if [ ! -d "${SYSTEM_HOME}/.ssh" ]; then
+    sudo mkdir ${SYSTEM_HOME}/.ssh
+    sudo chmod 700 ${SYSTEM_HOME}/.ssh
+  fi
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   # NOTE: If the file already exists and is non-empty, then assume the key does not need

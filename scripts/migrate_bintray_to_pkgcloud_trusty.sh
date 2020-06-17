@@ -23,4 +23,4 @@ if [[ ! -z "$key_exists" ]]; then
 fi
 
 echo "Adding back package cloud repo definitions to /etc/sources.list.d..."
-curl -s https://packagecloud.io/install/repositories/StackStorm/staging-stable/script.deb.sh | sudo bash
+curl -sSL https://packagecloud.io/install/repositories/StackStorm/staging-stable/script.deb.sh | sudo bash

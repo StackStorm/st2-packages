@@ -145,7 +145,7 @@ function get_package_url() {
   DISTRO=$2  # Distro name (e.g. xenial,bionic,el6,el7)
   PACKAGE_NAME_REGEX=$3
 
-  PACKAGES_METADATA=$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
+  PACKAGES_METADATA=$(curl -sSL -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
 
   if [ -z "${PACKAGES_METADATA}" ]; then
       echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts" 1>&2
@@ -247,6 +247,10 @@ configure_st2_user () {
 
   SYSTEM_HOME=$(echo ~stanley)
 
+  if [ ! -d "${SYSTEM_HOME}/.ssh" ]; then
+    sudo mkdir ${SYSTEM_HOME}/.ssh
+    sudo chmod 700 ${SYSTEM_HOME}/.ssh
+  fi
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   # NOTE: If the file already exists and is non-empty, then assume the key does not need
@@ -424,34 +428,42 @@ install_yum_utils() {
 get_full_pkg_versions() {
   if [ "$VERSION" != '' ];
   then
-    local ST2_VER=$(repoquery --nvr --show-duplicates st2 | grep -F st2-${VERSION} | sort --version-sort | tail -n 1)
+    local RHMAJVER=`cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/'`
+    local YES_FLAG=""
+    if [ "$RHMAJVER" -ge "8" ]; then
+      # RHEL 8 and newer, you need "-y" flag to avoid being prompted to confirm "yes"
+      local YES_FLAG="-y"
+    fi
+
+    local ST2_VER=$(repoquery ${YES_FLAG} --nvr --show-duplicates st2 | grep -F st2-${VERSION} | sort --version-sort | tail -n 1)
     if [ -z "$ST2_VER" ]; then
       echo "Could not find requested version of st2!!!"
-      sudo repoquery --nvr --show-duplicates st2
+      sudo repoquery ${YES_FLAG} --nvr --show-duplicates st2
       exit 3
     fi
     ST2_PKG=${ST2_VER}
 
-    local ST2MISTRAL_VER=$(repoquery --nvr --show-duplicates st2mistral | grep -F st2mistral-${VERSION} | sort --version-sort | tail -n 1)
-    if [ -z "$ST2MISTRAL_VER" ]; then
+    local ST2MISTRAL_VER=$(repoquery ${YES_FLAG} --nvr --show-duplicates st2mistral | grep -F st2mistral-${VERSION} | sort --version-sort | tail -n 1)
+    # RHEL 8 and newer does not install Mistral
+    if [[ -z "$ST2MISTRAL_VER" && "$RHMAJVER" -lt "8" ]]; then
       echo "Could not find requested version of st2mistral!!!"
-      sudo repoquery --nvr --show-duplicates st2mistral
+      sudo repoquery ${YES_FLAG} --nvr --show-duplicates st2mistral
       exit 3
     fi
     ST2MISTRAL_PKG=${ST2MISTRAL_VER}
 
-    local ST2WEB_VER=$(repoquery --nvr --show-duplicates st2web | grep -F st2web-${VERSION} | sort --version-sort | tail -n 1)
+    local ST2WEB_VER=$(repoquery ${YES_FLAG} --nvr --show-duplicates st2web | grep -F st2web-${VERSION} | sort --version-sort | tail -n 1)
     if [ -z "$ST2WEB_VER" ]; then
       echo "Could not find requested version of st2web."
-      sudo repoquery --nvr --show-duplicates st2web
+      sudo repoquery ${YES_FLAG} --nvr --show-duplicates st2web
       exit 3
     fi
     ST2WEB_PKG=${ST2WEB_VER}
 
-    local ST2CHATOPS_VER=$(repoquery --nvr --show-duplicates st2chatops | grep -F st2chatops-${VERSION} | sort --version-sort | tail -n 1)
+    local ST2CHATOPS_VER=$(repoquery ${YES_FLAG} --nvr --show-duplicates st2chatops | grep -F st2chatops-${VERSION} | sort --version-sort | tail -n 1)
     if [ -z "$ST2CHATOPS_VER" ]; then
       echo "Could not find requested version of st2chatops."
-      sudo repoquery --nvr --show-duplicates st2chatops
+      sudo repoquery ${YES_FLAG} --nvr --show-duplicates st2chatops
       exit 3
     fi
     ST2CHATOPS_PKG=${ST2CHATOPS_VER}
@@ -563,7 +575,7 @@ EOF
 }
 
 install_st2() {
-  curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
+  curl -sL https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
 
   # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
   if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then

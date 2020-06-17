@@ -151,7 +151,7 @@ function get_package_url() {
   DISTRO=$2  # Distro name (e.g. xenial,bionic,el6,el7)
   PACKAGE_NAME_REGEX=$3
 
-  PACKAGES_METADATA=$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
+  PACKAGES_METADATA=$(curl -sSL -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
 
   if [ -z "${PACKAGES_METADATA}" ]; then
       echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts" 1>&2
@@ -253,6 +253,10 @@ configure_st2_user () {
 
   SYSTEM_HOME=$(echo ~stanley)
 
+  if [ ! -d "${SYSTEM_HOME}/.ssh" ]; then
+    sudo mkdir ${SYSTEM_HOME}/.ssh
+    sudo chmod 700 ${SYSTEM_HOME}/.ssh
+  fi
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   # NOTE: If the file already exists and is non-empty, then assume the key does not need
@@ -565,7 +569,7 @@ get_full_pkg_versions() {
 
 install_st2() {
   # Following script adds a repo file, registers gpg key and runs apt-get update
-  curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.deb.sh | sudo bash
+  curl -sL https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.deb.sh | sudo bash
 
   # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
   if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
@@ -576,7 +580,7 @@ install_st2() {
 
     PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "${SUBTYPE}" "st2_.*.deb")
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
-    curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
+    curl -sSL -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
     sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
     sudo apt-get install -yf
     rm ${PACKAGE_FILENAME}
@@ -630,7 +634,7 @@ install_st2mistral() {
 
     PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "${SUBTYPE}" "st2mistral_.*.deb")
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
-    curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
+    curl -sSL -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
     sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
     sudo apt-get install -yf
     rm ${PACKAGE_FILENAME}
