@@ -683,8 +683,7 @@ EOT"
   sudo systemctl enable nginx
 
   # RHEL 8 runs firewalld so we need to open http/https
-  # Don't run this on ec2
-  if is_rhel && [[ $(grep -q "ec2" /sys/hypervisor/uuid) == 1 ]]; then
+  if is_rhel && command -v firewall-cmd >/dev/null 2>&1; then
     sudo firewall-cmd --zone=public --add-service=http --add-service=https
     sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https
   fi
