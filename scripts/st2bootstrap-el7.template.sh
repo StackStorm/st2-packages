@@ -146,14 +146,14 @@ install_st2_dependencies() {
 
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB (3.4)
-  sudo rpm --import https://www.mongodb.org/static/pgp/server-3.4.asc
-  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-3.4.repo
+  sudo rpm --import https://www.mongodb.org/static/pgp/server-3.6.asc
+  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-3.6.repo
 [mongodb-org-3.4]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/3.4/x86_64/
+baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/3.6/x86_64/
 gpgcheck=1
 enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc
+gpgkey=https://www.mongodb.org/static/pgp/server-3.6.asc
 EOT"
 
   sudo yum -y install mongodb-org
@@ -204,7 +204,7 @@ install_st2() {
   curl -sL https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
 
   # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
-  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
+  if [[ "$DEV_BUILD" = '' ]] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo yum -y install ${ST2_PKG}
   else
@@ -228,7 +228,7 @@ configure_st2_authentication() {
   sudo yum -y install httpd-tools
 
   # Create a user record in a password file.
-  echo $PASSWORD | sudo htpasswd -i /etc/st2/htpasswd $USERNAME
+  echo ${PASSWORD} | sudo htpasswd -i /etc/st2/htpasswd ${USERNAME}
 
   # Configure [auth] section in st2.conf
   sudo crudini --set /etc/st2/st2.conf auth enable 'True'
@@ -266,7 +266,7 @@ EHD
 
 install_st2mistral() {
   # 'st2' repo builds single 'st2' package and so we have to install 'st2mistral' from repo
-  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
+  if [[ "$DEV_BUILD" = '' ]] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
     sudo yum -y install ${ST2MISTRAL_PKG}
   else
     sudo yum -y install jq
