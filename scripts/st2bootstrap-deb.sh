@@ -452,29 +452,21 @@ install_st2_dependencies() {
 }
 
 install_mongodb() {
-  # Add key and repo for the latest stable MongoDB (3.6 or 4.0)
-  # Install MongoDB 4.0 on xenial and bionic, else install Mongo 3.6
-  if [[ "${SUBTYPE}" == "xenial" || "${SUBTYPE}" == "bionic" ]]; then
-    wget -qO - https://www.mongodb.org/static/pgp/server-4.0.asc | sudo apt-key add -
-    echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
-  else
-    wget -qO - https://www.mongodb.org/static/pgp/server-3.6.asc | sudo apt-key add -
-    echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.6 multiverse" | sudo
-    tee /etc/apt/sources.list.d/mongodb-org-3.6.list
-  fi
+  # Add key and repo for the latest stable MongoDB 4.0
+  wget -qO - https://www.mongodb.org/static/pgp/server-4.0.asc | sudo apt-key add -
+  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
 
+
+  # Install MongoDB 4.0
   sudo apt-get update
   sudo apt-get install -y mongodb-org
 
   # Configure MongoDB to listen on localhost only
   sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
 
-  if [[ "${SUBTYPE}" == "xenial" || "${SUBTYPE}" == "bionic" ]]; then
-    sudo systemctl enable mongod
-    sudo systemctl start mongod
-  else
-    sudo service mongod restart
-  fi
+  # Enable and restart
+  sudo systemctl enable mongod
+  sudo systemctl start mongod
 
   sleep 5
 
