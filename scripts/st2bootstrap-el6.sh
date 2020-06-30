@@ -142,7 +142,7 @@ function configure_proxy() {
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
-  DISTRO=$2  # Distro name (e.g. trusty,xenial,bionic,el6,el7)
+  DISTRO=$2  # Distro name (e.g. xenial,bionic,el6,el7)
   PACKAGE_NAME_REGEX=$3
 
   PACKAGES_METADATA=$(curl -sSL -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
@@ -224,7 +224,7 @@ check_st2_host_dependencies() {
   VAR_SPACE=`df -Pk /var/lib | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{print $4}'`
   if [ ${VAR_SPACE} -lt 358400 ]; then
     echo ""
-    echo "MongoDB 3.4 requires at least 350MB free in /var/lib/mongodb"
+    echo "MongoDB requires at least 350MB free in /var/lib/mongodb"
     echo "There is not enough space for MongoDB. It will fail to start."
     echo "Please, add some space to /var or clean it up."
     exit 1

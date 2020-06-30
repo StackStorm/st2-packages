@@ -15,8 +15,8 @@ USERNAME=''
 PASSWORD=''
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
 
-if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
-  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty), 16.04 (xenial) or Ubuntu 18.04 (bionic) as base system!"
+if [[ "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
+  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 16.04 (xenial) or Ubuntu 18.04 (bionic) as base system!"
   exit 2
 fi
 
@@ -138,28 +138,21 @@ install_st2_dependencies() {
 }
 
 install_mongodb() {
-  # Add key and repo for the latest stable MongoDB (3.4)
-  # TODO: Install MongoDB 4.0 on Bionic
-  if [[ "$SUBTYPE" == 'bionic' ]]; then
-    wget -qO - https://www.mongodb.org/static/pgp/server-4.0.asc | sudo apt-key add -
-    echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
-  else
-    wget -qO - https://www.mongodb.org/static/pgp/server-3.4.asc | sudo apt-key add -
-    echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
-  fi
+  # Add key and repo for the latest stable MongoDB 4.0
+  wget -qO - https://www.mongodb.org/static/pgp/server-4.0.asc | sudo apt-key add -
+  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
 
+
+  # Install MongoDB 4.0
   sudo apt-get update
   sudo apt-get install -y mongodb-org
 
   # Configure MongoDB to listen on localhost only
   sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
 
-  if [[ "$SUBTYPE" == 'xenial' || "${SUBTYPE}" == "bionic" ]]; then
-    sudo systemctl enable mongod
-    sudo systemctl start mongod
-  else
-    sudo service mongod restart
-  fi
+  # Enable and restart
+  sudo systemctl enable mongod
+  sudo systemctl start mongod
 
   sleep 5
 
@@ -203,10 +196,10 @@ EOF
 }
 
 get_full_pkg_versions() {
-  if [ "$VERSION" != '' ];
+  if [[ "$VERSION" != '' ]];
   then
     local ST2_VER=$(apt-cache show st2 | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
-    if [ -z "$ST2_VER" ]; then
+    if [[ -z "$ST2_VER" ]]; then
       echo "Could not find requested version of StackStorm!!!"
       sudo apt-cache policy st2
       exit 3
@@ -216,7 +209,7 @@ get_full_pkg_versions() {
         # Bionic doesn't support Mistral
         local ST2MISTRAL_VER=$(apt-cache show st2mistral | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
 
-        if [ -z "$ST2MISTRAL_VER" ]; then
+        if [[ -z "$ST2MISTRAL_VER" ]]; then
           echo "Could not find requested version of st2mistral!!!"
           sudo apt-cache policy st2mistral
           exit 3
@@ -226,14 +219,14 @@ get_full_pkg_versions() {
     fi
 
     local ST2WEB_VER=$(apt-cache show st2web | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
-    if [ -z "$ST2WEB_VER" ]; then
+    if [[ -z "$ST2WEB_VER" ]]; then
       echo "Could not find requested version of st2web."
       sudo apt-cache policy st2web
       exit 3
     fi
 
     local ST2CHATOPS_VER=$(apt-cache show st2chatops | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
-    if [ -z "$ST2CHATOPS_VER" ]; then
+    if [[ -z "$ST2CHATOPS_VER" ]]; then
       echo "Could not find requested version of st2chatops."
       sudo apt-cache policy st2chatops
       exit 3
@@ -258,7 +251,7 @@ install_st2() {
   curl -sL https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.deb.sh | sudo bash
 
   # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
-  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
+  if [[ "$DEV_BUILD" = '' ]] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo apt-get install -y st2${ST2_PKG_VERSION}
   else
@@ -313,7 +306,7 @@ EHD
 
 install_st2mistral() {
   # 'st2' repo builds single 'st2' package and so we have to install 'st2mistral' from repo
-  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
+  if [[ "$DEV_BUILD" = '' ]] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
     sudo apt-get install -y st2mistral${ST2MISTRAL_PKG_VERSION}
   else
     sudo apt-get install -y jq
@@ -383,7 +376,7 @@ configure_st2chatops() {
   sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
 
   # Setup adapter
-  if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
+  if [[ "$HUBOT_ADAPTER"="slack" ]] && [[ ! -z "$HUBOT_SLACK_TOKEN" ]]
   then
     sudo sed -i -r "s/^# (export HUBOT_ADAPTER=slack)/\1/" /opt/stackstorm/chatops/st2chatops.env
     sudo sed -i -r "s/^# (export HUBOT_SLACK_TOKEN.).*/\1/" /opt/stackstorm/chatops/st2chatops.env

@@ -309,19 +309,13 @@ EOT"
   sudo systemctl enable nginx
 
   # RHEL 8 runs firewalld so we need to open http/https
-  # Don't run this on ec2
-  if is_rhel && [[ $(grep -q "ec2" /sys/hypervisor/uuid) == 1 ]]; then
+  if is_rhel && command -v firewall-cmd >/dev/null 2>&1; then
     sudo firewall-cmd --zone=public --add-service=http --add-service=https
     sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https
   fi
 }
 
 install_st2chatops() {
-  # Temporary hack until proper upstream fix https://bugs.centos.org/view.php?id=13669
-  if ! yum -y list http-parser 1>/dev/null 2>&1; then
-    sudo yum install -y http://repo.okay.com.mx/centos/8/x86_64/release//http-parser-2.8.0-2.el8.x86_64.rpm
-  fi
-
   # Add NodeJS 10 repo
   curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
 

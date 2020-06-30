@@ -145,7 +145,7 @@ function configure_proxy() {
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
-  DISTRO=$2  # Distro name (e.g. trusty,xenial,bionic,el6,el7)
+  DISTRO=$2  # Distro name (e.g. xenial,bionic,el6,el7)
   PACKAGE_NAME_REGEX=$3
 
   PACKAGES_METADATA=$(curl -sSL -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
@@ -227,7 +227,7 @@ check_st2_host_dependencies() {
   VAR_SPACE=`df -Pk /var/lib | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{print $4}'`
   if [ ${VAR_SPACE} -lt 358400 ]; then
     echo ""
-    echo "MongoDB 3.4 requires at least 350MB free in /var/lib/mongodb"
+    echo "MongoDB requires at least 350MB free in /var/lib/mongodb"
     echo "There is not enough space for MongoDB. It will fail to start."
     echo "Please, add some space to /var or clean it up."
     exit 1
@@ -683,19 +683,13 @@ EOT"
   sudo systemctl enable nginx
 
   # RHEL 8 runs firewalld so we need to open http/https
-  # Don't run this on ec2
-  if is_rhel && [[ $(grep -q "ec2" /sys/hypervisor/uuid) == 1 ]]; then
+  if is_rhel && command -v firewall-cmd >/dev/null 2>&1; then
     sudo firewall-cmd --zone=public --add-service=http --add-service=https
     sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https
   fi
 }
 
 install_st2chatops() {
-  # Temporary hack until proper upstream fix https://bugs.centos.org/view.php?id=13669
-  if ! yum -y list http-parser 1>/dev/null 2>&1; then
-    sudo yum install -y http://repo.okay.com.mx/centos/8/x86_64/release//http-parser-2.8.0-2.el8.x86_64.rpm
-  fi
-
   # Add NodeJS 10 repo
   curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
 
