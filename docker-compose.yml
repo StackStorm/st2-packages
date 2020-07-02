@@ -67,22 +67,6 @@ el7:
     - mongodb
     - postgres
 
-el6:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
-  environment:
-    - ST2_PYTHON=1
-    - BUILDNODE=centos6build
-    - TESTNODE=centos6test
-  links:
-    - centos6build
-    - centos6test
-    - rabbitmq
-    - mongodb
-    - postgres
-
 ## Package build nodes
 #
 xenialbuild:
@@ -93,12 +77,6 @@ xenialbuild:
 
 bionicbuild:
   image: stackstorm/packagingbuild:bionic
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
-
-centos6build:
-  image: stackstorm/packagingbuild:centos6
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
@@ -134,12 +112,6 @@ bionictest:
     service: volumes-compose
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
-centos6test:
-  image: stackstorm/packagingtest:centos6-sshd
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
 
 centos7test:
   image: stackstorm/packagingtest:centos7-systemd
