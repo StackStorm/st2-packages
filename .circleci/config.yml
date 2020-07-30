@@ -6,7 +6,7 @@
 
 version: 2
 jobs:
-  # Build & Test st2 & st2mistral packages
+  # Build & Test st2 packages
   packages:
     parallelism: 4
     # 4CPUs & 8GB RAM CircleCI machine
@@ -24,7 +24,6 @@ jobs:
       # with build parameters. st2cd prep tasks will uncomment these on a branch, and replace with proper
       # gitrefs.
       # ST2_GITREV: ""
-      # ST2MISTRAL_GITREV: ""
     steps:
       - checkout
       - setup_remote_docker:
@@ -47,7 +46,6 @@ jobs:
           command: |
             set -x
             .circle/buildenv_st2.sh
-            .circle/buildenv_mistral.sh
       # Verify that Docker environment is properly cleaned up and there is nothing left from the previous build
       # See issue: https://discuss.circleci.com/t/no-space-left-on-device-while-creating-mongo/11532/13
       - run:

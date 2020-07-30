@@ -15,40 +15,6 @@ describe 'external services' do
     it { is_expected.to be_reachable.with :port => 27017, :timeout => 1 }
   end
 
-  if spec[:mistral_enabled]
-    describe 'postgres' do
-      subject { host(spec[:postgreshost]) }
-      it { is_expected.to be_reachable.with :port => 5432, :timeout => 1 }
-    end
-  end
-end
-
-describe 'run mistral DB migration' do
-  if spec[:mistral_enabled]
-    # Run mistral DB upgrade head
-    describe command(spec[:mistral_db_head_command]) do
-      its(:exit_status) { is_expected.to eq 0 }
-      after(:all) do
-        if described_class.exit_status > 0
-          puts "\nMistral DB upgrade head has failed (:", '>>>>>',
-               described_class.stderr
-          puts
-        end
-      end
-    end
-
-    # Run mistral DB populate
-    describe command(spec[:mistral_db_populate_command]) do
-      its(:exit_status) { is_expected.to eq 0 }
-      after(:all) do
-        if described_class.exit_status > 0
-          puts "Mistral DB populate has failed!", '>>>>>',
-               described_class.stderr
-          puts
-        end
-      end
-    end
-  end
 end
 
 describe 'start st2 components and services' do
@@ -97,12 +63,6 @@ describe 'st2 services' do
     it { should be_listening }
   end
 
-  if spec[:mistral_enabled]
-    describe 'mistral', prompt_on_failure: true do
-      subject { port(8989) }
-      it { should be_listening }
-    end
-  end
 end
 
 # all st2 services should work immediately after restart

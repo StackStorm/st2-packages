@@ -38,14 +38,10 @@ else
 	PYTHON_ALT_BINARY := python
 endif
 
-# Don't include Mistral runner on Bionic or EL8
-ifeq ($(DEB_DISTRO),bionic)
+# Don't include Mistral runner
+# TODO: Go back to all runners when mistral removed from st2
+#	RUNNERS := $(shell ls ../contrib/runners)
 	RUNNERS := $(shell ls -I mistral* ../contrib/runners)
-else ifeq ($(EL_VERSION),8)
-	RUNNERS := $(shell ls -I mistral* ../contrib/runners)
-else
-	RUNNERS := $(shell ls ../contrib/runners)
-endif
 
 # Moved from top of file to handle when only py2 or py3 available
 ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
@@ -123,14 +119,10 @@ populate_version: .stamp-populate_version
 	touch $@
 
 requirements:
-# Don't include Mistral runner on Bionic
-ifeq ($(DEB_DISTRO),bionic)
+# Don't include Mistral runner for now
+# TODO: Use all runners when mistral removed from st2 core
+#	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
-else ifeq ($(EL_VERSION),8)
-	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
-else
-	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
-endif
 	cat requirements.txt
 
 changelog: populate_version

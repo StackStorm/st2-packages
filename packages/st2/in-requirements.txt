@@ -13,7 +13,6 @@ stackstorm-runner-announcement
 stackstorm-runner-http
 stackstorm-runner-inquirer
 stackstorm-runner-local
-stackstorm-runner-mistral-v2
 stackstorm-runner-noop
 stackstorm-runner-orquesta
 stackstorm-runner-python

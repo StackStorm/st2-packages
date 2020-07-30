@@ -1,8 +1,0 @@
-#!/bin/sh
-# Wrapper script, used to override default mistral client environment variables
-# https://github.com/StackStorm/python-mistralclient#running-mistral-client
-
-OS_MISTRAL_URL=${OS_MISTRAL_URL:-http://127.0.0.1:8989/v2}
-export OS_MISTRAL_URL
-
-exec /opt/stackstorm/mistral/bin/mistral "$@"

@@ -24,9 +24,6 @@ namespace :setup do
           if opts.packages.include? 'st2'
             execute :bash, "$BASEDIR/scripts/generate_st2_config.sh"
           end
-          if opts.packages.include? 'st2mistral'
-            execute :bash, "$BASEDIR/scripts/generate_mistral_config.sh"
-          end
         end
       end
     end

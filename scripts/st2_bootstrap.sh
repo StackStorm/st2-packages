@@ -45,7 +45,7 @@ setup_args() {
           shift
           ;;
           # Used to install the packages from CircleCI build artifacts
-          # Examples: 'st2/5017', 'mistral/1012', 'st2-packages/3021',
+          # Examples: 'st2/5017', 'st2-packages/3021',
           # where first part is repository name, second is CircleCI build number.
           --dev=*)
           DEV_BUILD="${i#*=}"
