@@ -62,22 +62,6 @@ el7:
     - mongodb
     - postgres
 
-el6:
-  image: quay.io/stackstorm/packagingrunner
-  working_dir: /root/st2-packages
-  volumes_from:
-    - st2-packages-vol
-  environment:
-    - ST2_PYTHON=1
-    - BUILDNODE=centos6build
-    - TESTNODE=centos6test
-  links:
-    - centos6build
-    - centos6test
-    - rabbitmq
-    - mongodb
-    - postgres
-
 ## Package build nodes
 #
 xenialbuild:
@@ -87,11 +71,6 @@ xenialbuild:
 
 bionicbuild:
   image: stackstorm/packagingbuild:bionic
-  volumes_from:
-    - st2-packages-vol
-
-centos6build:
-  image: stackstorm/packagingbuild:centos6
   volumes_from:
     - st2-packages-vol
 
@@ -122,11 +101,6 @@ bionictest:
     - st2-packages-vol
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
-centos6test:
-  image: stackstorm/packagingtest:centos6-sshd
-  volumes_from:
-    - st2-packages-vol
 
 centos7test:
   image: stackstorm/packagingtest:centos7-systemd

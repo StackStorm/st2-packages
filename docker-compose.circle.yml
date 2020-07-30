@@ -60,19 +60,6 @@ el7:
     - centos7build
     - centos7test
 
-el6:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-circle
-  environment:
-    - ST2_PYTHON=1
-    - BUILDNODE=centos6build
-    - TESTNODE=centos6test
-  links:
-    - centos6build
-    - centos6test
-
 ## Package build nodes
 #
 xenialbuild:
@@ -85,12 +72,6 @@ bionicbuild:
   image: stackstorm/packagingbuild:bionic
   volumes_from:
     - st2-packages-vol
-
-centos6build:
-  image: stackstorm/packagingbuild:centos6
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
 
 centos7build:
   image: stackstorm/packagingbuild:centos7
@@ -122,12 +103,6 @@ bionictest:
     - st2-packages-vol
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
-centos6test:
-  image: stackstorm/packagingtest:centos6-sshd
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
 
 centos7test:
   image: stackstorm/packagingtest:centos7-systemd
