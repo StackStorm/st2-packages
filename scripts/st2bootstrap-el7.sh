@@ -194,14 +194,14 @@ check_st2_host_dependencies() {
   # CHECK 1: Determine which, if any, of the required ports are used by an existing process.
 
   # Abort the installation early if the following ports are being used by an existing process.
-  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), postgresql (5432) and st2 (9100-9102).
+  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), and st2 (9100-9102).
 
-  declare -a ports=("80" "443" "4369" "5432" "5672" "9100" "9101" "9102" "25672" "27017")
+  declare -a ports=("80" "443" "4369" "5672" "9100" "9101" "9102" "25672" "27017")
   declare -a used=()
 
   for i in "${ports[@]}"
   do
-    rv=$(port_status $i | sed 's/.*-$\|.*systemd\|.*beam.smp.*\|.*epmd\|.*st2.*\|.*nginx.*\|.*python.*\|.*postgres\|.*postmaster.*\|.*mongod\|.*init//')
+    rv=$(port_status $i | sed 's/.*-$\|.*systemd\|.*beam.smp.*\|.*epmd\|.*st2.*\|.*nginx.*\|.*python.*\|.*postmaster.*\|.*mongod\|.*init//')
     if [ "$rv" != "Unbound" ] && [ "$rv" != "" ]; then
       used+=("$rv")
     fi
@@ -232,9 +232,8 @@ check_st2_host_dependencies() {
 
 
 generate_random_passwords() {
-  # Generate random password used for MongoDB and PostgreSQL user authentication
+  # Generate random password used for MongoDB user authentication
   ST2_MONGODB_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
-  ST2_POSTGRESQL_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
 }
 
 
@@ -442,15 +441,6 @@ get_full_pkg_versions() {
     fi
     ST2_PKG=${ST2_VER}
 
-    local ST2MISTRAL_VER=$(repoquery ${YES_FLAG} --nvr --show-duplicates st2mistral | grep -F st2mistral-${VERSION} | sort --version-sort | tail -n 1)
-    # RHEL 8 and newer does not install Mistral
-    if [[ -z "$ST2MISTRAL_VER" && "$RHMAJVER" -lt "8" ]]; then
-      echo "Could not find requested version of st2mistral!!!"
-      sudo repoquery ${YES_FLAG} --nvr --show-duplicates st2mistral
-      exit 3
-    fi
-    ST2MISTRAL_PKG=${ST2MISTRAL_VER}
-
     local ST2WEB_VER=$(repoquery ${YES_FLAG} --nvr --show-duplicates st2web | grep -F st2web-${VERSION} | sort --version-sort | tail -n 1)
     if [ -z "$ST2WEB_VER" ]; then
       echo "Could not find requested version of st2web."
@@ -470,7 +460,6 @@ get_full_pkg_versions() {
     echo "##########################################################"
     echo "#### Following versions of packages will be installed ####"
     echo "${ST2_PKG}"
-    echo "${ST2MISTRAL_PKG}"
     echo "${ST2WEB_PKG}"
     echo "${ST2CHATOPS_PKG}"
     echo "##########################################################"
