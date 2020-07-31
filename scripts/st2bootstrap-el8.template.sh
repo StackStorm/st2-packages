@@ -221,8 +221,7 @@ EOF
 install_st2() {
   curl -sL https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
 
-  # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
-  if [[ "$DEV_BUILD" = '' ]] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
+  if [[ "$DEV_BUILD" = '' ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo yum -y install ${ST2_PKG}
   else
