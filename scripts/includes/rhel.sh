@@ -24,6 +24,15 @@ get_full_pkg_versions() {
     fi
     ST2_PKG=${ST2_VER}
 
+    local ST2MISTRAL_VER=$(repoquery ${YES_FLAG} --nvr --show-duplicates st2mistral | grep -F st2mistral-${VERSION} | sort --version-sort | tail -n 1)
+    # RHEL 8 and newer does not install Mistral
+    if [[ -z "$ST2MISTRAL_VER" && "$RHMAJVER" -lt "8" ]]; then
+      echo "Could not find requested version of st2mistral!!!"
+      sudo repoquery ${YES_FLAG} --nvr --show-duplicates st2mistral
+      exit 3
+    fi
+    ST2MISTRAL_PKG=${ST2MISTRAL_VER}
+
     local ST2WEB_VER=$(repoquery ${YES_FLAG} --nvr --show-duplicates st2web | grep -F st2web-${VERSION} | sort --version-sort | tail -n 1)
     if [ -z "$ST2WEB_VER" ]; then
       echo "Could not find requested version of st2web."
@@ -43,6 +52,7 @@ get_full_pkg_versions() {
     echo "##########################################################"
     echo "#### Following versions of packages will be installed ####"
     echo "${ST2_PKG}"
+    echo "${ST2MISTRAL_PKG}"
     echo "${ST2WEB_PKG}"
     echo "${ST2CHATOPS_PKG}"
     echo "##########################################################"

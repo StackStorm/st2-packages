@@ -45,7 +45,7 @@ setup_args() {
           shift
           ;;
           # Used to install the packages from CircleCI build artifacts
-          # Examples: 'st2/5017', 'st2-packages/3021',
+          # Examples: 'st2/5017', 'mistral/1012', 'st2-packages/3021',
           # where first part is repository name, second is CircleCI build number.
           --dev=*)
           DEV_BUILD="${i#*=}"
@@ -152,7 +152,7 @@ if [[ -n "$RHTEST" ]]; then
   echo "*** Detected Distro is ${RHTEST} ***"
   RHMAJVER=`cat /etc/redhat-release | sed 's/[^0-9.]*\([0-9.]\).*/\1/'`
   echo "*** Detected distro version ${RHMAJVER} ***"
-  if [[ "$RHMAJVER" != '6' && "$RHMAJVER" != '7' && "$RHMAJVER" != '8' ]]; then
+  if [[ "$RHMAJVER" != '7' && "$RHMAJVER" != '8' ]]; then
     echo "Unsupported distro version $RHMAJVER! Aborting!"
     exit 2
   fi
