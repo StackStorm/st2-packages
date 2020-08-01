@@ -16,11 +16,7 @@ Group: System/Management
 License: Apache 2.0
 Url: https://github.com/StackStorm/mistral
 Source0: .
-%if 0%{?use_st2python}
-Requires: st2python, bash, procps
-%else
 Requires: bash, procps
-%endif
 Provides: openstack-mistral
 Summary: st2 Mistral workflow service
 

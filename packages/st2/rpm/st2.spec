@@ -10,10 +10,6 @@
 Epoch: %{epoch}
 %endif
 
-%if 0%{?use_st2python}
-Requires: st2python, python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
-%endif
-
 %if 0%{?rhel} == 7
 Requires: python-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
 %endif

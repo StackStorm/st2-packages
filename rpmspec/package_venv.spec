@@ -27,9 +27,6 @@
 
 # EL8 requires crypto built locally and venvctrl available outside of venv
 %define pip_install_venv \
-    %if 0%{?use_st2python} \
-        export PATH=/usr/share/python/st2python/bin:$PATH \
-    %endif \
     virtualenv --no-download %{venv_dir} \
     %{pin_pip} \
     %{install_crypto} \

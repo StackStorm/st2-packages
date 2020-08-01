@@ -13,10 +13,6 @@ $(PBR_GITURL)
 endef
 export INJECT_DEPS
 
-ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
-	PATH := /usr/share/python/st2python/bin:$(PATH)
-endif
-
 ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	DESTDIR ?= $(CURDIR)/debian/$(COMPONENT)

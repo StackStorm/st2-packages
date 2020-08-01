@@ -57,12 +57,6 @@
 %endif  # if rhel8
 %endif  # st2 package version parsing
 
-## Set macro indicating that we're using our python
-#
-%if %(echo ${ST2_PYTHON:-0}) == 1
-  %define use_st2python 1
-%endif
-
 # Redefine and to drop python brp bytecompile
 #
 %define __os_install_post() \
