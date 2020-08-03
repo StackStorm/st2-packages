@@ -260,9 +260,7 @@ configure_st2_user () {
   # to be generated again.
   if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
     # added PEM to enforce PEM ssh key type in EL8 to maintain consistency
-    # Hotfix for EL6 which doesn't have '-m' param for ssh-keygen
-    # TODO: Revert once EL6 is deprecated, may need testing
-    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" -m PEM || sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P ""
+    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" -m PEM
   fi
 
   if ! sudo grep -s -q -f ${SYSTEM_HOME}/.ssh/stanley_rsa.pub ${SYSTEM_HOME}/.ssh/authorized_keys;
