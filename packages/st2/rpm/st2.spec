@@ -36,7 +36,7 @@ Conflicts: st2common
   all components
 
 # Define worker name
-%define worker_name %{!?use_systemd:st2actionrunner-worker}%{?use_systemd:st2actionrunner@}
+%define worker_name st2actionrunner@
 
 
 %install
@@ -46,7 +46,6 @@ Conflicts: st2common
   %service_install st2resultstracker st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
   %service_install st2scheduler
   make post_install DESTDIR=%{buildroot}
-  %{!?use_systemd:install -D -m644 conf/rhel-functions-sysvinit %{buildroot}/opt/stackstorm/st2/share/sysvinit/functions}
 
   %cleanup_python_abspath
 
@@ -96,7 +95,6 @@ Conflicts: st2common
   %attr(775, root, %{packs_group}) /opt/stackstorm/packs/*
   %attr(775, root, %{packs_group}) /usr/share/doc/st2/examples
   %attr(775, root, %{packs_group}) /opt/stackstorm/virtualenvs
-%if 0%{?use_systemd}
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
   %{_unitdir}/st2api.service
@@ -113,18 +111,3 @@ Conflicts: st2common
   %{_unitdir}/st2timersengine.service
   %{_unitdir}/st2workflowengine.service
   %{_unitdir}/st2scheduler.service
-%else
-  %{_sysconfdir}/rc.d/init.d/st2actionrunner
-  %{_sysconfdir}/rc.d/init.d/%{worker_name}
-  %{_sysconfdir}/rc.d/init.d/st2api
-  %{_sysconfdir}/rc.d/init.d/st2stream
-  %{_sysconfdir}/rc.d/init.d/st2auth
-  %{_sysconfdir}/rc.d/init.d/st2notifier
-  %{_sysconfdir}/rc.d/init.d/st2resultstracker
-  %{_sysconfdir}/rc.d/init.d/st2rulesengine
-  %{_sysconfdir}/rc.d/init.d/st2timersengine
-  %{_sysconfdir}/rc.d/init.d/st2sensorcontainer
-  %{_sysconfdir}/rc.d/init.d/st2garbagecollector
-  %{_sysconfdir}/rc.d/init.d/st2workflowengine
-  %{_sysconfdir}/rc.d/init.d/st2scheduler
-%endif
