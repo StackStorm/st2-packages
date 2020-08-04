@@ -16,11 +16,7 @@ Group: System/Management
 License: Apache 2.0
 Url: https://github.com/StackStorm/mistral
 Source0: .
-%if 0%{?use_st2python}
-Requires: st2python, bash, procps
-%else
 Requires: bash, procps
-%endif
 Provides: openstack-mistral
 Summary: st2 Mistral workflow service
 
@@ -36,7 +32,6 @@ Summary: st2 Mistral workflow service
   %pip_install_venv
   %service_install mistral mistral-api mistral-server
   make post_install DESTDIR=%{?buildroot}
-  %{!?use_systemd:install -D -m644 conf/rhel-functions-sysvinit %{buildroot}/opt/stackstorm/mistral/share/sysvinit/functions}
 
   %cleanup_python_abspath
 
@@ -67,12 +62,6 @@ Summary: st2 Mistral workflow service
   %config(noreplace) %{_sysconfdir}/logrotate.d/mistral
   %attr(755, %{svc_user}, root) %{_localstatedir}/log/mistral
   %attr(755, %{svc_user}, root) %{_localstatedir}/run/mistral
-%if 0%{?use_systemd}
   %{_unitdir}/mistral.service
   %{_unitdir}/mistral-api.service
   %{_unitdir}/mistral-server.service
-%else
-  %{_sysconfdir}/rc.d/init.d/mistral
-  %{_sysconfdir}/rc.d/init.d/mistral-api
-  %{_sysconfdir}/rc.d/init.d/mistral-server
-%endif

@@ -51,12 +51,10 @@ pipeopts do
   # basedir - base directory (intermediate files are copied there)
   # artifact_directory - directory on the main node where artifacts are copied
   # wheeldir - directory where wheels are prefetched (cache directory)
-  # st2_python - if variable is set that means that our version of python is used
   envpass :basedir,  '/root'
   envpass :debug_level, 1, proc: convert_to_int
   envpass :artifact_dir, '/root/build'
   envpass :wheeldir, '/tmp/wheelhouse'
-  envpass :st2_python, 0, proc: convert_to_int
 
   # Default hostnames of dependat services (the value can take an address also)
   envpass :rabbitmqhost, 'rabbitmq', proc: convert_to_ipaddr
