@@ -11,7 +11,6 @@ DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
 ST2_PKG='st2'
-ST2MISTRAL_PKG='st2mistral'
 ST2WEB_PKG='st2web'
 ST2CHATOPS_PKG='st2chatops'
 
@@ -203,8 +202,7 @@ EOF
 install_st2() {
   curl -sL https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
 
-  # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
-  if [[ "$DEV_BUILD" = '' ]] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
+  if [[ "$DEV_BUILD" = '' ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo yum -y install ${ST2_PKG}
   else
@@ -240,53 +238,6 @@ configure_st2_authentication() {
   sudo st2ctl restart-component st2stream
 }
 
-
-install_st2mistral_dependencies() {
-  sudo yum -y install postgresql-server postgresql-contrib postgresql-devel
-
-  # Setup postgresql at a first time
-  sudo postgresql-setup initdb
-
-  # Configure service only listens on localhost
-  sudo sh -c "echo \"listen_addresses = '127.0.0.1'\" >> /var/lib/pgsql/data/postgresql.conf"
-
-  # Make localhost connections to use an MD5-encrypted password for authentication
-  sudo sed -i "s/\(host.*all.*all.*127.0.0.1\/32.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
-  sudo sed -i "s/\(host.*all.*all.*::1\/128.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
-
-  # Start PostgreSQL service
-  sudo systemctl start postgresql
-  sudo systemctl enable postgresql
-
-  cat << EHD | sudo -u postgres psql
-CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD '${ST2_POSTGRESQL_PASSWORD}';
-CREATE DATABASE mistral OWNER mistral;
-EHD
-}
-
-install_st2mistral() {
-  # 'st2' repo builds single 'st2' package and so we have to install 'st2mistral' from repo
-  if [[ "$DEV_BUILD" = '' ]] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
-    sudo yum -y install ${ST2MISTRAL_PKG}
-  else
-    sudo yum -y install jq
-
-    PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "el7" "st2mistral-.*.rpm")
-    sudo yum -y install ${PACKAGE_URL}
-  fi
-
-  # Configure database settings
-  sudo crudini --set /etc/mistral/mistral.conf database connection "postgresql+psycopg2://mistral:${ST2_POSTGRESQL_PASSWORD}@127.0.0.1/mistral"
-
-  # Setup Mistral DB tables, etc.
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
-
-  # Register mistral actions.
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate | grep -v openstack | grep -v "ironicclient"
-
-  # start mistral
-  sudo systemctl start mistral
-}
 
 install_st2web() {
   # Add key and repo for the latest stable nginx
@@ -390,8 +341,6 @@ STEP="Configure st2 CLI config" && configure_st2_cli_config
 STEP="Generate symmetric crypto key for datastore" && generate_symmetric_crypto_key_for_datastore
 STEP="Verify st2" && verify_st2
 
-STEP="Install mistral dependencies" && install_st2mistral_dependencies
-STEP="Install mistral" && install_st2mistral
 
 STEP="Install st2web" && install_st2web
 STEP="Install st2chatops" && install_st2chatops
