@@ -27,11 +27,6 @@ else ifeq ($(EL_VERSION),8)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := /usr/local/bin/pip3
 	PYTHON_ALT_BINARY := python3
-else ifneq (,$(wildcard /usr/share/python/st2python/bin/python))
-	PATH := /usr/share/python/st2python/bin:$(PATH)
-	PYTHON_BINARY := /usr/share/python/st2python/bin/python
-	PIP_BINARY := pip
-	PYTHON_ALT_BINARY := python
 else
 	PYTHON_BINARY := python
 	PIP_BINARY := pip
