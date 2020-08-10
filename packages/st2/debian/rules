@@ -15,7 +15,7 @@ export DH_VIRTUALENV_INSTALL_ROOT
 IS_SYSTEMD = $(shell command -v dh_systemd_enable > /dev/null 2>&1 && echo true)
 DEB_DISTRO := $(shell lsb_release -cs)
 
-# Trusty, Xenial and Bionic depend on different libraries.
+# Xenial and Bionic depend on different libraries.
 # Most important, Bionic uses Python 3 and others use Python 2.7.
 ifeq ($(DEB_DISTRO),bionic)
 	BUILD_PRE_DEPENDS := python3 (>= 3.6)
@@ -42,10 +42,9 @@ override_dh_installdirs:
 override_dh_gencontrol:
 	dh_gencontrol -- -Vpre:Depends="$(BUILD_PRE_DEPENDS)" -VDepends="$(BUILD_DEPENDS)"
 
-# Packaging recognizes only 1 {package_name} service file (http://manpages.ubuntu.com/manpages/trusty/man1/dh_installinit.1.html)
+# Packaging recognizes only 1 {package_name} service file (http://manpages.ubuntu.com/manpages/xenial/man1/dh_installinit.1.html)
 # We have many, and so force it to install multiple service files
 override_dh_installinit:
-ifeq (true, $(IS_SYSTEMD))
 	dh_systemd_enable --name=st2actionrunner st2actionrunner.service
 	install -p -m644 debian/st2actionrunner@.service debian/st2/lib/systemd/system/st2actionrunner@.service
 	dh_systemd_enable --name=st2api st2api.service
@@ -59,22 +58,6 @@ ifeq (true, $(IS_SYSTEMD))
 	dh_systemd_enable --name=st2timersengine st2timersengine.service
 	dh_systemd_enable --name=st2workflowengine st2workflowengine.service
 	dh_systemd_enable --name=st2scheduler st2scheduler.service
-else
-	# So far don't start services
-	dh_installinit --no-start --name=st2actionrunner-worker
-	dh_installinit --no-start --name=st2actionrunner
-	dh_installinit --no-start --name=st2api
-	dh_installinit --no-start --name=st2stream
-	dh_installinit --no-start --name=st2auth
-	dh_installinit --no-start --name=st2notifier
-	dh_installinit --no-start --name=st2resultstracker
-	dh_installinit --no-start --name=st2rulesengine
-	dh_installinit --no-start --name=st2sensorcontainer
-	dh_installinit --no-start --name=st2garbagecollector
-	dh_installinit --no-start --name=st2timersengine
-	dh_installinit --no-start --name=st2workflowengine
-	dh_installinit --no-start --name=st2scheduler
-endif
 
 override_dh_installdeb:
 	DESTDIR=debian/st2 $(MAKE) post_install

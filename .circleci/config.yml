@@ -6,9 +6,9 @@
 
 version: 2
 jobs:
-  # Build & Test st2 & st2mistral packages
+  # Build & Test st2 packages
   packages:
-    parallelism: 6
+    parallelism: 4
     # 4CPUs & 8GB RAM CircleCI machine
     # sadly, it doesn't work with 'setup_remote_docker'
     resource_class: large
@@ -17,14 +17,13 @@ jobs:
       - image: circleci/python:2.7
     working_directory: ~/st2-packages
     environment:
-      DISTROS: "trusty xenial bionic el6 el7 el8"
+      DISTROS: "xenial bionic el7 el8"
       BASH_ENV: ~/.buildenv
       # These should be set to an empty string, so that st2cd prep tasks are able to replace these
       # with real gitrevs during releases. Note that they are commented out, so that they do not interfere
       # with build parameters. st2cd prep tasks will uncomment these on a branch, and replace with proper
       # gitrefs.
       # ST2_GITREV: ""
-      # ST2MISTRAL_GITREV: ""
     steps:
       - checkout
       - setup_remote_docker:
@@ -47,7 +46,6 @@ jobs:
           command: |
             set -x
             .circle/buildenv_st2.sh
-            .circle/buildenv_mistral.sh
       # Verify that Docker environment is properly cleaned up and there is nothing left from the previous build
       # See issue: https://discuss.circleci.com/t/no-space-left-on-device-while-creating-mongo/11532/13
       - run:
@@ -124,7 +122,7 @@ jobs:
       - image: circleci/ruby:2.4
     working_directory: /tmp/deploy
     environment:
-      - DISTROS: "trusty xenial bionic el6 el7 el8"
+      - DISTROS: "xenial bionic el7 el8"
     steps:
       - attach_workspace:
           at: .

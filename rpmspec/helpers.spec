@@ -57,12 +57,6 @@
 %endif  # if rhel8
 %endif  # st2 package version parsing
 
-## Set macro indicating that we're using our python
-#
-%if %(echo ${ST2_PYTHON:-0}) == 1
-  %define use_st2python 1
-%endif
-
 # Redefine and to drop python brp bytecompile
 #
 %define __os_install_post() \
@@ -72,60 +66,32 @@
     /usr/lib/rpm/brp-strip-comment-note %{__strip} %{__objdump} \
 %{nil}
 
-# Install systemd or sysv service into the package
+# Install systemd service into the package
 #
 %define service_install() \
-  %if 0%{?use_systemd} \
-    for svc in %{?*}; do \
-      install -D -p -m0644 %{SOURCE0}/rpm/$svc.service %{buildroot}%{_unitdir}/$svc.service \
-      [ -f %{SOURCE0}/rpm/$svc.socket ] && install -D -p -m0644 %{SOURCE0}/rpm/$svc.socket %{buildroot}%{_unitdir}/$svc.socket \
-    done \
-  %else \
-    for svc in %{?*}; do \
-      install -D -p -m0755 %{SOURCE0}/rpm/$svc.init %{buildroot}%{_sysconfdir}/rc.d/init.d/$svc \
-    done \
-  %endif \
+  for svc in %{?*}; do \
+    install -D -p -m0644 %{SOURCE0}/rpm/$svc.service %{buildroot}%{_unitdir}/$svc.service \
+    [ -f %{SOURCE0}/rpm/$svc.socket ] && install -D -p -m0644 %{SOURCE0}/rpm/$svc.socket %{buildroot}%{_unitdir}/$svc.socket \
+  done \
 %{nil}
 
 # Service post stage action
 # enables used to enforce the policy, which seems to be disabled by default
 #
 %define service_post() \
-  %if 0%{?use_systemd} \
-    %{expand: %systemd_post %%{?*}} \
-    systemctl --no-reload enable %{?*} >/dev/null 2>&1 || : \
-  %else \
-    for svc in %{?*}; do \
-      /sbin/chkconfig --add $svc || : \
-      /sbin/chkconfig --level 2345 $svc on || : \
-    done \
-  %endif \
+  %{expand: %systemd_post %%{?*}} \
+  systemctl --no-reload enable %{?*} >/dev/null 2>&1 || : \
 %{nil}
 
 # Service preun stage action
 #
 %define service_preun() \
-  %if 0%{?use_systemd} \
-    %{expand: %systemd_preun %%{?*}} \
-  %else \
-    for svc in %{?*}; do \
-      /sbin/service $svc stop &>/dev/null || : \
-      /sbin/chkconfig --del $svc &>/dev/null || : \
-    done \
-  %endif \
+  %{expand: %systemd_preun %%{?*}} \
 %{nil}
 
 # Service postun stage action
 # ($1 > 1 on package upgrade)
 #
 %define service_postun() \
-  %if 0%{?use_systemd} \
-    %{expand: %systemd_postun_with_restart %%{?*}} \
-  %else \
-    if [ $1 -ge 1 ]; then \
-      for svc in %{?*}; do \
-        /sbin/service $svc try-restart &>/dev/null || : \
-      done \
-    fi \
-  %endif \
+  %{expand: %systemd_postun_with_restart %%{?*}} \
 %{nil}

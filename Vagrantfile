@@ -5,11 +5,6 @@
 VAGRANTFILE_API_VERSION = "2"
 
 VIRTUAL_MACHINES = {
-  :trusty => {
-    :hostname => 'st2-packages-trusty',
-    :box => 'ubuntu/trusty64',
-    :ip => '192.168.16.20',
-  },
   :xenial => {
     :hostname => 'st2-packages-xenial',
     :box => 'ubuntu/xenial64',
@@ -24,6 +19,11 @@ VIRTUAL_MACHINES = {
     :hostname => 'st2-packages-el7',
     :box => 'centos/7',
     :ip => '192.168.16.22',
+  },
+  :el8 => {
+    :hostname => 'st2-packages-el8',
+    :box => 'centos/8',
+    :ip => '192.168.16.24',
   },
 }
 
@@ -74,13 +74,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         "ST2_TARGET" => "#{name}",
         "ST2_USER" => ENV['ST2USER'] ? ENV['ST2USER'] : 'st2admin',
         "ST2_PASSWORD" => ENV['ST2PASSWORD'] ? ENV['ST2PASSWORD'] : 'st2admin',
-        "ST2_PACKAGES" => ENV['ST2_PACKAGES'] ? ENV['ST2_PACKAGES'] : 'st2 st2mistral',
+        "ST2_PACKAGES" => ENV['ST2_PACKAGES'] ? ENV['ST2_PACKAGES'] : 'st2',
         "ST2_INSTALL" => ENV['ST2_INSTALL'] ? ENV['ST2_INSTALL'] : 'yes',
         "ST2_VERIFY" => ENV['ST2_VERIFY'] ? ENV['ST2_VERIFY'] : 'yes',
         "ST2_GITURL" => ENV['ST2_GITURL'],
         "ST2_GITREV" => ENV['ST2_GITREV'],
-        "ST2MISTRAL_GITURL" => ENV['ST2MISTRAL_GITURL'],
-        "ST2MISTRAL_GITREV" => ENV['ST2MISTRAL_GITREV'],
       }
     end
   end

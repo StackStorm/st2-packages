@@ -14,7 +14,7 @@ ST2_COMPONENTS = %w(
   st2tests)
 
 # Default list of packages to build
-BUILDLIST = 'st2 st2mistral'
+BUILDLIST = 'st2'
 
 ##  Helper procs
 convert_to_ipaddr = ->(v) {(v !~ Resolv::AddressRegex) ? Resolv.getaddress(v) : v}
@@ -51,17 +51,14 @@ pipeopts do
   # basedir - base directory (intermediate files are copied there)
   # artifact_directory - directory on the main node where artifacts are copied
   # wheeldir - directory where wheels are prefetched (cache directory)
-  # st2_python - if variable is set that means that our version of python is used
   envpass :basedir,  '/root'
   envpass :debug_level, 1, proc: convert_to_int
   envpass :artifact_dir, '/root/build'
   envpass :wheeldir, '/tmp/wheelhouse'
-  envpass :st2_python, 0, proc: convert_to_int
 
   # Default hostnames of dependat services (the value can take an address also)
   envpass :rabbitmqhost, 'rabbitmq', proc: convert_to_ipaddr
   envpass :mongodbhost,  'mongodb',  proc: convert_to_ipaddr
-  envpass :postgreshost, 'postgres', proc: convert_to_ipaddr
 
   # upload_sources - a list of directories which should be propogated
   #                  to remote nodes.
@@ -77,13 +74,4 @@ pipeopts 'st2' do
   envpass :st2pkg_version
   envpass :st2pkg_release, 1
   envpass :st2_circle_url
-end
-
-pipeopts 'st2mistral' do
-  envpass :checkout, 1,                                      from: 'ST2MISTRAL_CHECKOUT', proc: convert_to_int
-  envpass :giturl,  'https://github.com/StackStorm/mistral', from: 'ST2MISTRAL_GITURL'
-  envpass :gitrev,  'master',                                from: 'ST2MISTRAL_GITREV'
-  envpass :gitdir,  make_tmpname('mistral-'),                from: 'ST2MISTRAL_GITDIR'
-  envpass :mistral_version, '3.2dev'
-  envpass :mistral_release, 1
 end

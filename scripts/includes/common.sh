@@ -30,10 +30,10 @@ function configure_proxy() {
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
-  DISTRO=$2  # Distro name (e.g. trusty,xenial,bionic,el6,el7)
+  DISTRO=$2  # Distro name (e.g. xenial,bionic,el7,el8)
   PACKAGE_NAME_REGEX=$3
 
-  PACKAGES_METADATA=$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
+  PACKAGES_METADATA=$(curl -sSL -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
 
   if [ -z "${PACKAGES_METADATA}" ]; then
       echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts" 1>&2
@@ -83,14 +83,14 @@ check_st2_host_dependencies() {
   # CHECK 1: Determine which, if any, of the required ports are used by an existing process.
 
   # Abort the installation early if the following ports are being used by an existing process.
-  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), postgresql (5432) and st2 (9100-9102).
+  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), and st2 (9100-9102).
 
-  declare -a ports=("80" "443" "4369" "5432" "5672" "9100" "9101" "9102" "25672" "27017")
+  declare -a ports=("80" "443" "4369" "5672" "9100" "9101" "9102" "25672" "27017")
   declare -a used=()
 
   for i in "${ports[@]}"
   do
-    rv=$(port_status $i | sed 's/.*-$\|.*systemd\|.*beam.smp.*\|.*epmd\|.*st2.*\|.*nginx.*\|.*python.*\|.*postgres\|.*postmaster.*\|.*mongod\|.*init//')
+    rv=$(port_status $i | sed 's/.*-$\|.*systemd\|.*beam.smp.*\|.*epmd\|.*st2.*\|.*nginx.*\|.*python.*\|.*postmaster.*\|.*mongod\|.*init//')
     if [ "$rv" != "Unbound" ] && [ "$rv" != "" ]; then
       used+=("$rv")
     fi
@@ -112,7 +112,7 @@ check_st2_host_dependencies() {
   VAR_SPACE=`df -Pk /var/lib | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{print $4}'`
   if [ ${VAR_SPACE} -lt 358400 ]; then
     echo ""
-    echo "MongoDB 3.4 requires at least 350MB free in /var/lib/mongodb"
+    echo "MongoDB requires at least 350MB free in /var/lib/mongodb"
     echo "There is not enough space for MongoDB. It will fail to start."
     echo "Please, add some space to /var or clean it up."
     exit 1
@@ -121,9 +121,8 @@ check_st2_host_dependencies() {
 
 
 generate_random_passwords() {
-  # Generate random password used for MongoDB and PostgreSQL user authentication
+  # Generate random password used for MongoDB user authentication
   ST2_MONGODB_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
-  ST2_POSTGRESQL_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
 }
 
 
@@ -135,13 +134,17 @@ configure_st2_user () {
 
   SYSTEM_HOME=$(echo ~stanley)
 
-  sudo mkdir -p ${SYSTEM_HOME}/.ssh
+  if [ ! -d "${SYSTEM_HOME}/.ssh" ]; then
+    sudo mkdir ${SYSTEM_HOME}/.ssh
+    sudo chmod 700 ${SYSTEM_HOME}/.ssh
+  fi
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   # NOTE: If the file already exists and is non-empty, then assume the key does not need
   # to be generated again.
   if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
-    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P ""
+    # added PEM to enforce PEM ssh key type in EL8 to maintain consistency
+    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" -m PEM
   fi
 
   if ! sudo grep -s -q -f ${SYSTEM_HOME}/.ssh/stanley_rsa.pub ${SYSTEM_HOME}/.ssh/authorized_keys;

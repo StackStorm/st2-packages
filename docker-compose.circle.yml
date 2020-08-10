@@ -1,15 +1,3 @@
-trusty:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-circle
-  environment:
-    - BUILDNODE=trustybuild
-    - TESTNODE=trustytest
-  links:
-    - trustybuild
-    - trustytest
-
 xenial:
   image: quay.io/stackstorm/packagingrunner
   extends:
@@ -30,16 +18,12 @@ bionic:
   environment:
     - BUILDNODE=bionicbuild
     - TESTNODE=bionictest
-    # NOTE: We don't build st2mistral package so we don't mix Python 3
-    # (StackStorm components) and Python 2 (Mistral)
-    # Bionic will be first release without a Mistral
     - ST2_PACKAGES=st2
   links:
     - bionicbuild
     - bionictest
     - rabbitmq
     - mongodb
-    - postgres
 
 el8:
   image: quay.io/stackstorm/packagingrunner
@@ -49,16 +33,12 @@ el8:
   environment:
     - BUILDNODE=centos8build
     - TESTNODE=centos8test
-    # NOTE: We don't build st2mistral package so we don't mix Python 3
-    # (StackStorm components) and Python 2 (Mistral)
-    # Bionic will be first release without a Mistral
     - ST2_PACKAGES=st2
   links:
     - centos8build
     - centos8test
     - rabbitmq
     - mongodb
-    - postgres
 
 el7:
   image: quay.io/stackstorm/packagingrunner
@@ -72,27 +52,8 @@ el7:
     - centos7build
     - centos7test
 
-el6:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-circle
-  environment:
-    - ST2_PYTHON=1
-    - BUILDNODE=centos6build
-    - TESTNODE=centos6test
-  links:
-    - centos6build
-    - centos6test
-
 ## Package build nodes
 #
-trustybuild:
-  image: stackstorm/packagingbuild:trusty
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
-
 xenialbuild:
   image: stackstorm/packagingbuild:xenial
   extends:
@@ -103,12 +64,6 @@ bionicbuild:
   image: stackstorm/packagingbuild:bionic
   volumes_from:
     - st2-packages-vol
-
-centos6build:
-  image: stackstorm/packagingbuild:centos6
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
 
 centos7build:
   image: stackstorm/packagingbuild:centos7
@@ -124,12 +79,6 @@ centos8build:
 
 ## Package testing nodes
 #
-trustytest:
-  image: stackstorm/packagingtest:trusty-upstart
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
-
 xenialtest:
   image: stackstorm/packagingtest:xenial-systemd
   privileged: true
@@ -146,12 +95,6 @@ bionictest:
     - st2-packages-vol
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
-centos6test:
-  image: stackstorm/packagingtest:centos6-sshd
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
 
 centos7test:
   image: stackstorm/packagingtest:centos7-systemd

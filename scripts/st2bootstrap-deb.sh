@@ -15,7 +15,6 @@ RELEASE='stable'
 REPO_TYPE=''
 REPO_PREFIX=''
 ST2_PKG_VERSION=''
-ST2MISTRAL_PKG_VERSION=''
 ST2WEB_PKG_VERSION=''
 ST2CHATOPS_PKG_VERSION=''
 DEV_BUILD=''
@@ -23,8 +22,8 @@ USERNAME=''
 PASSWORD=''
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
 
-if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
-  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty), 16.04 (xenial) or Ubuntu 18.04 (bionic) as base system!"
+if [[ "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
+  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 16.04 (xenial) or Ubuntu 18.04 (bionic) as base system!"
   exit 2
 fi
 
@@ -148,10 +147,10 @@ function configure_proxy() {
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
-  DISTRO=$2  # Distro name (e.g. trusty,xenial,bionic,el6,el7)
+  DISTRO=$2  # Distro name (e.g. xenial,bionic,el7,el8)
   PACKAGE_NAME_REGEX=$3
 
-  PACKAGES_METADATA=$(curl -Ss -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
+  PACKAGES_METADATA=$(curl -sSL -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
 
   if [ -z "${PACKAGES_METADATA}" ]; then
       echo "Failed to retrieve packages metadata from https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts" 1>&2
@@ -201,14 +200,14 @@ check_st2_host_dependencies() {
   # CHECK 1: Determine which, if any, of the required ports are used by an existing process.
 
   # Abort the installation early if the following ports are being used by an existing process.
-  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), postgresql (5432) and st2 (9100-9102).
+  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), and st2 (9100-9102).
 
-  declare -a ports=("80" "443" "4369" "5432" "5672" "9100" "9101" "9102" "25672" "27017")
+  declare -a ports=("80" "443" "4369" "5672" "9100" "9101" "9102" "25672" "27017")
   declare -a used=()
 
   for i in "${ports[@]}"
   do
-    rv=$(port_status $i | sed 's/.*-$\|.*systemd\|.*beam.smp.*\|.*epmd\|.*st2.*\|.*nginx.*\|.*python.*\|.*postgres\|.*postmaster.*\|.*mongod\|.*init//')
+    rv=$(port_status $i | sed 's/.*-$\|.*systemd\|.*beam.smp.*\|.*epmd\|.*st2.*\|.*nginx.*\|.*python.*\|.*postmaster.*\|.*mongod\|.*init//')
     if [ "$rv" != "Unbound" ] && [ "$rv" != "" ]; then
       used+=("$rv")
     fi
@@ -230,7 +229,7 @@ check_st2_host_dependencies() {
   VAR_SPACE=`df -Pk /var/lib | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{print $4}'`
   if [ ${VAR_SPACE} -lt 358400 ]; then
     echo ""
-    echo "MongoDB 3.4 requires at least 350MB free in /var/lib/mongodb"
+    echo "MongoDB requires at least 350MB free in /var/lib/mongodb"
     echo "There is not enough space for MongoDB. It will fail to start."
     echo "Please, add some space to /var or clean it up."
     exit 1
@@ -239,9 +238,8 @@ check_st2_host_dependencies() {
 
 
 generate_random_passwords() {
-  # Generate random password used for MongoDB and PostgreSQL user authentication
+  # Generate random password used for MongoDB user authentication
   ST2_MONGODB_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
-  ST2_POSTGRESQL_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
 }
 
 
@@ -253,13 +251,17 @@ configure_st2_user () {
 
   SYSTEM_HOME=$(echo ~stanley)
 
-  sudo mkdir -p ${SYSTEM_HOME}/.ssh
+  if [ ! -d "${SYSTEM_HOME}/.ssh" ]; then
+    sudo mkdir ${SYSTEM_HOME}/.ssh
+    sudo chmod 700 ${SYSTEM_HOME}/.ssh
+  fi
 
   # Generate ssh keys on StackStorm box and copy over public key into remote box.
   # NOTE: If the file already exists and is non-empty, then assume the key does not need
   # to be generated again.
   if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
-    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P ""
+    # added PEM to enforce PEM ssh key type in EL8 to maintain consistency
+    sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" -m PEM
   fi
 
   if ! sudo grep -s -q -f ${SYSTEM_HOME}/.ssh/stanley_rsa.pub ${SYSTEM_HOME}/.ssh/authorized_keys;
@@ -446,32 +448,29 @@ install_st2_dependencies() {
 }
 
 install_mongodb() {
-  # Add key and repo for the latest stable MongoDB (3.4)
-  # TODO: Install MongoDB 4.0 on Bionic
-  if [[ "$SUBTYPE" == 'bionic' ]]; then
-    wget -qO - https://www.mongodb.org/static/pgp/server-4.0.asc | sudo apt-key add -
-    echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
-  else
-    wget -qO - https://www.mongodb.org/static/pgp/server-3.4.asc | sudo apt-key add -
-    echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
-  fi
+  # Add key and repo for the latest stable MongoDB 4.0
+  wget -qO - https://www.mongodb.org/static/pgp/server-4.0.asc | sudo apt-key add -
+  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
 
+
+  # Install MongoDB 4.0
   sudo apt-get update
   sudo apt-get install -y mongodb-org
 
   # Configure MongoDB to listen on localhost only
   sudo sed -i -e "s#bindIp:.*#bindIp: 127.0.0.1#g" /etc/mongod.conf
 
-  if [[ "$SUBTYPE" == 'xenial' || "${SUBTYPE}" == "bionic" ]]; then
-    sudo systemctl enable mongod
-    sudo systemctl start mongod
-  else
-    sudo service mongod restart
-  fi
+  # Enable and restart
+  sudo systemctl enable mongod
+  sudo systemctl start mongod
 
   sleep 5
 
   # Create admin user and user used by StackStorm (MongoDB needs to be running)
+  # NOTE: mongo shell will automatically exit when piping from stdin. There is
+  # no need to put quit(); at the end. This way last command exit code will be
+  # correctly preserved and install script will correctly fail and abort if this
+  # command fails.
   mongo <<EOF
 use admin;
 db.createUser({
@@ -481,7 +480,6 @@ db.createUser({
         { role: "userAdminAnyDatabase", db: "admin" }
     ]
 });
-quit();
 EOF
 
   mongo <<EOF
@@ -493,7 +491,6 @@ db.createUser({
         { role: "readWrite", db: "st2" }
     ]
 });
-quit();
 EOF
 
   # Require authentication to be able to acccess the database
@@ -509,50 +506,35 @@ EOF
 }
 
 get_full_pkg_versions() {
-  if [ "$VERSION" != '' ];
+  if [[ "$VERSION" != '' ]];
   then
     local ST2_VER=$(apt-cache show st2 | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
-    if [ -z "$ST2_VER" ]; then
+    if [[ -z "$ST2_VER" ]]; then
       echo "Could not find requested version of StackStorm!!!"
       sudo apt-cache policy st2
       exit 3
     fi
 
-    if [[ "$SUBTYPE" != 'bionic' ]]; then
-        # Bionic doesn't support Mistral
-        local ST2MISTRAL_VER=$(apt-cache show st2mistral | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
-
-        if [ -z "$ST2MISTRAL_VER" ]; then
-          echo "Could not find requested version of st2mistral!!!"
-          sudo apt-cache policy st2mistral
-          exit 3
-        fi
-     else
-        local ST2MISTRAL_VER="none"
-    fi
-
     local ST2WEB_VER=$(apt-cache show st2web | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
-    if [ -z "$ST2WEB_VER" ]; then
+    if [[ -z "$ST2WEB_VER" ]]; then
       echo "Could not find requested version of st2web."
       sudo apt-cache policy st2web
       exit 3
     fi
 
     local ST2CHATOPS_VER=$(apt-cache show st2chatops | grep Version | awk '{print $2}' | grep ^${VERSION//./\\.} | sort --version-sort | tail -n 1)
-    if [ -z "$ST2CHATOPS_VER" ]; then
+    if [[ -z "$ST2CHATOPS_VER" ]]; then
       echo "Could not find requested version of st2chatops."
       sudo apt-cache policy st2chatops
       exit 3
     fi
 
     ST2_PKG_VERSION="=${ST2_VER}"
-    ST2MISTRAL_PKG_VERSION="=${ST2MISTRAL_VER}"
     ST2WEB_PKG_VERSION="=${ST2WEB_VER}"
     ST2CHATOPS_PKG_VERSION="=${ST2CHATOPS_VER}"
     echo "##########################################################"
     echo "#### Following versions of packages will be installed ####"
     echo "st2${ST2_PKG_VERSION}"
-    echo "st2mistral${ST2MISTRAL_PKG_VERSION}"
     echo "st2web${ST2WEB_PKG_VERSION}"
     echo "st2chatops${ST2CHATOPS_PKG_VERSION}"
     echo "##########################################################"
@@ -561,10 +543,9 @@ get_full_pkg_versions() {
 
 install_st2() {
   # Following script adds a repo file, registers gpg key and runs apt-get update
-  curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.deb.sh | sudo bash
+  curl -sL https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.deb.sh | sudo bash
 
-  # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
-  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
+  if [[ "$DEV_BUILD" = '' ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo apt-get install -y st2${ST2_PKG_VERSION}
   else
@@ -572,7 +553,7 @@ install_st2() {
 
     PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "${SUBTYPE}" "st2_.*.deb")
     PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
-    curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
+    curl -sSL -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
     sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
     sudo apt-get install -yf
     rm ${PACKAGE_FILENAME}
@@ -604,46 +585,6 @@ configure_st2_authentication() {
   sudo st2ctl restart-component st2stream
 }
 
-install_st2mistral_dependencies() {
-  sudo apt-get install -y postgresql
-
-  # Configure service only listens on localhost
-  sudo crudini --set /etc/postgresql/*/main/postgresql.conf '' listen_addresses "'127.0.0.1'"
-
-  sudo service postgresql restart
-  cat << EHD | sudo -u postgres psql
-CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD '${ST2_POSTGRESQL_PASSWORD}';
-CREATE DATABASE mistral OWNER mistral;
-EHD
-}
-
-install_st2mistral() {
-  # 'st2' repo builds single 'st2' package and so we have to install 'st2mistral' from repo
-  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
-    sudo apt-get install -y st2mistral${ST2MISTRAL_PKG_VERSION}
-  else
-    sudo apt-get install -y jq
-
-    PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "${SUBTYPE}" "st2mistral_.*.deb")
-    PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
-    curl -Ss -k -o ${PACKAGE_FILENAME} ${PACKAGE_URL}
-    sudo dpkg -i --force-depends ${PACKAGE_FILENAME}
-    sudo apt-get install -yf
-    rm ${PACKAGE_FILENAME}
-  fi
-
-  # Configure database settings
-  sudo crudini --set /etc/mistral/mistral.conf database connection "postgresql+psycopg2://mistral:${ST2_POSTGRESQL_PASSWORD}@127.0.0.1/mistral"
-
-  # Setup Mistral DB tables, etc.
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
-
-  # Register mistral actions.
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate | grep -v openstack | grep -v "ironicclient"
-
-  # Start Mistral
-  sudo service mistral start
-}
 
 install_st2web() {
   # Add key and repo for the latest stable nginx
@@ -689,7 +630,7 @@ configure_st2chatops() {
   sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
 
   # Setup adapter
-  if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
+  if [[ "$HUBOT_ADAPTER"="slack" ]] && [[ ! -z "$HUBOT_SLACK_TOKEN" ]]
   then
     sudo sed -i -r "s/^# (export HUBOT_ADAPTER=slack)/\1/" /opt/stackstorm/chatops/st2chatops.env
     sudo sed -i -r "s/^# (export HUBOT_SLACK_TOKEN.).*/\1/" /opt/stackstorm/chatops/st2chatops.env
@@ -730,10 +671,6 @@ STEP="Configure st2 CLI config" && configure_st2_cli_config
 STEP="Generate symmetric crypto key for datastore" && generate_symmetric_crypto_key_for_datastore
 STEP="Verify st2" && verify_st2
 
-if [[ "${SUBTYPE}" != "bionic" ]]; then
-    STEP="Install mistral dependencies" && install_st2mistral_dependencies
-    STEP="Install mistral" && install_st2mistral
-fi
 
 STEP="Install st2web" && install_st2web
 

@@ -15,9 +15,9 @@
 Packages build environment is a *multi-container docker* application defined and managed with [docker-compose](https://github.com/docker/compose). It consists of four types of containers:
 
  - **Packaging runner** (https://quay.io/stackstorm/packagingrunner) - the main entry point, package build and test processing controller container.
- - **Packaging build** (https://hub.docker.com/r/stackstorm/packagingbuild/) - container where actual `.deb`/`.rpm` artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingbuild:centos6*, *packagingbuild:trusty* correspondingly for CentOS 6 and Ubuntu Trusty.
+ - **Packaging build** (https://hub.docker.com/r/stackstorm/packagingbuild/) - container where actual `.deb`/`.rpm` artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingbuild:centos7*, *packagingbuild:xenial* correspondingly for CentOS 7 and Ubuntu Xenial.
  - **Packaging test** (https://hub.docker.com/r/stackstorm/packagingtest/) - containers where built artifacts are tested, i.e. *artifacts are installed, configuration is written and tests are performed*.
- - **Services** - these are different containers required for testing such as *rabbitmq, mongodb and postgresql*
+ - **Services** - these are different containers required for testing such as *rabbitmq and mongodb*
 
 `Dockerfiles` sources are available at [StackStorm/st2-dockerfiles](https://github.com/stackstorm/st2-dockerfiles).
 
@@ -32,8 +32,8 @@ It's very simple to invoke the whole build-test pipeline. First just make sure t
 docker-compose kill
 docker-compose rm -f
 
-# To build packages for ubuntu trusty (--rm will wipe packaging runner container. All others will remain active).
-docker-compose run --rm trusty
+# To build packages for ubuntu xenial (--rm will wipe packaging runner container. All others will remain active).
+docker-compose run --rm xenial
 ```
 
 Execution takes a while, so grab a cup of tea or coffee and wait until it finishes. When build and test processes succeed, you'll find the StackStorm packages in `/tmp/st2-packages` on your host machine:
@@ -41,7 +41,6 @@ Execution takes a while, so grab a cup of tea or coffee and wait until it finish
 ```shell
 ls -l1 | grep ".deb$"
 -rw-r--r-- 1 root root 30872652 Feb  9 18:32 st2_1.4dev-1_amd64.deb
--rw-r--r-- 1 root root 31582068 Feb  9 18:32 st2mistral_1.3.0-1_amd64.deb
 ```
 
 ## Manual testing inside the docker environment
@@ -51,10 +50,10 @@ After the build and test stages are finished all docker containers remain active
 ```
 docker ps
 # Find the required testing container
-# In our case it will be st2packages_trustytest_1
+# In our case it will be st2packages_xenialtest_1
 
 # Simply exec to docker
-docker exec -it st2packages_trustytest_1 bash
+docker exec -it st2packages_xenialtest_1 bash
 ```
 
 Once done, you are inside the testing environment where all services are up and running. Don't forget to do (after exec):
@@ -72,8 +71,9 @@ In order to build, package, install and test ST2 in an isolated Vagrant VM, run 
 vagrant up $TARGET
 ```
 
-Where `$TARGET` is one of `trusty`, `xenial` or `el7`. Note that `el6` does not reliably support docker,
-so it is not an available option.
+Where `$TARGET` is one of `xenial`, `bionic`, `el7`, or `el8`. If you are using `el8`, comment out the 
+ `vm_config.vm.provision :docker` line in the Vagrantfile. There is logic in `setup-vagrant.sh` to 
+ install docker in `el8`.
 
 The following steps are run while provisioning the Vagrant VM:
 
@@ -90,9 +90,7 @@ consider allowing the host to provide existing ST2 packages, and install/self-ch
 Vagrant VM.
 
 To specify the ST2 source URL and REV (i.e., branch), use `ST2_GITURL` and `ST2_GITREV` environment
-variables on the host prior to provisioning the VM. Likewise, to specify the ST2 Mistral source URL
-and REV, use `ST2MISTRAL_GITURL` and `ST2MISTRAL_GITREV` environment variables on the host prior to
-provisioning the VM.
+variables on the host prior to provisioning the VM. 
 
 Prior to running `st2-self-check`, the required auth token is generated using `st2 auth`.  If necessary,
 you can change the default username and password passed to `st2 auth`.  To do this, set the `ST2USER`
@@ -103,7 +101,6 @@ are `st2admin` and `Ch@ngeMe` respectively.
 Current community packages are hosted on https://packagecloud.io/StackStorm. For detailed instructions how install st2 and perform basic configuration follow these instructions:
 - [Ubuntu/Debian](https://docs.stackstorm.com/install/deb.html)
 - [RHEL7/CentOS7](https://docs.stackstorm.com/install/rhel7.html)
-- [RHEL6/CentOS6](https://docs.stackstorm.com/install/rhel6.html)
 
 ## Adding Support For a New Distribution
 

@@ -11,9 +11,12 @@ DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
 ST2_PKG='st2'
-ST2MISTRAL_PKG='st2mistral'
 ST2WEB_PKG='st2web'
 ST2CHATOPS_PKG='st2chatops'
+
+is_rhel() {
+  return $(cat /etc/os-release | grep 'ID="rhel"')
+}
 
 setup_args() {
   for i in "$@"
@@ -73,14 +76,14 @@ setup_args() {
   echo "          Installing st2 $RELEASE $VERSION              "
   echo "########################################################"
 
-  if [ "$REPO_TYPE" == "staging" ]; then
+  if [[ "$REPO_TYPE" == "staging" ]]; then
     printf "\n\n"
     echo "################################################################"
     echo "### Installing from staging repos!!! USE AT YOUR OWN RISK!!! ###"
     echo "################################################################"
   fi
 
-  if [ "$DEV_BUILD" != '' ]; then
+  if [[ "$DEV_BUILD" != '' ]]; then
     printf "\n\n"
     echo "###############################################################################"
     echo "### Installing from dev build artifacts!!! REALLY, ANYTHING COULD HAPPEN!!! ###"
@@ -94,7 +97,7 @@ setup_args() {
     read -e -p "Admin username: " -i "st2admin" USERNAME
     read -e -s -p "Password: " PASSWORD
 
-    if [ "${PASSWORD}" = '' ]; then
+    if [[ "${PASSWORD}" = '' ]]; then
         echo "Password cannot be empty."
         exit 1
     fi
@@ -112,7 +115,7 @@ setup_args() {
 adjust_selinux_policies() {
   if getenforce | grep -q 'Enforcing'; then
     # SELINUX management tools, not available for some minimal installations
-    sudo yum install -y policycoreutils-python
+    sudo yum install -y policycoreutils-python-utils
 
     # Allow rabbitmq to use '25672' port, otherwise it will fail to start
     sudo semanage port --list | grep -q 25672 || sudo semanage port -a -t amqp_port_t -p tcp 25672
@@ -128,10 +131,24 @@ install_net_tools() {
 }
 
 install_st2_dependencies() {
+  # RabbitMQ on RHEL8 requires module(perl:5.26
+  if is_rhel; then
+    sudo yum -y module enable perl:5.26
+  fi
+
   is_epel_installed=$(rpm -qa | grep epel-release || true)
   if [[ -z "$is_epel_installed" ]]; then
     sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
   fi
+
+  # Install rabbit from packagecloud
+  # Package are not in EPEL or CentOS repos - but this is required for erlang.
+  # recommended by rabbit: https://www.rabbitmq.com/install-rpm.html#package-cloud
+  # TODO: Migrate rabbitmq packages to be sourced from EPEL rpm when available for EL8
+  # https://github.com/StackStorm/st2-packages/issues/632
+  curl -sL https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
+  sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'
+
   sudo yum -y install curl rabbitmq-server
 
   # Configure RabbitMQ to listen on localhost only
@@ -145,15 +162,16 @@ install_st2_dependencies() {
 }
 
 install_mongodb() {
-  # Add key and repo for the latest stable MongoDB (3.4)
-  sudo rpm --import https://www.mongodb.org/static/pgp/server-3.4.asc
-  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-3.4.repo
-[mongodb-org-3.4]
+
+  # Add key and repo for the latest stable MongoDB (4.0)
+  sudo rpm --import https://www.mongodb.org/static/pgp/server-4.0.asc
+  sudo sh -c "cat <<EOT > /etc/yum.repos.d/mongodb-org-4.repo
+[mongodb-org-4]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/3.4/x86_64/
+baseurl=https://repo.mongodb.org/yum/redhat/8/mongodb-org/4.0/x86_64/
 gpgcheck=1
 enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc
+gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
 EOT"
 
   sudo yum -y install mongodb-org
@@ -167,6 +185,10 @@ EOT"
   sleep 5
 
   # Create admin user and user used by StackStorm (MongoDB needs to be running)
+  # NOTE: mongo shell will automatically exit when piping from stdin. There is
+  # no need to put quit(); at the end. This way last command exit code will be
+  # correctly preserved and install script will correctly fail and abort if this
+  # command fails.
   mongo <<EOF
 use admin;
 db.createUser({
@@ -176,7 +198,6 @@ db.createUser({
         { role: "userAdminAnyDatabase", db: "admin" }
     ]
 });
-quit();
 EOF
 
   mongo <<EOF
@@ -188,7 +209,6 @@ db.createUser({
         { role: "readWrite", db: "st2" }
     ]
 });
-quit();
 EOF
 
   # Require authentication to be able to acccess the database
@@ -199,10 +219,9 @@ EOF
 }
 
 install_st2() {
-  curl -s https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
+  curl -sL https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
 
-  # 'mistral' repo builds single 'st2mistral' package and so we have to install 'st2' from repo
-  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^mistral/.* ]]; then
+  if [[ "$DEV_BUILD" = '' ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
     sudo yum -y install ${ST2_PKG}
   else
@@ -239,60 +258,13 @@ configure_st2_authentication() {
 }
 
 
-install_st2mistral_dependencies() {
-  sudo yum -y install postgresql-server postgresql-contrib postgresql-devel
-
-  # Setup postgresql at a first time
-  sudo postgresql-setup initdb
-
-  # Configure service only listens on localhost
-  sudo sh -c "echo \"listen_addresses = '127.0.0.1'\" >> /var/lib/pgsql/data/postgresql.conf"
-
-  # Make localhost connections to use an MD5-encrypted password for authentication
-  sudo sed -i "s/\(host.*all.*all.*127.0.0.1\/32.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
-  sudo sed -i "s/\(host.*all.*all.*::1\/128.*\)ident/\1md5/" /var/lib/pgsql/data/pg_hba.conf
-
-  # Start PostgreSQL service
-  sudo systemctl start postgresql
-  sudo systemctl enable postgresql
-
-  cat << EHD | sudo -u postgres psql
-CREATE ROLE mistral WITH CREATEDB LOGIN ENCRYPTED PASSWORD '${ST2_POSTGRESQL_PASSWORD}';
-CREATE DATABASE mistral OWNER mistral;
-EHD
-}
-
-install_st2mistral() {
-  # 'st2' repo builds single 'st2' package and so we have to install 'st2mistral' from repo
-  if [ "$DEV_BUILD" = '' ] || [[ "$DEV_BUILD" =~ ^st2/.* ]]; then
-    sudo yum -y install ${ST2MISTRAL_PKG}
-  else
-    sudo yum -y install jq
-
-    PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "el8" "st2mistral-.*.rpm")
-    sudo yum -y install ${PACKAGE_URL}
-  fi
-
-  # Configure database settings
-  sudo crudini --set /etc/mistral/mistral.conf database connection "postgresql+psycopg2://mistral:${ST2_POSTGRESQL_PASSWORD}@127.0.0.1/mistral"
-
-  # Setup Mistral DB tables, etc.
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
-
-  # Register mistral actions.
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate | grep -v openstack | grep -v "ironicclient"
-
-  # start mistral
-  sudo systemctl start mistral
-}
-
 install_st2web() {
   # Add key and repo for the latest stable nginx
   sudo rpm --import http://nginx.org/keys/nginx_signing.key
   sudo sh -c "cat <<EOT > /etc/yum.repos.d/nginx.repo
 [nginx]
 name=nginx repo
-baseurl=http://nginx.org/packages/rhel/7/x86_64/
+baseurl=http://nginx.org/packages/rhel/8/x86_64/
 gpgcheck=1
 enabled=1
 EOT"
@@ -315,19 +287,34 @@ EOT"
   # Remove default site, if present
   sudo rm -f /etc/nginx/conf.d/default.conf
 
+  # EL8: Comment out server { block } in nginx.conf and clean up
+  # nginx 1.6 in EL8 ships with a server block enabled which needs to be disabled
+
+  # back up conf
+  sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+  # comment out server block eg. server {...}
+  sudo awk '/^    server {/{f=1}f{$0 = "#" $0}{print}' /etc/nginx/nginx.conf.bak > /tmp/nginx.conf
+  # copy modified file over
+  sudo mv /tmp/nginx.conf /etc/nginx/nginx.conf
+  # remove double comments
+  sudo sed -i -e 's/##/#/' /etc/nginx/nginx.conf
+  # remove comment closing out server block
+  sudo sed -i -e 's/#}/}/' /etc/nginx/nginx.conf
+
   # Copy and enable StackStorm's supplied config file
   sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
 
   sudo systemctl restart nginx
   sudo systemctl enable nginx
+
+  # RHEL 8 runs firewalld so we need to open http/https
+  if is_rhel && command -v firewall-cmd >/dev/null 2>&1; then
+    sudo firewall-cmd --zone=public --add-service=http --add-service=https
+    sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https
+  fi
 }
 
 install_st2chatops() {
-  # Temporary hack until proper upstream fix https://bugs.centos.org/view.php?id=13669
-  if ! yum list http-parser 1>/dev/null 2>&1; then
-    sudo yum install -y http://repo.okay.com.mx/centos/8/x86_64/release//http-parser-2.8.0-2.el8.x86_64.rpm
-  fi
-
   # Add NodeJS 10 repo
   curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
 
@@ -345,7 +332,7 @@ configure_st2chatops() {
   sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
 
   # Setup adapter
-  if [ "$HUBOT_ADAPTER"="slack" ] && [ ! -z "$HUBOT_SLACK_TOKEN" ]
+  if [[ "$HUBOT_ADAPTER"="slack" ]] && [[ ! -z "$HUBOT_SLACK_TOKEN" ]]
   then
     sudo sed -i -r "s/^# (export HUBOT_ADAPTER=slack)/\1/" /opt/stackstorm/chatops/st2chatops.env
     sudo sed -i -r "s/^# (export HUBOT_SLACK_TOKEN.).*/\1/" /opt/stackstorm/chatops/st2chatops.env
@@ -371,6 +358,7 @@ configure_st2chatops() {
 }
 
 trap 'fail' EXIT
+
 STEP='Parse arguments' && setup_args $@
 STEP="Configure Proxy" && configure_proxy
 STEP='Install net-tools' && install_net_tools
@@ -388,9 +376,6 @@ STEP="Configure st2 CLI config" && configure_st2_cli_config
 STEP="Generate symmetric crypto key for datastore" && generate_symmetric_crypto_key_for_datastore
 STEP="Verify st2" && verify_st2
 
-# Disable for EL8, mistral not supported
-# STEP="Install mistral dependencies" && install_st2mistral_dependencies
-# STEP="Install mistral" && install_st2mistral
 
 STEP="Install st2web" && install_st2web
 STEP="Install st2chatops" && install_st2chatops

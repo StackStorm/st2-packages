@@ -15,7 +15,7 @@ USERNAME=''
 PASSWORD=''
 
 # Note: This variable needs to default to a branch of the latest stable release
-BRANCH='v3.1'
+BRANCH='v3.2'
 FORCE_BRANCH=""
 
 adddate() {
@@ -163,8 +163,8 @@ elif [[ -n "$DEBTEST" ]]; then
   echo "*** Detected Distro is ${DEBTEST} ***"
   SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
   echo "*** Detected flavor ${SUBTYPE} ***"
-  if [[ "$SUBTYPE" != 'trusty' && "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
-    echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 14.04 (trusty), 16.04 (xenial) or 18.04 (bionic) as base system!"
+  if [[ "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
+    echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 16.04 (xenial) or 18.04 (bionic) as base system!"
     exit 2
   fi
   ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-deb.sh"
@@ -182,7 +182,7 @@ if [ $? -ne 0 ]; then
     exit 2
 else
     echo "Downloading deployment script from: ${ST2BOOTSTRAP}..."
-    curl -Ss -k -o ${BOOTSTRAP_FILE} ${ST2BOOTSTRAP}
+    curl -sSL -k -o ${BOOTSTRAP_FILE} ${ST2BOOTSTRAP}
     chmod +x ${BOOTSTRAP_FILE}
 
     echo "Running deployment script for st2 ${VERSION}..."

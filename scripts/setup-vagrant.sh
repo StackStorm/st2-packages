@@ -12,7 +12,7 @@ case $ST2_TARGET in
   "el7")
     DC_TARGET=centos7
     INSTALL_CMD="yum";;
-  "trusty"|"xenial"|"bionic")
+  "xenial"|"bionic")
     DC_TARGET=$ST2_TARGET
     INSTALL_CMD="apt-get";;
   *)
@@ -48,13 +48,7 @@ fi
 if [[ "${ST2_GITREV}" != "" ]]; then
   ST2REV="-e ST2_GITREV=$ST2_GITREV"
 fi
-if [[ "${ST2MISTRAL_GITURL}" != "" ]]; then
-  ST2MISTRALURL="-e ST2MISTRAL_GITURL=$ST2MISTRAL_GITURL"
-fi
-if [[ "${ST2MISTRAL_GITREV}" != "" ]]; then
-  ST2MISTRALREV="-e ST2MISTRAL_GITREV=$ST2MISTRAL_GITREV"
-fi
-sudo sh -c "(cd /vagrant && $DC_BIN run $ST2PACKAGES $ST2URL $ST2REV $ST2MISTRALURL $ST2MISTRALREV --rm $ST2_TARGET)"
+sudo sh -c "(cd /vagrant && $DC_BIN run $ST2PACKAGES $ST2URL $ST2REV --rm $ST2_TARGET)"
 
 if [ "$ST2_INSTALL" = "yes" ]; then
   echo 'Install st2 packages'
@@ -65,7 +59,6 @@ if [ "$ST2_INSTALL" = "yes" ]; then
   # Install the packages we just built
   if [[ $ST2_TARGET != 'el7' ]]; then
     sudo /usr/bin/gdebi -n /tmp/st2-packages/st2_*.deb
-    sudo /usr/bin/gdebi -n /tmp/st2-packages/st2mistral*.deb
   else
     sudo $INSTALL_CMD install -y /tmp/st2-packages/st2*.rpm
   fi
@@ -109,10 +102,6 @@ EOF'
 
   sudo mkdir -p /etc/st2/keys
   sudo st2-generate-symmetric-crypto-key --key-path /etc/st2/keys/datastore_key.json
-
-  # Setup Mistral DB
-  /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf upgrade head
-  git init && /opt/stackstorm/mistral/bin/mistral-db-manage --config-file /etc/mistral/mistral.conf populate && rm -rf .git
 
   # Start ST2 services
   sudo st2ctl start

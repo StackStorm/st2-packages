@@ -28,10 +28,8 @@ class ST2Spec
     bin_prefix: '/usr/bin',
     conf_dir: '/etc/st2',
     log_dir: '/var/log/st2',
-    mistral_enabled: pipeopts.packages.include?('st2mistral'),
     package_list: pipeopts.packages,
     rabbitmqhost: pipeopts.rabbitmqhost,
-    postgreshost: pipeopts.postgreshost,
     mongodbhost:  pipeopts.mongodbhost,
     loglines_to_show: 100,
     logdest_pattern: {
@@ -41,19 +39,12 @@ class ST2Spec
                               ' --register-fail-on-failure' \
                               ' --register-all' \
                               ' --config-dir /etc/st2',
-    mistral_db_head_command: '/opt/stackstorm/mistral/bin/mistral-db-manage' \
-                                 ' --config-file /etc/mistral/mistral.conf upgrade head',
-    mistral_db_populate_command: '/opt/stackstorm/mistral/bin/mistral-db-manage' \
-                                 ' --config-file /etc/mistral/mistral.conf populate',
 
     st2_services: ST2_SERVICES,
     package_opts: {},
 
     package_has_services: {
       st2: ST2_SERVICES,
-      st2mistral: [
-        ['mistral', binary_name: 'mistral-server']
-      ]
     },
 
     package_has_binaries: {
@@ -61,7 +52,6 @@ class ST2Spec
               st2-trigger-refire st2 st2-self-check st2-track-result
               st2-validate-pack-config st2-check-license
               st2-generate-symmetric-crypto-key st2-submit-debug-info),
-      st2mistral: %w(mistral)
     },
 
     package_has_directories: {
@@ -71,17 +61,10 @@ class ST2Spec
         '/opt/stackstorm/packs',
         [ '/var/log/st2', example: Proc.new {|_| be_writable.by('owner')} ]
       ],
-      st2mistral: [
-        '/etc/mistral',
-        '/etc/logrotate.d',
-        '/opt/stackstorm/mistral',
-        [ '/var/log/mistral', example: Proc.new {|_| be_writable.by('owner')} ]
-      ]
     },
 
     package_has_files: {
       st2: %w(/etc/st2/st2.conf /etc/logrotate.d/st2),
-      st2mistral: %w(/etc/mistral/mistral.conf /etc/logrotate.d/mistral)
     },
 
     package_has_users: {
@@ -89,7 +72,6 @@ class ST2Spec
         'st2',
         ['stanley', example: Proc.new {|_| have_home_directory '/home/stanley'} ]
       ],
-      st2mistral: %w(mistral)
     }
   }
 
@@ -110,7 +92,6 @@ class ST2Spec
     def service_list
       @services_available ||= begin
         list = ST2_SERVICES
-        list << 'mistral' if spec[:mistral_enabled]
         list
       end
     end
