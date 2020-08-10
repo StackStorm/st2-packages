@@ -11,7 +11,7 @@ set -e
 # Source the build environment defintion (details in buildenv.sh)
 . ~/.buildenv
 
-# Used for `RABBITMQHOST` `POSTGRESHOST` `MONGODBHOST`, see docker-compose.override.yml
+# Used for `RABBITMQHOST` `MONGODBHOST`, see docker-compose.override.yml
 HOST_IP=$(ifconfig docker0 | grep 'inet addr' | awk -F: '{print $2}' | awk '{print $1}')
 
 set -x
@@ -25,7 +25,6 @@ case "$1" in
         -e ST2PKG_VERSION=${ST2PKG_VERSION} \
         -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
         -e RABBITMQHOST=${HOST_IP} \
-        -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
         -e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
         $2 /bin/true
@@ -37,12 +36,7 @@ case "$1" in
         -e ST2_GITREV=${ST2_GITREV} \
         -e ST2PKG_VERSION=${ST2PKG_VERSION} \
         -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
-        -e ST2MISTRAL_GITURL=${ST2MISTRAL_GITURL} \
-        -e ST2MISTRAL_GITREV=${ST2MISTRAL_GITREV} \
-        -e MISTRAL_VERSION=${MISTRAL_VERSION} \
-        -e MISTRAL_RELEASE=${MISTRAL_RELEASE} \
         -e RABBITMQHOST=${HOST_IP} \
-        -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
         -e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
@@ -57,7 +51,6 @@ case "$1" in
         -e ST2PKG_VERSION=${ST2PKG_VERSION} \
         -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
         -e RABBITMQHOST=${HOST_IP} \
-        -e POSTGRESHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
         -e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \

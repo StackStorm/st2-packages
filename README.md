@@ -17,7 +17,7 @@ Packages build environment is a *multi-container docker* application defined and
  - **Packaging runner** (https://quay.io/stackstorm/packagingrunner) - the main entry point, package build and test processing controller container.
  - **Packaging build** (https://hub.docker.com/r/stackstorm/packagingbuild/) - container where actual `.deb`/`.rpm` artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingbuild:centos7*, *packagingbuild:xenial* correspondingly for CentOS 7 and Ubuntu Xenial.
  - **Packaging test** (https://hub.docker.com/r/stackstorm/packagingtest/) - containers where built artifacts are tested, i.e. *artifacts are installed, configuration is written and tests are performed*.
- - **Services** - these are different containers required for testing such as *rabbitmq, mongodb and postgresql*
+ - **Services** - these are different containers required for testing such as *rabbitmq and mongodb*
 
 `Dockerfiles` sources are available at [StackStorm/st2-dockerfiles](https://github.com/stackstorm/st2-dockerfiles).
 
@@ -41,7 +41,6 @@ Execution takes a while, so grab a cup of tea or coffee and wait until it finish
 ```shell
 ls -l1 | grep ".deb$"
 -rw-r--r-- 1 root root 30872652 Feb  9 18:32 st2_1.4dev-1_amd64.deb
--rw-r--r-- 1 root root 31582068 Feb  9 18:32 st2mistral_1.3.0-1_amd64.deb
 ```
 
 ## Manual testing inside the docker environment
@@ -91,9 +90,7 @@ consider allowing the host to provide existing ST2 packages, and install/self-ch
 Vagrant VM.
 
 To specify the ST2 source URL and REV (i.e., branch), use `ST2_GITURL` and `ST2_GITREV` environment
-variables on the host prior to provisioning the VM. Likewise, to specify the ST2 Mistral source URL
-and REV, use `ST2MISTRAL_GITURL` and `ST2MISTRAL_GITREV` environment variables on the host prior to
-provisioning the VM.
+variables on the host prior to provisioning the VM. 
 
 Prior to running `st2-self-check`, the required auth token is generated using `st2 auth`.  If necessary,
 you can change the default username and password passed to `st2 auth`.  To do this, set the `ST2USER`

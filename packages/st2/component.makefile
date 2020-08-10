@@ -59,14 +59,9 @@ populate_version: .stamp-populate_version
 
 requirements: .stamp-requirements
 .stamp-requirements:
-# Don't include Mistral runner on Bionic
-ifeq ($(DEB_DISTRO),bionic)
+# Don't include Mistral runner for now, replace with commented version when mistral removed from st2
+#	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
-else ifeq ($(EL_VERSION),8)
-	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
-else
-	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
-endif
 	cat requirements.txt
 
 wheelhouse: .stamp-wheelhouse
