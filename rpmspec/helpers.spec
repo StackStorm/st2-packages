@@ -40,6 +40,11 @@
       xargs -I{} -n1 sed -i 's@%{buildroot}@@' {} \
 %{nil}
 
+#Cleanup .so files that may contain buildroot
+%define cleanup_so_abspath \
+   find %{venv_dir}/lib -type f -name "*.so" | xargs -r strip \
+%{nil}
+
 # Define use_systemd to know if we on a systemd system
 #
 %if 0%{?_unitdir:1}
@@ -56,6 +61,7 @@
   %define st2pkg_version %(python -c "from %{package} import __version__; print(__version__),")
 %endif  # if rhel8
 %endif  # st2 package version parsing
+
 
 # Redefine and to drop python brp bytecompile
 #

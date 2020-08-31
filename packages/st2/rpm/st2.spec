@@ -47,6 +47,7 @@ Conflicts: st2common
   %service_install st2scheduler
   make post_install DESTDIR=%{buildroot}
 
+  %cleanup_so_abspath
   %cleanup_python_abspath
 
 %prep
