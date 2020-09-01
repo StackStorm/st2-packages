@@ -40,9 +40,10 @@
       xargs -I{} -n1 sed -i 's@%{buildroot}@@' {} \
 %{nil}
 
-#Cleanup .so files that may contain buildroot
+#Cleanup .so files that contain buildroot
 %define cleanup_so_abspath \
-   find %{venv_dir}/lib -type f -name "*.so" | xargs -r strip \
+   for f in `find %{venv_dir}/lib -type f -name "*.so" | \
+      xargs grep -l %{buildroot} `; do strip $f; done \
 %{nil}
 
 # Define use_systemd to know if we on a systemd system
