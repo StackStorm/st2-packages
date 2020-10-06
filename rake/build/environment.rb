@@ -69,7 +69,7 @@ pipeopts 'st2' do
   env :components, ST2_COMPONENTS, proc: convert_to_array
   envpass :checkout,  1,                                  from: 'ST2_CHECKOUT', proc: convert_to_int
   envpass :giturl,   'https://github.com/StackStorm/st2', from: 'ST2_GITURL'
-  envpass :gitrev,   'master',                            from: 'ST2_GITREV'
+  envpass :gitrev,   'v3.3',                            from: 'ST2_GITREV'
   envpass :gitdir,    make_tmpname('st2-'),               from: 'ST2_GITDIR'
   envpass :st2pkg_version
   envpass :st2pkg_release, 1
