@@ -40,10 +40,10 @@ PY3 = sys.version_info[0] == 3
 
 if PY3:
     text_type = str
+    GET_PIP = 'curl https://bootstrap.pypa.io/get-pip.py | python3'
 else:
     text_type = unicode  # NOQA
-
-GET_PIP = 'curl https://bootstrap.pypa.io/get-pip.py | python'
+    GET_PIP = 'curl https://bootstrap.pypa.io/get-pip.py | python'
 
 __all__ = [
     'check_pip_is_installed',

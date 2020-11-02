@@ -13,8 +13,8 @@
 %define install_crypto %{venv_python} %{venv_bin}/pip install cryptography==2.8 --no-binary cryptography
 %define install_venvctrl python3 -m pip install venvctrl
 %else
-%define venv_python %{venv_bin}/python
-%define pin_pip %{nil}
+%define venv_python %{venv_bin}/python3
+%define pin_pip %{venv_python} %{venv_bin}/pip install pip==19.1.1
 %define install_crypto %{nil}
 %define install_venvctrl %{nil}
 %endif
@@ -27,7 +27,7 @@
 
 # EL8 requires crypto built locally and venvctrl available outside of venv
 %define pip_install_venv \
-    virtualenv --no-download %{venv_dir} \
+    virtualenv -p python3 --no-download %{venv_dir} \
     %{pin_pip} \
     %{install_crypto} \
     %{venv_pip} -r requirements.txt \
