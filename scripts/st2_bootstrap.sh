@@ -185,6 +185,7 @@ else
     # Make sure we are in a writable directory
     if [ ! -w $(pwd) ]; then
         echo "$(pwd) not writable, please cd to a different directory and try again."
+        exit 2
     fi
     curl -sSL -k -o ${BOOTSTRAP_FILE} ${ST2BOOTSTRAP}
     chmod +x ${BOOTSTRAP_FILE}
