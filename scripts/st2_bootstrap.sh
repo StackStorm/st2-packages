@@ -182,6 +182,10 @@ if [ $? -ne 0 ]; then
     exit 2
 else
     echo "Downloading deployment script from: ${ST2BOOTSTRAP}..."
+    # Make sure we are in a writable directory
+    if [ ! -w $(pwd) ]; then
+        echo "$(pwd) not writable, please cd to a different directory and try again."
+    fi
     curl -sSL -k -o ${BOOTSTRAP_FILE} ${ST2BOOTSTRAP}
     chmod +x ${BOOTSTRAP_FILE}
 
