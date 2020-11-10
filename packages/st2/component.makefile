@@ -80,15 +80,10 @@ bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | populate_version requirements inject-deps
 	cat requirements.txt
 # We need to install these python packages to handle rpmbuild 4.14 in EL8
-# TODO: Do we need these for CentOS 7 and Py3?
 ifeq ($(EL_VERSION),8)
 	$(PIP_BINARY) install wheel setuptools virtualenv
 	$(PIP_BINARY) install cryptography --no-binary cryptography
 endif
-#ifeq ($(EL_VERSION),7)
-#	$(PIP_BINARY) install wheel setuptools virtualenv
-#	$(PIP_BINARY) install cryptography --no-binary cryptography
-#endif
 	$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR) || \
 		$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR)
 	touch $@
