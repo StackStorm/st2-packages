@@ -18,7 +18,7 @@ setup_args() {
   for i in "$@"
     do
       case $i in
-          -v|--version=*)
+          -v=*|--version=*)
           VERSION="${i#*=}"
           shift
           ;;
@@ -112,6 +112,7 @@ adjust_selinux_policies() {
   if getenforce | grep -q 'Enforcing'; then
     # SELINUX management tools, not available for some minimal installations
     sudo yum install -y policycoreutils-python
+    sudo yum install -y libselinux-python3
 
     # Allow rabbitmq to use '25672' port, otherwise it will fail to start
     sudo semanage port --list | grep -q 25672 || sudo semanage port -a -t amqp_port_t -p tcp 25672
