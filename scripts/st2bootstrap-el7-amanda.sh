@@ -508,7 +508,7 @@ install_st2_dependencies() {
   # CentOS, but for RHEL need to subscribe to the optional-rpms repo
   if ! sudo yum info python3-devel 1> /dev/null 2>&1; then
       # Python3-devel not available in current repositories - need to enable optional-server repo
-      OPTIONAL_RPM_REPO=$(yum repolist disabled 2> /dev/null | awk -F'/' '/rhel-7-server-rhui-optional-rpms|rhui-REGION-rhel-server-optional|rhel-7-server-optional-rpms/{print $1}')
+      OPTIONAL_RPM_REPO=$(yum repolist disabled 2> /dev/null| awk -F'/' '/rhel-7-server-rhui-optional-rpms|rhui-REGION-rhel-server-optional|rhel-7-server-optional-rpms/{print $1}')
 
       if [[ "$OPTIONAL_RPM_REPO" != '' ]]; then
           # Attempt to install python3-devel temporarily with repo
@@ -577,11 +577,11 @@ EOF
 }
 
 install_st2() {
-  curl -sL https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
+  #curl -sL https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
 
   if [[ "$DEV_BUILD" = '' ]]; then
     STEP="Get package versions" && get_full_pkg_versions && STEP="Install st2"
-    sudo yum -y install ${ST2_PKG}
+    sudo yum -y install /tmp/st2-3.4dev-1.x86_64.rpm
   else
     sudo yum -y install jq
 
