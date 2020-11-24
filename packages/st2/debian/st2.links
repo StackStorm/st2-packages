@@ -4,6 +4,7 @@ opt/stackstorm/st2/bin/st2-trigger-refire usr/bin/st2-trigger-refire
 opt/stackstorm/st2/bin/st2-rule-tester usr/bin/st2-rule-tester
 opt/stackstorm/st2/bin/st2-run-pack-tests usr/bin/st2-run-pack-tests
 opt/stackstorm/st2/bin/st2-register-content usr/bin/st2-register-content
+opt/stackstorm/st2/bin/st2-apply-rbac-definitions usr/bin/st2-apply-rbac-definitions
 opt/stackstorm/st2/bin/st2-bootstrap-rmq usr/bin/st2-bootstrap-rmq
 opt/stackstorm/st2/bin/st2-submit-debug-info usr/bin/st2-submit-debug-info
 opt/stackstorm/st2/bin/st2-generate-symmetric-crypto-key usr/bin/st2-generate-symmetric-crypto-key
@@ -12,3 +13,6 @@ opt/stackstorm/st2/bin/st2-track-result usr/bin/st2-track-result
 opt/stackstorm/st2/bin/st2-validate-pack-config usr/bin/st2-validate-pack-config
 opt/stackstorm/st2/bin/st2-check-license usr/bin/st2-check-license
 opt/stackstorm/st2/bin/st2ctl usr/bin/st2ctl
+
+
+
