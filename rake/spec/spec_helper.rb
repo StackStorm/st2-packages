@@ -50,7 +50,7 @@ class ST2Spec
     package_has_binaries: {
       st2: %w(st2 st2ctl st2-bootstrap-rmq st2-register-content st2-rule-tester st2-run-pack-tests
               st2-trigger-refire st2 st2-self-check st2-track-result st2-validate-pack-config
-              st2-generate-symmetric-crypto-key st2-submit-debug-info),
+              st2-generate-symmetric-crypto-key st2-submit-debug-info st2-apply-rbac-definitions),
     },
 
     package_has_directories: {
