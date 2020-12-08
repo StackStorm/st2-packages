@@ -62,9 +62,7 @@ populate_version: .stamp-populate_version
 
 requirements: .stamp-requirements
 .stamp-requirements:
-# Don't include Mistral runner for now, replace with commented version when mistral removed from st2
-#	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
-	$(PYTHON_BINARY) ../scripts/fixate-requirements.py --skip=stackstorm-runner-mistral-v2,python-mistralclient -s in-requirements.txt -f ../fixed-requirements.txt
+	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s in-requirements.txt -f ../fixed-requirements.txt
 	cat requirements.txt
 
 wheelhouse: .stamp-wheelhouse
