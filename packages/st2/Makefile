@@ -23,6 +23,10 @@ endif
 ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := pip
+else ifeq ($(DEB_DISTRO),xenial)
+	PYTHON_BINARY := /usr/bin/python3.6
+	PIP_BINARY := /usr/local/bin/pip3.6
+	PYTHON_ALT_BINARY := python3.6
 else ifeq ($(EL_VERSION),8)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := /usr/local/bin/pip3
@@ -33,7 +37,7 @@ else ifeq ($(EL_VERSION),7)
 	PYTHON_ALT_BINARY := python3
 else
 	PYTHON_BINARY := /usr/bin/python3
-	PIP_BINARY := pip
+	PIP_BINARY := pip3
 	PYTHON_ALT_BINARY := python3
 endif
 

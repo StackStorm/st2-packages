@@ -3,7 +3,7 @@ Section: Python
 Priority: optional
 Maintainer: StackStorm Engineering <opsadmin@stackstorm.com>
 Build-Depends: debhelper (>= 9),
-               python3 (>= 3.6),
+               python,
                dh-virtualenv (>= 0.8),
                libldap2-dev, 
                libsasl2-dev
