@@ -473,7 +473,6 @@ adjust_selinux_policies() {
   if getenforce | grep -q 'Enforcing'; then
     # SELINUX management tools, not available for some minimal installations
     sudo yum install -y policycoreutils-python
-    sudo yum install -y libselinux-python3
 
     # Allow rabbitmq to use '25672' port, otherwise it will fail to start
     sudo semanage port --list | grep -q 25672 || sudo semanage port -a -t amqp_port_t -p tcp 25672
@@ -503,6 +502,21 @@ install_st2_dependencies() {
 
   # Various other dependencies needed by st2 and installer script
   sudo yum -y install crudini
+
+  # Ensure python3-devel is available for download. By default is available on
+  # CentOS, but for RHEL need to subscribe to the optional-rpms repo
+  if ! sudo yum info python3-devel 1> /dev/null 2>&1; then
+      # Python3-devel not available in current repositories - need to enable optional-server repo
+      OPTIONAL_RPM_REPO=$(yum repolist disabled 2> /dev/null | awk -F'/' '/rhel-7-server-rhui-optional-rpms|rhui-REGION-rhel-server-optional|rhel-7-server-optional-rpms/{print $1}')
+
+      if [[ "$OPTIONAL_RPM_REPO" != '' ]]; then
+          # Attempt to install python3-devel temporarily with repo
+          sudo yum install -y python3-devel --enablerepo ${OPTIONAL_RPM_REPO} 
+      fi
+
+      # Verify python3-devel now available
+      sudo yum info python3-devel
+  fi
 }
 
 install_mongodb() {
