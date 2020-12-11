@@ -23,6 +23,9 @@ endif
 ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := pip
+else ifeq ($(DEB_DISTRO),xenial)
+	PYTHON_BINARY := /usr/bin/python3.6
+	PIP_BINARY := /usr/local/bin/pip3.6
 else ifeq ($(EL_VERSION),8)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := /usr/local/bin/pip3
@@ -32,12 +35,12 @@ else ifeq ($(EL_VERSION),7)
 	PIP_BINARY := /usr/local/bin/pip3
 	PYTHON_ALT_BINARY := python3
 else
-	PYTHON_BINARY := python
-	PIP_BINARY := pip
-	PYTHON_ALT_BINARY := python
+	PYTHON_BINARY := /usr/bin/python3
+	PIP_BINARY := pip3
+	PYTHON_ALT_BINARY := python3
 endif
 
-	RUNNERS := $(shell ls ../contrib/runners)
+RUNNERS := $(shell ls ../contrib/runners)
 
 # Moved from top of file to handle when only py2 or py3 available
 ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
@@ -63,6 +66,7 @@ info:
 	@echo "EL_VERSION=$(EL_VERSION)"
 	@echo "DEB_DISTRO=$(DEB_DISTRO)"
 	@echo "PYTHON_BINARY=$(PYTHON_BINARY)"
+	@echo "PIP_BINARY=$(PIP_BINARY)"
 
 install: wheelhouse changelog
 

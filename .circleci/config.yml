@@ -14,7 +14,7 @@ jobs:
     resource_class: large
     docker:
       # The primary container is an instance of the first list image listed. Your build commands run in this container.
-      - image: circleci/python:2.7
+      - image: circleci/python:3.6
     working_directory: ~/st2-packages
     environment:
       DISTROS: "xenial bionic el7 el8"
