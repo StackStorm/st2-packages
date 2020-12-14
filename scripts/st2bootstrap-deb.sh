@@ -125,7 +125,7 @@ setup_args() {
       echo "We recommend switching to Ubuntu 18.04 LTS (Bionic) as a base OS."
       echo ""
       echo "Alternatively we'll try to add 3rd party python3.6 APT repository: https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa."
-      echo "By continue you're aware of security risk associated with using unofficial 3rd party PPA repository."
+      echo "By continuing you're aware of security risk associated with using unofficial 3rd party PPA repository."
       echo ""
       read -p "Press [y] to continue or [n] to cancel adding it: " choice
       case "$choice" in
