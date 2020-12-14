@@ -112,6 +112,34 @@ setup_args() {
         exit 1
     fi
   fi
+
+  # Python 3.6 package is not available in Ubuntu Xenial
+  # Installer can add it via 3rd party PPA based on user agreement
+  if [[ "$SUBTYPE" = 'xenial' ]]; then
+    sudo apt-get update > /dev/null 2>/dev/null
+    # check if python3.6 is available
+    if (! apt-cache show python3.6 2> /dev/null | grep 'Package:' > /dev/null); then
+      echo ""
+      echo "WARNING!"
+      echo "python3.6 package is required as a dependency for StackStorm and none of your software repositories provide it."
+      echo "We recommend switching to Ubuntu 18.04 LTS (Bionic) as a base OS."
+      echo ""
+      echo "Alternatively we'll try to add 3rd party python3.6 APT repository: https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa."
+      echo "By continue you're aware of security risk associated with using unofficial 3rd party PPA repository."
+      echo ""
+      read -p "Press [y] to continue or [n] to cancel adding it: " choice
+      case "$choice" in
+        y|Y )
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F23C5A6CF475977595C89F51BA6932366A755776
+          echo "deb http://ppa.launchpad.net/deadsnakes/ppa/ubuntu xenial main" | sudo tee /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-xenial.list
+          ;;
+        * )
+          echo "python3.6 PPA installation aborted"
+          exit 1
+          ;;
+      esac
+    fi
+  fi
 }
 
 
