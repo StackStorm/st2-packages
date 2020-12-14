@@ -121,11 +121,11 @@ setup_args() {
     if (! apt-cache show python3.6 2> /dev/null | grep 'Package:' > /dev/null); then
       echo ""
       echo "WARNING!"
-      echo "python3.6 package is required as a dependency for StackStorm and none of your software repositories provide it."
-      echo "We recommend switching to Ubuntu 18.04 LTS (Bionic) as a base OS."
+      echo "The python3.6 package is a required dependency for the StackStorm st2 package but that is not installable from any of the default Ubuntu 16.04 repositories."
+      echo "We recommend switching to Ubuntu 18.04 LTS (Bionic) as a base OS. Support for Ubuntu 16.04 will be removed with future StackStorm versions."
       echo ""
-      echo "Alternatively we'll try to add 3rd party python3.6 APT repository: https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa."
-      echo "By continuing you're aware of security risk associated with using unofficial 3rd party PPA repository."
+      echo "Alternatively we'll try to add python3.6 from the 3rd party 'deadsnakes' repository: https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa."
+      echo "By continuing you are aware of the support and security risks associated with using unofficial 3rd party PPA repository, and you understand that StackStorm does NOT provide ANY support for python3.6 packages on Ubuntu 16.04."
       echo ""
       read -p "Press [y] to continue or [n] to cancel adding it: " choice
       case "$choice" in
