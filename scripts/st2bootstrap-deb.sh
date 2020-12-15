@@ -20,7 +20,7 @@ ST2CHATOPS_PKG_VERSION=''
 DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
-PY3_ADD_INSECURE_PPA=0
+U16_ADD_INSECURE_PY3_PPA=0
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
 
 if [[ "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
@@ -64,7 +64,7 @@ setup_args() {
           # Provide flag to enable installing Python3 from 3rd party insecure PPA for Ubuntu Xenial
           # TODO: Remove once Ubuntu Xenial is dropped
           --u16-add-insecure-py3-ppa)
-          PY3_ADD_INSECURE_PPA=1
+          U16_ADD_INSECURE_PY3_PPA=1
           shift
           ;;
           *)
@@ -126,7 +126,7 @@ setup_args() {
     sudo apt-get update > /dev/null 2>/dev/null
     # check if python3.6 is available
     if (! apt-cache show python3.6 2> /dev/null | grep 'Package:' > /dev/null); then
-      if [[ "$PY3_ADD_INSECURE_PPA" = "1" ]]; then
+      if [[ "$U16_ADD_INSECURE_PY3_PPA" = "1" ]]; then
         choice=y
       else
         echo ""
