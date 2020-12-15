@@ -139,9 +139,7 @@ setup_args() {
         echo ""
         echo "To bypass this check in future, you can provide the following flag: --u16-add-insecure-py3-ppa"
         echo ""
-        echo "Press [y] to continue or [n] to cancel adding it: "
-        # Fix to read user input in a subshell
-        read -p "" choice < /dev/tty
+        read -p "Press [y] to continue or [n] to cancel adding it: " choice
       fi
       case "$choice" in
         y|Y )

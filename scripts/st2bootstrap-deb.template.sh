@@ -12,6 +12,7 @@ ST2CHATOPS_PKG_VERSION=''
 DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
+PY3_ADD_INSECURE_PPA=0
 SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
 
 if [[ "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
@@ -50,6 +51,12 @@ setup_args() {
           ;;
           --password=*)
           PASSWORD="${i#*=}"
+          shift
+          ;;
+          # Provide flag to enable installing Python3 from 3rd party insecure PPA for Ubuntu Xenial
+          # TODO: Remove once Ubuntu Xenial is dropped
+          --u16-add-insecure-py3-ppa)
+          PY3_ADD_INSECURE_PPA=1
           shift
           ;;
           *)
@@ -111,15 +118,21 @@ setup_args() {
     sudo apt-get update > /dev/null 2>/dev/null
     # check if python3.6 is available
     if (! apt-cache show python3.6 2> /dev/null | grep 'Package:' > /dev/null); then
-      echo ""
-      echo "WARNING!"
-      echo "The python3.6 package is a required dependency for the StackStorm st2 package but that is not installable from any of the default Ubuntu 16.04 repositories."
-      echo "We recommend switching to Ubuntu 18.04 LTS (Bionic) as a base OS. Support for Ubuntu 16.04 will be removed with future StackStorm versions."
-      echo ""
-      echo "Alternatively we'll try to add python3.6 from the 3rd party 'deadsnakes' repository: https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa."
-      echo "By continuing you are aware of the support and security risks associated with using unofficial 3rd party PPA repository, and you understand that StackStorm does NOT provide ANY support for python3.6 packages on Ubuntu 16.04."
-      echo ""
-      read -p "Press [y] to continue or [n] to cancel adding it: " choice
+      if [[ "$PY3_ADD_INSECURE_PPA" = "1" ]]; then
+        choice=y
+      else
+        echo ""
+        echo "WARNING!"
+        echo "The python3.6 package is a required dependency for the StackStorm st2 package but that is not installable from any of the default Ubuntu 16.04 repositories."
+        echo "We recommend switching to Ubuntu 18.04 LTS (Bionic) as a base OS. Support for Ubuntu 16.04 will be removed with future StackStorm versions."
+        echo ""
+        echo "Alternatively we'll try to add python3.6 from the 3rd party 'deadsnakes' repository: https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa."
+        echo "By continuing you are aware of the support and security risks associated with using unofficial 3rd party PPA repository, and you understand that StackStorm does NOT provide ANY support for python3.6 packages on Ubuntu 16.04."
+        echo ""
+        echo "To bypass this check in future, you can provide the following flag: --u16-add-insecure-py3-ppa"
+        echo ""
+        read -p "Press [y] to continue or [n] to cancel adding it: " choice
+      fi
       case "$choice" in
         y|Y )
           sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F23C5A6CF475977595C89F51BA6932366A755776
