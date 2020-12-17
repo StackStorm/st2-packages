@@ -13,6 +13,7 @@ ST2_PKG_VERSION=''
 DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
+EXTRA_OPTS=''
 
 # Note: This variable needs to default to a branch of the latest stable release
 BRANCH='v3.3'
@@ -64,6 +65,12 @@ setup_args() {
           # changes which are in a branch)
           --force-branch=*)
           FORCE_BRANCH="${i#*=}"
+          shift
+          ;;
+          # Provide a flag to enable installing Python3 from 3rd party insecure PPA for Ubuntu Xenial
+          # TODO: Remove once Ubuntu Xenial is dropped
+          --u16-add-insecure-py3-ppa)
+          EXTRA_OPTS="--u16-add-insecure-py3-ppa"
           shift
           ;;
           *)
@@ -194,6 +201,6 @@ else
     echo "OS specific script cmd: bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${DEV_BUILD} ${USERNAME} --password=****"
     TS=$(date +%Y%m%dT%H%M%S)
     sudo mkdir -p /var/log/st2
-    bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${DEV_BUILD} ${USERNAME} ${PASSWORD} 2>&1 | adddate | sudo tee /var/log/st2/st2-install.${TS}.log
+    bash ${BOOTSTRAP_FILE} ${VERSION} ${RELEASE} ${REPO_TYPE} ${DEV_BUILD} ${USERNAME} ${PASSWORD} ${EXTRA_OPTS} 2>&1 | adddate | sudo tee /var/log/st2/st2-install.${TS}.log
     exit ${PIPESTATUS[0]}
 fi
