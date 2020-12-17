@@ -40,7 +40,7 @@ Conflicts: st2common
   %default_install
   %pip_install_venv
   %service_install st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier st2workflowengine
-  %service_install st2resultstracker st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
+  %service_install st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
   %service_install st2scheduler
   make post_install DESTDIR=%{buildroot}
 
@@ -64,18 +64,18 @@ Conflicts: st2common
 
 %post
   %service_post st2actionrunner st2api st2stream st2auth st2notifier st2workflowengine
-  %service_post st2resultstracker st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
+  %service_post st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
   %service_post st2scheduler
   %include rpm/postinst_script.spec
 
 %preun
   %service_preun st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier st2workflowengine
-  %service_preun st2resultstracker st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
+  %service_preun st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
   %service_preun st2scheduler
 
 %postun
   %service_postun st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier st2workflowengine
-  %service_postun st2resultstracker st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
+  %service_postun st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
   %service_postun st2scheduler
   # Remove st2 logrotate config, since there's no analog of apt-get purge available
   if [ $1 -eq 0 ]; then
@@ -107,7 +107,6 @@ Conflicts: st2common
   %{_unitdir}/st2auth.service
   %{_unitdir}/st2auth.socket
   %{_unitdir}/st2notifier.service
-  %{_unitdir}/st2resultstracker.service
   %{_unitdir}/st2rulesengine.service
   %{_unitdir}/st2sensorcontainer.service
   %{_unitdir}/st2garbagecollector.service
