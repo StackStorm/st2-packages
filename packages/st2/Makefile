@@ -80,8 +80,6 @@ post_install:
 	install -m644 ../st2actions/conf/syslog.conf $(DESTDIR)/etc/st2/syslog.actionrunner.conf
 	install -m644 ../st2actions/conf/logging.notifier.conf $(DESTDIR)/etc/st2/logging.notifier.conf
 	install -m644 ../st2actions/conf/syslog.notifier.conf $(DESTDIR)/etc/st2/syslog.notifier.conf
-	install -m644 ../st2actions/conf/logging.resultstracker.conf $(DESTDIR)/etc/st2/logging.resultstracker.conf
-	install -m644 ../st2actions/conf/syslog.resultstracker.conf $(DESTDIR)/etc/st2/syslog.resultstracker.conf
 	install -m644 ../st2actions/conf/logging.workflowengine.conf $(DESTDIR)/etc/st2/logging.workflowengine.conf
 	install -m644 ../st2actions/conf/syslog.workflowengine.conf $(DESTDIR)/etc/st2/syslog.workflowengine.conf
 	install -m644 ../st2api/conf/logging.conf $(DESTDIR)/etc/st2/logging.api.conf
