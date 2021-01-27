@@ -8,10 +8,10 @@
 %define venv_bin %{venv_dir}/bin
 
 %define venv_python %{venv_bin}/python3
-%define pin_pip %{venv_python} %{venv_bin}/pip3 install pip==19.1.1
+%define pin_pip %{venv_python} %{venv_bin}/pip3 install pip==20.3.4
 %define install_venvctrl python3 -m pip install venvctrl
 %if 0%{?rhel} == 8
-%define install_crypto %{venv_python} %{venv_bin}/pip install cryptography==2.8 --no-binary cryptography
+%define install_crypto %{venv_python} %{venv_bin}/pip3 install cryptography==2.8 --no-binary cryptography
 %else
 %define install_crypto %{nil}
 %endif
@@ -26,8 +26,9 @@
 %define pip_install_venv \
     virtualenv-3 -p python3 --no-download %{venv_dir} \
     %{pin_pip} \
+    %{venv_python} %{venv_bin}/pip3 --version \
     %{install_crypto} \
-    %{venv_pip} -r requirements.txt \
+    %{venv_pip} --use-deprecated=legacy-resolver -r requirements.txt \
     %{venv_pip} . \
     %{install_venvctrl} \
     venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir} \

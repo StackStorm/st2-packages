@@ -74,8 +74,8 @@ wheelhouse: .stamp-wheelhouse
 	# Install wheels into shared location
 	cat requirements.txt
 	# Try to install wheels 2x in case the first one fails
-	$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
-		$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	$(PIP_BINARY) --use-deprecated=legacy-resolver wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+		$(PIP_BINARY) --use-deprecated=legacy-resolver wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 bdist_wheel: .stamp-bdist_wheel

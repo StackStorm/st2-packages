@@ -117,6 +117,8 @@ populate_version: .stamp-populate_version
 	touch $@
 
 requirements:
+	$(PYTHON_BINARY) -c "import pip; print(pip.__version__)"
+	echo $(PYTHON_BINARY)
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
 	cat requirements.txt
 
@@ -130,8 +132,8 @@ wheelhouse: .build-runners .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements inject-deps
 	cat requirements.txt
 	# Try to install wheels 2x in case the first one fails
-	$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
-		$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
+	$(PIP_BINARY) --use-deprecated=legacy-resolver  wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
+		$(PIP_BINARY) --use-deprecated=legacy-resolver wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
 	touch $@
 
 .build-runners:
