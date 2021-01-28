@@ -53,7 +53,7 @@ namespace :upload do
           execute :mkdir, '-p $ARTIFACT_DIR'
           within opts.basedir do
             if opts.checkout == 1
-              execute :git, :clone, '--depth 1 -b amanda_tmp_virtualenv $GITURL $GITDIR'
+              execute :git, :clone, '--depth 1 -b $GITREV $GITURL $GITDIR'
             end
           end
         end
