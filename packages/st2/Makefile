@@ -117,8 +117,6 @@ populate_version: .stamp-populate_version
 	touch $@
 
 requirements:
-	$(PYTHON_BINARY) -c "import pip; print(pip.__version__)"
-	echo $(PYTHON_BINARY)
 	$(PYTHON_BINARY) ../scripts/fixate-requirements.py -s ../st2*/in-requirements.txt ../contrib/runners/*/in-requirements.txt -f ../fixed-requirements.txt
 	cat requirements.txt
 
