@@ -8,7 +8,7 @@
 %define venv_bin %{venv_dir}/bin
 
 %define venv_python %{venv_bin}/python3
-%define pin_pip %{venv_python} %{venv_bin}/pip3 install pip==20.3.4
+%define pin_pip %{venv_python} %{venv_bin}/pip3 install pip==20.3.3
 %define install_venvctrl python3 -m pip install venvctrl
 %if 0%{?rhel} == 8
 %define install_crypto %{venv_python} %{venv_bin}/pip install cryptography==2.8 --no-binary cryptography
