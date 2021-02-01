@@ -67,7 +67,10 @@ override_dh_virtualenv:
 	#
 	# NB! Use '--no-download' arg for 'virtualenv' is required,
 	# otherwise it downloads latest PIP version instead of bundled/pinned one.
-	dh_virtualenv --extra-virtualenv-arg='--no-download' \
+	# nB. Need to set environment variable DH_VIRTUALENB_ARGUMENTS as
+	# otherwise --no-site-packages is added which is not supported in
+	# virtualenv >= 20.0
+	DH_VIRTUALENV_ARGUMENTS="" dh_virtualenv --extra-virtualenv-arg='--no-download' \
 								--extra-pip-arg '--find-links=$(WHEELDIR)' \
 								--extra-pip-arg '--no-index' --no-test
 
