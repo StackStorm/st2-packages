@@ -511,6 +511,10 @@ install_st2_dependencies() {
   sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'
 
   sudo yum -y install curl rabbitmq-server
+  sudo rabbitmqctl add_user stanley Ch@ngeMe
+  sudo rabbitmqctl delete_user guest
+  rabbitmqctl set_user_tags stanley administrator
+  rabbitmqctl set_permissions -p / stanley ".*" ".*" ".*"
 
   # Configure RabbitMQ to listen on localhost only
   sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
