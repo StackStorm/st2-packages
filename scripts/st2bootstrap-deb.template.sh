@@ -131,7 +131,7 @@ setup_args() {
         echo "By using the flag you are aware of the support and security risks associated with using unofficial 3rd party PPA repository, and you understand that StackStorm does NOT provide ANY support for python3.6 packages on Ubuntu 16.04."
         echo ""
         exit 1
-      else:
+      else
         sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F23C5A6CF475977595C89F51BA6932366A755776
         echo "deb http://ppa.launchpad.net/deadsnakes/ppa/ubuntu xenial main" | sudo tee /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-xenial.list
       fi
