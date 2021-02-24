@@ -282,6 +282,7 @@ check_st2_host_dependencies() {
 generate_random_passwords() {
   # Generate random password used for MongoDB user authentication
   ST2_MONGODB_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
+  # Generate random password used for RabbitMQ user authentication
   ST2_RABBITMQ_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
 }
 

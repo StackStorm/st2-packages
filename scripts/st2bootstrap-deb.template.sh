@@ -164,7 +164,7 @@ install_st2_dependencies() {
 
   sudo apt-get install -y curl
   sudo apt-get install -y rabbitmq-server
-  sudo rabbitmqctl add_user stanley Ch@ngeMe
+  sudo rabbitmqctl add_user stanley "${ST2_RABBITMQ_PASSWORD}"
   sudo rabbitmqctl delete_user guest
   rabbitmqctl set_user_tags stanley administrator
   rabbitmqctl set_permissions -p / stanley ".*" ".*" ".*"
@@ -297,6 +297,11 @@ install_st2() {
   # Configure [database] section in st2.conf (username password for MongoDB access)
   sudo crudini --set /etc/st2/st2.conf database username "stackstorm"
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
+
+  # Configure [messaging] section in st2.conf (username password for RabbitMQ access)
+  RABBITMQHOST="${RABBITMQHOST:-rabbitmq}"
+  AMQP="amqp://stanley:$ST2_RABBITMQ_PASSWORD@$RABBITMQHOST:5672/"
+  sudo sed -i "/\[messaging\]/,/\[.*\]\|url/ {n; s#url.*=.*#url = $AMQP#}" /etc/st2/st2.conf
 
   sudo st2ctl start
   sudo st2ctl reload --register-all
