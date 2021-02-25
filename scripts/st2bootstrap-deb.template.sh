@@ -301,8 +301,8 @@ install_st2() {
   # Configure [messaging] section in st2.conf (username password for RabbitMQ access)
   RABBITMQHOST="${RABBITMQHOST:-rabbitmq}"
   AMQP="amqp://stanley:$ST2_RABBITMQ_PASSWORD@$RABBITMQHOST:5672/"
-  sudo sed -i "/\[messaging\]/,/\[.*\]\|url/ {n; s#url.*=.*#url = $AMQP#}" /etc/st2/st2.conf
-
+  sudo crudini --set /etc/st2/st2.conf messaging url "${AMQP}"
+ 
   sudo st2ctl start
   sudo st2ctl reload --register-all
 }
