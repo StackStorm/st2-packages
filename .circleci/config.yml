@@ -23,7 +23,7 @@ jobs:
       # with real gitrevs during releases. Note that they are commented out, so that they do not interfere
       # with build parameters. st2cd prep tasks will uncomment these on a branch, and replace with proper
       # gitrefs.
-      # ST2_GITREV: ""
+      ST2_GITREV: v3.4
     steps:
       - checkout
       - setup_remote_docker:
