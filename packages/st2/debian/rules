@@ -27,7 +27,7 @@ endif
 %:
 # Use Python 3 binary on Ubuntu Bionic
 ifeq ($(DEB_DISTRO),bionic)
-	dh $@ --with python-virtualenv --python /usr/bin/python3
+	dh $@ --with python-virtualenv --python /usr/bin/python3.6
 else ifeq ($(DEB_DISTRO),xenial)
 	dh $@ --with python-virtualenv --python /usr/bin/python3.6
 endif
