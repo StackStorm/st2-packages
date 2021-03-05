@@ -67,7 +67,10 @@ override_dh_virtualenv:
 	#
 	# NB! Use '--no-download' arg for 'virtualenv' is required,
 	# otherwise it downloads latest PIP version instead of bundled/pinned one.
+	# --force-pip-version is needed to ensure correct pip version is installed
+	# inside dh virtualenv
 	dh_virtualenv --extra-virtualenv-arg='--no-download' \
+								--force-pip-version='20.0.2' \
 								--extra-pip-arg '--find-links=$(WHEELDIR)' \
 								--extra-pip-arg '--no-index' --no-test
 
