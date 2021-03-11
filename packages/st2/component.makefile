@@ -21,7 +21,7 @@ endif
 
 ifeq ($(DEB_DISTRO),bionic)
 	PYTHON_BINARY := /usr/bin/python3
-	PIP_BINARY := /usr/bin/pip3
+	PIP_BINARY := /usr/local/bin/pip3.6
 else ifeq ($(DEB_DISTRO),xenial)
 	PYTHON_BINARY := /usr/bin/python3.6
 	PIP_BINARY := /usr/local/bin/pip3.6
@@ -54,6 +54,7 @@ info:
 	@echo "PIP_BINARY=$(PIP_BINARY)"
 	@echo "EL_VERSION=$(EL_VERSION)"
 	@echo "EL_DISTRO=$(EL_DISTRO)"
+	$(PIP_BINARY) --version
 
 .PHONY: populate_version requirements wheelhouse bdist_wheel
 all: info populate_version requirements bdist_wheel

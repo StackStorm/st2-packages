@@ -8,6 +8,7 @@
 %define venv_bin %{venv_dir}/bin
 
 %define venv_python %{venv_bin}/python3
+# https://github.com/StackStorm/st2/wiki/Where-all-to-update-pip-and-or-virtualenv
 %define pin_pip %{venv_python} %{venv_bin}/pip3 install pip==20.3.3
 %define install_venvctrl python3 -m pip install venvctrl
 %if 0%{?rhel} == 8
