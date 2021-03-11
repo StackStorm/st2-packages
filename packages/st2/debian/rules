@@ -70,9 +70,6 @@ override_dh_virtualenv:
 	# NB! Use '--copies' else /opt/stackstorm/st2/bin/python is symlink to
 	# /usr/bin/pythonx rather than copy - and this breaks pack install
 	# which follows the path to calculate the location of the bin directory
-  # TODO: Determine if need force-pip-version on the branch as well...
-  # --force-pip-version is needed to ensure correct pip version is installed
-  # 								--force-pip-version='20.0.2' \
 	dh_virtualenv --extra-virtualenv-arg='--copies' --extra-virtualenv-arg='--no-download' \
 								--extra-pip-arg '--find-links=$(WHEELDIR)' \
 								--extra-pip-arg '--no-index' --no-test
