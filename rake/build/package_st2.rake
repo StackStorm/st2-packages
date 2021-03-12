@@ -9,6 +9,7 @@ namespace :package do
         with opts.env do
           opts.components.each do |component|
             within ::File.join(opts.gitdir, component) do
+              make :info, label: "make info"
               make :bdist_wheel, label: "bdist: #{component}"
             end
           end
