@@ -11,6 +11,7 @@ PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 WHEELDIR ?= /tmp/wheelhouse
 DH_VIRTUALENV_INSTALL_ROOT := /opt/stackstorm
 export DH_VIRTUALENV_INSTALL_ROOT
+PIP_VERSION = 20.3.3
 
 IS_SYSTEMD = $(shell command -v dh_systemd_enable > /dev/null 2>&1 && echo true)
 DEB_DISTRO := $(shell lsb_release -cs)
@@ -71,6 +72,7 @@ override_dh_virtualenv:
 	# /usr/bin/pythonx rather than copy - and this breaks pack install
 	# which follows the path to calculate the location of the bin directory
 	dh_virtualenv --extra-virtualenv-arg='--copies' --extra-virtualenv-arg='--no-download' \
+								'--upgrade-pip-to=$(PIP_VERSION)' \
 								--extra-pip-arg '--find-links=$(WHEELDIR)' \
 								--extra-pip-arg '--no-index' --no-test
 
