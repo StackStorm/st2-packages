@@ -126,32 +126,23 @@ setup_args() {
     sudo apt-get update > /dev/null 2>/dev/null
     # check if python3.6 is available
     if (! apt-cache show python3.6 2> /dev/null | grep 'Package:' > /dev/null); then
-      if [[ "$U16_ADD_INSECURE_PY3_PPA" = "1" ]]; then
-        choice=y
-      else
+      if [[ "$U16_ADD_INSECURE_PY3_PPA" = "0" ]]; then
         echo ""
         echo "WARNING!"
         echo "The python3.6 package is a required dependency for the StackStorm st2 package but that is not installable from any of the default Ubuntu 16.04 repositories."
         echo "We recommend switching to Ubuntu 18.04 LTS (Bionic) as a base OS. Support for Ubuntu 16.04 will be removed with future StackStorm versions."
         echo ""
         echo "Alternatively we'll try to add python3.6 from the 3rd party 'deadsnakes' repository: https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa."
-        echo "By continuing you are aware of the support and security risks associated with using unofficial 3rd party PPA repository, and you understand that StackStorm does NOT provide ANY support for python3.6 packages on Ubuntu 16.04."
         echo ""
-        echo "To bypass this check in future, you can provide the following flag: --u16-add-insecure-py3-ppa"
+        echo "You can provide the following flag os use python3.6 from the 'deadsnakes'repository: --u16-add-insecure-py3-ppa"
         echo ""
-        echo "Press [y] to continue or [n] to cancel adding it: "
-        read choice
+        echo "By using the flag you are aware of the support and security risks associated with using unofficial 3rd party PPA repository, and you understand that StackStorm does NOT provide ANY support for python3.6 packages on Ubuntu 16.04."
+        echo ""
+        exit 1
+      else
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F23C5A6CF475977595C89F51BA6932366A755776
+        echo "deb http://ppa.launchpad.net/deadsnakes/ppa/ubuntu xenial main" | sudo tee /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-xenial.list
       fi
-      case "$choice" in
-        y|Y )
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F23C5A6CF475977595C89F51BA6932366A755776
-          echo "deb http://ppa.launchpad.net/deadsnakes/ppa/ubuntu xenial main" | sudo tee /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-xenial.list
-          ;;
-        * )
-          echo "python3.6 PPA installation aborted"
-          exit 1
-          ;;
-      esac
     fi
   fi
 }
@@ -476,11 +467,18 @@ install_st2_dependencies() {
   fi
 
   sudo apt-get install -y curl
+  
+  # Various other dependencies needed by st2 and installer script
+  sudo apt-get install -y crudini
+}
+
+install_rabbitmq() {
+  # install RabbitMQ
   sudo apt-get install -y rabbitmq-server
   sudo rabbitmqctl add_user stanley "${ST2_RABBITMQ_PASSWORD}"
   sudo rabbitmqctl delete_user guest
-  rabbitmqctl set_user_tags stanley administrator
-  rabbitmqctl set_permissions -p / stanley ".*" ".*" ".*"
+  sudo rabbitmqctl set_user_tags stanley administrator
+  sudo rabbitmqctl set_permissions -p / stanley ".*" ".*" ".*"
 
   # Configure RabbitMQ to listen on localhost only
   sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
@@ -490,9 +488,6 @@ install_st2_dependencies() {
   else
     sudo service rabbitmq-server restart
   fi
-
-  # Various other dependencies needed by st2 and installer script
-  sudo apt-get install -y crudini
 }
 
 install_mongodb() {
@@ -612,8 +607,7 @@ install_st2() {
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
 
   # Configure [messaging] section in st2.conf (username password for RabbitMQ access)
-  RABBITMQHOST="${RABBITMQHOST:-rabbitmq}"
-  AMQP="amqp://stanley:$ST2_RABBITMQ_PASSWORD@$RABBITMQHOST:5672/"
+  AMQP="amqp://stanley:$ST2_RABBITMQ_PASSWORD@127.0.0.1:5672"
   sudo crudini --set /etc/st2/st2.conf messaging url "${AMQP}"
  
   sudo st2ctl start
@@ -716,6 +710,7 @@ STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_depend
 STEP="Generate random password" && generate_random_passwords
 STEP="Configure Proxy" && configure_proxy
 STEP="Install st2 dependencies" && install_st2_dependencies
+STEP="Install st2 dependencies (RabbitMQ)" && install_rabbitmq
 STEP="Install st2 dependencies (MongoDB)" && install_mongodb
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user

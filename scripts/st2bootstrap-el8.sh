@@ -22,6 +22,10 @@ ST2_PKG='st2'
 ST2WEB_PKG='st2web'
 ST2CHATOPS_PKG='st2chatops'
 
+# WORKAROUND - pin rabbitmq version for the moment due to 3.8.13 requiring
+# erlang version that is not in EPEL or CentOS repos
+RABBITMQ_VERSION=3.8.12
+
 is_rhel() {
   return $(cat /etc/os-release | grep 'ID="rhel"')
 }
@@ -504,6 +508,11 @@ install_st2_dependencies() {
     sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
   fi
 
+  # Various other dependencies needed by st2 and installer script
+  sudo yum -y install crudini
+}
+
+install_rabbitmq() {
   # Install rabbit from packagecloud
   # Package are not in EPEL or CentOS repos - but this is required for erlang.
   # recommended by rabbit: https://www.rabbitmq.com/install-rpm.html#package-cloud
@@ -511,12 +520,10 @@ install_st2_dependencies() {
   # https://github.com/StackStorm/st2-packages/issues/632
   curl -sL https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
   sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'
-
-  sudo yum -y install curl rabbitmq-server
-  sudo rabbitmqctl add_user stanley "${ST2_RABBITMQ_PASSWORD}"
-  sudo rabbitmqctl delete_user guest
-  rabbitmqctl set_user_tags stanley administrator
-  rabbitmqctl set_permissions -p / stanley ".*" ".*" ".*"
+  
+  # WORKAROUND - pin rabbitmq version for the moment due to 3.8.13 requiring
+  # erlang version that is not in EPEL or CentOS repos
+  sudo yum -y install curl rabbitmq-server-${RABBITMQ_VERSION}
 
   # Configure RabbitMQ to listen on localhost only
   sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
@@ -524,8 +531,10 @@ install_st2_dependencies() {
   sudo systemctl start rabbitmq-server
   sudo systemctl enable rabbitmq-server
 
-  # Various other dependencies needed by st2 and installer script
-  sudo yum -y install crudini
+  sudo rabbitmqctl add_user stanley "${ST2_RABBITMQ_PASSWORD}"
+  sudo rabbitmqctl delete_user guest
+  sudo rabbitmqctl set_user_tags stanley administrator
+  sudo rabbitmqctl set_permissions -p / stanley ".*" ".*" ".*"
 }
 
 install_mongodb() {
@@ -603,8 +612,7 @@ install_st2() {
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
 
   # Configure [messaging] section in st2.conf (username password for RabbitMQ access)
-  RABBITMQHOST="${RABBITMQHOST:-rabbitmq}"
-  AMQP="amqp://stanley:$ST2_RABBITMQ_PASSWORD@$RABBITMQHOST:5672/"
+  AMQP="amqp://stanley:$ST2_RABBITMQ_PASSWORD@127.0.0.1:5672"
   sudo crudini --set /etc/st2/st2.conf messaging url "${AMQP}"
 
   sudo st2ctl start
@@ -740,6 +748,7 @@ STEP='Install repoquery tool' && install_yum_utils
 STEP="Generate random password" && generate_random_passwords
 
 STEP="Install st2 dependencies" && install_st2_dependencies
+STEP="Install st2 dependencies (RabbitMQ)" && install_rabbitmq
 STEP="Install st2 dependencies (MongoDB)" && install_mongodb
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
