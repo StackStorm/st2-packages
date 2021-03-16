@@ -11,6 +11,7 @@ PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 WHEELDIR ?= /tmp/wheelhouse
 DH_VIRTUALENV_INSTALL_ROOT := /opt/stackstorm
 export DH_VIRTUALENV_INSTALL_ROOT
+PIP_VERSION = 20.3.3
 
 IS_SYSTEMD = $(shell command -v dh_systemd_enable > /dev/null 2>&1 && echo true)
 DEB_DISTRO := $(shell lsb_release -cs)
@@ -67,10 +68,11 @@ override_dh_virtualenv:
 	#
 	# NB! Use '--no-download' arg for 'virtualenv' is required,
 	# otherwise it downloads latest PIP version instead of bundled/pinned one.
-	# --force-pip-version is needed to ensure correct pip version is installed
-	# inside dh virtualenv
-	dh_virtualenv --extra-virtualenv-arg='--no-download' \
-								--force-pip-version='20.0.2' \
+	# NB! Use '--copies' else /opt/stackstorm/st2/bin/python is symlink to
+	# /usr/bin/pythonx rather than copy - and this breaks pack install
+	# which follows the path to calculate the location of the bin directory
+	dh_virtualenv --extra-virtualenv-arg='--copies' --extra-virtualenv-arg='--no-download' \
+								'--upgrade-pip-to=$(PIP_VERSION)' \
 								--extra-pip-arg '--find-links=$(WHEELDIR)' \
 								--extra-pip-arg '--no-index' --no-test
 
