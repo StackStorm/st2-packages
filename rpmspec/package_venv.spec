@@ -9,7 +9,7 @@
 
 %define venv_python %{venv_bin}/python3
 # https://github.com/StackStorm/st2/wiki/Where-all-to-update-pip-and-or-virtualenv
-%define pin_pip %{venv_python} %{venv_bin}/pip3 install pip==20.0.2
+%define pin_pip %{venv_python} %{venv_bin}/pip3 install pip==20.3.3
 %define install_venvctrl python3 -m pip install venvctrl
 %if 0%{?rhel} == 8
 %define install_crypto %{venv_python} %{venv_bin}/pip install cryptography==2.8 --no-binary cryptography
@@ -28,7 +28,7 @@
     virtualenv-3 -p python3 --no-download %{venv_dir} \
     %{pin_pip} \
     %{install_crypto} \
-    %{venv_pip} -r requirements.txt \
+    %{venv_pip} --use-deprecated=legacy-resolver -r requirements.txt \
     %{venv_pip} . \
     %{install_venvctrl} \
     venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir} \
