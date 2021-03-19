@@ -168,10 +168,10 @@ install_rabbitmq() {
   sudo systemctl start rabbitmq-server
   sudo systemctl enable rabbitmq-server
 
-  sudo rabbitmqctl add_user stanley "${ST2_RABBITMQ_PASSWORD}"
+  sudo rabbitmqctl add_user stackstorm "${ST2_RABBITMQ_PASSWORD}"
   sudo rabbitmqctl delete_user guest
-  sudo rabbitmqctl set_user_tags stanley administrator
-  sudo rabbitmqctl set_permissions -p / stanley ".*" ".*" ".*"
+  sudo rabbitmqctl set_user_tags stackstorm administrator
+  sudo rabbitmqctl set_permissions -p / stackstorm ".*" ".*" ".*"
 }
 
 install_mongodb() {
@@ -249,7 +249,7 @@ install_st2() {
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
 
   # Configure [messaging] section in st2.conf (username password for RabbitMQ access)
-  AMQP="amqp://stanley:$ST2_RABBITMQ_PASSWORD@127.0.0.1:5672"
+  AMQP="amqp://stackstorm:$ST2_RABBITMQ_PASSWORD@127.0.0.1:5672"
   sudo crudini --set /etc/st2/st2.conf messaging url "${AMQP}"
 
   sudo st2ctl start
