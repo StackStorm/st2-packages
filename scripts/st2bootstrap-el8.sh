@@ -242,6 +242,8 @@ check_st2_host_dependencies() {
 generate_random_passwords() {
   # Generate random password used for MongoDB user authentication
   ST2_MONGODB_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
+  # Generate random password used for RabbitMQ user authentication
+  ST2_RABBITMQ_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
 }
 
 
@@ -506,6 +508,11 @@ install_st2_dependencies() {
     sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
   fi
 
+  # Various other dependencies needed by st2 and installer script
+  sudo yum -y install crudini
+}
+
+install_rabbitmq() {
   # Install rabbit from packagecloud
   # Package are not in EPEL or CentOS repos - but this is required for erlang.
   # recommended by rabbit: https://www.rabbitmq.com/install-rpm.html#package-cloud
@@ -524,8 +531,10 @@ install_st2_dependencies() {
   sudo systemctl start rabbitmq-server
   sudo systemctl enable rabbitmq-server
 
-  # Various other dependencies needed by st2 and installer script
-  sudo yum -y install crudini
+  sudo rabbitmqctl add_user stackstorm "${ST2_RABBITMQ_PASSWORD}"
+  sudo rabbitmqctl delete_user guest
+  sudo rabbitmqctl set_user_tags stackstorm administrator
+  sudo rabbitmqctl set_permissions -p / stackstorm ".*" ".*" ".*"
 }
 
 install_mongodb() {
@@ -601,6 +610,10 @@ install_st2() {
   # Configure [database] section in st2.conf (username password for MongoDB access)
   sudo crudini --set /etc/st2/st2.conf database username "stackstorm"
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
+
+  # Configure [messaging] section in st2.conf (username password for RabbitMQ access)
+  AMQP="amqp://stackstorm:$ST2_RABBITMQ_PASSWORD@127.0.0.1:5672"
+  sudo crudini --set /etc/st2/st2.conf messaging url "${AMQP}"
 
   sudo st2ctl start
   sudo st2ctl reload --register-all
@@ -735,6 +748,7 @@ STEP='Install repoquery tool' && install_yum_utils
 STEP="Generate random password" && generate_random_passwords
 
 STEP="Install st2 dependencies" && install_st2_dependencies
+STEP="Install st2 dependencies (RabbitMQ)" && install_rabbitmq
 STEP="Install st2 dependencies (MongoDB)" && install_mongodb
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user

@@ -273,6 +273,8 @@ check_st2_host_dependencies() {
 generate_random_passwords() {
   # Generate random password used for MongoDB user authentication
   ST2_MONGODB_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
+  # Generate random password used for RabbitMQ user authentication
+  ST2_RABBITMQ_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 24 ; echo '')
 }
 
 
@@ -465,7 +467,18 @@ install_st2_dependencies() {
   fi
 
   sudo apt-get install -y curl
+  
+  # Various other dependencies needed by st2 and installer script
+  sudo apt-get install -y crudini
+}
+
+install_rabbitmq() {
+  # install RabbitMQ
   sudo apt-get install -y rabbitmq-server
+  sudo rabbitmqctl add_user stackstorm "${ST2_RABBITMQ_PASSWORD}"
+  sudo rabbitmqctl delete_user guest
+  sudo rabbitmqctl set_user_tags stackstorm administrator
+  sudo rabbitmqctl set_permissions -p / stackstorm ".*" ".*" ".*"
 
   # Configure RabbitMQ to listen on localhost only
   sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
@@ -475,9 +488,6 @@ install_st2_dependencies() {
   else
     sudo service rabbitmq-server restart
   fi
-
-  # Various other dependencies needed by st2 and installer script
-  sudo apt-get install -y crudini
 }
 
 install_mongodb() {
@@ -596,6 +606,10 @@ install_st2() {
   sudo crudini --set /etc/st2/st2.conf database username "stackstorm"
   sudo crudini --set /etc/st2/st2.conf database password "${ST2_MONGODB_PASSWORD}"
 
+  # Configure [messaging] section in st2.conf (username password for RabbitMQ access)
+  AMQP="amqp://stackstorm:$ST2_RABBITMQ_PASSWORD@127.0.0.1:5672"
+  sudo crudini --set /etc/st2/st2.conf messaging url "${AMQP}"
+ 
   sudo st2ctl start
   sudo st2ctl reload --register-all
 }
@@ -696,6 +710,7 @@ STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_depend
 STEP="Generate random password" && generate_random_passwords
 STEP="Configure Proxy" && configure_proxy
 STEP="Install st2 dependencies" && install_st2_dependencies
+STEP="Install st2 dependencies (RabbitMQ)" && install_rabbitmq
 STEP="Install st2 dependencies (MongoDB)" && install_mongodb
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
