@@ -13,7 +13,7 @@ platform() {
   echo 'rpm'
 }
 
-build_rpm() { rpmbuild -bb --define '_topdir %(readlink -f build)' rpm/"$package_name".spec; }
+build_rpm() { rpmbuild -bb -vv --define '_topdir %(readlink -f build)' rpm/"$package_name".spec; }
 build_deb() { dpkg-buildpackage -b -uc -us -j"$cores_num"; }
 
 copy_rpm() { sudo cp -v build/RPMS/*/$1*.rpm "$artifact_dir"; }
