@@ -20,8 +20,8 @@ build_deb() { dpkg-buildpackage -b -uc -us -j"$cores_num"; }
 copy_rpm() {
     sudo cp -v build/RPMS/*/$1*.rpm "$artifact_dir";
     # Also print some package info for easier troubleshooting
-    rpm -q --requires build/RPMS/*/$1*.rpm
-    rpm -q --provides build/RPMS/*/$1*.rpm
+    rpm -q --requires -p build/RPMS/*/$1*.rpm
+    rpm -q --provides -p build/RPMS/*/$1*.rpm
 }
 copy_deb() {
   sudo cp -v ../"$package_name"*.deb "$artifact_dir" || { echo "Failed to copy .deb file into artifact directory \`$artifact_dir'" ; exit 1; }
