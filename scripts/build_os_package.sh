@@ -24,5 +24,9 @@ copy_deb() {
 
 [[ -z "$package_name" ]] && { echo "usage: $0 package_name" && exit 1; }
 
+cat ~/.rpmmacros || true
+echo "%__make         /usr/bin/make -j 6" > ~/.rpmmacros
+cat ~/.rpmmacros || true
+
 build_$(platform)
 copy_$(platform)
