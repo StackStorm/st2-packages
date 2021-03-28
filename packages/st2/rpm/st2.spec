@@ -26,6 +26,16 @@ BuildRequires: python3-setuptools
 %endif  # Requires for RHEL 8
 
 %if 0%{?rhel} >= 8
+# By default on EL 8, RPM helper scripts will try to generate Requires: section which lists every
+# Python dependencies. That process / script works by recursively scanning all the package Python
+# dependencies which is very slow (5-6 minutes).
+# Our package bundles virtualenv with all the dependendencies and doesn't rely on this metadata
+# so we skip that step to vastly speed up the build.
+# Same step also does not run on EL7 so not running it on EL 8 should be totally
+# safe!
+# See https://github.com/StackStorm/st2-packages/pull/697#issuecomment-808971874 and that PR for
+# more details.
+# That issue was found by enabling rpmbuild -vv flag.
 %undefine __pythondist_provides
 %undefine __pythondist_requires
 %undefine __python_provides
