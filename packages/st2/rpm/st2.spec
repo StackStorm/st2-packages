@@ -31,8 +31,9 @@ BuildRequires: python3-setuptools
 # dependencies which is very slow (5-6 minutes).
 # Our package bundles virtualenv with all the dependendencies and doesn't rely on this metadata
 # so we skip that step to vastly speed up the build.
-# Same step also does not run on EL7 so not running it on EL 8 should be totally
-# safe!
+# Technically we also don't Require or Provide any of those libraries auto-detected by that script
+# because those are only used internally inside a package specific virtual environment.
+# Same step also does not run on EL7.
 # See https://github.com/StackStorm/st2-packages/pull/697#issuecomment-808971874 and that PR for
 # more details.
 # That issue was found by enabling rpmbuild -vv flag.
