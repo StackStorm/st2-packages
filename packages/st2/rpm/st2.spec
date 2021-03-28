@@ -25,6 +25,13 @@ BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 %endif  # Requires for RHEL 8
 
+%if 0%{?rhel} >= 8
+%undefine __pythondist_provides
+%undefine __pythondist_requires
+%undefine __python_provides
+%undefine __python_provides
+%endif
+
 Summary: StackStorm all components bundle
 Conflicts: st2common
 
