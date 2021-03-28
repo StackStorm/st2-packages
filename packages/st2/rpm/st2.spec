@@ -39,7 +39,7 @@ BuildRequires: python3-setuptools
 %undefine __pythondist_provides
 %undefine __pythondist_requires
 %undefine __python_provides
-%undefine __python_provides
+%undefine __pythondist_requires
 %endif
 
 Summary: StackStorm all components bundle
