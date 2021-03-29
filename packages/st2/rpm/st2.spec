@@ -25,7 +25,7 @@ BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 %endif  # Requires for RHEL 8
 
-%if 0%{?rhel} >= 8
+%if 0%{?rhel} >= 7
 # By default on EL 8, RPM helper scripts will try to generate Requires: section which lists every
 # Python dependencies. That process / script works by recursively scanning all the package Python
 # dependencies which is very slow (5-6 minutes).
