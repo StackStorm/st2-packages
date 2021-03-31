@@ -10,7 +10,7 @@
 Epoch: %{epoch}
 %endif
 
-%if 0%{?rhel} >= 8
+%if 0%{?rhel} == 8
 %global _build_id_links none
 %endif
 
@@ -19,11 +19,29 @@ Requires: python3-devel, openssl-devel, libffi-devel, git, pam, openssh-server, 
 # EL8 requires a few python packages available within 'BUILDROOT' when outside venv
 # These are in the el8 packagingbuild dockerfile
 # Reference https://fossies.org/linux/ansible/packaging/rpm/ansible.spec
-%if 0%{?rhel} >= 8
+%if 0%{?rhel} == 8
 # Will use the python3 stdlib venv
 BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 %endif  # Requires for RHEL 8
+
+%if 0%{?rhel} == 8
+# By default on EL 8, RPM helper scripts will try to generate Requires: section which lists every
+# Python dependencies. That process / script works by recursively scanning all the package Python
+# dependencies which is very slow (5-6 minutes).
+# Our package bundles virtualenv with all the dependendencies and doesn't rely on this metadata
+# so we skip that step to vastly speed up the build.
+# Technically we also don't Require or Provide any of those libraries auto-detected by that script
+# because those are only used internally inside a package specific virtual environment.
+# Same step also does not run on EL7.
+# See https://github.com/StackStorm/st2-packages/pull/697#issuecomment-808971874 and that PR for
+# more details.
+# That issue was found by enabling rpmbuild -vv flag.
+%undefine __pythondist_provides
+%undefine __pythondist_requires
+%undefine __python_provides
+%undefine __python_requires
+%endif
 
 Summary: StackStorm all components bundle
 Conflicts: st2common

@@ -89,7 +89,7 @@ module SSHKit
         ShellOut::HEADERS_LIST.inject('') do |result, k|
           color = command.failure? ? [:red, :bold] : Array(ShellOut::HEADERS_COLORS[k])
           header = send(:"header_#{k}", command) if respond_to?(:"header_#{k}", true)
-          header ? result << '[%s]' % colorize(header, *color) : result
+          header ? result << '[%s] [%s]' % [colorize(header, *color), Time.at(Time.new).utc.strftime("%H:%M:%S")] : result
         end
       end
 

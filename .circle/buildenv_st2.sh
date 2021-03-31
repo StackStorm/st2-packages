@@ -56,5 +56,8 @@ re="\\b$DISTRO\\b"
 ST2_CIRCLE_URL=${CIRCLE_BUILD_URL}
 
 write_env ST2_GITURL ST2_GITREV ST2PKG_VERSION ST2PKG_RELEASE DISTRO TESTING ST2_CIRCLE_URL
-
 cat ~/.buildenv
+
+# Workaround for cache key since we can't reference arbitrary environment variables for cache keys
+echo "${DISTRO}" > /tmp/distro-version
+echo "${ST2PKG_VERSION}" > /tmp/st2-version
