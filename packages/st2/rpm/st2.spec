@@ -38,9 +38,7 @@ BuildRequires: python3-setuptools
 # more details.
 # That issue was found by enabling rpmbuild -vv flag.
 %undefine __pythondist_provides
-%undefine __pythondist_requires
 %undefine __python_provides
-%undefine __python_requires
 %endif
 
 Summary: StackStorm all components bundle
