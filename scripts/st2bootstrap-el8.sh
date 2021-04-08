@@ -594,6 +594,13 @@ EOF
   sudo systemctl restart mongod
 }
 
+install_redis() {
+  # Install Redis Server. By default, redis only listen on localhost only.
+  sudo yum install -y redis
+  sudo systemctl start redis
+  sudo systemctl enable redis
+}
+
 install_st2() {
   curl -sL https://packagecloud.io/install/repositories/StackStorm/${REPO_PREFIX}${RELEASE}/script.rpm.sh | sudo bash
 
@@ -614,6 +621,9 @@ install_st2() {
   # Configure [messaging] section in st2.conf (username password for RabbitMQ access)
   AMQP="amqp://stackstorm:$ST2_RABBITMQ_PASSWORD@127.0.0.1:5672"
   sudo crudini --set /etc/st2/st2.conf messaging url "${AMQP}"
+
+  # Configure [coordination] section in st2.conf (url for Redis access)
+  sudo crudini --set /etc/st2/st2.conf coordination url "redis://127.0.0.1:6379"
 
   sudo st2ctl start
   sudo st2ctl reload --register-all
@@ -750,6 +760,7 @@ STEP="Generate random password" && generate_random_passwords
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2 dependencies (RabbitMQ)" && install_rabbitmq
 STEP="Install st2 dependencies (MongoDB)" && install_mongodb
+STEP="Install st2 dependencies (Redis)" && install_redis
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
 STEP="Configure st2 auth" && configure_st2_authentication

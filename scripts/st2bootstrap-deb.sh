@@ -548,6 +548,11 @@ EOF
 
 }
 
+install_redis() {
+	# Install Redis Server. By default, redis only listen on localhost only.
+	sudo apt-get install -y redis-server
+}
+
 get_full_pkg_versions() {
   if [[ "$VERSION" != '' ]];
   then
@@ -609,6 +614,9 @@ install_st2() {
   # Configure [messaging] section in st2.conf (username password for RabbitMQ access)
   AMQP="amqp://stackstorm:$ST2_RABBITMQ_PASSWORD@127.0.0.1:5672"
   sudo crudini --set /etc/st2/st2.conf messaging url "${AMQP}"
+
+  # Configure [coordination] section in st2.conf (url for Redis access)
+  sudo crudini --set /etc/st2/st2.conf coordination url "redis://127.0.0.1:6379"
  
   sudo st2ctl start
   sudo st2ctl reload --register-all
@@ -712,6 +720,7 @@ STEP="Configure Proxy" && configure_proxy
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2 dependencies (RabbitMQ)" && install_rabbitmq
 STEP="Install st2 dependencies (MongoDB)" && install_mongodb
+STEP="Install st2 dependencies (Redis)" && install_redis
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
 STEP="Configure st2 auth" && configure_st2_authentication
