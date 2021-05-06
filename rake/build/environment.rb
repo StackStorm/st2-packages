@@ -58,6 +58,7 @@ pipeopts do
   # Default hostnames of dependat services (the value can take an address also)
   envpass :rabbitmqhost, 'rabbitmq', proc: convert_to_ipaddr
   envpass :mongodbhost,  'mongodb',  proc: convert_to_ipaddr
+  envpass :redishost,  'redis',  proc: convert_to_ipaddr
 
   # upload_sources - a list of directories which should be propogated
   #                  to remote nodes.
