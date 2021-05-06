@@ -233,9 +233,10 @@ check_st2_host_dependencies() {
   # CHECK 1: Determine which, if any, of the required ports are used by an existing process.
 
   # Abort the installation early if the following ports are being used by an existing process.
-  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), and st2 (9100-9102).
+  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), redis (6379)
+  # and st2 (9100-9102).
 
-  declare -a ports=("80" "443" "4369" "5672" "9100" "9101" "9102" "25672" "27017")
+  declare -a ports=("80" "443" "4369" "5672" "6379" "9100" "9101" "9102" "25672" "27017")
   declare -a used=()
 
   for i in "${ports[@]}"
