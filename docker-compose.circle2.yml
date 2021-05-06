@@ -11,6 +11,7 @@ xenial:
     - xenialtest
     - rabbitmq
     - mongodb
+    - redis
 
 bionic:
   image: quay.io/stackstorm/packagingrunner
@@ -26,6 +27,7 @@ bionic:
     - bionictest
     - rabbitmq
     - mongodb
+    - redis
 
 el8:
   image: quay.io/stackstorm/packagingrunner
@@ -40,6 +42,7 @@ el8:
     - centos8test
     - rabbitmq
     - mongodb
+    - redis
 
 el7:
   image: quay.io/stackstorm/packagingrunner
@@ -54,6 +57,7 @@ el7:
     - centos7test
     - rabbitmq
     - mongodb
+    - redis
 
 ## Package build nodes
 #
