@@ -17,7 +17,7 @@ jobs:
       - image: circleci/python:3.6
     working_directory: ~/st2-packages
     environment:
-      DISTROS: "xenial bionic el7 el8"
+      DISTROS: "xenial bionic focal el7 el8"
       BASH_ENV: ~/.buildenv
       # These should be set to an empty string, so that st2cd prep tasks are able to replace these
       # with real gitrevs during releases. Note that they are commented out, so that they do not interfere
@@ -158,7 +158,7 @@ jobs:
       - image: circleci/ruby:2.4
     working_directory: /tmp/deploy
     environment:
-      - DISTROS: "xenial bionic el7 el8"
+      - DISTROS: "xenial bionic focal el7 el8"
     steps:
       - attach_workspace:
           at: .

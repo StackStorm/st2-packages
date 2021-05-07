@@ -37,8 +37,8 @@ function main() {
       fi
       ;;
     *)
-      echo $"Usage: deploy {trusty|xenial|bionic|el6|el7|el8} /tmp/st2-packages"
-      echo $"Usage: next-revision {trusty|xenial|bionic|el6|el7|el8} 0.14dev st2"
+      echo $"Usage: deploy {xenial|bionic|focal|el6|el7|el8} /tmp/st2-packages"
+      echo $"Usage: next-revision {xenial|bionic|focal|el6|el7|el8} 0.14dev st2"
       exit 1
   esac
 }
@@ -230,7 +230,7 @@ function get_pkg_os() {
       PKG_OS_VERSION=$PKG_OS
       PKG_TYPE="deb"
       ;;
-    warty|hoary|breezy|dapper|edgy|feisty|gutsy|hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneiric|precise|quantal|raring|saucy|trusty|utopic|vivid|wily|xenial|bionic)
+    warty|hoary|breezy|dapper|edgy|feisty|gutsy|hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneiric|precise|quantal|raring|saucy|trusty|utopic|vivid|wily|xenial|bionic|focal)
       PKG_OS_NAME=ubuntu
       PKG_OS_VERSION=$PKG_OS
       PKG_TYPE="deb"
