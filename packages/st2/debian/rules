@@ -77,11 +77,6 @@ override_dh_virtualenv:
 	# /usr/bin/pythonx rather than copy - and this breaks pack install
 	# which follows the path to calculate the location of the bin directory
 
-	# Fix for dual virtualenv installation to fix issue: https://github.com/pypa/virtualenv/issues/1873
-	/usr/bin/test "$(DEB_DISTRO)" == "focal" && \
-		pip uninstall -y virtualenv && \
-		dpkg --force-all --purge python3-virtualenv && \
-		pip install virtualenv || true
 	dh_virtualenv --extra-virtualenv-arg='--copies' --extra-virtualenv-arg='--no-download' \
 								'--upgrade-pip-to=$(PIP_VERSION)' \
 								--extra-pip-arg '--find-links=$(WHEELDIR)' \
