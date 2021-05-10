@@ -31,6 +31,7 @@ class ST2Spec
     package_list: pipeopts.packages,
     rabbitmqhost: pipeopts.rabbitmqhost,
     mongodbhost:  pipeopts.mongodbhost,
+    redishost: pipeopts.redishost,
     loglines_to_show: 100,
     logdest_pattern: {
       st2actionrunner: 'st2actionrunner.{pid}'

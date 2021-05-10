@@ -233,9 +233,10 @@ check_st2_host_dependencies() {
   # CHECK 1: Determine which, if any, of the required ports are used by an existing process.
 
   # Abort the installation early if the following ports are being used by an existing process.
-  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), and st2 (9100-9102).
+  # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), redis (6379)
+  # and st2 (9100-9102).
 
-  declare -a ports=("80" "443" "4369" "5672" "9100" "9101" "9102" "25672" "27017")
+  declare -a ports=("80" "443" "4369" "5672" "6379" "9100" "9101" "9102" "25672" "27017")
   declare -a used=()
 
   for i in "${ports[@]}"
@@ -548,6 +549,11 @@ EOF
 
 }
 
+install_redis() {
+	# Install Redis Server. By default, redis only listen on localhost only.
+	sudo apt-get install -y redis-server
+}
+
 get_full_pkg_versions() {
   if [[ "$VERSION" != '' ]];
   then
@@ -609,6 +615,9 @@ install_st2() {
   # Configure [messaging] section in st2.conf (username password for RabbitMQ access)
   AMQP="amqp://stackstorm:$ST2_RABBITMQ_PASSWORD@127.0.0.1:5672"
   sudo crudini --set /etc/st2/st2.conf messaging url "${AMQP}"
+
+  # Configure [coordination] section in st2.conf (url for Redis access)
+  sudo crudini --set /etc/st2/st2.conf coordination url "redis://127.0.0.1:6379"
  
   sudo st2ctl start
   sudo st2ctl reload --register-all
@@ -712,6 +721,7 @@ STEP="Configure Proxy" && configure_proxy
 STEP="Install st2 dependencies" && install_st2_dependencies
 STEP="Install st2 dependencies (RabbitMQ)" && install_rabbitmq
 STEP="Install st2 dependencies (MongoDB)" && install_mongodb
+STEP="Install st2 dependencies (Redis)" && install_redis
 STEP="Install st2" && install_st2
 STEP="Configure st2 user" && configure_st2_user
 STEP="Configure st2 auth" && configure_st2_authentication

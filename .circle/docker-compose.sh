@@ -11,7 +11,7 @@ set -e
 # Source the build environment defintion (details in buildenv.sh)
 . ~/.buildenv
 
-# Used for `RABBITMQHOST` `MONGODBHOST`, see docker-compose.override.yml
+# Used for `RABBITMQHOST`, `MONGODBHOST`, and `REDISHOST` see docker-compose.override.yml
 HOST_IP=$(ifconfig docker0 | grep 'inet addr' | awk -F: '{print $2}' | awk '{print $1}')
 
 set -x
@@ -26,6 +26,7 @@ case "$1" in
         -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
         -e RABBITMQHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
+        -e REDISHOST=${HOST_IP} \
         -e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
         $2 /bin/true
   ;;
@@ -38,6 +39,7 @@ case "$1" in
         -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
         -e RABBITMQHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
+        -e REDISHOST=${HOST_IP} \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
         -e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
         $2 build
@@ -52,6 +54,7 @@ case "$1" in
         -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
         -e RABBITMQHOST=${HOST_IP} \
         -e MONGODBHOST=${HOST_IP} \
+        -e REDISHOST=${HOST_IP} \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
         -e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
         $2 test

@@ -15,6 +15,11 @@ describe 'external services' do
     it { is_expected.to be_reachable.with :port => 27017, :timeout => 1 }
   end
 
+  describe 'redis' do
+    subject { host(spec[:redishost]) }
+    it { is_expected.to be_reachable.with :port => 6379, :timeout => 1 }
+  end
+
 end
 
 describe 'start st2 components and services' do
