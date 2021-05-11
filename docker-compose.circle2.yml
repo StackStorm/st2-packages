@@ -29,6 +29,21 @@ bionic:
     - mongodb
     - redis
 
+focal:
+  image: quay.io/stackstorm/packagingrunner
+  working_dir: /root/st2-packages
+  volumes_from:
+    - st2-packages-vol
+  environment:
+    - BUILDNODE=focalbuild
+    - TESTNODE=focaltest
+    - ST2_PACKAGES=st2
+  links:
+    - focalbuild
+    - focaltest
+    - rabbitmq
+    - mongodb
+
 el8:
   image: quay.io/stackstorm/packagingrunner
   working_dir: /root/st2-packages
@@ -71,6 +86,11 @@ bionicbuild:
   volumes_from:
     - st2-packages-vol
 
+focalbuild:
+  image: stackstorm/packagingbuild:focal
+  volumes_from:
+    - st2-packages-vol
+
 centos7build:
   image: stackstorm/packagingbuild:centos7
   volumes_from:
@@ -93,6 +113,14 @@ xenialtest:
 
 bionictest:
   image: stackstorm/packagingtest:bionic-systemd
+  privileged: true
+  volumes_from:
+    - st2-packages-vol
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+focaltest:
+  image: stackstorm/packagingtest:focal-systemd
   privileged: true
   volumes_from:
     - st2-packages-vol

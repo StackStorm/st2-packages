@@ -21,13 +21,12 @@ DEV_BUILD=''
 USERNAME=''
 PASSWORD=''
 U16_ADD_INSECURE_PY3_PPA=0
-SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
+SUBTYPE=`lsb_release -cs`
 
-if [[ "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'bionic' ]]; then
-  echo "Unsupported ubuntu flavor ${SUBTYPE}. Please use 16.04 (xenial) or Ubuntu 18.04 (bionic) as base system!"
+if [[ "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'focal' && "$SUBTYPE" != 'bionic' ]]; then
+  echo "Unsupported ubuntu codename ${SUBTYPE}. Please use 16.04 (xenial) or Ubuntu 18.04 (bionic) or Ubuntu 20.04 (focal) as base system!"
   exit 2
 fi
-
 
 setup_args() {
   for i in "$@"
@@ -180,7 +179,7 @@ function configure_proxy() {
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
-  DISTRO=$2  # Distro name (e.g. xenial,bionic,el7,el8)
+  DISTRO=$2  # Distro name (e.g. xenial,bionic,focal,el7,el8)
   PACKAGE_NAME_REGEX=$3
 
   PACKAGES_METADATA=$(curl -sSL -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
@@ -463,7 +462,7 @@ install_st2_dependencies() {
   sudo apt-get update
 
   # Note: gnupg-curl is needed to be able to use https transport when fetching keys
-  if [[ "$SUBTYPE" != 'bionic' ]]; then
+  if [[ "$SUBTYPE" = 'xenial' ]]; then
     sudo apt-get install -y gnupg-curl
   fi
 
@@ -484,18 +483,14 @@ install_rabbitmq() {
   # Configure RabbitMQ to listen on localhost only
   sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
 
-  if [[ "$SUBTYPE" == 'xenial' || "${SUBTYPE}" == "bionic" ]]; then
-    sudo systemctl restart rabbitmq-server
-  else
-    sudo service rabbitmq-server restart
-  fi
+  sudo systemctl restart rabbitmq-server
+
 }
 
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB 4.0
   wget -qO - https://www.mongodb.org/static/pgp/server-4.0.asc | sudo apt-key add -
   echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
-
 
   # Install MongoDB 4.0
   sudo apt-get update
@@ -541,11 +536,8 @@ EOF
   sudo sh -c 'printf "security:\n  authorization: enabled\n" >> /etc/mongod.conf'
 
   # MongoDB needs to be restarted after enabling auth
-  if [[ "$SUBTYPE" == 'xenial'  || "${SUBTYPE}" == "bionic" ]]; then
-    sudo systemctl restart mongod
-  else
-    sudo service mongod restart
-  fi
+  sudo systemctl restart mongod
+
 
 }
 

@@ -26,6 +26,21 @@ bionic:
     - mongodb
     - redis
 
+focal:
+  image: quay.io/stackstorm/packagingrunner
+  extends:
+    file: docker-compose.override.yml
+    service: suite-compose
+  environment:
+    - BUILDNODE=focalbuild
+    - TESTNODE=focaltest
+    - ST2_PACKAGES=st2
+  links:
+    - focalbuild
+    - focaltest
+    - rabbitmq
+    - mongodb
+
 el8:
   image: quay.io/stackstorm/packagingrunner
   extends:
@@ -67,6 +82,11 @@ bionicbuild:
   volumes_from:
     - st2-packages-vol
 
+focalbuild:
+  image: stackstorm/packagingbuild:focal
+  volumes_from:
+    - st2-packages-vol
+
 centos7build:
   image: stackstorm/packagingbuild:centos7
   extends:
@@ -92,6 +112,14 @@ xenialtest:
 
 bionictest:
   image: stackstorm/packagingtest:bionic-systemd
+  privileged: true
+  volumes_from:
+    - st2-packages-vol
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+focaltest:
+  image: stackstorm/packagingtest:focal-systemd
   privileged: true
   volumes_from:
     - st2-packages-vol
