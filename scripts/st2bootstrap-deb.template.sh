@@ -15,16 +15,10 @@ PASSWORD=''
 U16_ADD_INSECURE_PY3_PPA=0
 SUBTYPE=`lsb_release -cs`
 
-case "$SUBTYPE" in
-    "xenial"|"bionic"|"focal")
-        true
-        ;;
-    *)
-        echo "Unsupported Ubuntu codename ${SUBTYPE}. Please use 16.04 (xenial), 18.04 (bionic) or 20.04 (focal) as base system!"
-        exit 2
-        ;;
-esac
-
+if [[ "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'focal' && "$SUBTYPE" != 'bionic' ]]; then
+  echo "Unsupported ubuntu codename ${SUBTYPE}. Please use 16.04 (xenial) or Ubuntu 18.04 (bionic) or Ubuntu 20.04 (focal) as base system!"
+  exit 2
+fi
 
 setup_args() {
   for i in "$@"

@@ -170,15 +170,10 @@ elif [[ -n "$DEBTEST" ]]; then
   echo "*** Detected Distro is ${DEBTEST} ***"
   SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
   echo "*** Detected flavor ${SUBTYPE} ***"
-  case "$SUBTYPE" in
-    "xenial"|"bionic"|"focal")
-      true
-      ;;
-    *)
-      echo "Unsupported Ubuntu codename ${SUBTYPE}. Please use 16.04 (xenial), 18.04 (bionic) or 20.04 (focal) as base system!"
-      exit 2
-      ;;
-  esac
+if [[ "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'focal' && "$SUBTYPE" != 'bionic' ]]; then
+  echo "Unsupported ubuntu codename ${SUBTYPE}. Please use 16.04 (xenial) or Ubuntu 18.04 (bionic) or Ubuntu 20.04 (focal) as base system!"
+  exit 2
+fi
   ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-deb.sh"
   BOOTSTRAP_FILE="st2bootstrap-deb.sh"
 else
