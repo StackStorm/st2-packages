@@ -43,6 +43,7 @@ focal:
     - focaltest
     - rabbitmq
     - mongodb
+    - redis
 
 el8:
   image: quay.io/stackstorm/packagingrunner
