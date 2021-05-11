@@ -10,10 +10,15 @@ VIRTUAL_MACHINES = {
     :box => 'ubuntu/xenial64',
     :ip => '192.168.16.21',
   },
-  :bionic=> {
+  :bionic => {
     :hostname => 'st2-packages-bionic',
     :box => 'ubuntu/bionic64',
     :ip => '192.168.16.23',
+  },
+  :focal => {
+    :hostname => 'st2-packages-focal',
+    :box => 'ubuntu/focal64',
+    :ip => '192.168.16.25',
   },
   :el7 => {
     :hostname => 'st2-packages-el7',
