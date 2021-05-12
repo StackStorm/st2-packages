@@ -153,7 +153,7 @@ install_st2_dependencies() {
   fi
 
   sudo apt-get install -y curl
-  
+
   # Various other dependencies needed by st2 and installer script
   sudo apt-get install -y crudini
 }
@@ -228,8 +228,8 @@ EOF
 }
 
 install_redis() {
-	# Install Redis Server. By default, redis only listen on localhost only.
-	sudo apt-get install -y redis-server
+  # Install Redis Server. By default, redis only listen on localhost only.
+  sudo apt-get install -y redis-server
 }
 
 get_full_pkg_versions() {
@@ -296,7 +296,7 @@ install_st2() {
 
   # Configure [coordination] section in st2.conf (url for Redis access)
   sudo crudini --set /etc/st2/st2.conf coordination url "redis://127.0.0.1:6379"
- 
+
   sudo st2ctl start
   sudo st2ctl reload --register-all
 }
