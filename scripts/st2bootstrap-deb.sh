@@ -467,7 +467,7 @@ install_st2_dependencies() {
   fi
 
   sudo apt-get install -y curl
-  
+
   # Various other dependencies needed by st2 and installer script
   sudo apt-get install -y crudini
 }
@@ -489,10 +489,16 @@ install_rabbitmq() {
 
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB 4.0
-  wget -qO - https://www.mongodb.org/static/pgp/server-4.0.asc | sudo apt-key add -
-  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+  if [[ "$SUBTYPE" = 'focal' ]]; then
+    MONGO_VERSION="4.4"
+  else
+    MONGO_VERSION="4.0"
+  fi
 
-  # Install MongoDB 4.0
+  wget -qO - https://www.mongodb.org/static/pgp/server-${MONGO_VERSION}.asc | sudo apt-key add -
+  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/${MONGO_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGO_VERSION}.list
+
+  # Install MongoDB
   sudo apt-get update
   sudo apt-get install -y mongodb-org
 
@@ -542,8 +548,8 @@ EOF
 }
 
 install_redis() {
-	# Install Redis Server. By default, redis only listen on localhost only.
-	sudo apt-get install -y redis-server
+  # Install Redis Server. By default, redis only listen on localhost only.
+  sudo apt-get install -y redis-server
 }
 
 get_full_pkg_versions() {
@@ -610,7 +616,7 @@ install_st2() {
 
   # Configure [coordination] section in st2.conf (url for Redis access)
   sudo crudini --set /etc/st2/st2.conf coordination url "redis://127.0.0.1:6379"
- 
+
   sudo st2ctl start
   sudo st2ctl reload --register-all
 }

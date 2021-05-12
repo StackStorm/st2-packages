@@ -175,10 +175,16 @@ install_rabbitmq() {
 
 install_mongodb() {
   # Add key and repo for the latest stable MongoDB 4.0
-  wget -qO - https://www.mongodb.org/static/pgp/server-4.0.asc | sudo apt-key add -
-  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+  if [[ "$SUBTYPE" = 'focal' ]]; then
+    MONGO_VERSION="4.4"
+  else
+    MONGO_VERSION="4.0"
+  fi
 
-  # Install MongoDB 4.0
+  wget -qO - https://www.mongodb.org/static/pgp/server-${MONGO_VERSION}.asc | sudo apt-key add -
+  echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/${MONGO_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGO_VERSION}.list
+
+  # Install MongoDB
   sudo apt-get update
   sudo apt-get install -y mongodb-org
 
