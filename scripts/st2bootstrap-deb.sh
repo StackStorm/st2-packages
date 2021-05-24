@@ -29,7 +29,6 @@ if [[ "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'focal' && "$SUBTYPE" != 'bionic' 
 fi
 
 
-
 setup_args() {
   for i in "$@"
     do
