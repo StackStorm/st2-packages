@@ -22,6 +22,7 @@ ST2_PKG='st2'
 ST2WEB_PKG='st2web'
 ST2CHATOPS_PKG='st2chatops'
 
+
 setup_args() {
   for i in "$@"
     do
@@ -99,15 +100,30 @@ setup_args() {
     echo "You can also use \"--user\" and \"--password\" for unattended installation."
     echo "Press \"ENTER\" to continue or \"CTRL+C\" to exit/abort"
     read -e -p "Admin username: " -i "st2admin" USERNAME
-    read -e -s -p "Password: " PASSWORD
-
-    if [ "${PASSWORD}" = '' ]; then
-        echo "Password cannot be empty."
-        exit 1
-    fi
+    set_password 
   fi
 }
 
+
+
+###This will ask user to create strong password containing one Upper case alphabet, one lower case alphabet, one digut and if it matches the criteria then only user will be given access to the installation.
+set_password(){
+  typeset PASSWORD
+  regex="^(?=[a-zA-Z0-9#@!\-&+=\$\/?]{8,120}$)(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[#@!\-&+=\$\/]).*"
+  #echo $regex
+  echo "******Please Note: Password should be at least 8 characters long with one digit, one Upper case Alphabet, one lower case alphabet and one special character ******"
+  echo "Please enter password for User to be created: "
+  read PASSWORD
+  if [ "${PASSWORD}" = '' ]; then
+      echo "Password cannot be empty."
+      exit 1
+  fi
+  while ! echo "$PASSWORD" | grep -P "$regex"
+  do
+      echo "Enter password to match criteria"
+      read PASSWORD 
+  done
+}
 
 function configure_proxy() {
   # Allow bypassing 'proxy' env vars via sudo
