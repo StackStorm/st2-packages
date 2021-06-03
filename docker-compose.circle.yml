@@ -1,15 +1,3 @@
-xenial:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-circle
-  environment:
-    - BUILDNODE=xenialbuild
-    - TESTNODE=xenialtest
-  links:
-    - xenialbuild
-    - xenialtest
-
 bionic:
   image: quay.io/stackstorm/packagingrunner
   extends:
@@ -72,12 +60,6 @@ el7:
 
 ## Package build nodes
 #
-xenialbuild:
-  image: stackstorm/packagingbuild:xenial
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
-
 bionicbuild:
   image: stackstorm/packagingbuild:bionic
   volumes_from:
@@ -102,15 +84,6 @@ centos8build:
 
 ## Package testing nodes
 #
-xenialtest:
-  image: stackstorm/packagingtest:xenial-systemd
-  privileged: true
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
 bionictest:
   image: stackstorm/packagingtest:bionic-systemd
   privileged: true

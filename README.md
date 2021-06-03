@@ -15,7 +15,7 @@
 Packages build environment is a *multi-container docker* application defined and managed with [docker-compose](https://github.com/docker/compose). It consists of four types of containers:
 
  - **Packaging runner** (https://quay.io/stackstorm/packagingrunner) - the main entry point, package build and test processing controller container.
- - **Packaging build** (https://hub.docker.com/r/stackstorm/packagingbuild/) - container where actual `.deb`/`.rpm` artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingbuild:centos7*, *packagingbuild:xenial* correspondingly for CentOS 7 and Ubuntu Xenial.
+ - **Packaging build** (https://hub.docker.com/r/stackstorm/packagingbuild/) - container where actual `.deb`/`.rpm` artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingbuild:centos7*, *packagingbuild:focal* correspondingly for CentOS 7 and Ubuntu Focal.
  - **Packaging test** (https://hub.docker.com/r/stackstorm/packagingtest/) - containers where built artifacts are tested, i.e. *artifacts are installed, configuration is written and tests are performed*.
  - **Services** - these are different containers required for testing such as *rabbitmq and mongodb*
 
@@ -32,8 +32,8 @@ It's very simple to invoke the whole build-test pipeline. First just make sure t
 docker-compose kill
 docker-compose rm -f
 
-# To build packages for ubuntu xenial (--rm will wipe packaging runner container. All others will remain active).
-docker-compose run --rm xenial
+# To build packages for ubuntu focal (--rm will wipe packaging runner container. All others will remain active).
+docker-compose run --rm focal
 ```
 
 Execution takes a while, so grab a cup of tea or coffee and wait until it finishes. When build and test processes succeed, you'll find the StackStorm packages in `/tmp/st2-packages` on your host machine:
@@ -50,10 +50,10 @@ After the build and test stages are finished all docker containers remain active
 ```
 docker ps
 # Find the required testing container
-# In our case it will be st2packages_xenialtest_1
+# In our case it will be st2packages_focaltest_1
 
 # Simply exec to docker
-docker exec -it st2packages_xenialtest_1 bash
+docker exec -it st2packages_focaltest_1 bash
 ```
 
 Once done, you are inside the testing environment where all services are up and running. Don't forget to do (after exec):
@@ -71,7 +71,7 @@ In order to build, package, install and test ST2 in an isolated Vagrant VM, run 
 vagrant up $TARGET
 ```
 
-Where `$TARGET` is one of `xenial`, `bionic`, `focal`, `el7`, or `el8`. If you are using `el8`, comment
+Where `$TARGET` is one of `bionic`, `focal`, `el7`, or `el8`. If you are using `el8`, comment
 out the `vm_config.vm.provision :docker` line in the Vagrantfile. There is logic in `setup-vagrant.sh`
 to install docker in `el8`.
 
@@ -132,7 +132,7 @@ bionictest:
   ...
 ```
 
-NOTE: Main ``distro`` definition (e.g. ``bionic``, ``xenial``, etc.) needs to use packaging runner image.
+NOTE: Main ``distro`` definition (e.g. ``bionic``, ``focal``, etc.) needs to use packaging runner image.
 
 As you can see, ``image`` attribute references local image tagged ``bionicbuild`` instead of a
 remote image (e.g. ``stackstorm/packagingbuild:bionic`` or similar).

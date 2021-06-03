@@ -1,18 +1,3 @@
-xenial:
-  image: quay.io/stackstorm/packagingrunner
-  working_dir: /root/st2-packages
-  volumes_from:
-    - st2-packages-vol
-  environment:
-    - BUILDNODE=xenialbuild
-    - TESTNODE=xenialtest
-  links:
-    - xenialbuild
-    - xenialtest
-    - rabbitmq
-    - mongodb
-    - redis
-
 bionic:
   image: quay.io/stackstorm/packagingrunner
   working_dir: /root/st2-packages
@@ -77,11 +62,6 @@ el7:
 
 ## Package build nodes
 #
-xenialbuild:
-  image: stackstorm/packagingbuild:xenial
-  volumes_from:
-    - st2-packages-vol
-
 bionicbuild:
   image: stackstorm/packagingbuild:bionic
   volumes_from:
@@ -104,14 +84,6 @@ centos8build:
 
 ## Package testing nodes
 #
-xenialtest:
-  image: stackstorm/packagingtest:xenial-systemd
-  privileged: true
-  volumes_from:
-    - st2-packages-vol
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
 bionictest:
   image: stackstorm/packagingtest:bionic-systemd
   privileged: true
