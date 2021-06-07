@@ -25,9 +25,6 @@ ifeq ($(DEB_DISTRO),bionic)
 else ifeq ($(DEB_DISTRO),focal)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := /usr/local/bin/pip3.8
-else ifeq ($(DEB_DISTRO),xenial)
-	PYTHON_BINARY := /usr/bin/python3.6
-	PIP_BINARY := /usr/local/bin/pip3.6
 else ifeq ($(EL_VERSION),8)
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := /usr/local/bin/pip3

@@ -12,7 +12,7 @@ case $ST2_TARGET in
   "el7")
     DC_TARGET=centos7
     INSTALL_CMD="yum";;
-  "xenial"|"bionic")
+  "focal"|"bionic")
     DC_TARGET=$ST2_TARGET
     INSTALL_CMD="apt-get";;
   *)
