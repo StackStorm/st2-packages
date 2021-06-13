@@ -60,7 +60,12 @@ Conflicts: st2common
   %service_install st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier st2workflowengine
   %service_install st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
   %service_install st2scheduler
+  mkdir -p %{buildroot}/usr/lib/systemd/system-generators
+  cp -a st2api-generator %{buildroot}/usr/lib/systemd/system-generators/
+  cp -a st2stream-generator %{buildroot}/usr/lib/systemd/system-generators/
+  cp -a st2auth-generator %{buildroot}/usr/lib/systemd/system-generators/
   make post_install DESTDIR=%{buildroot}
+
 
 # We build cryptography for EL8, and this can contain buildroot path in the
 # built .so files. We use strip on these libraries so that there are no
@@ -119,11 +124,8 @@ Conflicts: st2common
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
   %{_unitdir}/st2api.service
-  %{_unitdir}/st2api.socket
   %{_unitdir}/st2stream.service
-  %{_unitdir}/st2stream.socket
   %{_unitdir}/st2auth.service
-  %{_unitdir}/st2auth.socket
   %{_unitdir}/st2notifier.service
   %{_unitdir}/st2rulesengine.service
   %{_unitdir}/st2sensorcontainer.service
@@ -131,3 +133,6 @@ Conflicts: st2common
   %{_unitdir}/st2timersengine.service
   %{_unitdir}/st2workflowengine.service
   %{_unitdir}/st2scheduler.service
+  /usr/lib/systemd/system-generators/st2api-generator
+  /usr/lib/systemd/system-generators/st2auth-generator
+  /usr/lib/systemd/system-generators/st2stream-generator
