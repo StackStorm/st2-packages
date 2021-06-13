@@ -7,6 +7,6 @@
 ../conf/nginx usr/share/doc/st2/conf/
 ../st2actions/bin/runners.sh opt/stackstorm/st2/bin/
 ../package.meta opt/stackstorm/st2/
-st2api-generator usr/lib/systemd/system-generators/
-st2auth-generator usr/lib/systemd/system-generators/
-st2stream-generator usr/lib/systemd/system-generators/
+debian/st2api-generator usr/lib/systemd/system-generators/
+debian/st2auth-generator usr/lib/systemd/system-generators/
+debian/st2stream-generator usr/lib/systemd/system-generators/

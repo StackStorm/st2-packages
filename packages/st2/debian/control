@@ -15,7 +15,7 @@ Vcs-Browser: https://github.com/stackstorm/st2
 Package: st2
 Architecture: any
 Pre-Depends: dpkg (>= 1.16.16), ${pre:Depends}, ${misc:Pre-Depends}, adduser
-Depends: ${shlibs:Depends}, ${misc:Depends}, sudo, adduser, ${Depends}, libssl-dev, libffi-dev, git, libpam0g, openssh-server, openssh-client, bash, netbase
+Depends: ${shlibs:Depends}, ${misc:Depends}, sudo, adduser, ${Depends}, libssl-dev, libffi-dev, git, libpam0g, openssh-server, openssh-client, bash, netbase, crudini
 Conflicts: st2common
 Description: StackStorm Event-driven automation
  Package is full standalone st2 installation including
