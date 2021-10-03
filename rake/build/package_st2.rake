@@ -34,6 +34,8 @@ namespace :package do
             opts.components.each do |component|
               execute :cp, "packages/st2/component.makefile ${GITDIR}/#{component}/Makefile"
             end
+            # hack! Drop once fixed in st2.git
+            execute :sed, '-i "s/python /python3 /" $GITDIR/scripts/populate-package-meta.sh'
             execute :bash, '$GITDIR/scripts/populate-package-meta.sh'
           end
         end
