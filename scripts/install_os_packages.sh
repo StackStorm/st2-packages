@@ -11,6 +11,8 @@ version_delemiter() {
 }
 
 install_rpm() {
+  # we need epel as systemd socket generators depend on crudini
+  sudo yum -y install epel-release
   sudo yum deplist $(lookup_fullnames $@)
   sudo yum -y install $(lookup_fullnames $@);
 }
