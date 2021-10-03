@@ -89,7 +89,6 @@ Conflicts: st2common
   %service_post st2actionrunner st2api st2stream st2auth st2notifier st2workflowengine
   %service_post st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
   %service_post st2scheduler
-  systemctl daemon-reload
   %include rpm/postinst_script.spec
 
 %preun
