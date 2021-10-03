@@ -14,7 +14,7 @@ Epoch: %{epoch}
 %global _build_id_links none
 %endif
 
-Requires: python3-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup, crudini
+Requires: python3-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
 
 # EL8 requires a few python packages available within 'BUILDROOT' when outside venv
 # These are in the el8 packagingbuild dockerfile
