@@ -60,12 +60,7 @@ Conflicts: st2common
   %service_install st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier st2workflowengine
   %service_install st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
   %service_install st2scheduler
-  mkdir -p %{buildroot}/usr/lib/systemd/system-generators
-  cp -a st2api-generator %{buildroot}/usr/lib/systemd/system-generators/
-  cp -a st2stream-generator %{buildroot}/usr/lib/systemd/system-generators/
-  cp -a st2auth-generator %{buildroot}/usr/lib/systemd/system-generators/
   make post_install DESTDIR=%{buildroot}
-
 
 # We build cryptography for EL8, and this can contain buildroot path in the
 # built .so files. We use strip on these libraries so that there are no
