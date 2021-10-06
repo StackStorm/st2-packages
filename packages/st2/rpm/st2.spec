@@ -119,11 +119,8 @@ Conflicts: st2common
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
   %{_unitdir}/st2api.service
-  %{_unitdir}/st2api.socket
   %{_unitdir}/st2stream.service
-  %{_unitdir}/st2stream.socket
   %{_unitdir}/st2auth.service
-  %{_unitdir}/st2auth.socket
   %{_unitdir}/st2notifier.service
   %{_unitdir}/st2rulesengine.service
   %{_unitdir}/st2sensorcontainer.service
@@ -131,3 +128,6 @@ Conflicts: st2common
   %{_unitdir}/st2timersengine.service
   %{_unitdir}/st2workflowengine.service
   %{_unitdir}/st2scheduler.service
+  /usr/lib/systemd/system-generators/st2api-generator
+  /usr/lib/systemd/system-generators/st2auth-generator
+  /usr/lib/systemd/system-generators/st2stream-generator

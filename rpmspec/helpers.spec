@@ -18,7 +18,7 @@
 %{nil}
 
 # Cat debian/install, set buildroot prefix and copy files.
-%define debian_install cat debian/install | grep -v '^\s*#' | sed -r 's~ +~ %{buildroot}/~' | \
+%define debian_install cat debian/install | grep -v '^\s*#' | sed -r -e 's~ lib/systemd~ usr/lib/systemd~' -e 's~ +~ %{buildroot}/~' | \
           while read copy_rule; do \
             parent=$(echo "$copy_rule" | cut -f2 -d' ') \
             [ -d "$parent" ] || install -d "$parent" && cp -r $copy_rule \
