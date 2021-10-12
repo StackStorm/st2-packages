@@ -146,15 +146,11 @@ install_st2_dependencies() {
 }
 
 install_rabbitmq() {
-  # Install rabbit from packagecloud
-  # WORKAROUND - install erlang from rabbitmq/erlang as need newer version
+  # Install erlang from rabbitmq/erlang as need newer version
   # than available in epel
   curl -sL https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | sudo bash
   sudo yum -y install erlang
-  # Package are not in EPEL or CentOS repos - but this is required for erlang.
-  # recommended by rabbit: https://www.rabbitmq.com/install-rpm.html#package-cloud
-  # TODO: Migrate rabbitmq packages to be sourced from EPEL rpm when available for EL8
-  # https://github.com/StackStorm/st2-packages/issues/632
+  # Install rabbit from packagecloud
   curl -sL https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
   sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'
   
