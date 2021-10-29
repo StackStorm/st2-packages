@@ -16,7 +16,7 @@ PASSWORD=''
 EXTRA_OPTS=''
 
 # Note: This variable needs to default to a branch of the latest stable release
-BRANCH='v3.5'
+BRANCH='v3.6'
 FORCE_BRANCH=""
 
 adddate() {
