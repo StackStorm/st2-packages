@@ -36,12 +36,12 @@ el8:
     file: docker-compose.override.yml
     service: suite-compose
   environment:
-    - BUILDNODE=centos8build
-    - TESTNODE=centos8test
+    - BUILDNODE=rockylinux8build
+    - TESTNODE=rockylinux8test
     - ST2_PACKAGES=st2
   links:
-    - centos8build
-    - centos8test
+    - rockylinux8build
+    - rockylinux8test
     - rabbitmq
     - mongodb
     - redis
@@ -76,8 +76,8 @@ centos7build:
     file: docker-compose.override.yml
     service: volumes-circle
 
-centos8build:
-  image: stackstorm/packagingbuild:centos8
+rockylinux8build:
+  image: stackstorm/packagingbuild:rockylinux8
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
@@ -108,8 +108,8 @@ centos7test:
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup
 
-centos8test:
-  image: stackstorm/packagingtest:centos8-systemd
+rockylinux8test:
+  image: stackstorm/packagingtest:rockylinux8-systemd
   privileged: true
   cap_add:
     - SYS_ADMIN

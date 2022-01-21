@@ -22,7 +22,7 @@ VIRTUAL_MACHINES = {
   },
   :el8 => {
     :hostname => 'st2-packages-el8',
-    :box => 'centos/8',
+    :box => 'rockylinux/8',
     :ip => '192.168.16.24',
   },
 }
