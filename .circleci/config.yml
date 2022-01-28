@@ -67,7 +67,7 @@ jobs:
             docker cp ~/st2-packages st2-packages-vol:/root
       - run:
           name: Pull dependent Docker Images
-          command: .circle/docker-compose2.sh pull ${DISTRO}
+          command: .circle/docker-compose2.sh pull ${DISTRO} || .circle/docker-compose2.sh pull ${DISTRO}
       - restore_cache:
           name: Restore Wheelhouse Cache
           keys:
