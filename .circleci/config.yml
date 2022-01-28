@@ -68,56 +68,14 @@ jobs:
       - run:
           name: Pull dependent Docker Images
           command: .circle/docker-compose2.sh pull ${DISTRO} || .circle/docker-compose2.sh pull ${DISTRO}
-      - restore_cache:
-          name: Restore Wheelhouse Cache
-          keys:
-            - wheelhouse-v4-{{ .Branch }}-{{ checksum "/tmp/distro-version" }}-{{ checksum "/tmp/st2-version" }}
       - run:
           name: Build the ${DISTRO} Packages
           command: |
-            # Create necessary directories
-            # TODO: Per distro directory?
-            mkdir -p ~/st2-packages/build/${DISTRO}/log/
-            mkdir -p ~/st2-packages/wheelhouse/
-
-            # List volume content to see if there is any cached dasta
-            # Uncomment if you are troubleshooting wheelhouse caching issues
-            # echo "local wheelhouse cache directory content"
-            # echo ""
-            # ls -la ~/st2-packages/wheelhouse/
-            # du -hs ~/st2-packages/wheelhouse/
-            # echo ""
-
-            # Copy over cached wheelhouse packages (if any exist)
-            docker cp ~/st2-packages/wheelhouse/. st2-packages-vol:/tmp/wheelhouse
-
-            # List volume content to see if there is any cached data
-            # echo "docker volume wheelhouse cache directory content"
-            # echo ""
-            # docker run --rm -i -v=st2-packages-vol:/tmp/wheelhouse busybox find /tmp/wheelhouse
-            # echo ""
-
             # Run the build
             .circle/docker-compose2.sh build ${DISTRO}
 
             # Once build container finishes we can copy packages directly from it
-
-            # Copy built packages
             docker cp st2-packages-vol:/root/build/. ~/st2-packages/build/${DISTRO}
-
-            # Copy all the files from /tmp/wheelhouse so we can cache it and substantially speed
-            # up subsequent builds
-            docker cp st2-packages-vol:/tmp/wheelhouse/. ~/st2-packages/wheelhouse/
-
-            # echo "wheelhouse cache directory content"
-            # Uncomment if you are troubleshooting wheelhouse caching issues
-            # ls -la ~/st2-packages/wheelhouse/
-            # du -hs ~/st2-packages/wheelhouse/
-      - save_cache:
-          name: Store Wheelhouse Cache
-          key: wheelhouse-v4-{{ .Branch }}-{{ checksum "/tmp/distro-version" }}-{{ checksum "/tmp/st2-version" }}
-          paths:
-            - ~/st2-packages/wheelhouse/
       - run:
           name: Test the Packages
           command: .circle/docker-compose2.sh test ${DISTRO}
