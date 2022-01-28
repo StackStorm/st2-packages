@@ -29,9 +29,7 @@ jobs:
       - setup_remote_docker:
           reusable: true    # default - false
           exclusive: true   # default - true
-          # Temporary workaround for Circle CI issue
-          # https://discuss.circleci.com/t/setup-remote-docker-connection-failures/26434
-          version: 18.05.0-ce
+          version: 19.03.14
       - run:
           name: Ensure installation scripts are synced with their templates
           command: make .generated-files-check
