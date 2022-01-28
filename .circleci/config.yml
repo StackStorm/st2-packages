@@ -71,6 +71,9 @@ jobs:
       - run:
           name: Build the ${DISTRO} Packages
           command: |
+            # Create necessary directories
+            mkdir -p ~/st2-packages/build/${DISTRO}/log/
+            
             # Run the build
             .circle/docker-compose2.sh build ${DISTRO}
 
