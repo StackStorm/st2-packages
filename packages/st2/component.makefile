@@ -6,13 +6,13 @@ ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	DEB_DISTRO := $(shell lsb_release -cs)
 	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
-else ifneq (,$(wildcard /etc/centos-release))
-	EL_DISTRO := centos
-	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
-	REDHAT := 1
 else ifneq (,$(wildcard /etc/rocky-release))
 	EL_DISTRO := rocky
 	EL_VERSION := $(shell cat /etc/rocky-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	REDHAT := 1
+else ifneq (,$(wildcard /etc/centos-release))
+	EL_DISTRO := centos
+	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
 	REDHAT := 1
 else ifneq (,$(wildcard /etc/redhat-release))
 	EL_DISTRO := redhat
