@@ -88,8 +88,7 @@ bdist_wheel: .stamp-bdist_wheel
 	cat requirements.txt
 # We need to install these python packages to handle rpmbuild 4.14 in EL8
 ifeq ($(EL_VERSION),8)
-        # Setuptools 60.x requires > python 3.6
-	$(PIP_BINARY) install wheel 'setuptools<60' virtualenv
+	$(PIP_BINARY) install wheel setuptools virtualenv
 	$(PIP_BINARY) install cryptography
 endif
 	$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR) || \
