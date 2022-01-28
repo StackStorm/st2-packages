@@ -71,8 +71,7 @@ jobs:
       - restore_cache:
           name: Restore Wheelhouse Cache
           keys:
-            - wheelhouse-v3-{{ .Branch }}-{{ checksum "/tmp/distro-version" }}-{{ checksum "/tmp/st2-version" }}
-            - wheelhouse-v3-{{ .Branch }}-
+            - wheelhouse-v4-{{ .Branch }}-{{ checksum "/tmp/distro-version" }}-{{ checksum "/tmp/st2-version" }}
       - run:
           name: Build the ${DISTRO} Packages
           command: |
@@ -116,7 +115,7 @@ jobs:
             # du -hs ~/st2-packages/wheelhouse/
       - save_cache:
           name: Store Wheelhouse Cache
-          key: wheelhouse-v3-{{ .Branch }}-{{ checksum "/tmp/distro-version" }}-{{ checksum "/tmp/st2-version" }}
+          key: wheelhouse-v4-{{ .Branch }}-{{ checksum "/tmp/distro-version" }}-{{ checksum "/tmp/st2-version" }}
           paths:
             - ~/st2-packages/wheelhouse/
       - run:
