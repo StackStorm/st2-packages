@@ -6,13 +6,13 @@ ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	DEB_DISTRO := $(shell lsb_release -cs)
 	DESTDIR ?= $(CURDIR)/debian/$(ST2_COMPONENT)
-else ifneq (,$(wildcard /etc/centos-release))
-	EL_DISTRO := centos
-	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
-	REDHAT := 1
 else ifneq (,$(wildcard /etc/rocky-release))
 	EL_DISTRO := rocky
 	EL_VERSION := $(shell cat /etc/rocky-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	REDHAT := 1
+else ifneq (,$(wildcard /etc/centos-release))
+	EL_DISTRO := centos
+	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
 	REDHAT := 1
 else ifneq (,$(wildcard /etc/redhat-release))
 	EL_DISTRO := redhat
@@ -88,7 +88,8 @@ bdist_wheel: .stamp-bdist_wheel
 	cat requirements.txt
 # We need to install these python packages to handle rpmbuild 4.14 in EL8
 ifeq ($(EL_VERSION),8)
-	$(PIP_BINARY) install wheel setuptools virtualenv
+        # Setuptools 60.x requires > python 3.6
+	$(PIP_BINARY) install wheel 'setuptools<60' virtualenv
 	$(PIP_BINARY) install cryptography
 endif
 	$(PYTHON_BINARY) setup.py bdist_wheel -d $(WHEELDIR) || \

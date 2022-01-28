@@ -7,13 +7,17 @@ ifneq (,$(wildcard /etc/debian_version))
 	DEBIAN := 1
 	#DEB_EPOCH := $(shell echo $(ST2PKG_VERSION) | grep -q dev || echo '1')
 	DEB_DISTRO := $(shell lsb_release -cs)
+else ifneq (,$(wildcard /etc/rocky-release))
+	EL_DISTRO:=rocky
+	EL_VERSION := $(shell cat /etc/rocky-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	REDHAT := 1
 else ifneq (,$(wildcard /etc/centos-release))
 	EL_DISTRO:=centos
 	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
 	REDHAT := 1
 else ifneq (,$(wildcard /etc/redhat-release))
 	EL_DISTRO:=redhat
-	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
+	EL_VERSION := $(shell cat /etc/redhat-release | grep -oP '(?<= )[0-9]+(?=\.)')
 	REDHAT := 1
 else
 	REDHAT := 1
