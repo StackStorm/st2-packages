@@ -111,6 +111,7 @@ Conflicts: st2common
   %{_datadir}/doc/st2
   %attr(755, %{svc_user}, root) /opt/stackstorm/configs
   %attr(755, %{svc_user}, root) /opt/stackstorm/exports
+  %attr(755, %{svc_user}, root) /opt/stackstorm/overrides
   %attr(755, %{svc_user}, root) %{_localstatedir}/log/st2
   %attr(755, %{svc_user}, root) %{_localstatedir}/run/st2
   %attr(775, root, %{packs_group}) /opt/stackstorm/packs/*

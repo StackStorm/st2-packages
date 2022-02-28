@@ -59,6 +59,7 @@ class ST2Spec
         '/etc/st2',
         '/etc/logrotate.d',
         '/opt/stackstorm/packs',
+        '/opt/stackstorm/overrides',
         [ '/var/log/st2', example: Proc.new {|_| be_writable.by('owner')} ]
       ],
     },

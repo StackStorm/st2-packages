@@ -3,6 +3,7 @@
 /etc/st2
 /opt/stackstorm/configs
 /opt/stackstorm/exports
+/opt/stackstorm/overrides
 /opt/stackstorm/virtualenvs
 /var/log/st2
 /var/run/st2
