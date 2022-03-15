@@ -14,16 +14,21 @@ Epoch: %{epoch}
 %global _build_id_links none
 %endif
 
-Requires: python3-devel, openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
+Requires: openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
+%if 0%{?rhel} == 8
+Requires: python38-devel
+%else # Requires for RHEL 8
+Requires: python3-devel
+%endif  # Requires for RHEL 7
 
 # EL8 requires a few python packages available within 'BUILDROOT' when outside venv
 # These are in the el8 packagingbuild dockerfile
 # Reference https://fossies.org/linux/ansible/packaging/rpm/ansible.spec
 %if 0%{?rhel} == 8
 # Will use the python3 stdlib venv
-BuildRequires: python3-devel
-BuildRequires: python3-setuptools
-%endif  # Requires for RHEL 8
+BuildRequires: python38-devel
+BuildRequires: python38-setuptools
+%endif  # Requires for RHEL 7
 
 %if 0%{?rhel} == 8
 # By default on EL 8, RPM helper scripts will try to generate Requires: section which lists every

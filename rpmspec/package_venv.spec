@@ -7,12 +7,20 @@
 %define venv_dir %{buildroot}/%{venv_install_dir}
 %define venv_bin %{venv_dir}/bin
 
-%define venv_python %{venv_bin}/python3
-# https://github.com/StackStorm/st2/wiki/Where-all-to-update-pip-and-or-virtualenv
-%define pin_pip %{venv_python} %{venv_bin}/pip3 install pip==20.3.3
-%define install_venvctrl python3 -m pip install venvctrl
 %if 0%{?rhel} == 8
-%define install_crypto %{venv_python} %{venv_bin}/pip install cryptography==2.8
+%define python_binname python3.8
+%define pip_binname pip3.8
+%else
+%define python_binname python3
+%define pip_binname pip3
+%endif
+
+%define venv_python %{venv_bin}/%{python_binname}
+# https://github.com/StackStorm/st2/wiki/Where-all-to-update-pip-and-or-virtualenv
+%define pin_pip %{venv_python} %{venv_bin}/%{pip_binname} install pip==20.3.3
+%define install_venvctrl %{python_binname} -m pip install venvctrl
+%if 0%{?rhel} == 8
+%define install_crypto %{venv_python} %{venv_bin}/pip3.8 install cryptography==2.8
 %else
 %define install_crypto %{nil}
 %endif
@@ -25,7 +33,7 @@
 
 # EL8 requires crypto built locally and venvctrl available outside of venv
 %define pip_install_venv \
-    virtualenv-3 -p python3 --no-download %{venv_dir} \
+    virtualenv-3 -p %{python_binname} --no-download %{venv_dir} \
     %{pin_pip} \
     %{install_crypto} \
     %{venv_pip} --use-deprecated=legacy-resolver -r requirements.txt \
