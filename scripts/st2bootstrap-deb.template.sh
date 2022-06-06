@@ -134,7 +134,7 @@ install_rabbitmq() {
 
   # Team RabbitMQ's main signing key
   curl -1sLf "https://keys.openpgp.org/vks/v1/by-fingerprint/0A9AF2115F4687BD29803A206B73A36E6026DFCA" | sudo gpg --dearmor | sudo tee /usr/share/keyrings/com.rabbitmq.team.gpg > /dev/null
-  # Launchpad PPA that provides modern Erlang releases
+  # CloudSmith Erlang Repository
   curl -1sLf "https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-erlang/gpg.E495BB49CC4BBE5B.key" | sudo gpg --dearmor | sudo tee /usr/share/keyrings/io.cloudsmith.dl.rabbitmq.erlang.gpg > /dev/null
   # CloudSmith RabbitMQ repository
   curl -1sLf "https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/gpg.9F4587F226208342.key" | sudo gpg --dearmor | sudo tee /usr/share/keyrings/io.cloudsmith.dl.rabbitmq.gpg > /dev/null
