@@ -6,7 +6,7 @@ import sys
 
 ST2SVC = "st2auth"
 DEFAULT_IP = "127.0.0.1"
-DEFAULT_PORT = "9101"
+DEFAULT_PORT = "9100"
 ST2CFG = "/etc/st2/st2.conf"
 
 # Systemd passes 3 paths to a generator, normal_dir, early_dir, late_dir.
