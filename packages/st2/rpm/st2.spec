@@ -124,9 +124,6 @@ Conflicts: st2common
   %attr(775, root, %{packs_group}) /opt/stackstorm/virtualenvs
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
-  %{_unitdir}/st2api.service
-  %{_unitdir}/st2stream.service
-  %{_unitdir}/st2auth.service
   %{_unitdir}/st2notifier.service
   %{_unitdir}/st2rulesengine.service
   %{_unitdir}/st2sensorcontainer.service
