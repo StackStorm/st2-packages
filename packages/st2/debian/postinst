@@ -59,6 +59,7 @@ case "$1" in
 
       # Enable services created by systemd generator
       systemctl enable st2api st2auth st2stream >/dev/null 2>&1  || true
+      systemctl start st2api st2auth st2stream >/dev/null 2>&1  || true
     ;;
     abort-upgrade|abort-remove|abort-deconfigure)
     ;;
