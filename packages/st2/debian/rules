@@ -47,9 +47,6 @@ override_dh_gencontrol:
 override_dh_installinit:
 	dh_systemd_enable --name=st2actionrunner st2actionrunner.service
 	install -p -m644 debian/st2actionrunner@.service debian/st2/lib/systemd/system/st2actionrunner@.service
-	dh_systemd_enable --name=st2api st2api.service
-	dh_systemd_enable --name=st2stream st2stream.service
-	dh_systemd_enable --name=st2auth st2auth.service
 	dh_systemd_enable --name=st2notifier st2notifier.service
 	dh_systemd_enable --name=st2rulesengine st2rulesengine.service
 	dh_systemd_enable --name=st2sensorcontainer st2sensorcontainer.service
