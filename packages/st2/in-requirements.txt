@@ -6,7 +6,7 @@ st2auth
 st2reactor
 st2exporter
 st2tests
-git+https://github.com/StackStorm/st2-auth-backend-pam.git@master#egg=st2-auth-backend-pam
+st2-auth-backend-pam@ git+https://github.com/StackStorm/st2-auth-backend-pam.git@master
 stackstorm-runner-action-chain
 stackstorm-runner-announcement
 stackstorm-runner-http
