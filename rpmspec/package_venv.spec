@@ -8,8 +8,8 @@
 %define venv_bin %{venv_dir}/bin
 
 %if 0%{?rhel} == 8
-%define python_binname python3.8
-%define pip_binname pip3.8
+%define python_binname python3.9
+%define pip_binname pip3.9
 %else
 %define python_binname python3
 %define pip_binname pip3
@@ -20,7 +20,7 @@
 %define pin_pip %{venv_python} %{venv_bin}/%{pip_binname} install pip==20.3.3
 %define install_venvctrl %{python_binname} -m pip install venvctrl
 %if 0%{?rhel} == 8
-%define install_crypto %{venv_python} %{venv_bin}/pip3.8 install cryptography==2.8
+%define install_crypto %{venv_python} %{venv_bin}/%{pip_binname} install cryptography==2.8
 %else
 %define install_crypto %{nil}
 %endif

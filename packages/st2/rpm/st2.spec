@@ -16,7 +16,7 @@ Epoch: %{epoch}
 
 Requires: openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
 %if 0%{?rhel} == 8
-Requires: python38-devel
+Requires: python39-devel
 %else # Requires for RHEL 8
 Requires: python3-devel
 %endif  # Requires for RHEL 7
@@ -26,8 +26,8 @@ Requires: python3-devel
 # Reference https://fossies.org/linux/ansible/packaging/rpm/ansible.spec
 %if 0%{?rhel} == 8
 # Will use the python3 stdlib venv
-BuildRequires: python38-devel
-BuildRequires: python38-setuptools
+BuildRequires: python39-devel
+BuildRequires: python39-setuptools
 %endif  # Requires for RHEL 7
 
 %if 0%{?rhel} == 8

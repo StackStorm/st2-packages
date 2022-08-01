@@ -57,7 +57,7 @@
 #
 %if %(PKG=%{package}; [ "${PKG##st2}" != "$PKG" ] && echo 1 || echo 0 ) == 1
 %if 0%{?rhel} == 8
-%define st2pkg_version %(python3.8 -c "from %{package} import __version__; print(__version__),")
+%define st2pkg_version %(python3.9 -c "from %{package} import __version__; print(__version__),")
 %else
 %define st2pkg_version %(python3 -c "from %{package} import __version__; print(__version__),")
 %endif
