@@ -155,12 +155,6 @@ EOF
   # Update package indices
   sudo apt-get update -y
 
-  # Set preferences to use 1:24.* for erlang 
-  sudo tee /etc/apt/preferences.d/erlang <<EOF
-# prefer packages erlang less than 25 repository
-Package: erlang-*
-Pin: version 1:24.*
-Pin-Priority: 800
 EOF
 
   # Install Erlang packages
