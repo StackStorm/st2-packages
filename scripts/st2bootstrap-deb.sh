@@ -469,8 +469,6 @@ EOF
   # Update package indices
   sudo apt-get update -y
 
-EOF
-
   # Install Erlang packages
   sudo apt-get install -y erlang-base \
                         erlang-asn1 erlang-crypto erlang-eldap erlang-ftp erlang-inets \
