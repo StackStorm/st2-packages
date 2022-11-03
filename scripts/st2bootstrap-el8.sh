@@ -512,9 +512,8 @@ install_st2_dependencies() {
 install_rabbitmq() {
   # Install erlang from rabbitmq/erlang as need newer version
   # than available in epel.
-  # Use Erlang 24 has Erlang 25 has only preview support with RabbitMQ 3.10
   curl -sL https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | sudo bash
-  sudo yum -y install erlang-24*
+  sudo yum -y install erlang
   # Install rabbit from packagecloud
   curl -sL https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
   sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'
