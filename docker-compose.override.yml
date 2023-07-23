@@ -50,6 +50,6 @@ mongodb:
     - "27017:27017"
 
 redis:
-  image: redis:latest
+  image: redis:7.0.12
   ports:
     - "6379:6379"
