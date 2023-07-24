@@ -39,6 +39,7 @@ volumes-circle:
 #
 rabbitmq:
   image: rabbitmq:3.9-management
+  privileged: true
   hostname: rabbit
   ports:
     - "15672:15672"  # managment plugin port
