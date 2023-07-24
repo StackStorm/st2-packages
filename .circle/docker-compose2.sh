@@ -27,10 +27,6 @@ case "$1" in
   ;;
   build)
     echo Starting Packages Build for $2 ...
-    free -hm
-    df -h
-    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml up redis
-    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml up rabbitmq
     docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
         -e ST2_CHECKOUT=${ST2_CHECKOUT} \
         -e ST2_GITURL=${ST2_GITURL} \
