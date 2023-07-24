@@ -27,7 +27,8 @@ case "$1" in
   ;;
   build)
     echo Starting Packages Build for $2 ...
-    sudo sysctl vm.overcommit_memory=1
+    free -hm
+    df -h
     docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml up redis
     docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml up rabbitmq
     docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
