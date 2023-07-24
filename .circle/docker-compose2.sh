@@ -22,7 +22,7 @@ case "$1" in
   ;;
   # Perform fake command invocation, technically provides images "pull" phase.
   pull)
-    echo Pulling dependent Docker images for $2 ...    
+    echo Pulling dependent Docker images for $2 ...
     docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml pull --include-deps $2
   ;;
   build)
