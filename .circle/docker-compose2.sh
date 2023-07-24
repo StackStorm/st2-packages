@@ -22,11 +22,13 @@ case "$1" in
   ;;
   # Perform fake command invocation, technically provides images "pull" phase.
   pull)
-    echo Pulling dependent Docker images for $2 ...
+    echo Pulling dependent Docker images for $2 ...    
     docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml pull --include-deps $2
   ;;
   build)
     echo Starting Packages Build for $2 ...
+    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml up redis
+    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml up rabbitmq
     docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
         -e ST2_CHECKOUT=${ST2_CHECKOUT} \
         -e ST2_GITURL=${ST2_GITURL} \
