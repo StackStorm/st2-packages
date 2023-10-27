@@ -37,7 +37,7 @@
     %{pin_pip} \
     %{install_crypto} \
     %{venv_pip} --use-deprecated=legacy-resolver -r requirements.txt \
-    %{venv_pip} . \
+    %{venv_pip} --use-deprecated=legacy-resolver . \
     %{install_venvctrl} \
     venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir} \
 %{nil}
