@@ -492,12 +492,8 @@ EOF
 }
 
 install_mongodb() {
-  # Add key and repo for the latest stable MongoDB 4.0
-  if [[ "$SUBTYPE" = 'focal' ]]; then
-    MONGO_VERSION="4.4"
-  else
-    MONGO_VERSION="4.0"
-  fi
+  # Add key and repo for the MongoDB 4.4 (Ubuntu Focal, Bionic)
+  MONGO_VERSION="4.4"
 
   wget -qO - https://www.mongodb.org/static/pgp/server-${MONGO_VERSION}.asc | sudo apt-key add -
   echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/${MONGO_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGO_VERSION}.list
