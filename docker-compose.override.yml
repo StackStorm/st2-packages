@@ -38,7 +38,8 @@ volumes-circle:
 ## Service used by st2
 #
 rabbitmq:
-  image: rabbitmq:management
+  image: rabbitmq:3.9-management
+  privileged: true
   hostname: rabbit
   ports:
     - "15672:15672"  # managment plugin port
@@ -50,6 +51,6 @@ mongodb:
     - "27017:27017"
 
 redis:
-  image: redis:latest
+  image: redis:6.2.11
   ports:
     - "6379:6379"
