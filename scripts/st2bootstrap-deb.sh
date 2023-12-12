@@ -430,6 +430,10 @@ fail() {
 }
 
 
+install_net_tools() {
+  # Install netstat
+  sudo apt install -y net-tools
+}
 
 install_st2_dependencies() {
   # Silence debconf prompt, raised during some dep installations. This will be passed to sudo via 'env_keep'.
@@ -718,6 +722,7 @@ configure_st2chatops() {
 
 trap 'fail' EXIT
 STEP="Setup args" && setup_args $@
+STEP="Install net-tools" && install_net_tools
 STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_dependencies
 STEP="Generate random password" && generate_random_passwords
 STEP="Configure Proxy" && configure_proxy
