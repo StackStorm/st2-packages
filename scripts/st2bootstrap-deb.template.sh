@@ -20,6 +20,7 @@ if [[ "$SUBTYPE" != 'focal' && "$SUBTYPE" != 'bionic' ]]; then
   exit 2
 fi
 
+
 setup_args() {
   for i in "$@"
     do
@@ -103,12 +104,7 @@ setup_args() {
     echo "You can also use \"--user\" and \"--password\" for unattended installation."
     echo "Press \"ENTER\" to continue or \"CTRL+C\" to exit/abort"
     read -e -p "Admin username: " -i "st2admin" USERNAME
-    read -e -s -p "Password: " PASSWORD
-
-    if [ "${PASSWORD}" = '' ]; then
-        echo "Password cannot be empty."
-        exit 1
-    fi
+    set_password
   fi
 
 }
