@@ -288,6 +288,7 @@ configure_st2_cli_config() {
   # Configure CLI config (write credentials for the root user and user which ran the script)
   ROOT_USER="root"
   CURRENT_USER=$(whoami)
+  CURRENT_GROUP=$(id -gn)
 
   ROOT_HOME=$(eval echo ~${ROOT_USER})
   : "${HOME:=$(eval echo ~${CURRENT_USER})}"
@@ -325,7 +326,7 @@ password = ${PASSWORD}
 EOT"
 
   # Fix the permissions
-  sudo chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
+  sudo chown -R ${CURRENT_USER}:${CURRENT_GROUP} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
 }
 
 
