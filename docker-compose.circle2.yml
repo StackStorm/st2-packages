@@ -30,6 +30,21 @@ focal:
     - mongodb
     - redis
 
+el9:
+  image: quay.io/stackstorm/packagingrunner
+  working_dir: /root/st2-packages
+  volumes_from:
+    - st2-packages-vol
+  environment:
+    - BUILDNODE=rockylinux9build
+    - TESTNODE=rockylinux9test
+  links:
+    - rockylinux9build
+    - rockylinux9test
+    - rabbitmq
+    - mongodb
+    - redis
+
 el8:
   image: quay.io/stackstorm/packagingrunner
   working_dir: /root/st2-packages
@@ -82,6 +97,11 @@ rockylinux8build:
   volumes_from:
     - st2-packages-vol
 
+rockylinux9build:
+  image: stackstorm/packagingbuild:rockylinux9
+  volumes_from:
+    - st2-packages-vol
+
 ## Package testing nodes
 #
 bionictest:
@@ -110,6 +130,18 @@ centos7test:
 
 rockylinux8test:
   image: stackstorm/packagingtest:rockylinux8-systemd
+  privileged: true
+  cap_add:
+    - SYS_ADMIN
+  security_opt:
+    - seccomp:unconfined
+  volumes_from:
+    - st2-packages-vol
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup
+
+rockylinux9test:
+  image: stackstorm/packagingtest:rockylinux9-systemd
   privileged: true
   cap_add:
     - SYS_ADMIN

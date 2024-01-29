@@ -11,7 +11,8 @@ RHEL_INCLUDE_PATH = os.path.join(SCRIPTS_PATH, 'includes/rhel.sh')
 SCRIPT_FILES = [
     'st2bootstrap-deb.sh',
     'st2bootstrap-el7.sh',
-    'st2bootstrap-el8.sh'
+    'st2bootstrap-el8.sh',
+    'st2bootstrap-el9.sh'
 ]
 
 HEADER_WARNING = """
