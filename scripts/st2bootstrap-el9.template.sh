@@ -328,7 +328,7 @@ EOT"
   sudo systemctl restart nginx
   sudo systemctl enable nginx
 
-  # RHEL 8 runs firewalld so we need to open http/https
+  # RHEL 9 runs firewalld so we need to open http/https
   if is_rhel && command -v firewall-cmd >/dev/null 2>&1; then
     sudo firewall-cmd --zone=public --add-service=http --add-service=https
     sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https

@@ -29,7 +29,9 @@ jobs:
       - setup_remote_docker:
           reusable: true    # default - false
           exclusive: true   # default - true
-          version: 19.03.14
+          # See if default solves rockylinux9 problems with getaddrinfo 
+          # https://support.circleci.com/hc/en-us/articles/11125365270939-Architecture-Change-Setup-remote-docker-
+          #version: 19.03.14
       - run:
           name: Ensure installation scripts are synced with their templates
           command: make .generated-files-check
