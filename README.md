@@ -71,7 +71,7 @@ In order to build, package, install and test ST2 in an isolated Vagrant VM, run 
 vagrant up $TARGET
 ```
 
-Where `$TARGET` is one of `focal`, or `el8`. If you are using `el8`, comment
+Where `$TARGET` is one of `focal`, or `el8` or `el9`. If you are using `el8`, comment
 out the `vm_config.vm.provision :docker` line in the Vagrantfile. There is logic in `setup-vagrant.sh`
 to install docker in `el8`.
 

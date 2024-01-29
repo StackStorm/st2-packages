@@ -30,6 +30,22 @@ el8:
     - mongodb
     - redis
 
+el9:
+  image: quay.io/stackstorm/packagingrunner
+  extends:
+    file: docker-compose.override.yml
+    service: suite-compose
+  environment:
+    - BUILDNODE=rockylinux9build
+    - TESTNODE=rockylinux9test
+    - ST2_PACKAGES=st2
+  links:
+    - rockylinux9build
+    - rockylinux9test
+    - rabbitmq
+    - mongodb
+    - redis
+
 ## Package build nodes
 #
 focalbuild:
@@ -39,6 +55,12 @@ focalbuild:
 
 rockylinux8build:
   image: stackstorm/packagingbuild:rockylinux8
+  extends:
+    file: docker-compose.override.yml
+    service: volumes-compose
+
+rockylinux9build:
+  image: stackstorm/packagingbuild:rockylinux9
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
@@ -55,6 +77,16 @@ focaltest:
 
 rockylinux8test:
   image: stackstorm/packagingtest:rockylinux8-systemd
+  privileged: true
+  cap_add:
+    - SYS_ADMIN
+  security_opt:
+    - seccomp:unconfined
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup
+
+rockylinux9test:
+  image: stackstorm/packagingtest:rockylinux9-systemd
   privileged: true
   cap_add:
     - SYS_ADMIN

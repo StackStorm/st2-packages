@@ -235,7 +235,7 @@ function get_pkg_os() {
       PKG_OS_VERSION=$PKG_OS
       PKG_TYPE="deb"
       ;;
-    el6|el7|el8)
+    el6|el7|el8|el9)
       PKG_OS_NAME=el
       PKG_OS_VERSION=${PKG_OS//[^0-9]/}
       PKG_TYPE="rpm"
