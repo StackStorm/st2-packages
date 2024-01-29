@@ -261,7 +261,7 @@ configure_st2_user () {
   # NOTE: If the file already exists and is non-empty, then assume the key does not need
   # to be generated again.
   if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
-    # added PEM to enforce PEM ssh key type in EL9 to maintain consistency
+    # added PEM to enforce PEM ssh key type in EL8 to maintain consistency
     sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" -m PEM
   fi
 
@@ -473,7 +473,7 @@ get_full_pkg_versions() {
 
 
 
-# Note that default SELINUX policies for RHEL9 differ with CentOS9. CentOS9 is more permissive by default
+# Note that default SELINUX policies for RHEL9 differ with CentOS8. CentOS8 is more permissive by default
 # Note that depending on distro assembly/settings you may need more rules to change
 # Apply these changes OR disable selinux in /etc/selinux/config (manually)
 adjust_selinux_policies() {
