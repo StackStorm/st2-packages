@@ -5,11 +5,6 @@
 VAGRANTFILE_API_VERSION = "2"
 
 VIRTUAL_MACHINES = {
-  :bionic => {
-    :hostname => 'st2-packages-bionic',
-    :box => 'ubuntu/bionic64',
-    :ip => '192.168.16.23',
-  },
   :focal => {
     :hostname => 'st2-packages-focal',
     :box => 'ubuntu/focal64',

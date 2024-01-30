@@ -16,20 +16,12 @@ PIP_VERSION = 20.3.3
 IS_SYSTEMD = $(shell command -v dh_systemd_enable > /dev/null 2>&1 && echo true)
 DEB_DISTRO := $(shell lsb_release -cs)
 
-# Xenial and Bionic depend on different libraries.
-ifeq ($(DEB_DISTRO),bionic)
-	BUILD_PRE_DEPENDS := python3 (>= 3.6)
-	BUILD_DEPENDS := python3-distutils, python3-dev
-else ifeq ($(DEB_DISTRO),focal)
-	BUILD_PRE_DEPENDS := python3 (>= 3.8)
-	BUILD_DEPENDS := python3-distutils, python3-dev
-endif
+BUILD_PRE_DEPENDS := python3 (>= 3.8)
+BUILD_DEPENDS := python3-distutils, python3-dev
 
 %:
-# Use Python 3 binary on Ubuntu Bionic
-ifeq ($(DEB_DISTRO),bionic)
-	dh $@ --with python-virtualenv --python /usr/bin/python3.6
-else ifeq ($(DEB_DISTRO),focal)
+
+ifeq ($(DEB_DISTRO),focal)
 	dh $@ --with python-virtualenv --python /usr/bin/python3.8
 endif
 

@@ -71,7 +71,7 @@ In order to build, package, install and test ST2 in an isolated Vagrant VM, run 
 vagrant up $TARGET
 ```
 
-Where `$TARGET` is one of `bionic`, `focal`, `el7`, or `el8`. If you are using `el8`, comment
+Where `$TARGET` is one of `focal`, `el7`, or `el8`. If you are using `el8`, comment
 out the `vm_config.vm.provision :docker` line in the Vagrantfile. There is logic in `setup-vagrant.sh`
 to install docker in `el8`.
 
@@ -113,40 +113,40 @@ For example:
 ```yaml
 ...
 
-bionic:
+focal:
   ...
   image: quay.io/stackstorm/packagingrunner
   ...
 ...
 
-bionicbuild:
+focalbuild:
   ...
-  image: bionicbuild
+  image: focalbuild
   ...
 
 ...
 
-bionictest:
+focaltest:
   ...
-  image: bionictest
+  image: focaltest
   ...
 ```
 
-NOTE: Main ``distro`` definition (e.g. ``bionic``, ``focal``, etc.) needs to use packaging runner image.
+NOTE: Main ``distro`` definition (e.g. ``focal``, etc.) needs to use packaging runner image.
 
-As you can see, ``image`` attribute references local image tagged ``bionicbuild`` instead of a
-remote image (e.g. ``stackstorm/packagingbuild:bionic`` or similar).
+As you can see, ``image`` attribute references local image tagged ``focalbuild`` instead of a
+remote image (e.g. ``stackstorm/packagingbuild:focal`` or similar).
 
 Before that will work, you of course also need to build those images locally.
 
 For example:
 
 ```bash
-cd ~/st2packaging-dockerfiles/packagingbuild/bionic
-docker build -t bionicbuild .
+cd ~/st2packaging-dockerfiles/packagingbuild/focal
+docker build -t focalbuild .
 
-cd ~/st2packaging-dockerfiles/packagingtest/bionic/systemd
-docker build -t bionictest .
+cd ~/st2packaging-dockerfiles/packagingtest/focal/systemd
+docker build -t focaltest .
 ```
 
 # License and Authors
