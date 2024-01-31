@@ -23,8 +23,8 @@ PASSWORD=''
 U16_ADD_INSECURE_PY3_PPA=0
 SUBTYPE=`lsb_release -cs`
 
-if [[ "$SUBTYPE" != 'focal' && "$SUBTYPE" != 'bionic' ]]; then
-  echo "Unsupported ubuntu codename ${SUBTYPE}. Please use Ubuntu 18.04 (bionic) or Ubuntu 20.04 (focal) as base system!"
+if [[ "$SUBTYPE" != 'focal' ]]; then
+  echo "Unsupported ubuntu codename ${SUBTYPE}. Please use Ubuntu 20.04 (focal) as base system!"
   exit 2
 fi
 
@@ -154,7 +154,7 @@ function configure_proxy() {
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
-  DISTRO=$2  # Distro name (e.g. bionic,focal,el7,el8)
+  DISTRO=$2  # Distro name (e.g. focal,el7,el8)
   PACKAGE_NAME_REGEX=$3
 
   PACKAGES_METADATA=$(curl -sSL -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
@@ -496,7 +496,7 @@ EOF
 }
 
 install_mongodb() {
-  # Add key and repo for the MongoDB 4.4 (Ubuntu Focal, Bionic)
+  # Add key and repo for the MongoDB 4.4 (Ubuntu Focal)
   MONGO_VERSION="4.4"
 
   wget -qO - https://www.mongodb.org/static/pgp/server-${MONGO_VERSION}.asc | sudo apt-key add -

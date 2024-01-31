@@ -37,8 +37,8 @@ function main() {
       fi
       ;;
     *)
-      echo $"Usage: deploy {xenial|bionic|focal|el6|el7|el8} /tmp/st2-packages"
-      echo $"Usage: next-revision {xenial|bionic|focal|el6|el7|el8} 0.14dev st2"
+      echo $"Usage: deploy {focal|el6|el7|el8} /tmp/st2-packages"
+      echo $"Usage: next-revision {focal|el6|el7|el8} 0.14dev st2"
       exit 1
   esac
 }
