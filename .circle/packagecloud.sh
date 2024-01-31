@@ -14,10 +14,10 @@
 MAX_REVISIONS=5
 
 # Usage:
-# packagecloud.sh deploy el7 /tmp/st2-packages
+# packagecloud.sh deploy el8 /tmp/st2-packages
 # IS_ENTERPRISE=1 packagecloud.sh deploy trusty /tmp/st2-packages
 # packagecloud.sh next-revision trusty 0.14dev st2
-# packagecloud.sh next-revision el7 1.3.1 st2web
+# packagecloud.sh next-revision el8 1.3.1 st2web
 function main() {
   : ${PACKAGECLOUD_ORGANIZATION:=stackstorm}
   : ${PACKAGECLOUD_TOKEN:? PACKAGECLOUD_TOKEN env is required}
@@ -37,8 +37,8 @@ function main() {
       fi
       ;;
     *)
-      echo $"Usage: deploy {focal|el6|el7|el8} /tmp/st2-packages"
-      echo $"Usage: next-revision {focal|el6|el7|el8} 0.14dev st2"
+      echo $"Usage: deploy {focal|el6|el8} /tmp/st2-packages"
+      echo $"Usage: next-revision {focal|el6|el8} 0.14dev st2"
       exit 1
   esac
 }

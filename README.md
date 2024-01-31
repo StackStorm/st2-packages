@@ -15,7 +15,7 @@
 Packages build environment is a *multi-container docker* application defined and managed with [docker-compose](https://github.com/docker/compose). It consists of four types of containers:
 
  - **Packaging runner** (https://quay.io/stackstorm/packagingrunner) - the main entry point, package build and test processing controller container.
- - **Packaging build** (https://hub.docker.com/r/stackstorm/packagingbuild/) - container where actual `.deb`/`.rpm` artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingbuild:centos7*, *packagingbuild:focal* correspondingly for CentOS 7 and Ubuntu Focal.
+ - **Packaging build** (https://hub.docker.com/r/stackstorm/packagingbuild/) - container where actual `.deb`/`.rpm` artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingbuild:rocky8*, *packagingbuild:focal* correspondingly for RockyLinux 8 and Ubuntu Focal.
  - **Packaging test** (https://hub.docker.com/r/stackstorm/packagingtest/) - containers where built artifacts are tested, i.e. *artifacts are installed, configuration is written and tests are performed*.
  - **Services** - these are different containers required for testing such as *rabbitmq and mongodb*
 
@@ -71,7 +71,7 @@ In order to build, package, install and test ST2 in an isolated Vagrant VM, run 
 vagrant up $TARGET
 ```
 
-Where `$TARGET` is one of `focal`, `el7`, or `el8`. If you are using `el8`, comment
+Where `$TARGET` is one of `focal`, or `el8`. If you are using `el8`, comment
 out the `vm_config.vm.provision :docker` line in the Vagrantfile. There is logic in `setup-vagrant.sh`
 to install docker in `el8`.
 
@@ -100,7 +100,7 @@ are `st2admin` and `Ch@ngeMe` respectively.
 # Installation
 Current community packages are hosted on https://packagecloud.io/StackStorm. For detailed instructions how install st2 and perform basic configuration follow these instructions:
 - [Ubuntu/Debian](https://docs.stackstorm.com/install/deb.html)
-- [RHEL7/CentOS7](https://docs.stackstorm.com/install/rhel7.html)
+- [RHEL8/RockyLinux8](https://docs.stackstorm.com/install/rhel8.html)
 
 ## Adding Support For a New Distribution
 
