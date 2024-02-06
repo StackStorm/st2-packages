@@ -11,10 +11,6 @@ else ifneq (,$(wildcard /etc/rocky-release))
 	EL_DISTRO:=rocky
 	EL_VERSION := $(shell cat /etc/rocky-release | grep -oP '(?<= )[0-9]+(?=\.)')
 	REDHAT := 1
-else ifneq (,$(wildcard /etc/centos-release))
-	EL_DISTRO:=centos
-	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
-	REDHAT := 1
 else ifneq (,$(wildcard /etc/redhat-release))
 	EL_DISTRO:=redhat
 	EL_VERSION := $(shell cat /etc/redhat-release | grep -oP '(?<= )[0-9]+(?=\.)')
@@ -31,10 +27,6 @@ else ifeq ($(EL_VERSION),8)
 	PYTHON_BINARY := /usr/bin/python3.8
 	PIP_BINARY := /usr/local/bin/pip3.8
 	PYTHON_ALT_BINARY := python3.8
-else ifeq ($(EL_VERSION),7)
-	PYTHON_BINARY := /usr/bin/python3
-	PIP_BINARY := /usr/local/bin/pip3
-	PYTHON_ALT_BINARY := python3
 else
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := pip3
@@ -108,7 +100,7 @@ post_install:
 	sed -i "/\[logger_root\]/,/\[.*\]\|\s*$$/ {s/level=DEBUG/level=INFO/}" $(DESTDIR)/etc/st2/logging.*conf
 	sed -i "/\[logger_root\]/,/\[.*\]\|\s*$$/ {s/level=DEBUG/level=INFO/}" $(DESTDIR)/etc/st2/syslog.*conf
 ifeq ($(REDHAT),1)
-	if [[ `$(PYTHON_ALT_BINARY) /root/scripts/platform_major_version.py` = 7 ]] || [[ `$(PYTHON_ALT_BINARY) /root/scripts/platform_major_version.py` = 8 ]]; then sed -i -r 's/virtualenv_opts\s*=.*/virtualenv_opts =/' $(DESTDIR)/etc/st2/st2.conf; fi
+	if [[ `$(PYTHON_ALT_BINARY) /root/scripts/platform_major_version.py` = 8 ]]; then sed -i -r 's/virtualenv_opts\s*=.*/virtualenv_opts =/' $(DESTDIR)/etc/st2/st2.conf; fi
 endif
 
 populate_version: .stamp-populate_version

@@ -10,10 +10,6 @@ else ifneq (,$(wildcard /etc/rocky-release))
 	EL_DISTRO := rocky
 	EL_VERSION := $(shell cat /etc/rocky-release | grep -oP '(?<= )[0-9]+(?=\.)')
 	REDHAT := 1
-else ifneq (,$(wildcard /etc/centos-release))
-	EL_DISTRO := centos
-	EL_VERSION := $(shell cat /etc/centos-release | grep -oP '(?<= )[0-9]+(?=\.)')
-	REDHAT := 1
 else ifneq (,$(wildcard /etc/redhat-release))
 	EL_DISTRO := redhat
 	EL_VERSION := $(shell cat /etc/redhat-release | grep -oP '(?<= )[0-9]+(?=\.)')
@@ -29,9 +25,6 @@ ifeq ($(DEB_DISTRO),focal)
 else ifeq ($(EL_VERSION),8)
 	PYTHON_BINARY := /usr/bin/python3.8
 	PIP_BINARY := /usr/local/bin/pip3.8
-else ifeq ($(EL_VERSION),7)
-	PYTHON_BINARY := /usr/bin/python3
-	PIP_BINARY := /usr/local/bin/pip3
 else
 	PYTHON_BINARY := /usr/bin/python3
 	PIP_BINARY := pip3
