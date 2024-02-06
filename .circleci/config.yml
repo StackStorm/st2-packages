@@ -8,16 +8,16 @@ version: 2
 jobs:
   # Build & Test st2 packages
   packages:
-    parallelism: 3
+    parallelism: 2
     # 4CPUs & 8GB RAM CircleCI machine
     # sadly, it doesn't work with 'setup_remote_docker'
     resource_class: large
     docker:
       # The primary container is an instance of the first list image listed. Your build commands run in this container.
-      - image: circleci/python:3.6
+      - image: circleci/python:3.8
     working_directory: ~/st2-packages
     environment:
-      DISTROS: "focal el7 el8"
+      DISTROS: "focal el8"
       BASH_ENV: ~/.buildenv
       # These should be set to an empty string, so that st2cd prep tasks are able to replace these
       # with real gitrevs during releases. Note that they are commented out, so that they do not interfere
@@ -116,7 +116,7 @@ jobs:
       - image: circleci/ruby:2.7
     working_directory: /tmp/deploy
     environment:
-      - DISTROS: "focal el7 el8"
+      - DISTROS: "focal el8"
     steps:
       - attach_workspace:
           at: .

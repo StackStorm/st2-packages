@@ -9,9 +9,6 @@ fail() {
 trap 'fail' EXIT
 
 case $ST2_TARGET in
-  "el7")
-    DC_TARGET=centos7
-    INSTALL_CMD="yum";;
   "focal")
     DC_TARGET=$ST2_TARGET
     INSTALL_CMD="apt-get";;
@@ -22,7 +19,7 @@ esac
 
 echo "[Install] dependencies"
 sudo $INSTALL_CMD update
-if [[ $ST2_TARGET != 'el7' ]]; then
+if [[ $ST2_TARGET == 'focal' ]]; then
   sudo apt-get -y autoremove
   sudo apt-get install -y gdebi-core
 fi
@@ -57,7 +54,7 @@ if [ "$ST2_INSTALL" = "yes" ]; then
   sudo docker stop "vagrant_${DC_TARGET}test_1"
 
   # Install the packages we just built
-  if [[ $ST2_TARGET != 'el7' ]]; then
+  if [[ $ST2_TARGET == 'focal' ]]; then
     sudo /usr/bin/gdebi -n /tmp/st2-packages/st2_*.deb
   else
     sudo $INSTALL_CMD install -y /tmp/st2-packages/st2*.rpm
@@ -79,7 +76,7 @@ if [ "$ST2_INSTALL" = "yes" ]; then
   # Create htpasswd file
   HT='/usr/bin/htpasswd'
   if [[ ! -x "$HT" ]]; then
-    if [[ $ST2_TARGET != 'el7' ]]; then
+    if [[ $ST2_TARGET == 'focal' ]]; then
       sudo $INSTALL_CMD install -y apache2-utils
     else
       sudo $INSTALL_CMD install -y httpd-tools

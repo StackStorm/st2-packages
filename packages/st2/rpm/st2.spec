@@ -17,9 +17,9 @@ Epoch: %{epoch}
 Requires: openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
 %if 0%{?rhel} == 8
 Requires: python38-devel
-%else # Requires for RHEL 8
+%else # Required for RHEL 8
 Requires: python3-devel
-%endif  # Requires for RHEL 7
+%endif  # default
 
 # EL8 requires a few python packages available within 'BUILDROOT' when outside venv
 # These are in the el8 packagingbuild dockerfile
@@ -28,7 +28,7 @@ Requires: python3-devel
 # Will use the python3 stdlib venv
 BuildRequires: python38-devel
 BuildRequires: python38-setuptools
-%endif  # Requires for RHEL 7
+%endif
 
 %if 0%{?rhel} == 8
 # By default on EL 8, RPM helper scripts will try to generate Requires: section which lists every
@@ -38,7 +38,6 @@ BuildRequires: python38-setuptools
 # so we skip that step to vastly speed up the build.
 # Technically we also don't Require or Provide any of those libraries auto-detected by that script
 # because those are only used internally inside a package specific virtual environment.
-# Same step also does not run on EL7.
 # See https://github.com/StackStorm/st2-packages/pull/697#issuecomment-808971874 and that PR for
 # more details.
 # That issue was found by enabling rpmbuild -vv flag.

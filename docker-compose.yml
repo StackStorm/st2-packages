@@ -30,31 +30,10 @@ el8:
     - mongodb
     - redis
 
-el7:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
-  environment:
-    - BUILDNODE=centos7build
-    - TESTNODE=centos7test
-  links:
-    - centos7build
-    - centos7test
-    - rabbitmq
-    - mongodb
-    - redis
-
 ## Package build nodes
 #
 focalbuild:
   image: stackstorm/packagingbuild:focal
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
-
-centos7build:
-  image: stackstorm/packagingbuild:centos7
   extends:
     file: docker-compose.override.yml
     service: volumes-compose
@@ -75,15 +54,6 @@ focaltest:
     service: volumes-compose
   volumes:
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
-centos7test:
-  image: stackstorm/packagingtest:centos7-systemd
-  privileged: true
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup
 
 rockylinux8test:
   image: stackstorm/packagingtest:rockylinux8-systemd

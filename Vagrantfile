@@ -10,11 +10,6 @@ VIRTUAL_MACHINES = {
     :box => 'ubuntu/focal64',
     :ip => '192.168.16.25',
   },
-  :el7 => {
-    :hostname => 'st2-packages-el7',
-    :box => 'centos/7',
-    :ip => '192.168.16.22',
-  },
   :el8 => {
     :hostname => 'st2-packages-el8',
     :box => 'rockylinux/8',
