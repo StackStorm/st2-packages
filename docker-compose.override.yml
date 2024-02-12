@@ -1,56 +1,58 @@
 ## Suites configuration
 #
-suite:
-  image: fake
-  working_dir: /root/st2-packages
-  environment:
-    - DEBUG_LEVEL=0
-  volumes:
-    - .:/root/st2-packages
-    - /tmp/st2-packages:/root/build
+version: "2.1"
+services:
+  suite:
+    image: fake
+    working_dir: /root/st2-packages
+    environment:
+      - DEBUG_LEVEL=0
+    volumes:
+      - .:/root/st2-packages
+      - /tmp/st2-packages:/root/build
 
-suite-compose:
-  image: fake
-  extends:
-    file: docker-compose.override.yml
-    service: suite
+  suite-compose:
+    image: fake
+    extends:
+      file: docker-compose.override.yml
+      service: suite
 
-suite-circle:
-  image: fake
-  command: build
-  extends:
-    file: docker-compose.override.yml
-    service: suite
+  suite-circle:
+    image: fake
+    command: build
+    extends:
+      file: docker-compose.override.yml
+      service: suite
 
-## Volumes passed during compose or ci builds
-#
-volumes-compose:
-  image: fake
-  volumes:
-    - /tmp/st2-packages:/root/build
+  ## Volumes passed during compose or ci builds
+  #
+  volumes-compose:
+    image: fake
+    volumes:
+      - /tmp/st2-packages:/root/build
 
-volumes-circle:
-  image: fake
-  volumes:
-    - /tmp/st2-packages:/root/build
-    - /tmp/st2-packages/log/st2:/var/log/st2
+  volumes-circle:
+    image: fake
+    volumes:
+      - /tmp/st2-packages:/root/build
+      - /tmp/st2-packages/log/st2:/var/log/st2
 
-## Service used by st2
-#
-rabbitmq:
-  image: rabbitmq:3.9-management
-  privileged: true
-  hostname: rabbit
-  ports:
-    - "15672:15672"  # managment plugin port
-    - "5672:5672"
+  ## Service used by st2
+  #
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    privileged: true
+    hostname: rabbit
+    ports:
+      - "15672:15672"  # managment plugin port
+      - "5672:5672"
 
-mongodb:
-  image: mongo:4.0
-  ports:
-    - "27017:27017"
+  mongodb:
+    image: mongo:4.4
+    ports:
+      - "27017:27017"
 
-redis:
-  image: redis:6.2.11
-  ports:
-    - "6379:6379"
+  redis:
+    image: redis:7.2.4
+    ports:
+      - "6379:6379"
