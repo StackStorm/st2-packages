@@ -29,11 +29,11 @@ It's very simple to invoke the whole build-test pipeline. First just make sure t
 
 ```shell
 # (Optional) First clean out previous build containers
-docker-compose kill
-docker-compose rm -f
+docker compose kill
+docker compose rm -f
 
 # To build packages for ubuntu focal (--rm will wipe packaging runner container. All others will remain active).
-docker-compose run --rm focal
+docker compose run --rm focal
 ```
 
 Execution takes a while, so grab a cup of tea or coffee and wait until it finishes. When build and test processes succeed, you'll find the StackStorm packages in `/tmp/st2-packages` on your host machine:
@@ -77,8 +77,8 @@ to install docker in `el8`.
 
 The following steps are run while provisioning the Vagrant VM:
 
-1. Install `docker` and `docker-compose`.
-2. Run `docker-compose run --rm $TARGET` to build, test and package ST2 as described in prior
+1. Install `docker` that includes `docker compose` V2.
+2. Run `docker compose run --rm $TARGET` to build, test and package ST2 as described in prior
    sections.
 3. Install the packages built in step 2, unless the host `$ST2_INSTALL` environment variable is set to
    a value other than `yes`.
@@ -106,7 +106,7 @@ Current community packages are hosted on https://packagecloud.io/StackStorm. For
 
 If you are adding support for a new distribution for which ``packagingbuild`` and ``packagingtest``
 images are not yet published to Docker Hub and you want to test the build pipeline locally, you
-need to update ``docker-compose.yml`` file to use locally built Docker images.
+need to update ``docker compose.yml`` file to use locally built Docker images.
 
 For example:
 

@@ -1,4 +1,4 @@
-version: "2.1"
+version: "3.8"
 services:
   focal:
     image: quay.io/stackstorm/packagingrunner
@@ -96,3 +96,22 @@ services:
       - seccomp:unconfined
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
+
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    privileged: true
+    hostname: rabbit
+    ports:
+      - "15672:15672"  # managment plugin port
+      - "5672:5672"
+
+  mongodb:
+    image: mongo:4.4
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: redis:7.2.4
+    ports:
+      - "6379:6379"

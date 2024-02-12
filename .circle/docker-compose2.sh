@@ -18,16 +18,16 @@ case "$1" in
   # containers running from the previous cached build
   clean)
     echo Cleaning cached Docker containers which could be there from the previous build ...
-    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml rm -v --stop --force || true
+    docker compose -f docker-compose.circle2.yml -f docker-compose.override.yml rm -v --stop --force || true
   ;;
   # Perform fake command invocation, technically provides images "pull" phase.
   pull)
     echo Pulling dependent Docker images for $2 ...
-    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml pull --include-deps $2
+    docker compose -f docker-compose.circle2.yml -f docker-compose.override.yml pull --include-deps $2
   ;;
   build)
     echo Starting Packages Build for $2 ...
-    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
+    docker compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
         -e ST2_CHECKOUT=${ST2_CHECKOUT} \
         -e ST2_GITURL=${ST2_GITURL} \
         -e ST2_GITREV=${ST2_GITREV} \
@@ -41,7 +41,7 @@ case "$1" in
   test)
     [ "$TESTING" = 0 ] && { echo "Omitting Tests for $2 ..." ; exit 0; }
     echo Starting Tests for $2 ...
-    docker-compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
+    docker compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
         $2 test
   ;;
