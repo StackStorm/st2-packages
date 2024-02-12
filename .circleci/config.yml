@@ -32,6 +32,7 @@ jobs:
           # See if default solves rockylinux9 problems with getaddrinfo 
           # https://support.circleci.com/hc/en-us/articles/11125365270939-Architecture-Change-Setup-remote-docker-
           #version: 19.03.14
+          version: 20.10.24
       - run:
           name: Ensure installation scripts are synced with their templates
           command: make .generated-files-check
