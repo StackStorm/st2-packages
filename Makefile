@@ -3,7 +3,7 @@ scriptsgen:
 	@echo
 	@echo "================== scripts gen ===================="
 	@echo
-	python tools/generate_final_installer_scripts.py
+	/usr/bin/env python3 tools/generate_final_installer_scripts.py
 
 .PHONY: .generated-files-check
 .generated-files-check:
