@@ -26,10 +26,12 @@
 # https://github.com/StackStorm/st2/wiki/Where-all-to-update-pip-and-or-virtualenv
 %define pin_pip %{venv_python} %{venv_bin}/%{pip_binname} install pip==20.3.3
 %define install_venvctrl %{python_binname} -m pip install venvctrl
-%if 0%{?rhel} == 8
+%if 0%{?rhel} == 9
 %define install_crypto %{venv_python} %{venv_bin}/pip3.8 install cryptography==2.8
-%else
+%elif 0%{?rhel} == 9
 %define install_crypto %{venv_python} %{venv_bin}/pip3.9 install cryptography==2.8
+%else
+install_crypto %{nil}
 %endif
 
 %define venv_pip %{venv_python} %{venv_bin}/pip3 install --find-links=%{wheel_dir} --no-index
