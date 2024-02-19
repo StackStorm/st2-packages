@@ -1,64 +1,95 @@
-focal:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
-  environment:
-    - BUILDNODE=focalbuild
-    - TESTNODE=focaltest
-    - ST2_PACKAGES=st2
-  links:
-    - focalbuild
-    - focaltest
-    - rabbitmq
-    - mongodb
-    - redis
+version: "2.1"
+services:
+  focal:
+    image: quay.io/stackstorm/packagingrunner
+    extends:
+      file: docker-compose.override.yml
+      service: suite-compose
+    environment:
+      - BUILDNODE=focalbuild
+      - TESTNODE=focaltest
+      - ST2_PACKAGES=st2
+    links:
+      - focalbuild
+      - focaltest
+      - rabbitmq
+      - mongodb
+      - redis
 
-el8:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
-  environment:
-    - BUILDNODE=rockylinux8build
-    - TESTNODE=rockylinux8test
-    - ST2_PACKAGES=st2
-  links:
-    - rockylinux8build
-    - rockylinux8test
-    - rabbitmq
-    - mongodb
-    - redis
+  jammy:
+    image: quay.io/stackstorm/packagingrunner
+    extends:
+      file: docker-compose.override.yml
+      service: suite-compose
+    environment:
+      - BUILDNODE=jammybuild
+      - TESTNODE=jammytest
+      - ST2_PACKAGES=st2
+    links:
+      - jammybuild
+      - jammytest
+      - rabbitmq
+      - mongodb
+      - redis
 
-## Package build nodes
-#
-focalbuild:
-  image: stackstorm/packagingbuild:focal
-  volumes_from:
-    - st2-packages-vol
+  el8:
+    image: quay.io/stackstorm/packagingrunner
+    extends:
+      file: docker-compose.override.yml
+      service: suite-compose
+    environment:
+      - BUILDNODE=rockylinux8build
+      - TESTNODE=rockylinux8test
+      - ST2_PACKAGES=st2
+    links:
+      - rockylinux8build
+      - rockylinux8test
+      - rabbitmq
+      - mongodb
+      - redis
 
-rockylinux8build:
-  image: stackstorm/packagingbuild:rockylinux8
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  ## Package build nodes
+  #
+  focalbuild:
+    image: stackstorm/packagingbuild:focal
+    volumes_from:
+      - container:st2-packages-vol
 
-## Package testing nodes
-#
-focaltest:
-  image: stackstorm/packagingtest:focal-systemd
-  privileged: true
-  volumes_from:
-    - st2-packages-vol
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  jammybuild:
+    image: stackstorm/packagingbuild:jammy
+    volumes_from:
+      - container:st2-packages-vol
 
-rockylinux8test:
-  image: stackstorm/packagingtest:rockylinux8-systemd
-  privileged: true
-  cap_add:
-    - SYS_ADMIN
-  security_opt:
-    - seccomp:unconfined
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup
+  rockylinux8build:
+    image: stackstorm/packagingbuild:rockylinux8
+    extends:
+      file: docker-compose.override.yml
+      service: volumes-compose
+
+  ## Package testing nodes
+  #
+  focaltest:
+    image: stackstorm/packagingtest:focal-systemd
+    privileged: true
+    volumes_from:
+      - container:st2-packages-vol
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+  jammytest:
+    image: stackstorm/packagingtest:jammy-systemd
+    privileged: true
+    volumes_from:
+      - container:st2-packages-vol
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+  rockylinux8test:
+    image: stackstorm/packagingtest:rockylinux8-systemd
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup

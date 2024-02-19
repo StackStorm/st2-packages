@@ -8,7 +8,7 @@ version: 2
 jobs:
   # Build & Test st2 packages
   packages:
-    parallelism: 2
+    parallelism: 3
     # 4CPUs & 8GB RAM CircleCI machine
     # sadly, it doesn't work with 'setup_remote_docker'
     resource_class: large
@@ -17,7 +17,7 @@ jobs:
       - image: circleci/python:3.8
     working_directory: ~/st2-packages
     environment:
-      DISTROS: "focal el8"
+      DISTROS: "focal jammy el8"
       BASH_ENV: ~/.buildenv
       # These should be set to an empty string, so that st2cd prep tasks are able to replace these
       # with real gitrevs during releases. Note that they are commented out, so that they do not interfere
@@ -26,10 +26,25 @@ jobs:
       # ST2_GITREV: ""
     steps:
       - checkout
+      - run:
+          name: Install latest Docker Compose V2
+          command: |
+            set -x
+            export CODENAME=$(source /etc/os-release && echo "$VERSION_CODENAME")
+            export DISTRO=$(source /etc/os-release && echo "$ID")
+            export ARCH=$(dpkg --print-architecture)
+            # get gpg key for download.docker
+            curl -fsSL https://download.docker.com/linux/${DISTRO}/gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/download.docker.gpg
+            # set source list
+            sudo tee <<<"deb [arch=${ARCH}] https://download.docker.com/linux/${DISTRO} ${CODENAME} stable" /etc/apt/sources.list.d/download.docker.list
+            # update package list
+            sudo apt update
+            # install docker CLI and Docker Compose v2
+            sudo apt install docker-ce-cli docker-compose-plugin
       - setup_remote_docker:
-          reusable: true    # default - false
-          exclusive: true   # default - true
-          version: 19.03.14
+          # reusable: true    # default - false
+          # exclusive: true   # default - true
+          version: docker24
       - run:
           name: Ensure installation scripts are synced with their templates
           command: make .generated-files-check
@@ -38,7 +53,7 @@ jobs:
           command: |
             set -x
             docker --version
-            docker-compose --version
+            docker compose --version
       - run:
           name: Initialize packages Build Environment
           command: |
@@ -73,7 +88,7 @@ jobs:
           command: |
             # Create necessary directories
             mkdir -p ~/st2-packages/build/${DISTRO}/log/
-            
+
             # Run the build
             .circle/docker-compose2.sh build ${DISTRO}
 
@@ -116,7 +131,7 @@ jobs:
       - image: circleci/ruby:2.7
     working_directory: /tmp/deploy
     environment:
-      - DISTROS: "focal el8"
+      - DISTROS: "focal jammy el8"
     steps:
       - attach_workspace:
           at: .

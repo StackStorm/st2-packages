@@ -5,6 +5,11 @@
 VAGRANTFILE_API_VERSION = "2"
 
 VIRTUAL_MACHINES = {
+  :jammy => {
+    :hostname => 'st2-packages-jammy',
+    :box => 'ubuntu/jammy64',
+    :ip => '192.168.16.26',
+  },
   :focal => {
     :hostname => 'st2-packages-focal',
     :box => 'ubuntu/focal64',
