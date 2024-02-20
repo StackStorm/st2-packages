@@ -473,7 +473,7 @@ get_full_pkg_versions() {
 
 
 
-# Note that default SELINUX policies for RHEL8 differ with CentOS8. CentOS8 is more permissive by default
+# Note that default SELINUX policies for RHEL8 differ with Rocky8. Rocky8 is more permissive by default
 # Note that depending on distro assembly/settings you may need more rules to change
 # Apply these changes OR disable selinux in /etc/selinux/config (manually)
 adjust_selinux_policies() {
