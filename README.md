@@ -104,9 +104,7 @@ Current community packages are hosted on https://packagecloud.io/StackStorm. For
 
 ## Adding Support For a New Distribution
 
-If you are adding support for a new distribution for which ``packagingbuild`` and ``packagingtest``
-images are not yet published to Docker Hub and you want to test the build pipeline locally, you
-need to update ``docker-compose.yml`` file to use locally built Docker images.
+If you are adding support for a new distribution for which ``packagingbuild`` and ``packagingtest`` images are not yet published to Docker Hub and you want to test the build pipeline locally, you need to update ``docker-compose.yml`` file to use locally built Docker images.
 
 For example:
 
