@@ -23,25 +23,25 @@ case "$1" in
   ;;
   # Perform fake command invocation, technically provides images "pull" phase.
   pull)
-    echo "Pulling dependent Docker images for $2 ..."
+    echo Pulling dependent Docker images for $2 ...
     docker compose -f docker-compose.circle2.yml -f docker-compose.override.yml pull --include-deps $2
   ;;
   build)
-    echo "Starting Packages Build for $2 ..."
+    echo Starting Packages Build for $2 ...
     docker compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
-        -e ST2_CHECKOUT="${ST2_CHECKOUT}" \
-        -e ST2_GITURL="${ST2_GITURL}" \
-        -e ST2_GITREV="${ST2_GITREV}" \
-        -e ST2_GITDIR="${ST2_GITDIR}" \
-        -e ST2PKG_VERSION="${ST2PKG_VERSION}" \
-        -e ST2PKG_RELEASE="${ST2PKG_RELEASE}" \
+        -e ST2_CHECKOUT=${ST2_CHECKOUT} \
+        -e ST2_GITURL=${ST2_GITURL} \
+        -e ST2_GITREV=${ST2_GITREV} \
+        -e ST2_GITDIR=${ST2_GITDIR} \
+        -e ST2PKG_VERSION=${ST2PKG_VERSION} \
+        -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
         -e ST2_CIRCLE_URL="${CIRCLE_BUILD_URL}" \
         $2 build
   ;;
   test)
     [ "$TESTING" = 0 ] && { echo "Omitting Tests for $2 ..." ; exit 0; }
-    echo "Starting Tests for $2 ..."
+    echo Starting Tests for $2 ...
     docker compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
         "$2" test

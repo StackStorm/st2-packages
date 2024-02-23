@@ -14,7 +14,9 @@ platform() {
 }
 
 # NOTE: If you want to troubleshoot rpmbuild, add -vv flag to enable debug mode
-build_rpm() { rpmbuild -bb --define '_topdir %(readlink -f build)' rpm/"$package_name".spec; }
+build_rpm() {
+	rpmbuild -bb --define '_topdir %(readlink -f build)' rpm/"$package_name".spec;
+}
 build_deb() { dpkg-buildpackage -b -uc -us -j"$cores_num"; }
 
 copy_rpm() {

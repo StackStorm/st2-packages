@@ -20,6 +20,11 @@ VIRTUAL_MACHINES = {
     :box => 'rockylinux/8',
     :ip => '192.168.16.24',
   },
+  :el9 => {
+    :hostname => 'st2-packages-el9',
+    :box => 'rockylinux/9',
+    :ip => '192.168.16.26',
+  },
 }
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|

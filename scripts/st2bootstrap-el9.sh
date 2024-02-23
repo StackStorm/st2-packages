@@ -474,7 +474,7 @@ get_full_pkg_versions() {
 
 
 
-# Note that default SELINUX policies for RHEL8 differ with Rocky8. Rocky8 is more permissive by default
+# Note that default SELINUX policies for RHEL9 differ with CentOS8. CentOS8 is more permissive by default
 # Note that depending on distro assembly/settings you may need more rules to change
 # Apply these changes OR disable selinux in /etc/selinux/config (manually)
 adjust_selinux_policies() {
@@ -496,7 +496,7 @@ install_net_tools() {
 }
 
 install_st2_dependencies() {
-  # RabbitMQ on RHEL8 requires module(perl:5.26
+  # RabbitMQ on RHEL9 requires module(perl:5.26
   if is_rhel; then
     sudo yum -y module enable perl:5.26
   fi
@@ -606,7 +606,7 @@ install_st2() {
   else
     sudo yum -y install jq
 
-    PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "el8" "st2-.*.rpm")
+    PACKAGE_URL=$(get_package_url "${DEV_BUILD}" "el9" "st2-.*.rpm")
     sudo yum -y install ${PACKAGE_URL}
   fi
 
@@ -673,8 +673,8 @@ EOT"
   # Remove default site, if present
   sudo rm -f /etc/nginx/conf.d/default.conf
 
-  # EL8: Comment out server { block } in nginx.conf and clean up
-  # nginx 1.6 in EL8 ships with a server block enabled which needs to be disabled
+  # EL9: Comment out server { block } in nginx.conf and clean up
+  # nginx 1.6 in EL9 ships with a server block enabled which needs to be disabled
 
   # back up conf
   sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
@@ -693,7 +693,7 @@ EOT"
   sudo systemctl restart nginx
   sudo systemctl enable nginx
 
-  # RHEL 8 runs firewalld so we need to open http/https
+  # RHEL 9 runs firewalld so we need to open http/https
   if is_rhel && command -v firewall-cmd >/dev/null 2>&1; then
     sudo firewall-cmd --zone=public --add-service=http --add-service=https
     sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https
@@ -738,7 +738,7 @@ configure_st2chatops() {
     echo "  $ sudo service st2chatops restart"
     echo ""
     echo "For more information, please refer to documentation at  "
-    echo "https://docs.stackstorm.com/install/rhel8.html#setup-chatops"
+    echo "https://docs.stackstorm.com/install/rhel9.html#setup-chatops"
     echo "########################################################"
   fi
 }

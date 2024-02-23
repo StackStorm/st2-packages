@@ -1,8 +1,8 @@
-version: "2.1" # https://docs.docker.com/compose/compose-file/compose-file-v2/
+## Suites configuration
+#
+version: "3.8"
 
 services:
-  ## Suites configuration
-  #
   suite:
     image: fake
     working_dir: /root/st2-packages
@@ -15,14 +15,14 @@ services:
   suite-compose:
     image: fake
     extends:
-      # file: docker-compose.override.yml
+      file: docker-compose.override.yml
       service: suite
 
   suite-circle:
     image: fake
     command: build
     extends:
-      # file: docker-compose.override.yml
+      file: docker-compose.override.yml
       service: suite
 
   ## Volumes passed during compose or ci builds
@@ -37,23 +37,3 @@ services:
     volumes:
       - /tmp/st2-packages:/root/build
       - /tmp/st2-packages/log/st2:/var/log/st2
-
-  ## Service used by st2
-  #
-  rabbitmq:
-    image: rabbitmq:3.9-management
-    privileged: true
-    hostname: rabbit
-    ports:
-      - "15672:15672"  # managment plugin port
-      - "5672:5672"
-
-  mongodb:
-    image: mongo:4.0
-    ports:
-      - "27017:27017"
-
-  redis:
-    image: redis:6.2.11
-    ports:
-      - "6379:6379"

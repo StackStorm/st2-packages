@@ -17,7 +17,7 @@ jobs:
       - image: circleci/python:3.8
     working_directory: ~/st2-packages
     environment:
-      DISTROS: "focal jammy el8"
+      DISTROS: "focal el8 el9"
       BASH_ENV: ~/.buildenv
       # These should be set to an empty string, so that st2cd prep tasks are able to replace these
       # with real gitrevs during releases. Note that they are commented out, so that they do not interfere
@@ -42,8 +42,8 @@ jobs:
             # install docker CLI and Docker Compose v2
             sudo apt install docker-ce-cli docker-compose-plugin
       - setup_remote_docker:
-          # reusable: true    # default - false
-          # exclusive: true   # default - true
+          reusable: true    # default - false
+          exclusive: true   # default - true
           version: docker24
       - run:
           name: Ensure installation scripts are synced with their templates
@@ -53,7 +53,7 @@ jobs:
           command: |
             set -x
             docker --version
-            docker compose --version
+            docker compose version
       - run:
           name: Initialize packages Build Environment
           command: |
@@ -131,7 +131,7 @@ jobs:
       - image: circleci/ruby:2.7
     working_directory: /tmp/deploy
     environment:
-      - DISTROS: "focal jammy el8"
+      - DISTROS: "focal el8 el9"
     steps:
       - attach_workspace:
           at: .
