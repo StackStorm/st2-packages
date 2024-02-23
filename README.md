@@ -6,7 +6,7 @@
 
 ## Highlights
 
- - **Docker based**. Leveraging docker it's possible to deliver packages for any OS distro in a fast and reliable way.
+ - **Docker based**. Leveraging docker it's possible to deliver packages for any OS distro in a fast and reliable way.  *Use the latest Docker version with a Docker Compose plugin that supports V2 syntax.*
  - [Rake](https://github.com/ruby/rake) + [sshkit](https://github.com/capistrano/sshkit)-based execution enables easy configuration via **simple DSL** and brings **parallel task processing** out of the box.
  - **Test-driven workflow**. Artifacts built are not only available for any enabled OS distro but at the same time tested on a bunch of platforms, providing feedback such as can be installed, services can start up, operations can be executed etc.
 
@@ -15,7 +15,7 @@
 Packages build environment is a *multi-container docker* application defined and managed with [docker-compose](https://github.com/docker/compose). It consists of four types of containers:
 
  - **Packaging runner** (https://quay.io/stackstorm/packagingrunner) - the main entry point, package build and test processing controller container.
- - **Packaging build** (https://hub.docker.com/r/stackstorm/packagingbuild/) - container where actual `.deb`/`.rpm` artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingbuild:centos7*, *packagingbuild:focal* correspondingly for CentOS 7 and Ubuntu Focal.
+ - **Packaging build** (https://hub.docker.com/r/stackstorm/packagingbuild/) - container where actual `.deb`/`.rpm` artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingbuild:rocky8*, *packagingbuild:focal* correspondingly for RockyLinux 8 and Ubuntu Focal.
  - **Packaging test** (https://hub.docker.com/r/stackstorm/packagingtest/) - containers where built artifacts are tested, i.e. *artifacts are installed, configuration is written and tests are performed*.
  - **Services** - these are different containers required for testing such as *rabbitmq and mongodb*
 
@@ -29,11 +29,11 @@ It's very simple to invoke the whole build-test pipeline. First just make sure t
 
 ```shell
 # (Optional) First clean out previous build containers
-docker-compose kill
-docker-compose rm -f
+docker compose kill
+docker compose rm -f
 
 # To build packages for ubuntu focal (--rm will wipe packaging runner container. All others will remain active).
-docker-compose run --rm focal
+docker compose run --rm focal
 ```
 
 Execution takes a while, so grab a cup of tea or coffee and wait until it finishes. When build and test processes succeed, you'll find the StackStorm packages in `/tmp/st2-packages` on your host machine:
@@ -71,14 +71,14 @@ In order to build, package, install and test ST2 in an isolated Vagrant VM, run 
 vagrant up $TARGET
 ```
 
-Where `$TARGET` is one of `bionic`, `focal`, `el7`, or `el8`. If you are using `el8`, comment
+Where `$TARGET` is one of `focal`, or `el8` or `el9`. If you are using `el8`, comment
 out the `vm_config.vm.provision :docker` line in the Vagrantfile. There is logic in `setup-vagrant.sh`
 to install docker in `el8`.
 
 The following steps are run while provisioning the Vagrant VM:
 
-1. Install `docker` and `docker-compose`.
-2. Run `docker-compose run --rm $TARGET` to build, test and package ST2 as described in prior
+1. Install `docker` that includes `docker compose` V2.
+2. Run `docker compose run --rm $TARGET` to build, test and package ST2 as described in prior
    sections.
 3. Install the packages built in step 2, unless the host `$ST2_INSTALL` environment variable is set to
    a value other than `yes`.
@@ -100,7 +100,7 @@ are `st2admin` and `Ch@ngeMe` respectively.
 # Installation
 Current community packages are hosted on https://packagecloud.io/StackStorm. For detailed instructions how install st2 and perform basic configuration follow these instructions:
 - [Ubuntu/Debian](https://docs.stackstorm.com/install/deb.html)
-- [RHEL7/CentOS7](https://docs.stackstorm.com/install/rhel7.html)
+- [RHEL8/RockyLinux8](https://docs.stackstorm.com/install/rhel8.html)
 
 ## Adding Support For a New Distribution
 
@@ -113,40 +113,40 @@ For example:
 ```yaml
 ...
 
-bionic:
+focal:
   ...
   image: quay.io/stackstorm/packagingrunner
   ...
 ...
 
-bionicbuild:
+focalbuild:
   ...
-  image: bionicbuild
+  image: focalbuild
   ...
 
 ...
 
-bionictest:
+focaltest:
   ...
-  image: bionictest
+  image: focaltest
   ...
 ```
 
-NOTE: Main ``distro`` definition (e.g. ``bionic``, ``focal``, etc.) needs to use packaging runner image.
+NOTE: Main ``distro`` definition (e.g. ``focal``, ``el8`` etc.) needs to use packaging runner image.
 
-As you can see, ``image`` attribute references local image tagged ``bionicbuild`` instead of a
-remote image (e.g. ``stackstorm/packagingbuild:bionic`` or similar).
+As you can see, ``image`` attribute references local image tagged ``focalbuild`` instead of a
+remote image (e.g. ``stackstorm/packagingbuild:focal`` or similar).
 
 Before that will work, you of course also need to build those images locally.
 
 For example:
 
 ```bash
-cd ~/st2packaging-dockerfiles/packagingbuild/bionic
-docker build -t bionicbuild .
+cd ~/st2packaging-dockerfiles/packagingbuild/focal
+docker build -t focalbuild .
 
-cd ~/st2packaging-dockerfiles/packagingtest/bionic/systemd
-docker build -t bionictest .
+cd ~/st2packaging-dockerfiles/packagingtest/focal/systemd
+docker build -t focaltest .
 ```
 
 # License and Authors

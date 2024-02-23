@@ -109,7 +109,7 @@ setup_args() {
 # include:includes/rhel.sh
 
 
-# Note that default SELINUX policies for RHEL8 differ with CentOS8. CentOS8 is more permissive by default
+# Note that default SELINUX policies for RHEL8 differ with Rocky8. Rocky8 is more permissive by default
 # Note that depending on distro assembly/settings you may need more rules to change
 # Apply these changes OR disable selinux in /etc/selinux/config (manually)
 adjust_selinux_policies() {
@@ -148,9 +148,8 @@ install_st2_dependencies() {
 install_rabbitmq() {
   # Install erlang from rabbitmq/erlang as need newer version
   # than available in epel.
-  # Use Erlang 24 as RabbitMQ 3.10 only has preview support for Erlang 25.
   curl -sL https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | sudo bash
-  sudo yum -y install erlang-24*
+  sudo yum -y install erlang-25*
   # Install rabbit from packagecloud
   curl -sL https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
   sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'

@@ -5,25 +5,20 @@
 VAGRANTFILE_API_VERSION = "2"
 
 VIRTUAL_MACHINES = {
-  :bionic => {
-    :hostname => 'st2-packages-bionic',
-    :box => 'ubuntu/bionic64',
-    :ip => '192.168.16.23',
-  },
   :focal => {
     :hostname => 'st2-packages-focal',
     :box => 'ubuntu/focal64',
     :ip => '192.168.16.25',
   },
-  :el7 => {
-    :hostname => 'st2-packages-el7',
-    :box => 'centos/7',
-    :ip => '192.168.16.22',
-  },
   :el8 => {
     :hostname => 'st2-packages-el8',
     :box => 'rockylinux/8',
     :ip => '192.168.16.24',
+  },
+  :el9 => {
+    :hostname => 'st2-packages-el9',
+    :box => 'rockylinux/9',
+    :ip => '192.168.16.26',
   },
 }
 

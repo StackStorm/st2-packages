@@ -17,9 +17,10 @@ Epoch: %{epoch}
 Requires: openssl-devel, libffi-devel, git, pam, openssh-server, openssh-clients, bash, setup
 %if 0%{?rhel} == 8
 Requires: python38-devel
-%else # Requires for RHEL 8
+%endif
+%if 0%{?rhel} == 9
 Requires: python3-devel
-%endif  # Requires for RHEL 7
+%endif
 
 # EL8 requires a few python packages available within 'BUILDROOT' when outside venv
 # These are in the el8 packagingbuild dockerfile
@@ -28,17 +29,21 @@ Requires: python3-devel
 # Will use the python3 stdlib venv
 BuildRequires: python38-devel
 BuildRequires: python38-setuptools
-%endif  # Requires for RHEL 7
+%endif
+%if 0%{?rhel} == 9
+BuildRequires: python3-devel
+BuildRequires: python3-setuptools
+%endif
 
-%if 0%{?rhel} == 8
-# By default on EL 8, RPM helper scripts will try to generate Requires: section which lists every
+# Apply this to both RHEL 8 and RHEL 9
+%if 0%{?rhel} > 7
+# By default the RPM helper scripts will try to generate Requires: section which lists every
 # Python dependencies. That process / script works by recursively scanning all the package Python
 # dependencies which is very slow (5-6 minutes).
 # Our package bundles virtualenv with all the dependendencies and doesn't rely on this metadata
 # so we skip that step to vastly speed up the build.
 # Technically we also don't Require or Provide any of those libraries auto-detected by that script
 # because those are only used internally inside a package specific virtual environment.
-# Same step also does not run on EL7.
 # See https://github.com/StackStorm/st2-packages/pull/697#issuecomment-808971874 and that PR for
 # more details.
 # That issue was found by enabling rpmbuild -vv flag.
@@ -58,6 +63,11 @@ Conflicts: st2common
 # Define worker name
 %define worker_name st2actionrunner@
 
+# WORKAROUND: RockyLinux9 doesn't have a python virtualenv rpm so it's installed during build as a dependency with pip.
+%if 0%{?rhel} == 9
+%build
+  pip install virtualenv
+%endif
 
 %install
   %default_install
@@ -67,10 +77,10 @@ Conflicts: st2common
   %service_install st2scheduler
   make post_install DESTDIR=%{buildroot}
 
-# We build cryptography for EL8, and this can contain buildroot path in the
+# We build cryptography for RHEL8/RHEL9, and this can contain buildroot path in the
 # built .so files. We use strip on these libraries so that there are no
 # references to the buildroot in the st2 rpm
-%if 0%{?rhel} == 8
+%if 0%{?rhel} > 7
   %cleanup_so_abspath
 %endif
   %cleanup_python_abspath
@@ -103,7 +113,7 @@ Conflicts: st2common
   %service_postun st2scheduler
   # Remove st2 logrotate config, since there's no analog of apt-get purge available
   if [ $1 -eq 0 ]; then
-    [ ! -f /etc/logrotate.d/st2 ] || rm /etc/logrotate.d/st2
+    rm -f /etc/logrotate.d/st2
   fi
 
 %files

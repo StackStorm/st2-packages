@@ -16,7 +16,7 @@ PASSWORD=''
 EXTRA_OPTS=''
 
 # Note: This variable needs to default to a branch of the latest stable release
-BRANCH='v3.7'
+BRANCH='v3.8'
 FORCE_BRANCH=""
 
 adddate() {
@@ -170,8 +170,8 @@ elif [[ -n "$DEBTEST" ]]; then
   echo "*** Detected Distro is ${DEBTEST} ***"
   SUBTYPE=`lsb_release -a 2>&1 | grep Codename | grep -v "LSB" | awk '{print $2}'`
   echo "*** Detected flavor ${SUBTYPE} ***"
-  if [[ "$SUBTYPE" != 'xenial' && "$SUBTYPE" != 'focal' && "$SUBTYPE" != 'bionic' ]]; then
-    echo "Unsupported ubuntu codename ${SUBTYPE}. Please use 16.04 (xenial) or Ubuntu 18.04 (bionic) or Ubuntu 20.04 (focal) as base system!"
+  if [[ "$SUBTYPE" != 'focal' ]]; then
+    echo "Unsupported ubuntu codename ${SUBTYPE}. Please use Ubuntu 20.04 (focal) as base system!"
     exit 2
   fi
   ST2BOOTSTRAP="${BASE_PATH}/${BRANCH}/scripts/st2bootstrap-deb.sh"

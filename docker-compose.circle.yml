@@ -1,119 +1,117 @@
-bionic:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
-  environment:
-    - BUILDNODE=bionicbuild
-    - TESTNODE=bionictest
-    - ST2_PACKAGES=st2
-  links:
-    - bionicbuild
-    - bionictest
-    - rabbitmq
-    - mongodb
-    - redis
+version: "3.8"
+services:
+  focal:
+    image: quay.io/stackstorm/packagingrunner
+    extends:
+      file: docker-compose.override.yml
+      service: suite-compose
+    environment:
+      - BUILDNODE=focalbuild
+      - TESTNODE=focaltest
+      - ST2_PACKAGES=st2
+    links:
+      - focalbuild
+      - focaltest
+      - rabbitmq
+      - mongodb
+      - redis
 
-focal:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
-  environment:
-    - BUILDNODE=focalbuild
-    - TESTNODE=focaltest
-    - ST2_PACKAGES=st2
-  links:
-    - focalbuild
-    - focaltest
-    - rabbitmq
-    - mongodb
-    - redis
+  el8:
+    image: quay.io/stackstorm/packagingrunner
+    extends:
+      file: docker-compose.override.yml
+      service: suite-compose
+    environment:
+      - BUILDNODE=rockylinux8build
+      - TESTNODE=rockylinux8test
+      - ST2_PACKAGES=st2
+    links:
+      - rockylinux8build
+      - rockylinux8test
+      - rabbitmq
+      - mongodb
+      - redis
 
-el8:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
-  environment:
-    - BUILDNODE=rockylinux8build
-    - TESTNODE=rockylinux8test
-    - ST2_PACKAGES=st2
-  links:
-    - rockylinux8build
-    - rockylinux8test
-    - rabbitmq
-    - mongodb
-    - redis
+  el9:
+    image: quay.io/stackstorm/packagingrunner
+    extends:
+      file: docker-compose.override.yml
+      service: suite-compose
+    environment:
+      - BUILDNODE=rockylinux9build
+      - TESTNODE=rockylinux9test
+      - ST2_PACKAGES=st2
+    links:
+      - rockylinux9build
+      - rockylinux9test
+      - rabbitmq
+      - mongodb
+      - redis
 
-el7:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-circle
-  environment:
-    - BUILDNODE=centos7build
-    - TESTNODE=centos7test
-  links:
-    - centos7build
-    - centos7test
+  ## Package build nodes
+  #
+  focalbuild:
+    image: stackstorm/packagingbuild:focal
+    volumes_from:
+      - st2-packages-vol
 
-## Package build nodes
-#
-bionicbuild:
-  image: stackstorm/packagingbuild:bionic
-  volumes_from:
-    - st2-packages-vol
+  rockylinux8build:
+    image: stackstorm/packagingbuild:rockylinux8
+    extends:
+      file: docker-compose.override.yml
+      service: volumes-compose
 
-focalbuild:
-  image: stackstorm/packagingbuild:focal
-  volumes_from:
-    - st2-packages-vol
+  rockylinux9build:
+    image: stackstorm/packagingbuild:rockylinux9
+    extends:
+      file: docker-compose.override.yml
+      service: volumes-compose
 
-centos7build:
-  image: stackstorm/packagingbuild:centos7
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
+  ## Package testing nodes
+  #
+  focaltest:
+    image: stackstorm/packagingtest:focal-systemd
+    privileged: true
+    volumes_from:
+      - st2-packages-vol
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
-rockylinux8build:
-  image: stackstorm/packagingbuild:rockylinux8
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  rockylinux8test:
+    image: stackstorm/packagingtest:rockylinux8-systemd
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
 
-## Package testing nodes
-#
-bionictest:
-  image: stackstorm/packagingtest:bionic-systemd
-  privileged: true
-  volumes_from:
-    - st2-packages-vol
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  rockylinux9test:
+    image: stackstorm/packagingtest:rockylinux9-systemd
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
 
-focaltest:
-  image: stackstorm/packagingtest:focal-systemd
-  privileged: true
-  volumes_from:
-    - st2-packages-vol
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
-centos7test:
-  image: stackstorm/packagingtest:centos7-systemd
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-circle
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    privileged: true
+    hostname: rabbit
+    ports:
+      - "15672:15672"  # managment plugin port
+      - "5672:5672"
 
-rockylinux8test:
-  image: stackstorm/packagingtest:rockylinux8-systemd
-  privileged: true
-  cap_add:
-    - SYS_ADMIN
-  security_opt:
-    - seccomp:unconfined
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup
+  mongodb:
+    image: mongo:4.4
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: redis:7.2.4
+    ports:
+      - "6379:6379"

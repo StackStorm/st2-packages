@@ -15,6 +15,13 @@
 %define pip_binname pip3
 %endif
 
+%if 0%{?rhel} == 9
+%define virtualenv_binname virtualenv
+%else
+%define virtualenv_binname virtualenv-3
+%endif
+
+
 %define venv_python %{venv_bin}/%{python_binname}
 # https://github.com/StackStorm/st2/wiki/Where-all-to-update-pip-and-or-virtualenv
 %define pin_pip %{venv_python} %{venv_bin}/%{pip_binname} install pip==20.3.3
@@ -33,11 +40,11 @@
 
 # EL8 requires crypto built locally and venvctrl available outside of venv
 %define pip_install_venv \
-    virtualenv-3 -p %{python_binname} --no-download %{venv_dir} \
+    %{virtualenv_binname} -p %{python_binname} --no-download %{venv_dir} \
     %{pin_pip} \
     %{install_crypto} \
     %{venv_pip} --use-deprecated=legacy-resolver -r requirements.txt \
-    %{venv_pip} . \
+    %{venv_pip} --use-deprecated=legacy-resolver . \
     %{install_venvctrl} \
     venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir} \
 %{nil}

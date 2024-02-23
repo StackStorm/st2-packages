@@ -23,8 +23,8 @@ PASSWORD=''
 U16_ADD_INSECURE_PY3_PPA=0
 SUBTYPE=`lsb_release -cs`
 
-if [[ "$SUBTYPE" != 'focal' && "$SUBTYPE" != 'bionic' ]]; then
-  echo "Unsupported ubuntu codename ${SUBTYPE}. Please use Ubuntu 18.04 (bionic) or Ubuntu 20.04 (focal) as base system!"
+if [[ "$SUBTYPE" != 'focal' ]]; then
+  echo "Unsupported ubuntu codename ${SUBTYPE}. Please use Ubuntu 20.04 (focal) as base system!"
   exit 2
 fi
 
@@ -154,7 +154,8 @@ function configure_proxy() {
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
-  DISTRO=$2  # Distro name (e.g. bionic,focal,el7,el8)
+  DISTRO=$2  # Distro name (e.g. focal,el8,el9)
+
   PACKAGE_NAME_REGEX=$3
 
   PACKAGES_METADATA=$(curl -sSL -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
@@ -430,6 +431,10 @@ fail() {
 }
 
 
+install_net_tools() {
+  # Install netstat
+  sudo apt install -y net-tools
+}
 
 install_st2_dependencies() {
   # Silence debconf prompt, raised during some dep installations. This will be passed to sudo via 'env_keep'.
@@ -469,14 +474,6 @@ EOF
   # Update package indices
   sudo apt-get update -y
 
-  # Set preferences to use 1:24.* for erlang 
-  sudo tee /etc/apt/preferences.d/erlang <<EOF
-# prefer packages erlang less than 25 repository
-Package: erlang-*
-Pin: version 1:24.*
-Pin-Priority: 800
-EOF
-
   # Install Erlang packages
   sudo apt-get install -y erlang-base \
                         erlang-asn1 erlang-crypto erlang-eldap erlang-ftp erlang-inets \
@@ -500,12 +497,8 @@ EOF
 }
 
 install_mongodb() {
-  # Add key and repo for the latest stable MongoDB 4.0
-  if [[ "$SUBTYPE" = 'focal' ]]; then
-    MONGO_VERSION="4.4"
-  else
-    MONGO_VERSION="4.0"
-  fi
+  # Add key and repo for the MongoDB 4.4 (Ubuntu Focal)
+  MONGO_VERSION="4.4"
 
   wget -qO - https://www.mongodb.org/static/pgp/server-${MONGO_VERSION}.asc | sudo apt-key add -
   echo "deb http://repo.mongodb.org/apt/ubuntu ${SUBTYPE}/mongodb-org/${MONGO_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGO_VERSION}.list
@@ -730,6 +723,7 @@ configure_st2chatops() {
 
 trap 'fail' EXIT
 STEP="Setup args" && setup_args $@
+STEP="Install net-tools" && install_net_tools
 STEP="Check TCP ports and MongoDB storage requirements" && check_st2_host_dependencies
 STEP="Generate random password" && generate_random_passwords
 STEP="Configure Proxy" && configure_proxy

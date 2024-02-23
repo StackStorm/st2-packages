@@ -145,7 +145,8 @@ function configure_proxy() {
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
-  DISTRO=$2  # Distro name (e.g. bionic,focal,el7,el8)
+  DISTRO=$2  # Distro name (e.g. focal,el8,el9)
+
   PACKAGE_NAME_REGEX=$3
 
   PACKAGES_METADATA=$(curl -sSL -q https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts)
@@ -473,7 +474,7 @@ get_full_pkg_versions() {
 
 
 
-# Note that default SELINUX policies for RHEL8 differ with CentOS8. CentOS8 is more permissive by default
+# Note that default SELINUX policies for RHEL8 differ with Rocky8. Rocky8 is more permissive by default
 # Note that depending on distro assembly/settings you may need more rules to change
 # Apply these changes OR disable selinux in /etc/selinux/config (manually)
 adjust_selinux_policies() {
@@ -512,9 +513,8 @@ install_st2_dependencies() {
 install_rabbitmq() {
   # Install erlang from rabbitmq/erlang as need newer version
   # than available in epel.
-  # Use Erlang 24 as RabbitMQ 3.10 only has preview support for Erlang 25.
   curl -sL https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | sudo bash
-  sudo yum -y install erlang-24*
+  sudo yum -y install erlang-25*
   # Install rabbit from packagecloud
   curl -sL https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
   sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'
