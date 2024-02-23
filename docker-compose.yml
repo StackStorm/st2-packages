@@ -1,70 +1,128 @@
-focal:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
-  environment:
-    - BUILDNODE=focalbuild
-    - TESTNODE=focaltest
-    - ST2_PACKAGES=st2
-  links:
-    - focalbuild
-    - focaltest
-    - rabbitmq
-    - mongodb
-    - redis
+version: "3.8"
 
-el8:
-  image: quay.io/stackstorm/packagingrunner
-  extends:
-    file: docker-compose.override.yml
-    service: suite-compose
-  environment:
-    - BUILDNODE=rockylinux8build
-    - TESTNODE=rockylinux8test
-    - ST2_PACKAGES=st2
-  links:
-    - rockylinux8build
-    - rockylinux8test
-    - rabbitmq
-    - mongodb
-    - redis
+services:
+  focal:
+    image: quay.io/stackstorm/packagingrunner
+    extends:
+      file: docker-compose.override.yml
+      service: suite-compose
+    environment:
+      - BUILDNODE=focalbuild
+      - TESTNODE=focaltest
+      - ST2_PACKAGES=st2
+    links:
+      - focalbuild
+      - focaltest
+      - rabbitmq
+      - mongodb
+      - redis
 
-## Package build nodes
-#
-focalbuild:
-  image: stackstorm/packagingbuild:focal
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  el8:
+    image: quay.io/stackstorm/packagingrunner
+    extends:
+      file: docker-compose.override.yml
+      service: suite-compose
+    environment:
+      - BUILDNODE=rockylinux8build
+      - TESTNODE=rockylinux8test
+      - ST2_PACKAGES=st2
+    links:
+      - rockylinux8build
+      - rockylinux8test
+      - rabbitmq
+      - mongodb
+      - redis
 
-rockylinux8build:
-  image: stackstorm/packagingbuild:rockylinux8
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
+  el9:
+    image: quay.io/stackstorm/packagingrunner
+    extends:
+      file: docker-compose.override.yml
+      service: suite-compose
+    environment:
+      - BUILDNODE=rockylinux9build
+      - TESTNODE=rockylinux9test
+      - ST2_PACKAGES=st2
+    links:
+      - rockylinux9build
+      - rockylinux9test
+      - rabbitmq
+      - mongodb
+      - redis
 
-## Package testing nodes
-#
-focaltest:
-  image: stackstorm/packagingtest:focal-systemd
-  privileged: true
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  ## Package build nodes
+  #
+  focalbuild:
+    image: stackstorm/packagingbuild:focal
+    extends:
+      file: docker-compose.override.yml
+      service: volumes-compose
 
-rockylinux8test:
-  image: stackstorm/packagingtest:rockylinux8-systemd
-  privileged: true
-  cap_add:
-    - SYS_ADMIN
-  security_opt:
-    - seccomp:unconfined
-  extends:
-    file: docker-compose.override.yml
-    service: volumes-compose
-  volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup
+  rockylinux8build:
+    image: stackstorm/packagingbuild:rockylinux8
+    extends:
+      file: docker-compose.override.yml
+      service: volumes-compose
 
+  rockylinux9build:
+    image: stackstorm/packagingbuild:rockylinux9
+    extends:
+      file: docker-compose.override.yml
+      service: volumes-compose
+
+  ## Package testing nodes
+  #
+  focaltest:
+    image: stackstorm/packagingtest:focal-systemd
+    privileged: true
+    cgroup: host
+    extends:
+      file: docker-compose.override.yml
+      service: volumes-compose
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+
+  rockylinux8test:
+    image: stackstorm/packagingtest:rockylinux8-systemd
+    privileged: true
+    cgroup: host
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    extends:
+      file: docker-compose.override.yml
+      service: volumes-compose
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+
+  rockylinux9test:
+    image: stackstorm/packagingtest:rockylinux9-systemd
+    privileged: true
+    cgroup: host
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    extends:
+      file: docker-compose.override.yml
+      service: volumes-compose
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    privileged: true
+    hostname: rabbit
+    ports:
+      - "15672:15672"  # managment plugin port
+      - "5672:5672"
+
+  mongodb:
+    image: mongo:4.4
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: redis:7.2.4
+    ports:
+      - "6379:6379"

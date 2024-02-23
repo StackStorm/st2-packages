@@ -6,7 +6,7 @@
 
 ## Highlights
 
- - **Docker based**. Leveraging docker it's possible to deliver packages for any OS distro in a fast and reliable way.
+ - **Docker based**. Leveraging docker it's possible to deliver packages for any OS distro in a fast and reliable way.  *Use the latest Docker version with a Docker Compose plugin that supports V2 syntax.*
  - [Rake](https://github.com/ruby/rake) + [sshkit](https://github.com/capistrano/sshkit)-based execution enables easy configuration via **simple DSL** and brings **parallel task processing** out of the box.
  - **Test-driven workflow**. Artifacts built are not only available for any enabled OS distro but at the same time tested on a bunch of platforms, providing feedback such as can be installed, services can start up, operations can be executed etc.
 
@@ -29,11 +29,11 @@ It's very simple to invoke the whole build-test pipeline. First just make sure t
 
 ```shell
 # (Optional) First clean out previous build containers
-docker-compose kill
-docker-compose rm -f
+docker compose kill
+docker compose rm -f
 
 # To build packages for ubuntu focal (--rm will wipe packaging runner container. All others will remain active).
-docker-compose run --rm focal
+docker compose run --rm focal
 ```
 
 Execution takes a while, so grab a cup of tea or coffee and wait until it finishes. When build and test processes succeed, you'll find the StackStorm packages in `/tmp/st2-packages` on your host machine:
@@ -71,14 +71,14 @@ In order to build, package, install and test ST2 in an isolated Vagrant VM, run 
 vagrant up $TARGET
 ```
 
-Where `$TARGET` is one of `focal`, or `el8`. If you are using `el8`, comment
+Where `$TARGET` is one of `focal`, or `el8` or `el9`. If you are using `el8`, comment
 out the `vm_config.vm.provision :docker` line in the Vagrantfile. There is logic in `setup-vagrant.sh`
 to install docker in `el8`.
 
 The following steps are run while provisioning the Vagrant VM:
 
-1. Install `docker` and `docker-compose`.
-2. Run `docker-compose run --rm $TARGET` to build, test and package ST2 as described in prior
+1. Install `docker` that includes `docker compose` V2.
+2. Run `docker compose run --rm $TARGET` to build, test and package ST2 as described in prior
    sections.
 3. Install the packages built in step 2, unless the host `$ST2_INSTALL` environment variable is set to
    a value other than `yes`.
@@ -132,7 +132,7 @@ focaltest:
   ...
 ```
 
-NOTE: Main ``distro`` definition (e.g. ``focal``, etc.) needs to use packaging runner image.
+NOTE: Main ``distro`` definition (e.g. ``focal``, ``el8`` etc.) needs to use packaging runner image.
 
 As you can see, ``image`` attribute references local image tagged ``focalbuild`` instead of a
 remote image (e.g. ``stackstorm/packagingbuild:focal`` or similar).
