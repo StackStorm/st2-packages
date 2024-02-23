@@ -145,7 +145,7 @@ function configure_proxy() {
 function get_package_url() {
   # Retrieve direct package URL for the provided dev build, subtype and package name regex.
   DEV_BUILD=$1 # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
-  DISTRO=$2  # Distro name (e.g. focal,el8,el9)
+  DISTRO=$2  # Distro name (e.g. focal,jammy,el8,el9)
 
   PACKAGE_NAME_REGEX=$3
 
