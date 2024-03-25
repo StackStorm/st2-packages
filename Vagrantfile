@@ -8,7 +8,7 @@ VIRTUAL_MACHINES = {
   :jammy => {
     :hostname => 'st2-packages-jammy',
     :box => 'ubuntu/jammy64',
-    :ip => '192.168.16.26',
+    :ip => '192.168.16.27',
   },
   :focal => {
     :hostname => 'st2-packages-focal',
