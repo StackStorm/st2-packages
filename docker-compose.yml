@@ -17,6 +17,22 @@ services:
       - mongodb
       - redis
 
+  jammy:
+    image: quay.io/stackstorm/packagingrunner
+    extends:
+      file: docker-compose.override.yml
+      service: suite-compose
+    environment:
+      - BUILDNODE=jammybuild
+      - TESTNODE=jammytest
+      - ST2_PACKAGES=st2
+    links:
+      - jammybuild
+      - jammytest
+      - rabbitmq
+      - mongodb
+      - redis
+
   el8:
     image: quay.io/stackstorm/packagingrunner
     extends:
@@ -57,6 +73,12 @@ services:
       file: docker-compose.override.yml
       service: volumes-compose
 
+  jammybuild:
+    image: stackstorm/packagingbuild:jammy
+    extends:
+      file: docker-compose.override.yml
+      service: volumes-compose
+
   rockylinux8build:
     image: stackstorm/packagingbuild:rockylinux8
     extends:
@@ -73,6 +95,16 @@ services:
   #
   focaltest:
     image: stackstorm/packagingtest:focal-systemd
+    privileged: true
+    cgroup: host
+    extends:
+      file: docker-compose.override.yml
+      service: volumes-compose
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+
+  jammytest:
+    image: stackstorm/packagingtest:jammy-systemd
     privileged: true
     cgroup: host
     extends:

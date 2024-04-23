@@ -12,12 +12,12 @@
 
 ## Overview
 
-Packages build environment is a *multi-container docker* application defined and managed with [docker-compose](https://github.com/docker/compose). It consists of four types of containers:
+Packages build environment is a _multi-container docker_ application defined and managed with [docker-compose](https://github.com/docker/compose). It consists of four types of containers:
 
- - **Packaging runner** (https://quay.io/stackstorm/packagingrunner) - the main entry point, package build and test processing controller container.
- - **Packaging build** (https://hub.docker.com/r/stackstorm/packagingbuild/) - container where actual `.deb`/`.rpm` artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as *packagingbuild:rocky8*, *packagingbuild:focal* correspondingly for RockyLinux 8 and Ubuntu Focal.
- - **Packaging test** (https://hub.docker.com/r/stackstorm/packagingtest/) - containers where built artifacts are tested, i.e. *artifacts are installed, configuration is written and tests are performed*.
- - **Services** - these are different containers required for testing such as *rabbitmq and mongodb*
+- **Packaging runner** (https://quay.io/stackstorm/packagingrunner) - the main entry point, package build and test processing controller container.
+- **Packaging build** (https://hub.docker.com/r/stackstorm/packagingbuild/) - container where actual `.deb`/`.rpm` artifacts build takes place. It's used to bring up the build environment specific for OS distro. This means that different containers are available such as _packagingbuild:rocky8_, _packagingbuild:focal_, _packagingbuild:jammy_,  correspondingly for RockyLinux 8, Ubuntu Focal, and Ubuntu Jammy.
+- **Packaging test** (https://hub.docker.com/r/stackstorm/packagingtest/) - containers where built artifacts are tested, i.e. _artifacts are installed, configuration is written and tests are performed_.
+- **Services** - these are different containers required for testing such as _rabbitmq and mongodb_
 
 `Dockerfiles` sources are available at [StackStorm/st2-dockerfiles](https://github.com/stackstorm/st2-dockerfiles).
 
@@ -47,31 +47,32 @@ ls -l1 | grep ".deb$"
 
 After the build and test stages are finished all docker containers remain active, so you are welcome to do more in-depth testing if desired. To do so simply run:
 
-```
+```shell
 docker ps
 # Find the required testing container
-# In our case it will be st2packages_focaltest_1
+# In our case it will be st2packages_jammytest_1
 
 # Simply exec to docker
-docker exec -it st2packages_focaltest_1 bash
+docker exec -it st2packages_jammytest_1 bash
 ```
 
 Once done, you are inside the testing environment where all services are up and running. Don't forget to do (after exec):
 
-```
+```shell
 export TERM=xterm
 ```
+
 At this point you can do any manual testing which is required.
 
 # Vagrant based build and test
 
 In order to build, package, install and test ST2 in an isolated Vagrant VM, run the following:
 
-```
+```shell
 vagrant up $TARGET
 ```
 
-Where `$TARGET` is one of `focal`, or `el8` or `el9`. If you are using `el8`, comment
+Where `$TARGET` is one of `focal`, `jammy`, `el8` or `el9`. If you are using `el8`, comment
 out the `vm_config.vm.provision :docker` line in the Vagrantfile. There is logic in `setup-vagrant.sh`
 to install docker in `el8`.
 
@@ -90,66 +91,65 @@ consider allowing the host to provide existing ST2 packages, and install/self-ch
 Vagrant VM.
 
 To specify the ST2 source URL and REV (i.e., branch), use `ST2_GITURL` and `ST2_GITREV` environment
-variables on the host prior to provisioning the VM. 
+variables on the host prior to provisioning the VM.
 
-Prior to running `st2-self-check`, the required auth token is generated using `st2 auth`.  If necessary,
-you can change the default username and password passed to `st2 auth`.  To do this, set the `ST2USER`
+Prior to running `st2-self-check`, the required auth token is generated using `st2 auth`. If necessary,
+you can change the default username and password passed to `st2 auth`. To do this, set the `ST2USER`
 and `ST2PASSWORD` environment variables on the host prior to provisioning the VM. The default values
 are `st2admin` and `Ch@ngeMe` respectively.
 
 # Installation
+
 Current community packages are hosted on https://packagecloud.io/StackStorm. For detailed instructions how install st2 and perform basic configuration follow these instructions:
+
 - [Ubuntu/Debian](https://docs.stackstorm.com/install/deb.html)
 - [RHEL8/RockyLinux8](https://docs.stackstorm.com/install/rhel8.html)
 
 ## Adding Support For a New Distribution
 
-If you are adding support for a new distribution for which ``packagingbuild`` and ``packagingtest``
+If you are adding support for a new distribution for which `packagingbuild` and `packagingtest`
 images are not yet published to Docker Hub and you want to test the build pipeline locally, you
-need to update ``docker-compose.yml`` file to use locally built Docker images.
+need to update `docker-compose.yml` file to use locally built Docker images.
 
 For example:
 
 ```yaml
-...
-
-focal:
+services:
   ...
-  image: quay.io/stackstorm/packagingrunner
+  jammy:
+    ...
+    image: quay.io/stackstorm/packagingrunner
+    ...
   ...
-...
-
-focalbuild:
+  jammybuild:
+    ...
+    image: jammybuild
+    ...
   ...
-  image: focalbuild
-  ...
-
-...
-
-focaltest:
-  ...
-  image: focaltest
-  ...
+  jammytest:
+    ...
+    image: jammytest
+    ...
 ```
 
 NOTE: Main ``distro`` definition (e.g. ``focal``, ``el8`` etc.) needs to use packaging runner image.
 
-As you can see, ``image`` attribute references local image tagged ``focalbuild`` instead of a
-remote image (e.g. ``stackstorm/packagingbuild:focal`` or similar).
+As you can see, `image` attribute references local image tagged `jammybuild` instead of a
+remote image (e.g. `stackstorm/packagingbuild:jammy` or similar).
 
 Before that will work, you of course also need to build those images locally.
 
 For example:
 
 ```bash
-cd ~/st2packaging-dockerfiles/packagingbuild/focal
-docker build -t focalbuild .
+cd ~/st2packaging-dockerfiles/packagingbuild/jammy
+docker build -t jammybuild .
 
-cd ~/st2packaging-dockerfiles/packagingtest/focal/systemd
-docker build -t focaltest .
+cd ~/st2packaging-dockerfiles/packagingtest/jammy/systemd
+docker build -t jammytest .
 ```
 
 # License and Authors
 
-* Author:: StackStorm (st2-dev) (<info@stackstorm.com>)
-* Author:: Denis Baryshev (<dennybaa@gmail.com>)
+- Author:: StackStorm (st2-dev) (<info@stackstorm.com>)
+- Author:: Denis Baryshev (<dennybaa@gmail.com>)
