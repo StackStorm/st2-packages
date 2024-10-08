@@ -80,9 +80,7 @@ Conflicts: st2common
 # We build cryptography for RHEL8/RHEL9, and this can contain buildroot path in the
 # built .so files. We use strip on these libraries so that there are no
 # references to the buildroot in the st2 rpm
-%if 0%{?rhel} > 7
   %cleanup_so_abspath
-%endif
   %cleanup_python_abspath
 
 %prep
