@@ -9,6 +9,7 @@
 
 set -e
 # Source the build environment defintion (details in buildenv.sh)
+# shellcheck disable=SC1090
 . ~/.buildenv
 
 set -x
@@ -35,7 +36,7 @@ case "$1" in
         -e ST2PKG_VERSION=${ST2PKG_VERSION} \
         -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
-        -e ST2_CIRCLE_URL=${CIRCLE_BUILD_URL} \
+        -e ST2_CIRCLE_URL="${CIRCLE_BUILD_URL}" \
         $2 build
   ;;
   test)
@@ -43,6 +44,6 @@ case "$1" in
     echo Starting Tests for $2 ...
     docker compose -f docker-compose.circle2.yml -f docker-compose.override.yml run \
         -e ST2_PACKAGES="${ST2_PACKAGES}" \
-        $2 test
+        "$2" test
   ;;
 esac
