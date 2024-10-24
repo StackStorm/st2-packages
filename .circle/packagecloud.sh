@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set +x
+
 # Requires: `jq` binary
 # Requires: `package_cloud` gem
 
