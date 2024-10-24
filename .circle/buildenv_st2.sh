@@ -1,9 +1,14 @@
 #!/bin/bash
+
+# This script is maintained in the st2 and st2-packages github repository.  Keeping them as consistent
+# as possible will help avoid inconsistent behaviour in CircleCI pipeline.
 set -e
+set +x
 
 my_dir="$(dirname "$0")"
 source "$my_dir/buildenv_common.sh"
 
+# DISTROS environment is set from the CircleCI pipeline.
 distros=($DISTROS)
 DISTRO=${distros[$CIRCLE_NODE_INDEX]}
 
@@ -44,15 +49,16 @@ ST2PKG_VERSION=$(fetch_version)
 
 # for PackageCloud
 if [ -n "$PACKAGECLOUD_TOKEN" ]; then
-  ST2PKG_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${ST2PKG_VERSION} st2)
+    ST2PKG_RELEASE=$(.circle/packagecloud.sh next-revision ${DISTRO} ${ST2PKG_VERSION} st2)
 else
-  # is fork
-  ST2PKG_RELEASE=1
+    # is fork
+    ST2PKG_RELEASE=1
 fi
 
 re="\\b$DISTRO\\b"
 [[ "$NOTESTS" =~ $re ]] && TESTING=0
 
+# Used by docker compose when run from CircleCI
 ST2_CIRCLE_URL=${CIRCLE_BUILD_URL}
 
 write_env ST2_GITURL ST2_GITREV ST2PKG_VERSION ST2PKG_RELEASE DISTRO TESTING ST2_CIRCLE_URL
