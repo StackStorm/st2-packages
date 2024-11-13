@@ -41,8 +41,8 @@ function main() {
             fi
         ;;
         *)
-            echo $"Usage: deploy {focal|el8|el9} /tmp/st2-packages"
-            echo $"Usage: next-revision {focal|el8|el9} 3.9dev st2"
+            echo $"Usage: deploy {focal|jammy|el8|el9} /tmp/st2-packages"
+            echo $"Usage: next-revision {focal|jammy|el8|el9} 3.9dev st2"
             exit 1
     esac
 }

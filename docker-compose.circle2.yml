@@ -17,6 +17,22 @@ services:
       - mongodb
       - redis
 
+  jammy:
+    image: quay.io/stackstorm/packagingrunner
+    working_dir: /root/st2-packages
+    volumes_from:
+      - container:st2-packages-vol
+    environment:
+      - BUILDNODE=jammybuild
+      - TESTNODE=jammytest
+      - ST2_PACKAGES=st2
+    links:
+      - jammybuild
+      - jammytest
+      - rabbitmq
+      - mongodb
+      - redis
+
   el8:
     image: quay.io/stackstorm/packagingrunner
     working_dir: /root/st2-packages
@@ -54,6 +70,11 @@ services:
     volumes_from:
       - container:st2-packages-vol
 
+  jammybuild:
+    image: stackstorm/packagingbuild:jammy
+    volumes_from:
+      - container:st2-packages-vol
+
   rockylinux8build:
     image: stackstorm/packagingbuild:rockylinux8
     volumes_from:
@@ -68,6 +89,15 @@ services:
   #
   focaltest:
     image: stackstorm/packagingtest:focal-systemd
+    privileged: true
+    cgroup: host
+    volumes_from:
+      - container:st2-packages-vol
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+
+  jammytest:
+    image: stackstorm/packagingtest:jammy-systemd
     privileged: true
     cgroup: host
     volumes_from:
