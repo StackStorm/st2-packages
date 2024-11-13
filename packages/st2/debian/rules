@@ -20,10 +20,7 @@ BUILD_PRE_DEPENDS := python3 (>= 3.8)
 BUILD_DEPENDS := python3-distutils, python3-dev
 
 %:
-
-ifeq ($(DEB_DISTRO),focal)
-	dh $@ --with python-virtualenv --python /usr/bin/python3.8
-endif
+	dh $@ --with python-virtualenv --python /usr/bin/python3
 
 override_dh_installdirs:
 	dh_installdirs
