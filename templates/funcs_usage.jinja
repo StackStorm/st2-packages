@@ -1,0 +1,47 @@
+###############[ SCRIPT HELP ]###############
+usage() {
+    cat <<EOF
+
+    $0 [--version=<x.y.z|x.ydev>] [--stable|--unstable] [--staging] [--dev=<repo_name/build_num>] [--user=<st2username>] [--password=<st2password>]
+       [--no-mongodb] [--no-rabbitmq] [--no-redis] [--no-st2chatops] [--no-st2web]
+
+    StackStorm installation script.  This script will configure and install StackStorm and its dependencies on the system.
+    WARNING: This script will make system changes that aren't automatically reversible.
+
+    Parameters
+        --version|-v:   The StackStorm version to be installed.
+                        Stable versions are <major>.<minor>.<patch>. E.g. --version=3.8.1 to install StackStorm v3.8.1 from the stable repository.
+                        Unstable versions are <major>.<minor>dev.  E.g. --version=3.9dev to install the latest StackStorm v3.9dev from the unstable repository.
+
+        --username:     The StackStorm account name to be created.
+
+        --password:     The password for the StackStorm account.
+
+        --stable|-s:    Install StackStorm packages from the stable repository. (default)
+                        Packages are officially supported and production ready.
+                        The stable option is mutually exclusive with the unstable option.
+
+        --unstable|-u:  Install StackStorm packages from the unstable repository.
+                        Daily or Promoted packages built after passing end-to-end testing from the StackStorm development branch.
+
+        --staging:      Install StackStorm packages from the staging-<stable|unstable> repository.
+                        This option is combined with the stable/unstable option.
+                        staging-stable packages are release candidate made available for testing during the StackStorm release process.
+                        staging-unstable experimental packages that are built from the latest development branch that have passed unit testing.
+
+        --dev=*:        Install StackStorm from Continuous Integration artifact.
+                        The pamameter takes the git repository name and build number - <repo_name>/<build_num>.  E.g. --dev=st2/5646
+                        Do not use this option unless you understand what you're doing.
+
+        --no-mongodb    Disable the installation procedure for MongoDB on the system.
+
+        --no-rabbitmq   Disable the installation procedure for RabbitMQ on the system.
+
+        --no-redis      Disable the installation procedure for Redis on the system.
+
+        --no-st2chatops Disable the installation procedure for st2 chatops on the system.
+
+        --no-st2web     Disable the installation procedure for st2 web ui on the system.
+
+EOF
+}

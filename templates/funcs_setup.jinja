@@ -1,0 +1,92 @@
+###############[ SCRIPT PARAMETER SETUP ]###############
+setup_install_parameters()
+{
+    # Valid release repository combinations:
+    #   stable with version x.y.z
+    #       https://packagecloud.io/StackStorm/stable           (st2web-3.8.1-1.x86_64.rpm)
+    #   staging-stable with version x.y.z
+    #       https://packagecloud.io/StackStorm/staging-stable   (st2chatops_3.8.1-1_amd64.deb)
+    #   unstable with version x.ydev
+    #       https://packagecloud.io/StackStorm/unstable         (st2-3.9dev-208.x86_64.rpm)
+    #   staging-unstable with version x.ydev
+    #       https://packagecloud.io/StackStorm/staging-unstable (st2-3.9dev-97.x86_64.rpm)
+    local VERSION="$1"
+    local RELEASE="$2"
+    local REPO_TYPE="$3"
+    local DEV_BUILD="$4"
+
+    # Set the installation type to use in the script.
+    if [[ -n "$DEV_BUILD" ]]; then
+        # Development builds use the package produced from CI directly.
+        # https://output.circle-artifacts.com/output/job/e404c552-f8d6-46bd-9034-0267148874db/artifacts/0/packages/focal/st2_3.9dev-186_amd64.deb
+        # CircleCI pipeline repo: st2, branch: master, workflow: package-test-and-deploy, job: 17505
+        INSTALL_TYPE["CI"]="$DEV_BUILD"
+        if [[ ! "$DEV_BUILD" =~ [^/]+/[0-9]+ ]]; then
+            echo.error "Unexpected format '$DEV_BUILD'.  Format must be 'repo_name/build_id'"
+            exit 1
+        fi
+        echo.warning "Installation of $DEV_BUILD from CI build artifacts!  REALLY, ANYTHING COULD HAPPEN!"
+    else
+        # non-development builds use the PackageCloud repositories.
+        setup_select_repository "$VERSION" "$RELEASE" "$REPO_TYPE"
+    fi
+}
+
+
+setup_check_version()
+{
+    # StackStorm version sanity check.  Report and error and exit if
+    # the version doesn't conform to the format x.y.z or x.ydev
+    local VERSION="$1"
+    if [[ -z "$VERSION" ]]; then
+        echo.error "Unable to run script because no StackStorm version was provided."
+        usage
+        exit 1
+    fi
+    if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+        echo.error "$VERSION does not match supported formats x.y.z or x.ydev."
+        exit 1
+    fi
+}
+
+
+setup_select_repository()
+{
+    local VERSION="$1"
+    local RELEASE="$2"
+    local REPO_TYPE="$3"
+
+    setup_check_version "$VERSION"
+
+    # Version takes precedence over requested release
+    if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
+        if [[ "$RELEASE" != "unstable" ]]; then
+            echo.warning "Development version $VERSION requested, switching from '$RELEASE' to 'unstable' repository!"
+            RELEASE='unstable'
+        fi
+    fi
+
+    if [[ -n "$REPO_TYPE" ]]; then
+        echo.warning "Installing from staging repository:  USE AT YOUR OWN RISK!"
+        RELEASE="${REPO_TYPE}-${RELEASE}"
+    fi
+    echo.info "Installation of StackStorm $VERSION from repository $RELEASE."
+    INSTALL_TYPE["REPO"]="$RELEASE"
+}
+
+
+setup_username_password()
+{
+    if [[ "$USERNAME" = '' || "$PASSWORD" = '' ]]; then
+        echo "Let's set StackStorm admin credentials."
+        echo 'You can also use "--user" and "--password" for unattended installation.'
+        echo 'Press <ENTER> to continue or <CTRL+C> to exit/abort.'
+        read -e -p "Admin username: " -i "st2admin" USERNAME
+        read -e -s -p "Password: " PASSWORD
+        echo
+        if [[ -z "${PASSWORD}" ]]; then
+            echo.error "Password cannot be empty."
+            exit 1
+        fi
+    fi
+}

@@ -1,0 +1,116 @@
+###############[ RABBITMQ ]###############
+rabbitmq_adjust_selinux_policies()
+{
+    if getenforce | grep -q 'Enforcing'; then
+        # SELINUX management tools, not available for some minimal installations
+        pkg_install policycoreutils-python-utils
+
+        # Allow rabbitmq to use '25672' port, otherwise it will fail to start
+        sudo semanage port --list | grep -q 25672 || sudo semanage port -a -t amqp_port_t -p tcp 25672
+
+        # Allow network access for nginx
+        sudo setsebool -P httpd_can_network_connect 1
+    fi
+}
+
+rabbitmq_install()
+{
+    local RABBITMQ_PKG=rabbitmq-server
+
+    if [[ $INSTALL_RABBITMQ -eq 0 ]]; then
+        echo.info "Skip RabbitMQ: Installation explicitly disabled at runtime."
+        return
+    elif pkg_is_installed "$RABBITMQ_PKG"; then
+        echo.info "Skip RabbitMQ: Package is already present on the system."
+        return
+    fi
+{% if id in ["rhel", "rocky", "centos", "opensuse-leap"] -%}
+    # https://www.rabbitmq.com/docs/install-rpm
+    repo_definition "erlang" \
+                    "https://yum1.rabbitmq.com/erlang/el/{{ version_id }}/\$basearch" \
+                    "erlang-key" \
+                    "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key"
+    repo_definition "rabbitmq-server" \
+                    "https://yum2.rabbitmq.com/rabbitmq/el/{{ version_id }}/\$basearch" \
+                    "rabbitmq-server-key" \
+                    "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-server.9F4587F226208342.key https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc"
+    repo_definition "rabbitmq-server-noarch" \
+                    "https://yum2.rabbitmq.com/rabbitmq/el/{{ version_id }}/noarch" \
+                    "rabbitmq-server-key" \
+                    "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-server.9F4587F226208342.key https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc"
+
+    rabbitmq_adjust_selinux_policies
+
+    local PKGS=(
+        erlang
+        "$RABBITMQ_PKG"
+    )
+{% elif id in ["ubuntu", "debian"] %}
+    # https://www.rabbitmq.com/docs/install-debian
+    repo_add_gpg_key "com.rabbitmq.team.gpg" "https://keys.openpgp.org/vks/v1/by-fingerprint/0A9AF2115F4687BD29803A206B73A36E6026DFCA"
+
+    repo_definition "erlang" \
+                    "https://ppa1.rabbitmq.com/rabbitmq/rabbitmq-erlang/deb/${OS_ID}" \
+                    "${OS_VERSION_CODENAME}" \
+                    "main" \
+                    "erlang-key" \
+                    "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key"
+    repo_definition "rabbitmq-server" \
+                    "https://ppa1.rabbitmq.com/rabbitmq/rabbitmq-server/deb/${OS_ID}" \
+                    "${OS_VERSION_CODENAME}" \
+                    "main" \
+                    "rabbitmq-server-key" \
+                    "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-server.9F4587F226208342.key"
+
+    local PKGS=(
+        erlang-base
+        erlang-asn1
+        erlang-crypto
+        erlang-eldap
+        erlang-ftp
+        erlang-inets
+        erlang-mnesia
+        erlang-os-mon
+        erlang-parsetools
+        erlang-public-key
+        erlang-runtime-tools
+        erlang-snmp
+        erlang-ssl
+        erlang-syntax-tools
+        erlang-tftp
+        erlang-tools
+        erlang-xmerl
+        "$RABBITMQ_PKG"
+    )
+    # Pinning
+    cat <<EOF >/etc/apt/preferences.d/erlang.pref
+Package: erlang*
+Pin: origin ppa1.rabbitmq.com
+# Note: priority of 1001 (greater than 1000) allows for downgrading.
+# To make package downgrading impossible, use a value of 999
+Pin-Priority: 1001
+EOF
+{% else %}
+    echo.error "Installing erlang and rabbitmq on $OS_ID $OS_VERSION isn't supported by this script."
+    exit 4
+{% endif %}
+
+    pkg_meta_update
+    pkg_install ${PKGS[@]}
+
+    # Configure RabbitMQ to listen on localhost only
+    sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
+
+    sudo systemctl enable rabbitmq-server
+    sudo systemctl restart rabbitmq-server
+
+    # configure RabbitMQ
+    if ! sudo rabbitmqctl list_users | grep -E '^stackstorm'; then
+        sudo rabbitmqctl add_user stackstorm "${ST2_RABBITMQ_PASSWORD}"
+        sudo rabbitmqctl set_user_tags stackstorm administrator
+        sudo rabbitmqctl set_permissions -p / stackstorm ".*" ".*" ".*"
+    fi
+    if sudo rabbitmqctl list_users | grep -E '^guest'; then
+        sudo rabbitmqctl delete_user guest
+    fi
+}

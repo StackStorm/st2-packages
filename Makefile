@@ -1,9 +1,31 @@
+ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+SHELL := /bin/bash
+VIRTUALENV_DIR ?= virtualenv/st2packages
+.DEFAULT_GOAL := scriptsgen
+
+.PHONY: .create_venv
+.create_venv:
+	test -d "$(VIRTUALENV_DIR)" || python3 -m venv "$(VIRTUALENV_DIR)"
+
+.PHONY: .install_dependencies
+.install_dependencies:
+	"$(VIRTUALENV_DIR)/bin/pip3" install -r requirements.txt
+
+.PHONY: clean
+clean:
+	test -d "$(VIRTUALENV_DIR)" && rm -rf "$(VIRTUALENV_DIR)"
+
 .PHONY: scriptsgen
-scriptsgen:
+scriptsgen: .create_venv .install_dependencies
 	@echo
 	@echo "================== scripts gen ===================="
 	@echo
-	/usr/bin/env python3 tools/generate_final_installer_scripts.py
+	"$(VIRTUALENV_DIR)/bin/python3" tools/generate_install_script.py
+	# Remove comments to reduce script size by ~7k
+	for i in scripts/st2bootstrap-*.sh; \
+	do \
+		grep -Ev '^\s*#[^!]' "$$i" >"$$i".s && mv "$$i".s "$$i"; \
+	done
 
 .PHONY: .generated-files-check
 .generated-files-check:
@@ -11,15 +33,17 @@ scriptsgen:
 	# committed
 	@echo "==================== generated-files-check ===================="
 
-	# 1. Sample config - conf/st2.conf.sample
-	cp scripts/st2bootstrap-deb.sh /tmp/st2bootstrap-deb.sh.upstream
-	cp scripts/st2bootstrap-el8.sh /tmp/st2bootstrap-el8.sh.upstream
-	cp scripts/st2bootstrap-el9.sh /tmp/st2bootstrap-el9.sh.upstream
+	mkdir -p /tmp/scripts
+	for i in scripts/st2bootstrap-*.sh; \
+	do \
+		cp scripts/$$i /tmp/$$i \
+	done
 
 	make scriptsgen
 
-	diff scripts/st2bootstrap-deb.sh /tmp/st2bootstrap-deb.sh.upstream || (echo "scripts/st2bootstrap-deb.sh hasn't been re-generated and committed. Please run \"make scriptsgen\" and include and commit the generated file." && exit 1)
-	diff scripts/st2bootstrap-el8.sh /tmp/st2bootstrap-el8.sh.upstream || (echo "scripts/st2bootstrap-el8.sh hasn't been re-generated and committed. Please run \"make scriptsgen\" and include and commit the generated file." && exit 1)
-	diff scripts/st2bootstrap-el9.sh /tmp/st2bootstrap-el9.sh.upstream || (echo "scripts/st2bootstrap-el9.sh hasn't been re-generated and committed. Please run \"make scriptsgen\" and include and commit the generated file." && exit 1)
+	for i in scripts/st2bootstrap-*.sh; \
+	do \
+		diff $i /tmp/$$i || (echo "scripts/st2bootstrap-deb.sh hasn't been re-generated and committed. Please run \"make scriptsgen\" and include and commit the generated file." && exit 1); \
+	done
 
 	@echo "All automatically generated files are up to date."

@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+#
+# DO NOT EDIT MANUALLY.  GENERATED FOR {{ id }} {{ version_id }}
+#
+# Please edit the corresponding template file and include files in https://github.com/StackStorm/st2-packages.git.
+
+set -e -u +x
+
+# ============================ Global variables ============================
+HUBOT_ADAPTER='slack'
+HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
+VERSION=''
+RELEASE='stable'
+REPO_TYPE=''
+DEV_BUILD=''
+USERNAME=''
+PASSWORD=''
+ST2_PKG='st2'
+ST2WEB_PKG='st2web'
+ST2CHATOPS_PKG='st2chatops'
+INSTALL_MONGODB=1
+INSTALL_RABBITMQ=1
+INSTALL_REDIS=1
+INSTALL_ST2CHATOPS=1
+INSTALL_ST2WEB=1
+
+declare -A INSTALL_TYPE=()
+#~ export INSTALL_TYPE
+
+# Prefix operating system variables with OS_ to avoid conflicts in the script.
+# References: https://github.com/chef/os_release
+source <(sed 's/^/OS_/g' /etc/os-release)
+
+# ============================ Function declarations ============================
+{% include 'funcs_usage.jinja'  %}
+{% include 'funcs_display.jinja'  %}
+{% include 'funcs_setup.jinja' %}
+{% include 'funcs_package_manager.jinja' %}
+{% include 'funcs_repo_manager.jinja' %}
+{% include 'funcs_system.jinja' %}
+{% include 'funcs_st2.jinja' %}
+{% include 'funcs_st2chatops.jinja' %}
+{% include 'funcs_st2web.jinja' %}
+{% include 'funcs_mongodb.jinja' %}
+{% include 'funcs_rabbitmq.jinja' %}
+{% include 'funcs_redis.jinja' %}
+
+# ============================ Main script logic ============================
+for i in "$@"
+do
+    case $i in
+        -v=*|--version=*)
+            VERSION="${i#*=}"
+            shift
+            ;;
+        -s|--stable)
+            RELEASE=stable
+            shift
+            ;;
+        -u|--unstable)
+            RELEASE=unstable
+            shift
+            ;;
+        --staging)
+            REPO_TYPE='staging'
+            shift
+            ;;
+        --dev=*)
+            DEV_BUILD="${i#*=}"
+            shift
+            ;;
+        --user=*|--username=*)
+            USERNAME="${i#*=}"
+            shift
+            ;;
+        --password=*)
+            PASSWORD="${i#*=}"
+            shift
+            ;;
+        --no-mongodb)
+            INSTALL_MONGODB=0
+            shift
+            ;;
+        --no-rabbitmq)
+            INSTALL_RABBITMQ=0
+            shift
+            ;;
+        --no-redis)
+            INSTALL_REDIS=0
+            shift
+            ;;
+        --no-st2chatops)
+            INSTALL_ST2CHATOPS=0
+            shift
+            ;;
+        --no-st2web)
+            INSTALL_ST2WEB=0
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown parameter $i."
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+trap 'fail' EXIT
+
+step "Setup runtime arguments"
+# Side-effect: INSTALL_TYPE is updated from setup_install_parameters()
+setup_install_parameters "$VERSION" "$RELEASE" "$REPO_TYPE" "$DEV_BUILD"
+setup_username_password
+
+step "Install required runtime packages"
+system_install_runtime_packages
+
+step "Check storage capacity and network ports"
+system_check_resources
+
+step "Configure HTTP Proxy"
+system_configure_proxy
+
+ST2_RABBITMQ_PASSWORD=$(system_generate_password 24)
+ST2_MONGODB_PASSWORD=$(system_generate_password 24)
+write_passwords
+
+step "Install event bus (RabbitMQ)"
+rabbitmq_install "$ST2_RABBITMQ_PASSWORD"
+
+step "Install database (MongoDB)"
+mongodb_install "$ST2_MONGODB_PASSWORD"
+
+step "Install key/value store (Redis)"
+redis_install
+
+step "Install st2 (StackStorm)"
+st2_install
+
+step "Configure st2 system user account"
+st2_configure_user
+
+step "Configure st2 authentication"
+st2_configure_authentication
+
+step "Create st2 CLI configuration"
+st2_configure_cli_config "$USERNAME" "$PASSWORD"
+
+step "Setup datastore symmetric encryption"
+st2_setup_kvstore_encryption_keys
+
+step "Verify StackStorm installation"
+st2_verification
+
+step "Install Web Interface (st2web)"
+st2web_install
+
+step "Install ChatOps bot (st2chatops)"
+st2chatops_install
+
+step "Configure st2chatops"
+st2chatops_configure
+
+trap - EXIT
+
+ok_message

@@ -1,0 +1,146 @@
+###############[ MONGODB ]###############
+{% if id in ["rhel", "rocky", "centos", "opensuse-leap"] -%}
+mongodb_configure_repo()
+{
+    repo_definition "mongodb-org-7.0" \
+                    "https://repo.mongodb.org/yum/redhat/{{ version_id }}/mongodb-org/7.0/x86_64/" \
+                    "mongodb-org-7.0-key" \
+                    "https://pgp.mongodb.com/server-7.0.asc"
+}
+mongodb_configuration()
+{
+    local MONGODB_USER="mongod"
+    local DB_PATH="/var/lib/mongo"
+    local LOG_PATH="/var/log/mongodb"
+    mongodb_write_configuration "$MONGODB_USER" "$DB_PATH" "$LOG_PATH"
+    mongodb_adjust_selinux_policies
+}
+{% elif id in ["ubuntu", "debian"] %}
+{% set component = {"ubuntu": "multiverse", "debian": "main"}[id] %}
+mongodb_configure_repo()
+{
+    repo_definition "mongodb-org-7.0" \
+                    "https://repo.mongodb.org/apt/${OS_ID}" \
+                    "${OS_VERSION_CODENAME}/mongodb-org/7.0" \
+                    "{{ component }}" \
+                    "mongodb-org-7.0-key" \
+                    "https://www.mongodb.org/static/pgp/server-7.0.asc"
+}
+mongodb_configuration()
+{
+    local MONGODB_USER="mongodb"
+    local DB_PATH="/var/lib/mongodb"
+    local LOG_PATH="/var/log/mongodb"
+    mongodb_write_configuration "$MONGODB_USER" "$DB_PATH" "$LOG_PATH"
+}
+{% else %}
+mongodb_configure_repo()
+{
+    echo.error "Installing mongodb on $OS_ID $OS_VERSION isn't supported by this script."
+    exit 4
+}
+mongodb_configuration()
+{
+    mongodb_configure_repo
+}
+{% endif %}
+
+mongodb_write_configuration()
+{
+    local MONGODB_USER="$1"
+    local DB_PATH="$2"
+    local LOG_PATH="$3"
+    local CFGFILE="/etc/mongod.conf"
+
+    TMP=$(cat <<EOF
+net:
+  bindIp: 127.0.0.1
+  port: 27017
+storage:
+  dbPath: $DB_PATH
+systemLog:
+  path: $LOG_PATH/mongod.log
+  destination: file
+  logAppend: true
+processManagement:
+  timeZoneInfo: /usr/share/zoneinfo
+security:
+  authorization: disabled
+EOF
+)
+    sudo bash -c "cat <<<\"$TMP\" >${CFGFILE}"
+}
+
+mongodb_adjust_selinux_policies()
+{
+    if getenforce | grep -q 'Enforcing'; then
+        # RHEL9 selinux policy is more restrictive than RHEL8 by default which requires
+        # the installation of a mongodb policy to allow it to run.
+        # Note that depending on distro assembly/settings you may need more rules to change
+        # Apply these changes OR disable selinux in /etc/selinux/config (manually)
+        echo.info "Applying MongoDB SELinux policy."
+        pkg_install git make checkpolicy policycoreutils selinux-policy-devel
+        test -d /root/mongodb-selinux || sudo git clone https://github.com/mongodb/mongodb-selinux /root/mongodb-selinux
+        cd /root/mongodb-selinux && \
+        make && \
+        sudo make install
+    fi
+}
+
+mongodb_install()
+{
+    local MONGODB_PKG=mongodb-org
+
+    if [[ $INSTALL_MONGODB -eq 0 ]]; then
+        echo.info "Skip MongoDB: Installation explicitly disabled at runtime."
+        return
+    elif pkg_is_installed "$MONGODB_PKG"; then
+        echo.info "Skip MongoDB: Package is already present on the system."
+        return
+    fi
+
+    mongodb_configure_repo
+    pkg_meta_update
+    pkg_install "$MONGODB_PKG"
+    mongodb_configuration
+
+    # Enable and restart
+    sudo systemctl enable mongod
+    sudo systemctl start mongod
+
+    # Wait for service to come up before attempt to create user
+    sleep 10
+
+    # Create admin user and user used by StackStorm (MongoDB needs to be running)
+    # NOTE: mongo shell will automatically exit when piping from stdin. There is
+    # no need to put quit(); at the end. This way last command exit code will be
+    # correctly preserved and install script will correctly fail and abort if this
+    # command fails.
+    mongosh <<EOF
+use admin;
+db.createUser({
+    user: "admin",
+    pwd: "${ST2_MONGODB_PASSWORD}",
+    roles: [
+        { role: "userAdminAnyDatabase", db: "admin" }
+    ]
+});
+EOF
+
+    mongosh <<EOF
+use st2;
+db.createUser({
+    user: "stackstorm",
+    pwd: "${ST2_MONGODB_PASSWORD}",
+    roles: [
+        { role: "readWrite", db: "st2" }
+    ]
+});
+EOF
+
+    # Require authentication to be able to acccess the database
+    sudo sed -ri 's/^  authorization: disabled$/  authorization: enabled/g' /etc/mongod.conf
+
+    # MongoDB needs to be restarted after enabling auth
+    sudo systemctl restart mongod
+}

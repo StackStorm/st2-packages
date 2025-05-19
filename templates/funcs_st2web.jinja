@@ -1,0 +1,63 @@
+###############[ ST2WEB ]###############
+{% if id in ["rhel", "rocky", "centos", "opensuse-leap"] -%}
+nginx_configure_repo()
+{
+    repo_definition "nginx" \
+                    "http://nginx.org/packages/rhel/{{ version_id }}/x86_64/" \
+                    "nginx-key" \
+                    "http://nginx.org/keys/nginx_signing.key"
+
+    # Ensure that EPEL repo is not used for nginx (to do: confirm this is still needed)
+    #~ sudo sed -i 's/^\(enabled=1\)$/exclude=nginx\n\1/g' /etc/yum.repos.d/epel.repo
+}
+{% elif id in ["ubuntu", "debian"] %}
+nginx_configure_repo()
+{
+    repo_definition "nginx" \
+                    "http://nginx.org/packages/${OS_ID}" \
+                    "${OS_VERSION_CODENAME}" \
+                    "nginx" \
+                    "nginx-key" \
+                    "http://nginx.org/keys/nginx_signing.key"
+}
+{% else %}
+nginx_configure_repo()
+{
+    echo.error "Installing nginx on $OS_ID $OS_VERSION isn't supported by this script."
+    exit 4
+}
+{% endif %}
+st2web_install()
+{
+    nginx_configure_repo
+    pkg_meta_update
+
+    pkg_install nginx
+    st2_install_pkg_version st2web ${ST2WEB_PKG_VERSION}
+
+    # Generate self-signed certificate or place your existing certificate under /etc/ssl/st2
+    sudo mkdir -p /etc/ssl/st2
+    sudo openssl req -x509 -newkey rsa:2048 -keyout /etc/ssl/st2/st2.key -out /etc/ssl/st2/st2.crt \
+    -days 365 -nodes -subj "/C=US/ST=California/L=Palo Alto/O=StackStorm/OU=Information \
+    Technology/CN=$(hostname)"
+
+    # Remove default site, if present
+    sudo rm -f /etc/nginx/conf.d/default.conf
+
+    {% if id in ["rhel", "rocky", "centos", "opensuse-leap"] -%}
+        # back up conf
+        sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+        # comment out server block eg. server {...}
+        sudo awk '/^    server {/{f=1}f{$0 = "#" $0}{print}' /etc/nginx/nginx.conf.bak >/etc/nginx/nginx.conf
+        # remove double comments
+        sudo sed -i -e 's/##/#/' /etc/nginx/nginx.conf
+        # remove comment closing out server block
+        sudo sed -i -e 's/#}/}/' /etc/nginx/nginx.conf
+    {% endif %}
+
+    # Copy and enable StackStorm's supplied config file
+    sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
+
+    sudo systemctl enable nginx
+    sudo systemctl restart nginx
+}

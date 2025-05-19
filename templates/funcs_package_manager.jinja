@@ -1,0 +1,39 @@
+###############[ PACKAGE MANAGER FUNCTIONS ]###############
+pkg_install()
+{
+    {% if pkg_mgr == "apt" %}
+    # Silence debconf prompt, raised during some dep installations. This will be passed to sudo via 'env_keep'.
+    export DEBIAN_FRONTEND=noninteractive
+    {% endif %}
+    sudo {{ pkg_mgr }} -y install $@
+}
+
+pkg_meta_update()
+{
+    # Update the package metadata to the latest information from the repostories.
+    {% if pkg_mgr == "apt" %}
+    sudo apt update -y
+    {% elif pkg_mgr == "dnf" %}
+    sudo dnf -y check-update
+    # to do: which is more appropriate.
+    #sudo dnf makecache --refresh
+    {% else %}
+    echo.error "The package manager on $OS_ID $OS_VERSION_ID is not supported by the bootstrap script."
+    exit 1
+    {% endif %}
+}
+
+pkg_is_installed()
+{
+    PKG="$1"
+    # Check for package installed on system
+    {% if pkg_mgr == "apt" %}
+    # ii indicates the package is correctly installed.
+    dpkg -l "$PKG" | grep -qE "^ii.*${PKG}"
+    {% elif pkg_mgr == "dnf" %}
+    sudo rpm -q "$PKG" | grep -qE "^${PKG}"
+    {% else %}
+    echo.error "The package manager on $OS_ID $OS_VERSION_ID is not supported by the bootstrap script."
+    exit 1
+    {% endif %}
+}

@@ -1,0 +1,243 @@
+###############[ COMMON FUNCTIONS ]###############
+system_install_runtime_packages()
+{
+    {% if id in ["rhel", "rocky", "centos"] %}
+    # Extra Packages for Enterprise Linux (EPEL) for crudini requirement
+    if ! pkg_is_installed epel-release; then
+        pkg_install https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ version_id }}.noarch.rpm
+    fi
+    {% endif %}
+    local PKG_DEPS=(
+        crudini
+        curl
+        jq
+        logrotate
+        net-tools
+        {% if id in ["rhel", "rocky", "centos", "opensuse-leap"] -%}
+        # Use repoquery tool from yum-utils to get package_name-package_ver-package_rev in RPM based distros
+        # if we don't want to construct this string manually using yum info --show-duplicates and
+        # doing a bunch of sed awk magic. Problem is this is not installed by default on all images.
+        yum-utils
+        iproute
+        gnupg2
+        httpd-tools
+        {% elif id in ["ubuntu", "debian"] %}
+        iproute2
+        gnupg
+        apt-transport-https
+        apache2-utils
+        ca-certificates
+        {% if id == "debian" %}
+        debian-archive-keyring
+        {% endif %}
+        {% endif -%}
+    )
+    pkg_meta_update
+    pkg_install ${PKG_DEPS[@]}
+}
+
+
+system_configure_proxy()
+{
+    # Allow bypassing 'proxy' env vars via sudo
+    local sudoers_proxy='Defaults env_keep += "http_proxy https_proxy no_proxy proxy_ca_bundle_path DEBIAN_FRONTEND"'
+    if ! sudo grep -s -q ^"${sudoers_proxy}" /etc/sudoers.d/st2; then
+        sudo sh -c "echo '${sudoers_proxy}' >> /etc/sudoers.d/st2"
+    fi
+
+    # Configure proxy env vars for 'st2api', 'st2actionrunner' and 'st2chatops' system configs
+    # See: https://docs.stackstorm.com/packs.html#installing-packs-from-behind-a-proxy
+    service_config_path=""
+    # sysconfig and default exist on RedHat systems, so sysconfig must be first in the search list.
+    for cfgdir in "/etc/sysconfig" "/etc/default"
+    do
+        if [[ -d "$cfgdir" ]]; then
+            service_config_path="$cfgdir"
+            break
+        fi
+    done
+
+    if [[ -z "$service_config_path" ]]; then
+        echo.error "Failed to determine the systems configuration path!  Is this system supported?"
+        exit 1
+    fi
+    for service in st2api st2actionrunner st2chatops;
+    do
+        service_config="${service_config_path}/${service}"
+        # create file if doesn't exist yet
+        sudo test -e "${service_config}" || sudo touch "${service_config}"
+        for env_var in http_proxy https_proxy no_proxy proxy_ca_bundle_path; do
+            # delete line from file if specific proxy env var is unset
+            if sudo test -z "${!env_var:-}"; then
+                sudo sed -i "/^${env_var}=/d" ${service_config}
+            # add proxy env var if it doesn't exist yet
+            elif ! sudo grep -s -q ^"${env_var}=" ${service_config}; then
+                sudo sh -c "echo '${env_var}=${!env_var}' >> ${service_config}"
+            # modify existing proxy env var value
+            elif ! sudo grep -s -q ^"${env_var}=${!env_var}$" ${service_config}; then
+                sudo sed -i "s#^${env_var}=.*#${env_var}=${!env_var}#" ${service_config}
+            fi
+        done
+    done
+}
+
+
+system_port_status()
+{
+    # If the specified tcp4 port is bound, then return the "port pid/procname",
+    # else if a pipe command fails, return "Unbound",
+    # else return "".
+    #
+    # Please note that all return values end with a newline.
+    #
+    # Use netstat and awk to get a list of all the tcp4 sockets that are in the LISTEN state,
+    # matching the specified port.
+    #
+    # `ss` command is expected to output data in the below format:
+    #    Netid State  Recv-Q Send-Q  Local Address:Port   Peer Address:Port Process
+    #    tcp   LISTEN 0      511           0.0.0.0:80          0.0.0.0:*     users:(("nginx",pid=421,fd=6),("nginx",pid=420,fd=6))
+
+    # The awk command prints the 4th and 7th columns of any line matching both the following criteria:
+    #   1) The 5th column contains the port passed to port_status()  (i.e., $1)
+    #   2) The 7th column contains the process bound (listening) to the port.
+    #
+    # Sample output:
+    #   0.0.0.0:80 users:(("nginx",pid=421,fd=6),("nginx",pid=420,fd=6))
+    sudo ss -ltpun4 "sport = :$1" | awk '/tcp.*LISTEN.*/ {print $5" "$7}' || echo "Unbound"
+}
+
+
+system_check_resources()
+{
+    # CHECK 1: Determine which, if any, of the required ports are used by an existing process.
+
+    # Abort the installation early if the following ports are being used by an existing process.
+    # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), redis (6379)
+    # and st2 (9100-9102).
+    PORT_TEST=$(
+    cat <<EOF
+    {
+        "nginx": {
+            "ports": [80, 443],
+            "process": ".*nginx.*"
+        },
+        "redis": {
+            "ports": [6379],
+            "process": ".*redis-server.*"
+        },
+        "mongodb": {
+            "ports": [27017],
+            "process": ".*mongod.*"
+        },
+        "st2": {
+            "ports": [9100, 9101, 9102],
+            "process": ".*gunicorn.*"
+        },
+        "rabbitmq": {
+            "ports": [5672, 25672],
+            "process": ".*beam.smp.*"
+        },
+        "erlang": {
+            "ports": [4369],
+            "process": ".*epmd.*"
+        }
+    }
+EOF
+)
+    declare -a used=()
+    for test in $(jq -r '. | keys[]' <<<$PORT_TEST); do
+        ALLOWED=$(jq -r '.'"$test"'.process' <<<$PORT_TEST)
+        for i in $(jq -r '.'"$test"'.ports[]' <<<$PORT_TEST)
+        do
+            rv="$(system_port_status $i | sed 's/.*-$\|'${ALLOWED}'//')"
+            if [[ "$rv" != "Unbound" ]] && [[ -n "$rv" ]]; then
+                used+=("$rv")
+            fi
+        done
+    done
+
+    # If any used ports were found, display helpful message and exit {% raw %}
+    if [[ ${#used[@]} -gt 0 ]]; then
+        #{% endraw %}
+        echo.error "\nNot all required TCP ports are available. ST2 and related services will fail to start.\n\n"
+        echo.info "The following ports are in use by the specified pid/process and need to be stopped:"
+        for port_pid_process in "${used[@]}"
+        do
+             echo.info " $port_pid_process"
+        done
+        echo ""
+        exit 1
+    fi
+
+    # CHECK 2: Ensure there is enough space at /var/lib/mongodb
+    VAR_SPACE=`df -Pm /var/lib | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{print $4}'`
+    if [[ ${VAR_SPACE} -lt 350 ]]; then
+        echo
+        echo.error "MongoDB disk space check failed."
+        echo.info "MongoDB requires at least 350MB free in /var/lib/mongodb but the is only ${VAR_SPACE}MB available."
+        echo.info "There is not enough space for MongoDB.  It will fail to start.  Please, add some space to /var or clean it up."
+        exit 1
+    fi
+}
+
+
+system_generate_password()
+{
+    local LEN="$1"
+    head /dev/urandom | tr -dc A-Za-z0-9 | head -c $LEN; echo ''
+}
+
+
+ok_message()
+{
+    cat <<EOF
+
+                      StackStorm is installed and ready to use.
+┌──────────────────┐
+│   ▓▓▓▓▓  ███████ │  Head to https://YOUR_HOST_IP/ to access the WebUI
+│ ▓▓▓▓▓▓▓▓▓  █████ │
+│▓▓▓▓▓▓▓▓▓▓▓▓  ███ │  Don't forget to dive into our documentation! Here are some resources
+│ ▓▓▓▓▓▓▓▓▓▓▓▓▓  ▓ │  for you:
+│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  │
+│   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│  * Documentation  - https://docs.stackstorm.com
+│ ██  ▓▓▓▓▓▓▓▓▓▓▓▓▓│  * Pack Exchange - https://exchange.stackstorm.org/
+│ ████  ▓▓▓▓▓▓▓▓▓▓ │
+│ ███████  ▓▓▓▓▓▓  │  Thanks for installing StackStorm! Come visit us in our Slack Channel
+└──────────────────┘  and tell us how it's going. We'd love to hear from you!
+                      http://stackstorm.com/community-signup
+
+                      Password credentials have been saved to /root/st2_credentials.
+                      Please store them in a secure location and delete the file.
+
+
+EOF
+}
+
+write_passwords()
+{
+    cat <<EOF >/root/st2_credentials
+User account details:
+  StackStorm
+    username: $USERNAME
+    password: $PASSWORD
+  MongoDB
+    username: admin
+    password: $ST2_MONGODB_PASSWORD
+  RabbitMQ
+    username: stackstorm
+    password: $ST2_RABBITMQ_PASSWORD
+EOF
+}
+
+step()
+{
+    export STEP="$1"
+    echo; heading "$STEP"; echo
+}
+
+
+fail()
+{
+    echo.error "Failed during '$STEP'"
+    exit 2
+}

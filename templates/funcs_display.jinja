@@ -1,0 +1,53 @@
+function centre()
+{
+    LINE_LEN="$1"
+    TEXT="$2"
+    OUTPUT=""
+    {% raw %}
+    if [[ ${#TEXT} -lt ${LINE_LEN} ]]; then
+        LS=$(( (LINE_LEN - ${#TEXT}) / 2 ))
+        OUTPUT+=$(printf "%0.s " $(seq 0 $LS))
+        OUTPUT+="$TEXT"
+        RS=$(( LINE_LEN - ${#OUTPUT} ))
+        OUTPUT+=$(printf "%0.s " $(seq 0 $RS))
+    fi
+    {% endraw %}
+    echo "${OUTPUT}"
+}
+# colour echo (ref https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences)
+function cecho()
+{
+    if [[ "$1" == "-n" ]]; then
+        # No carrage return
+        local NCR="$1"; shift
+    else
+        local NCR=""
+    fi
+    local C="$1";
+    local MSG="$2"
+    echo $NCR -e "${C}${MSG}\e[0m"
+}
+function heading()
+{
+    local COLS=$(stty size | cut -d' ' -f2)
+    if [[ -n "$COLS" ]]; then
+        HEADING=$(centre $((COLS - 1)) "$1")
+    else
+        HEADING="$1"
+    fi
+    echo
+    cecho "\e[38;5;208m\e[48;5;238m\e[1m" "$HEADING"
+    echo
+}
+function echo.info()
+{
+    cecho "\e[37;1m" "$1"
+}
+function echo.warning()
+{
+    cecho "\e[33;1m" "$1"
+}
+function echo.error()
+{
+    cecho "\e[31;1m" "$1" >/dev/stderr
+}
