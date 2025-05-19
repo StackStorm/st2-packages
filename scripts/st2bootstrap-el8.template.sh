@@ -17,6 +17,7 @@ ST2CHATOPS_PKG='st2chatops'
 is_rhel() {
   return $(cat /etc/os-release | grep 'ID="rhel"')
 }
+# include:includes/install_pkg_yum.sh
 
 setup_args() {
   for i in "$@"
