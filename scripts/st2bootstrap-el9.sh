@@ -5,7 +5,8 @@
 set -e -u +x
 
 HUBOT_ADAPTER='slack'
-HUBOT_SLACK_TOKEN=${HUBOT_SLACK_TOKEN:-''}
+HUBOT_SLACK_BOT_TOKEN=${HUBOT_SLACK_BOT_TOKEN:-''}
+HUBOT_SLACK_APP_TOKEN=${HUBOT_SLACK_APP_TOKEN:-''}
 VERSION=''
 RELEASE='stable'
 REPO_TYPE=''
@@ -762,11 +763,14 @@ st2chatops_configure()
     sudo sed -i -r "s/^(export ST2_AUTH_USERNAME.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
     sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
 
-    if [[ "$HUBOT_ADAPTER"="slack" ]] && [[ ! -z "$HUBOT_SLACK_TOKEN" ]]; then
+    if [[ "$HUBOT_ADAPTER"="slack" ]] && [[ ! -z "$HUBOT_SLACK_BOT_TOKEN" ]] && [[ ! -z "$HUBOT_SLACK_APP_TOKEN" ]];
+    then
         sudo sed -i -r "s/^# (export HUBOT_ADAPTER=slack)/\1/" /opt/stackstorm/chatops/st2chatops.env
-        sudo sed -i -r "s/^# (export HUBOT_SLACK_TOKEN.).*/\1/" /opt/stackstorm/chatops/st2chatops.env
+        sudo sed -i -r "s/^# (export HUBOT_SLACK_BOT_TOKEN.).*/\1/" /opt/stackstorm/chatops/st2chatops.env
+        sudo sed -i -r "s/^# (export HUBOT_SLACK_APP_TOKEN.).*/\1/" /opt/stackstorm/chatops/st2chatops.env
         sudo sed -i -r "s/^(export HUBOT_ADAPTER.).*/\1$HUBOT_ADAPTER/" /opt/stackstorm/chatops/st2chatops.env
-        sudo sed -i -r "s/^(export HUBOT_SLACK_TOKEN.).*/\1$HUBOT_SLACK_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
+        sudo sed -i -r "s/^(export HUBOT_SLACK_BOT_TOKEN.).*/\1$HUBOT_SLACK_BOT_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
+        sudo sed -i -r "s/^(export HUBOT_SLACK_APP_TOKEN.).*/\1$HUBOT_SLACK_APP_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
 
         sudo service st2chatops restart
     else
