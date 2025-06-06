@@ -36,14 +36,14 @@ scriptsgen: .create_venv .install_dependencies
 	mkdir -p /tmp/scripts
 	for i in scripts/st2bootstrap-*.sh; \
 	do \
-		cp scripts/$$i /tmp/$$i \
+		cp "$$i" "/tmp/$$i"; \
 	done
 
 	make scriptsgen
 
 	for i in scripts/st2bootstrap-*.sh; \
 	do \
-		diff $i /tmp/$$i || (echo "scripts/st2bootstrap-deb.sh hasn't been re-generated and committed. Please run \"make scriptsgen\" and include and commit the generated file." && exit 1); \
+		diff "$$i" "/tmp/$$i" || (echo "scripts/st2bootstrap-deb.sh hasn't been re-generated and committed. Please run \"make scriptsgen\" and include and commit the generated file." && exit 1); \
 	done
 
 	@echo "All automatically generated files are up to date."
