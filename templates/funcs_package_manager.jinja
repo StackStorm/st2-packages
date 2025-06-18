@@ -14,9 +14,7 @@ pkg_meta_update()
     {% if pkg_mgr == "apt" %}
     sudo apt update -y
     {% elif pkg_mgr == "dnf" %}
-    sudo dnf -y check-update
-    # to do: which is more appropriate.
-    #sudo dnf makecache --refresh
+    sudo dnf -y makecache --refresh
     {% else %}
     echo.error "The package manager on $OS_ID $OS_VERSION_ID is not supported by the bootstrap script."
     exit 1
