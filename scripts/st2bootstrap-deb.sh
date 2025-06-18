@@ -1,9 +1,26 @@
 #!/usr/bin/env bash
+# Copyright 2025 The StackStorm Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 #
+# DO NOT EDIT MANUALLY.  GENERATED FOR ubuntu 22.04
+#
+# Please edit the corresponding template file and include files in https://github.com/StackStorm/st2-packages.git.
 
 set -e -u +x
 
+# ============================ Global variables ============================
 HUBOT_ADAPTER='slack'
 HUBOT_SLACK_BOT_TOKEN=${HUBOT_SLACK_BOT_TOKEN:-''}
 HUBOT_SLACK_APP_TOKEN=${HUBOT_SLACK_APP_TOKEN:-''}
@@ -24,8 +41,12 @@ INSTALL_ST2WEB=1
 
 declare -A INSTALL_TYPE=()
 
+# Prefix operating system variables with OS_ to avoid conflicts in the script.
+# References: https://github.com/chef/os_release
 source <(sed 's/^/OS_/g' /etc/os-release)
 
+# ============================ Function declarations ============================
+###############[ SCRIPT HELP ]###############
 usage() {
     cat <<EOF
 
@@ -88,9 +109,11 @@ function centre()
     
     echo "${OUTPUT}"
 }
+# colour echo (ref https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences)
 function cecho()
 {
     if [[ "$1" == "-n" ]]; then
+        # No carrage return
         local NCR="$1"; shift
     else
         local NCR=""
@@ -123,14 +146,28 @@ function echo.error()
 {
     cecho "\e[31;1m" "$1" >/dev/stderr
 }
+###############[ SCRIPT PARAMETER SETUP ]###############
 setup_install_parameters()
 {
+    # Valid release repository combinations:
+    #   stable with version x.y.z
+    #       https://packagecloud.io/StackStorm/stable           (st2web-3.8.1-1.x86_64.rpm)
+    #   staging-stable with version x.y.z
+    #       https://packagecloud.io/StackStorm/staging-stable   (st2chatops_3.8.1-1_amd64.deb)
+    #   unstable with version x.ydev
+    #       https://packagecloud.io/StackStorm/unstable         (st2-3.9dev-208.x86_64.rpm)
+    #   staging-unstable with version x.ydev
+    #       https://packagecloud.io/StackStorm/staging-unstable (st2-3.9dev-97.x86_64.rpm)
     local VERSION="$1"
     local RELEASE="$2"
     local REPO_TYPE="$3"
     local DEV_BUILD="$4"
 
+    # Set the installation type to use in the script.
     if [[ -n "$DEV_BUILD" ]]; then
+        # Development builds use the package produced from CI directly.
+        # https://output.circle-artifacts.com/output/job/e404c552-f8d6-46bd-9034-0267148874db/artifacts/0/packages/focal/st2_3.9dev-186_amd64.deb
+        # CircleCI pipeline repo: st2, branch: master, workflow: package-test-and-deploy, job: 17505
         INSTALL_TYPE["CI"]="$DEV_BUILD"
         if [[ ! "$DEV_BUILD" =~ [^/]+/[0-9]+ ]]; then
             echo.error "Unexpected format '$DEV_BUILD'.  Format must be 'repo_name/build_id'"
@@ -138,6 +175,7 @@ setup_install_parameters()
         fi
         echo.warning "Installation of $DEV_BUILD from CI build artifacts!  REALLY, ANYTHING COULD HAPPEN!"
     else
+        # non-development builds use the PackageCloud repositories.
         setup_select_repository "$VERSION" "$RELEASE" "$REPO_TYPE"
     fi
 }
@@ -145,6 +183,8 @@ setup_install_parameters()
 
 setup_check_version()
 {
+    # StackStorm version sanity check.  Report and error and exit if
+    # the version doesn't conform to the format x.y.z or x.ydev
     local VERSION="$1"
     if [[ -z "$VERSION" ]]; then
         echo.error "Unable to run script because no StackStorm version was provided."
@@ -166,6 +206,7 @@ setup_select_repository()
 
     setup_check_version "$VERSION"
 
+    # Version takes precedence over requested release
     if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+dev$ ]]; then
         if [[ "$RELEASE" != "unstable" ]]; then
             echo.warning "Development version $VERSION requested, switching from '$RELEASE' to 'unstable' repository!"
@@ -197,9 +238,11 @@ setup_username_password()
         fi
     fi
 }
+###############[ PACKAGE MANAGER FUNCTIONS ]###############
 pkg_install()
 {
     
+    # Silence debconf prompt, raised during some dep installations. This will be passed to sudo via 'env_keep'.
     export DEBIAN_FRONTEND=noninteractive
     
     sudo apt -y install $@
@@ -207,6 +250,7 @@ pkg_install()
 
 pkg_meta_update()
 {
+    # Update the package metadata to the latest information from the repostories.
     
     sudo apt update -y
     
@@ -215,10 +259,13 @@ pkg_meta_update()
 pkg_is_installed()
 {
     PKG="$1"
+    # Check for package installed on system
     
+    # ii indicates the package is correctly installed.
     dpkg -l "$PKG" | grep -qE "^ii.*${PKG}"
     
 }
+###############[ REPOSITORY MANAGER FUNCTIONS ]###############
 
 
 
@@ -235,6 +282,7 @@ repo_definition()
     KEY_URL="$6"
 
     repo_add_gpg_key "$KEY_NAME" "$KEY_URL"
+    # DEB822 is preferred over list format.
     sudo cat <<EOF >"${REPO_PATH}/${REPO_NAME}.sources"
 Types: deb
 URIs: ${REPO_URL}
@@ -278,11 +326,13 @@ repo_clean_meta()
 
 
 repo_pkg_availability() {
+    # repo_pkg_availability  <PKG> <VERSION>
     local PKG="$1"
     local VERSION="$2"
 
     local PKG_VER=""
     
+        # deb based systems.
         PKG_VER=$(pkg_get_latest_version "$PKG" "${VERSION}")
     
 
@@ -292,6 +342,7 @@ repo_pkg_availability() {
     fi
     echo "$PKG_VER"
 }
+###############[ COMMON FUNCTIONS ]###############
 system_install_runtime_packages()
 {
     
@@ -316,12 +367,16 @@ system_install_runtime_packages()
 
 system_configure_proxy()
 {
+    # Allow bypassing 'proxy' env vars via sudo
     local sudoers_proxy='Defaults env_keep += "http_proxy https_proxy no_proxy proxy_ca_bundle_path DEBIAN_FRONTEND"'
     if ! sudo grep -s -q ^"${sudoers_proxy}" /etc/sudoers.d/st2; then
         sudo sh -c "echo '${sudoers_proxy}' >> /etc/sudoers.d/st2"
     fi
 
+    # Configure proxy env vars for 'st2api', 'st2actionrunner' and 'st2chatops' system configs
+    # See: https://docs.stackstorm.com/packs.html#installing-packs-from-behind-a-proxy
     service_config_path=""
+    # sysconfig and default exist on RedHat systems, so sysconfig must be first in the search list.
     for cfgdir in "/etc/sysconfig" "/etc/default"
     do
         if [[ -d "$cfgdir" ]]; then
@@ -337,12 +392,16 @@ system_configure_proxy()
     for service in st2api st2actionrunner st2chatops;
     do
         service_config="${service_config_path}/${service}"
+        # create file if doesn't exist yet
         sudo test -e "${service_config}" || sudo touch "${service_config}"
         for env_var in http_proxy https_proxy no_proxy proxy_ca_bundle_path; do
+            # delete line from file if specific proxy env var is unset
             if sudo test -z "${!env_var:-}"; then
                 sudo sed -i "/^${env_var}=/d" ${service_config}
+            # add proxy env var if it doesn't exist yet
             elif ! sudo grep -s -q ^"${env_var}=" ${service_config}; then
                 sudo sh -c "echo '${env_var}=${!env_var}' >> ${service_config}"
+            # modify existing proxy env var value
             elif ! sudo grep -s -q ^"${env_var}=${!env_var}$" ${service_config}; then
                 sudo sed -i "s#^${env_var}=.*#${env_var}=${!env_var}#" ${service_config}
             fi
@@ -353,18 +412,36 @@ system_configure_proxy()
 
 system_port_status()
 {
+    # If the specified tcp4 port is bound, then return the "port pid/procname",
+    # else if a pipe command fails, return "Unbound",
+    # else return "".
     #
+    # Please note that all return values end with a newline.
     #
+    # Use netstat and awk to get a list of all the tcp4 sockets that are in the LISTEN state,
+    # matching the specified port.
     #
+    # `ss` command is expected to output data in the below format:
+    #    Netid State  Recv-Q Send-Q  Local Address:Port   Peer Address:Port Process
+    #    tcp   LISTEN 0      511           0.0.0.0:80          0.0.0.0:*     users:(("nginx",pid=421,fd=6),("nginx",pid=420,fd=6))
 
+    # The awk command prints the 4th and 7th columns of any line matching both the following criteria:
+    #   1) The 5th column contains the port passed to port_status()  (i.e., $1)
+    #   2) The 7th column contains the process bound (listening) to the port.
     #
+    # Sample output:
+    #   0.0.0.0:80 users:(("nginx",pid=421,fd=6),("nginx",pid=420,fd=6))
     sudo ss -ltpun4 "sport = :$1" | awk '/tcp.*LISTEN.*/ {print $5" "$7}' || echo "Unbound"
 }
 
 
 system_check_resources()
 {
+    # CHECK 1: Determine which, if any, of the required ports are used by an existing process.
 
+    # Abort the installation early if the following ports are being used by an existing process.
+    # nginx (80, 443), mongodb (27017), rabbitmq (4369, 5672, 25672), redis (6379)
+    # and st2 (9100-9102).
     PORT_TEST=$(
     cat <<EOF
     {
@@ -407,6 +484,7 @@ EOF
         done
     done
 
+    # If any used ports were found, display helpful message and exit 
     if [[ ${#used[@]} -gt 0 ]]; then
         #
         echo.error "\nNot all required TCP ports are available. ST2 and related services will fail to start.\n\n"
@@ -419,6 +497,7 @@ EOF
         exit 1
     fi
 
+    # CHECK 2: Ensure there is enough space at /var/lib/mongodb
     VAR_SPACE=`df -Pm /var/lib | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{print $4}'`
     if [[ ${VAR_SPACE} -lt 350 ]]; then
         echo
@@ -490,6 +569,7 @@ fail()
     echo.error "Failed during '$STEP'"
     exit 2
 }
+###############[ STACKSTORM ]###############
 
 
 st2_configure_repository()
@@ -504,6 +584,7 @@ st2_configure_repository()
 }
 st2_distribution_name()
 {
+    # codename is used rather than version id.
     echo "${OS_VERSION_CODENAME}"
 }
 st2_install_from_url()
@@ -525,6 +606,7 @@ st2_install_pkg_version()
 
 st2_install_dev_build()
 {
+    # Retrieve package URL for the provided dev build from CircleCI build pipeline.
     DEV_BUILD="$1" # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
     DISTRO="$(st2_distribution_name)"  # Distro name (e.g. focal, jammy, el8, el9)
     PACKAGE_NAME_REGEX="${DISTRO}/st2[_-].*\.(deb|rpm)$"
@@ -578,12 +660,15 @@ st2_install()
 
     local ST2_CFGFILE="/etc/st2/st2.conf"
 
+    # Configure [database] section in st2.conf (username password for MongoDB access)
     local DB_URI="mongodb://stackstorm:${ST2_MONGODB_PASSWORD}@127.0.0.1:27017/st2?authSource=st2"
     sudo crudini --set "$ST2_CFGFILE" database host "$DB_URI"
 
+    # Configure [messaging] section in st2.conf (username password for RabbitMQ access)
     local AMQP="amqp://stackstorm:$ST2_RABBITMQ_PASSWORD@127.0.0.1:5672"
     sudo crudini --set "$ST2_CFGFILE" messaging url "${AMQP}"
 
+    # Configure [coordination] section in st2.conf (url for Redis access)
     sudo crudini --set "$ST2_CFGFILE" coordination url "redis://127.0.0.1:6379"
 
     if [[ ! -d /var/log/st2 ]]; then
@@ -599,8 +684,10 @@ st2_install()
 st2_configure_authentication() {
     local ST2_CFGFILE="/etc/st2/st2.conf"
 
+    # Create a user record in a password file.
     sudo htpasswd -i /etc/st2/htpasswd $USERNAME <<<"${PASSWORD}"
 
+    # Configure [auth] section in st2.conf
     sudo crudini --set "$ST2_CFGFILE" auth enable "True"
     sudo crudini --set "$ST2_CFGFILE" auth backend "flat_file"
     sudo crudini --set "$ST2_CFGFILE" auth backend_kwargs '{"file_path": "/etc/st2/htpasswd"}'
@@ -614,6 +701,7 @@ st2_configure_authentication() {
 
 st2_configure_user()
 {
+    # Create an SSH system user (default `stanley` user may be already created)
     if (! id stanley 2>/dev/null); then
         sudo useradd stanley
     fi
@@ -625,12 +713,17 @@ st2_configure_user()
         sudo chmod 700 ${SYSTEM_HOME}/.ssh
     fi
 
+    # Generate ssh keys on StackStorm box and copy over public key into remote box.
+    # NOTE: If the file already exists and is non-empty, then assume the key does not need
+    # to be generated again.
     if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
+        # added PEM to enforce PEM ssh key type in EL8 to maintain consistency
         sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" -m PEM
     fi
 
     if ! sudo grep -s -q -f ${SYSTEM_HOME}/.ssh/stanley_rsa.pub ${SYSTEM_HOME}/.ssh/authorized_keys;
     then
+        # Authorize key-base access
         sudo sh -c "cat ${SYSTEM_HOME}/.ssh/stanley_rsa.pub >> ${SYSTEM_HOME}/.ssh/authorized_keys"
     fi
 
@@ -638,6 +731,7 @@ st2_configure_user()
     sudo chmod 0700 ${SYSTEM_HOME}/.ssh
     sudo chown -R stanley:stanley ${SYSTEM_HOME}
 
+    # Enable passwordless sudo
     local STANLEY_SUDOERS="stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL"
     if ! sudo grep -s -q ^"${STANLEY_SUDOERS}" /etc/sudoers.d/st2; then
         sudo sh -c "echo '${STANLEY_SUDOERS}' >> /etc/sudoers.d/st2"
@@ -645,6 +739,7 @@ st2_configure_user()
 
     sudo chmod 0440 /etc/sudoers.d/st2
 
+    # Disable requiretty for all users
     sudo sed -i -r "s/^Defaults\s+\+?requiretty/# Defaults requiretty/g" /etc/sudoers
 }
 
@@ -656,6 +751,7 @@ st2_configure_cli_config()
     test -z "$USERNAME" && ( echo.error "Can't configure cli, missing username."; exit 9 )
     test -z "$PASSWORD" && ( echo.error "Can't configure cli, missing password."; exit 9 )
 
+    # Configure CLI config (write credentials for the root user and user which ran the script)
     ROOT_USER="root"
     CURRENT_USER=$(whoami)
 
@@ -672,12 +768,14 @@ st2_configure_cli_config()
         sudo mkdir -p ${ROOT_USER_CLI_CONFIG_DIRECTORY}
     fi
 
+    # Write config for root user
     sudo sh -c "cat <<EOF >${ROOT_USER_CLI_CONFIG_PATH}
 [credentials]
 username = ${USERNAME}
 password = ${PASSWORD}
 EOF"
 
+    # Write config for current user (in case current user is not the root user)
     if [ "${CURRENT_USER}" == "${ROOT_USER}" ]; then
         return
     fi
@@ -692,6 +790,7 @@ username = ${USERNAME}
 password = ${PASSWORD}
 EOF"
 
+    # Fix the permissions
     sudo chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
 }
 
@@ -703,17 +802,22 @@ st2_setup_kvstore_encryption_keys()
 
     sudo mkdir -p ${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}
 
+    # If the file ${DATASTORE_ENCRYPTION_KEY_PATH} exists and is not empty, then do not generate
+    # a new key. st2-generate-symmetric-crypto-key fails if the key file already exists.
     if ! sudo test -s ${DATASTORE_ENCRYPTION_KEY_PATH}; then
         sudo st2-generate-symmetric-crypto-key --key-path ${DATASTORE_ENCRYPTION_KEY_PATH}
     fi
 
+    # Make sure only st2 user can read the file
     for dir in "${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}" "${DATASTORE_ENCRYPTION_KEY_PATH}"
     do
         sudo chgrp st2 "$dir"
         sudo chmod o-r "${dir}"
     done
+    # set path to the key file in the config
     sudo crudini --set /etc/st2/st2.conf keyvalue encryption_key_path ${DATASTORE_ENCRYPTION_KEY_PATH}
 
+    # NOTE: We need to restart all the affected services so they pick the key and load it in memory
     for srv in st2api st2sensorcontainer st2workflowengine st2actionrunner
     do
         sudo st2ctl restart-component $srv
@@ -731,6 +835,7 @@ st2_verification()
 
     echo.info "Check Authentication"
     st2 auth $USERNAME -p $PASSWORD
+    # A shortcut to authenticate and export the token
     export ST2_AUTH_TOKEN=$(st2 auth $USERNAME -p $PASSWORD -t)
 
     echo.info "Check actions list for 'core' pack"
@@ -748,6 +853,7 @@ st2_verification()
     echo.info "Check pack installation"
     st2 pack install st2
 }
+###############[ ST2CHATOPS ]###############
 
 nodejs_configure_repository()
 {
@@ -756,14 +862,17 @@ nodejs_configure_repository()
 
 st2chatops_install()
 {
+    # Add NodeJS 20 repo
     nodejs_configure_repository
     pkg_install nodejs
 
+    # Install st2chatops
     st2_install_pkg_version st2chatops ${ST2CHATOPS_PKG_VERSION}
 }
 
 st2chatops_configure()
 {
+    # set API keys. This should work since CLI is configuered already.
     ST2_API_KEY=$(st2 apikey create -k)
     sudo sed -i -r "s/^(export ST2_API_KEY.).*/\1$ST2_API_KEY/" /opt/stackstorm/chatops/st2chatops.env
 
@@ -771,6 +880,7 @@ st2chatops_configure()
     sudo sed -i -r "s/^(export ST2_AUTH_USERNAME.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
     sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
 
+    # Setup adapter
     if [[ "$HUBOT_ADAPTER"="slack" ]] && [[ ! -z "$HUBOT_SLACK_BOT_TOKEN" ]] && [[ ! -z "$HUBOT_SLACK_APP_TOKEN" ]];
     then
         sudo sed -i -r "s/^# (export HUBOT_ADAPTER=slack)/\1/" /opt/stackstorm/chatops/st2chatops.env
@@ -794,6 +904,7 @@ st2chatops_configure()
         echo.info "https://docs.stackstorm.com/install/index.html"
     fi
 }
+###############[ ST2WEB ]###############
 
 nginx_configure_repo()
 {
@@ -813,20 +924,24 @@ st2web_install()
     pkg_install nginx
     st2_install_pkg_version st2web ${ST2WEB_PKG_VERSION}
 
+    # Generate self-signed certificate or place your existing certificate under /etc/ssl/st2
     sudo mkdir -p /etc/ssl/st2
     sudo openssl req -x509 -newkey rsa:2048 -keyout /etc/ssl/st2/st2.key -out /etc/ssl/st2/st2.crt \
     -days 365 -nodes -subj "/C=US/ST=California/L=Palo Alto/O=StackStorm/OU=Information \
     Technology/CN=$(hostname)"
 
+    # Remove default site, if present
     sudo rm -f /etc/nginx/conf.d/default.conf
 
     
 
+    # Copy and enable StackStorm's supplied config file
     sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
 
     sudo systemctl enable nginx
     sudo systemctl restart nginx
 }
+###############[ MONGODB ]###############
 
 
 mongodb_configure_repo()
@@ -876,6 +991,10 @@ EOF
 mongodb_adjust_selinux_policies()
 {
     if getenforce | grep -q 'Enforcing'; then
+        # RHEL9 selinux policy is more restrictive than RHEL8 by default which requires
+        # the installation of a mongodb policy to allow it to run.
+        # Note that depending on distro assembly/settings you may need more rules to change
+        # Apply these changes OR disable selinux in /etc/selinux/config (manually)
         echo.info "Applying MongoDB SELinux policy."
         pkg_install git make checkpolicy policycoreutils selinux-policy-devel
         test -d /root/mongodb-selinux || sudo git clone https://github.com/mongodb/mongodb-selinux /root/mongodb-selinux
@@ -902,11 +1021,18 @@ mongodb_install()
     pkg_install "$MONGODB_PKG"
     mongodb_configuration
 
+    # Enable and restart
     sudo systemctl enable mongod
     sudo systemctl start mongod
 
+    # Wait for service to come up before attempt to create user
     sleep 10
 
+    # Create admin user and user used by StackStorm (MongoDB needs to be running)
+    # NOTE: mongo shell will automatically exit when piping from stdin. There is
+    # no need to put quit(); at the end. This way last command exit code will be
+    # correctly preserved and install script will correctly fail and abort if this
+    # command fails.
     mongosh <<EOF
 use admin;
 db.createUser({
@@ -929,17 +1055,23 @@ db.createUser({
 });
 EOF
 
+    # Require authentication to be able to acccess the database
     sudo sed -ri 's/^  authorization: disabled$/  authorization: enabled/g' /etc/mongod.conf
 
+    # MongoDB needs to be restarted after enabling auth
     sudo systemctl restart mongod
 }
+###############[ RABBITMQ ]###############
 rabbitmq_adjust_selinux_policies()
 {
     if getenforce | grep -q 'Enforcing'; then
+        # SELINUX management tools, not available for some minimal installations
         pkg_install policycoreutils-python-utils
 
+        # Allow rabbitmq to use '25672' port, otherwise it will fail to start
         sudo semanage port --list | grep -q 25672 || sudo semanage port -a -t amqp_port_t -p tcp 25672
 
+        # Allow network access for nginx
         sudo setsebool -P httpd_can_network_connect 1
     fi
 }
@@ -956,6 +1088,7 @@ rabbitmq_install()
         return
     fi
 
+    # https://www.rabbitmq.com/docs/install-debian
     repo_add_gpg_key "com.rabbitmq.team.gpg" "https://keys.openpgp.org/vks/v1/by-fingerprint/0A9AF2115F4687BD29803A206B73A36E6026DFCA"
 
     repo_definition "erlang" \
@@ -991,9 +1124,12 @@ rabbitmq_install()
         erlang-xmerl
         "$RABBITMQ_PKG"
     )
+    # Pinning
     cat <<EOF >/etc/apt/preferences.d/erlang.pref
 Package: erlang*
 Pin: origin ppa1.rabbitmq.com
+# Note: priority of 1001 (greater than 1000) allows for downgrading.
+# To make package downgrading impossible, use a value of 999
 Pin-Priority: 1001
 EOF
 
@@ -1001,11 +1137,13 @@ EOF
     pkg_meta_update
     pkg_install ${PKGS[@]}
 
+    # Configure RabbitMQ to listen on localhost only
     sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
 
     sudo systemctl enable rabbitmq-server
     sudo systemctl restart rabbitmq-server
 
+    # configure RabbitMQ
     if ! sudo rabbitmqctl list_users | grep -E '^stackstorm'; then
         sudo rabbitmqctl add_user stackstorm "${ST2_RABBITMQ_PASSWORD}"
         sudo rabbitmqctl set_user_tags stackstorm administrator
@@ -1015,6 +1153,7 @@ EOF
         sudo rabbitmqctl delete_user guest
     fi
 }
+###############[ REDIS ]###############
 redis_install()
 {
     local REDIS_PKG=redis
@@ -1027,6 +1166,7 @@ redis_install()
         return
     fi
 
+    # https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/install-redis-on-linux/
     repo_definition "redis" \
                     "https://packages.redis.io/deb" \
                     "${OS_VERSION_CODENAME}" \
@@ -1053,8 +1193,10 @@ dir /var/lib/redis
 EOF
 )
     if [[ -f /etc/redis.conf ]]; then
+        # redis v5 configuration
         sudo bash -c "cat <<<\"$TMP\" >/etc/redis.conf"
     elif [[ -f /etc/redis/redis.conf ]]; then
+        # redis v6 configuration
         sudo bash -c "cat <<<\"$TMP\" >/etc/redis/redis.conf"
     else
         echo.warning "Unable to find redis configuration file at /etc/redis.conf or /etc/redis/redis.conf."
@@ -1064,6 +1206,7 @@ EOF
     sudo systemctl start "${REDIS_SERVICE}"
 }
 
+# ============================ Main script logic ============================
 for i in "$@"
 do
     case $i in
@@ -1130,6 +1273,7 @@ done
 trap 'fail' EXIT
 
 step "Setup runtime arguments"
+# Side-effect: INSTALL_TYPE is updated from setup_install_parameters()
 setup_install_parameters "$VERSION" "$RELEASE" "$REPO_TYPE" "$DEV_BUILD"
 setup_username_password
 

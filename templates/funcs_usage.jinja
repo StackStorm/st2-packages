@@ -5,8 +5,8 @@ usage() {
     $0 [--version=<x.y.z|x.ydev>] [--stable|--unstable] [--staging] [--dev=<repo_name/build_num>] [--user=<st2username>] [--password=<st2password>]
        [--no-mongodb] [--no-rabbitmq] [--no-redis] [--no-st2chatops] [--no-st2web]
 
-    StackStorm installation script.  This script will configure and install StackStorm and its dependencies on the system.
-    WARNING: This script will make system changes that aren't automatically reversible.
+    StackStorm installation script.  This script will install and configure StackStorm and its dependencies on the system.
+    WARNING: This script will make system changes that aren't automatically reversible.  Take care to run this script on the correct machine.
 
     Parameters
         --version|-v:   The StackStorm version to be installed.
