@@ -112,10 +112,12 @@ mongodb_install()
     sleep 10
 
     # Create admin user and user used by StackStorm (MongoDB needs to be running)
-    # NOTE: mongo shell will automatically exit when piping from stdin. There is
-    # no need to put quit(); at the end. This way last command exit code will be
-    # correctly preserved and install script will correctly fail and abort if this
-    # command fails.
+    {#
+      NOTE: mongo shell will automatically exit when piping from stdin. There is
+      no need to put quit(); at the end. This way last command exit code will be
+      correctly preserved and install script will correctly fail and abort if this
+      command fails.
+    #}
     mongosh <<EOF
 use admin;
 db.createUser({
@@ -138,9 +140,9 @@ db.createUser({
 });
 EOF
 
-    # Require authentication to be able to acccess the database
+    {#- Require authentication to be able to acccess the database #}
     sudo sed -ri 's/^  authorization: disabled$/  authorization: enabled/g' /etc/mongod.conf
 
-    # MongoDB needs to be restarted after enabling auth
+    {#- MongoDB needs to be restarted after enabling auth #}
     sudo systemctl restart mongod
 }

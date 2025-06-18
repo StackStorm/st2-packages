@@ -11,7 +11,7 @@ st2_configure_repository()
 }
 st2_distribution_name()
 {
-    # Use jinja version id for major version only.
+    {#- Use jinja version id for major version only. #}
     echo "el{{ version_id }}"
 }
 st2_install_from_url()
@@ -38,7 +38,7 @@ st2_configure_repository()
 }
 st2_distribution_name()
 {
-    # codename is used rather than version id.
+    {#- codename is used rather than version id. #}
     echo "${OS_VERSION_CODENAME}"
 }
 st2_install_from_url()
@@ -185,11 +185,11 @@ st2_configure_user()
         sudo chmod 700 ${SYSTEM_HOME}/.ssh
     fi
 
-    # Generate ssh keys on StackStorm box and copy over public key into remote box.
+    # Generate ssh keys
     # NOTE: If the file already exists and is non-empty, then assume the key does not need
     # to be generated again.
     if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
-        # added PEM to enforce PEM ssh key type in EL8 to maintain consistency
+        {#- added PEM to enforce PEM ssh key type in EL8 to maintain consistency #}
         sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" -m PEM
     fi
 

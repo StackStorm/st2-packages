@@ -1,5 +1,5 @@
 ###############[ REPOSITORY MANAGER FUNCTIONS ]###############
-{# filter functions based on package manager. #}
+{#- filter functions based on package manager. #}
 {% if pkg_mgr == "dnf" %}
 pkg_get_latest_version()
 {
@@ -109,14 +109,11 @@ repo_pkg_availability() {
     local VERSION="$2"
 
     local PKG_VER=""
-    {% if pkg_mgr == "dnf" %}
-        # rpm based systems.
-        PKG_VER=$(pkg_get_latest_version "$PKG" "${VERSION}")
-    {% elif pkg_mgr == "apt" %}
-        # deb based systems.
+    {% if pkg_mgr in ["dnf", "apt"] %}
+        {#- rpm or deb based systems. #}
         PKG_VER=$(pkg_get_latest_version "$PKG" "${VERSION}")
     {% else %}
-        # unsupported/unknown package managers.
+        {#- unsupported/unknown package managers. #}
         echo.error "Failed to detect a supported repository query tool (apt-cache or repoquery)."
         exit 1
     {% endif %}

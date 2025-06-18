@@ -1,15 +1,17 @@
 ###############[ SCRIPT PARAMETER SETUP ]###############
 setup_install_parameters()
 {
-    # Valid release repository combinations:
-    #   stable with version x.y.z
-    #       https://packagecloud.io/StackStorm/stable           (st2web-3.8.1-1.x86_64.rpm)
-    #   staging-stable with version x.y.z
-    #       https://packagecloud.io/StackStorm/staging-stable   (st2chatops_3.8.1-1_amd64.deb)
-    #   unstable with version x.ydev
-    #       https://packagecloud.io/StackStorm/unstable         (st2-3.9dev-208.x86_64.rpm)
-    #   staging-unstable with version x.ydev
-    #       https://packagecloud.io/StackStorm/staging-unstable (st2-3.9dev-97.x86_64.rpm)
+    {#
+      Valid release repository combinations:
+        stable with version x.y.z
+            https://packagecloud.io/StackStorm/stable           (st2web-3.8.1-1.x86_64.rpm)
+        staging-stable with version x.y.z
+            https://packagecloud.io/StackStorm/staging-stable   (st2chatops_3.8.1-1_amd64.deb)
+        unstable with version x.ydev
+            https://packagecloud.io/StackStorm/unstable         (st2-3.9dev-208.x86_64.rpm)
+        staging-unstable with version x.ydev
+            https://packagecloud.io/StackStorm/staging-unstable (st2-3.9dev-97.x86_64.rpm)
+    #}
     local VERSION="$1"
     local RELEASE="$2"
     local REPO_TYPE="$3"

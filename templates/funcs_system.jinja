@@ -39,7 +39,7 @@ system_install_runtime_packages()
 
 system_configure_proxy()
 {
-    # Allow bypassing 'proxy' env vars via sudo
+    # Allow passing 'proxy' env vars via sudo
     local sudoers_proxy='Defaults env_keep += "http_proxy https_proxy no_proxy proxy_ca_bundle_path DEBIAN_FRONTEND"'
     if ! sudo grep -s -q ^"${sudoers_proxy}" /etc/sudoers.d/st2; then
         sudo sh -c "echo '${sudoers_proxy}' >> /etc/sudoers.d/st2"
@@ -48,7 +48,7 @@ system_configure_proxy()
     # Configure proxy env vars for 'st2api', 'st2actionrunner' and 'st2chatops' system configs
     # See: https://docs.stackstorm.com/packs.html#installing-packs-from-behind-a-proxy
     service_config_path=""
-    # sysconfig and default exist on RedHat systems, so sysconfig must be first in the search list.
+    {#- sysconfig and default exist on RedHat systems, so sysconfig must be first in the search list. #}
     for cfgdir in "/etc/sysconfig" "/etc/default"
     do
         if [[ -d "$cfgdir" ]]; then
@@ -89,20 +89,21 @@ system_port_status()
     # else return "".
     #
     # Please note that all return values end with a newline.
-    #
-    # Use netstat and awk to get a list of all the tcp4 sockets that are in the LISTEN state,
-    # matching the specified port.
-    #
-    # `ss` command is expected to output data in the below format:
-    #    Netid State  Recv-Q Send-Q  Local Address:Port   Peer Address:Port Process
-    #    tcp   LISTEN 0      511           0.0.0.0:80          0.0.0.0:*     users:(("nginx",pid=421,fd=6),("nginx",pid=420,fd=6))
+    {#
+      Use netstat and awk to get a list of all the tcp4 sockets that are in the LISTEN state,
+      matching the specified port.
 
-    # The awk command prints the 4th and 7th columns of any line matching both the following criteria:
-    #   1) The 5th column contains the port passed to port_status()  (i.e., $1)
-    #   2) The 7th column contains the process bound (listening) to the port.
-    #
-    # Sample output:
-    #   0.0.0.0:80 users:(("nginx",pid=421,fd=6),("nginx",pid=420,fd=6))
+      `ss` command is expected to output data in the below format:
+         Netid State  Recv-Q Send-Q  Local Address:Port   Peer Address:Port Process
+         tcp   LISTEN 0      511           0.0.0.0:80          0.0.0.0:*     users:(("nginx",pid=421,fd=6),("nginx",pid=420,fd=6))
+
+      The awk command prints the 4th and 7th columns of any line matching both the following criteria:
+        1) The 5th column contains the port passed to port_status()  (i.e., $1)
+        2) The 7th column contains the process bound (listening) to the port.
+
+      Sample output:
+        0.0.0.0:80 users:(("nginx",pid=421,fd=6),("nginx",pid=420,fd=6))
+    #}
     sudo ss -ltpun4 "sport = :$1" | awk '/tcp.*LISTEN.*/ {print $5" "$7}' || echo "Unbound"
 }
 
@@ -156,9 +157,8 @@ EOF
         done
     done
 
-    # If any used ports were found, display helpful message and exit {% raw %}
-    if [[ ${#used[@]} -gt 0 ]]; then
-        #{% endraw %}
+    # If any used ports were found, display helpful message and exit
+    {% raw %}if [[ ${#used[@]} -gt 0 ]]; then{% endraw %}
         echo.error "\nNot all required TCP ports are available. ST2 and related services will fail to start.\n\n"
         echo.info "The following ports are in use by the specified pid/process and need to be stopped:"
         for port_pid_process in "${used[@]}"

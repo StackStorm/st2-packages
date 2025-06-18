@@ -10,7 +10,7 @@ pkg_install()
 
 pkg_meta_update()
 {
-    # Update the package metadata to the latest information from the repostories.
+    {#- Update the package metadata to the latest information from the repostories. #}
     {% if pkg_mgr == "apt" %}
     sudo apt update -y
     {% elif pkg_mgr == "dnf" %}
@@ -24,7 +24,7 @@ pkg_meta_update()
 pkg_is_installed()
 {
     PKG="$1"
-    # Check for package installed on system
+    {#- Check for package installed on system #}
     {% if pkg_mgr == "apt" %}
     # ii indicates the package is correctly installed.
     dpkg -l "$PKG" | grep -qE "^ii.*${PKG}"

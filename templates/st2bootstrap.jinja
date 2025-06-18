@@ -128,7 +128,7 @@ done
 trap 'fail' EXIT
 
 step "Setup runtime arguments"
-# Side-effect: INSTALL_TYPE is updated from setup_install_parameters()
+{#- Side-effect: INSTALL_TYPE is updated from setup_install_parameters() #}
 setup_install_parameters "$VERSION" "$RELEASE" "$REPO_TYPE" "$DEV_BUILD"
 setup_username_password
 

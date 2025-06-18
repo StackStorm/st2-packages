@@ -104,7 +104,7 @@ EOF
     sudo systemctl enable rabbitmq-server
     sudo systemctl restart rabbitmq-server
 
-    # configure RabbitMQ
+    {#- configure RabbitMQ #}
     if ! sudo rabbitmqctl list_users | grep -E '^stackstorm'; then
         sudo rabbitmqctl add_user stackstorm "${ST2_RABBITMQ_PASSWORD}"
         sudo rabbitmqctl set_user_tags stackstorm administrator
