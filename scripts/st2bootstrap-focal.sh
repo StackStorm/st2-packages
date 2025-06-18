@@ -53,8 +53,8 @@ usage() {
     $0 [--version=<x.y.z|x.ydev>] [--stable|--unstable] [--staging] [--dev=<repo_name/build_num>] [--user=<st2username>] [--password=<st2password>]
        [--no-mongodb] [--no-rabbitmq] [--no-redis] [--no-st2chatops] [--no-st2web]
 
-    StackStorm installation script.  This script will configure and install StackStorm and its dependencies on the system.
-    WARNING: This script will make system changes that aren't automatically reversible.
+    StackStorm installation script.  This script will install and configure StackStorm and its dependencies on the system.
+    WARNING: This script will make system changes that aren't automatically reversible.  Take care to run this script on the correct machine.
 
     Parameters
         --version|-v:   The StackStorm version to be installed.
@@ -149,15 +149,7 @@ function echo.error()
 ###############[ SCRIPT PARAMETER SETUP ]###############
 setup_install_parameters()
 {
-    # Valid release repository combinations:
-    #   stable with version x.y.z
-    #       https://packagecloud.io/StackStorm/stable           (st2web-3.8.1-1.x86_64.rpm)
-    #   staging-stable with version x.y.z
-    #       https://packagecloud.io/StackStorm/staging-stable   (st2chatops_3.8.1-1_amd64.deb)
-    #   unstable with version x.ydev
-    #       https://packagecloud.io/StackStorm/unstable         (st2-3.9dev-208.x86_64.rpm)
-    #   staging-unstable with version x.ydev
-    #       https://packagecloud.io/StackStorm/staging-unstable (st2-3.9dev-97.x86_64.rpm)
+    
     local VERSION="$1"
     local RELEASE="$2"
     local REPO_TYPE="$3"
@@ -250,7 +242,6 @@ pkg_install()
 
 pkg_meta_update()
 {
-    # Update the package metadata to the latest information from the repostories.
     
     sudo apt update -y
     
@@ -259,14 +250,12 @@ pkg_meta_update()
 pkg_is_installed()
 {
     PKG="$1"
-    # Check for package installed on system
     
     # ii indicates the package is correctly installed.
     dpkg -l "$PKG" | grep -qE "^ii.*${PKG}"
     
 }
 ###############[ REPOSITORY MANAGER FUNCTIONS ]###############
-
 
 
 repo_definition()
@@ -313,12 +302,6 @@ pkg_get_latest_version()
 }
 
 
-pkg_get_versions()
-{
-    apt-cache show "$1"
-}
-
-
 repo_clean_meta()
 {
     true
@@ -332,7 +315,6 @@ repo_pkg_availability() {
 
     local PKG_VER=""
     
-        # deb based systems.
         PKG_VER=$(pkg_get_latest_version "$PKG" "${VERSION}")
     
 
@@ -367,7 +349,7 @@ system_install_runtime_packages()
 
 system_configure_proxy()
 {
-    # Allow bypassing 'proxy' env vars via sudo
+    # Allow passing 'proxy' env vars via sudo
     local sudoers_proxy='Defaults env_keep += "http_proxy https_proxy no_proxy proxy_ca_bundle_path DEBIAN_FRONTEND"'
     if ! sudo grep -s -q ^"${sudoers_proxy}" /etc/sudoers.d/st2; then
         sudo sh -c "echo '${sudoers_proxy}' >> /etc/sudoers.d/st2"
@@ -376,7 +358,6 @@ system_configure_proxy()
     # Configure proxy env vars for 'st2api', 'st2actionrunner' and 'st2chatops' system configs
     # See: https://docs.stackstorm.com/packs.html#installing-packs-from-behind-a-proxy
     service_config_path=""
-    # sysconfig and default exist on RedHat systems, so sysconfig must be first in the search list.
     for cfgdir in "/etc/sysconfig" "/etc/default"
     do
         if [[ -d "$cfgdir" ]]; then
@@ -417,20 +398,7 @@ system_port_status()
     # else return "".
     #
     # Please note that all return values end with a newline.
-    #
-    # Use netstat and awk to get a list of all the tcp4 sockets that are in the LISTEN state,
-    # matching the specified port.
-    #
-    # `ss` command is expected to output data in the below format:
-    #    Netid State  Recv-Q Send-Q  Local Address:Port   Peer Address:Port Process
-    #    tcp   LISTEN 0      511           0.0.0.0:80          0.0.0.0:*     users:(("nginx",pid=421,fd=6),("nginx",pid=420,fd=6))
-
-    # The awk command prints the 4th and 7th columns of any line matching both the following criteria:
-    #   1) The 5th column contains the port passed to port_status()  (i.e., $1)
-    #   2) The 7th column contains the process bound (listening) to the port.
-    #
-    # Sample output:
-    #   0.0.0.0:80 users:(("nginx",pid=421,fd=6),("nginx",pid=420,fd=6))
+    
     sudo ss -ltpun4 "sport = :$1" | awk '/tcp.*LISTEN.*/ {print $5" "$7}' || echo "Unbound"
 }
 
@@ -484,9 +452,8 @@ EOF
         done
     done
 
-    # If any used ports were found, display helpful message and exit 
+    # If any used ports were found, display helpful message and exit
     if [[ ${#used[@]} -gt 0 ]]; then
-        #
         echo.error "\nNot all required TCP ports are available. ST2 and related services will fail to start.\n\n"
         echo.info "The following ports are in use by the specified pid/process and need to be stopped:"
         for port_pid_process in "${used[@]}"
@@ -584,7 +551,6 @@ st2_configure_repository()
 }
 st2_distribution_name()
 {
-    # codename is used rather than version id.
     echo "${OS_VERSION_CODENAME}"
 }
 st2_install_from_url()
@@ -713,11 +679,10 @@ st2_configure_user()
         sudo chmod 700 ${SYSTEM_HOME}/.ssh
     fi
 
-    # Generate ssh keys on StackStorm box and copy over public key into remote box.
+    # Generate ssh keys
     # NOTE: If the file already exists and is non-empty, then assume the key does not need
     # to be generated again.
     if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
-        # added PEM to enforce PEM ssh key type in EL8 to maintain consistency
         sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" -m PEM
     fi
 
@@ -854,19 +819,9 @@ st2_verification()
     st2 pack install st2
 }
 ###############[ ST2CHATOPS ]###############
-
-nodejs_configure_repository()
-{
-    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-}
-
 st2chatops_install()
 {
-    # Add NodeJS 20 repo
-    nodejs_configure_repository
-    pkg_install nodejs
-
-    # Install st2chatops
+    nodejs_install
     st2_install_pkg_version st2chatops ${ST2CHATOPS_PKG_VERSION}
 }
 
@@ -890,7 +845,8 @@ st2chatops_configure()
         sudo sed -i -r "s/^(export HUBOT_SLACK_BOT_TOKEN.).*/\1$HUBOT_SLACK_BOT_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
         sudo sed -i -r "s/^(export HUBOT_SLACK_APP_TOKEN.).*/\1$HUBOT_SLACK_APP_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
 
-        sudo service st2chatops restart
+        sudo systemctl enable st2chatops
+        sudo systemctl restart st2chatops
     else
         echo.warning "Warning: Chatops requires manual configuration!"
         echo.info "Edit /opt/stackstorm/chatops/st2chatops.env to specify"
@@ -898,6 +854,7 @@ st2chatops_configure()
         echo.info "the chat you're using.  Don't forget to start the service"
         echo.info "afterwards:"
         echo.info ""
+        echo.info "  $ sudo systemctl enable st2chatops"
         echo.info "  $ sudo systemctl restart st2chatops"
         echo.info ""
         echo.info "For more information, please refer to documentation at"
@@ -905,6 +862,57 @@ st2chatops_configure()
     fi
 }
 ###############[ ST2WEB ]###############
+st2web_install()
+{
+    st2_install_pkg_version st2web ${ST2WEB_PKG_VERSION}
+}
+###############[ NODEJS ]###############
+
+nodejs_configure_repository()
+{
+    local NODE_VERSION="20.x"
+
+    local RM_FILES=(
+        /etc/apt/preferences.d/nsolid.pref
+        /usr/share/keyrings/nodesource.gpg
+        /etc/apt/sources.list.d/nodesource.list
+        /etc/apt/preferences.d/nodejs.pref
+    )
+    for f in "${RM_FILES[@]}"
+    do
+        rm -f "$i" || true
+    done
+
+    repo_definition "nodejs-${NODE_VERSION}" \
+                    "https://deb.nodesource.com/node_${NODE_VERSION}" \
+                    "nodistro" \
+                    "main" \
+                    "nodejs-${NODE_VERSION}-key" \
+                    "https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key"
+
+    # N|Solid pinning
+    sudo cat <<EOF >/etc/apt/preferences.d/nsolid.pref
+Package: nsolid
+Pin: origin deb.nodesource.com
+Pin-Priority: 600
+EOF
+
+    # N|Solid pinning
+    sudo cat <<EOF >/etc/apt/preferences.d/nodejs.pref
+Package: nodejs
+Pin: origin deb.nodesource.com
+Pin-Priority: 600
+EOF
+}
+
+
+nodejs_install()
+{
+    nodejs_configure_repository
+    pkg_meta_update
+    pkg_install nodejs
+}
+###############[ NGINX ]###############
 
 nginx_configure_repo()
 {
@@ -915,25 +923,46 @@ nginx_configure_repo()
                     "nginx-key" \
                     "http://nginx.org/keys/nginx_signing.key"
 }
+nginx_update_default_configuration()
+{
+    true
+}
+nginx_update_firewall_rules()
+{
+    true
+}
 
-st2web_install()
+nginx_gernerate_certificate()
+{
+    OPENSSL_VERSION=$(openssl version | awk '/OpenSSL/ {print $2}')
+    if grep -E '^1\.' <<<$OPENSSL_VERSION; then
+        FLAGS="-nodes"
+    else
+        # openssl v3.x replaced deprecated -nodes with -noenc.
+        FLAGS="-noenc"
+    fi
+    # Generate self-signed certificate or place your existing certificate under /etc/ssl/st2
+    sudo mkdir -p /etc/ssl/st2
+    sudo openssl req \
+        -x509 \
+        -newkey rsa:2048 \
+        -keyout /etc/ssl/st2/st2.key -out /etc/ssl/st2/st2.crt \
+        -days 365 \
+        $FLAGS \
+        -subj "/C=US/ST=California/L=Palo Alto/O=StackStorm/OU=Information Technology/CN=$(hostname)"
+}
+
+nginx_install()
 {
     nginx_configure_repo
     pkg_meta_update
-
     pkg_install nginx
-    st2_install_pkg_version st2web ${ST2WEB_PKG_VERSION}
 
-    # Generate self-signed certificate or place your existing certificate under /etc/ssl/st2
-    sudo mkdir -p /etc/ssl/st2
-    sudo openssl req -x509 -newkey rsa:2048 -keyout /etc/ssl/st2/st2.key -out /etc/ssl/st2/st2.crt \
-    -days 365 -nodes -subj "/C=US/ST=California/L=Palo Alto/O=StackStorm/OU=Information \
-    Technology/CN=$(hostname)"
-
-    # Remove default site, if present
+    nginx_gernerate_certificate
     sudo rm -f /etc/nginx/conf.d/default.conf
 
-    
+    nginx_update_default_configuration
+    nginx_update_firewall_rules
 
     # Copy and enable StackStorm's supplied config file
     sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
@@ -988,21 +1017,6 @@ EOF
     sudo bash -c "cat <<<\"$TMP\" >${CFGFILE}"
 }
 
-mongodb_adjust_selinux_policies()
-{
-    if getenforce | grep -q 'Enforcing'; then
-        # RHEL9 selinux policy is more restrictive than RHEL8 by default which requires
-        # the installation of a mongodb policy to allow it to run.
-        # Note that depending on distro assembly/settings you may need more rules to change
-        # Apply these changes OR disable selinux in /etc/selinux/config (manually)
-        echo.info "Applying MongoDB SELinux policy."
-        pkg_install git make checkpolicy policycoreutils selinux-policy-devel
-        test -d /root/mongodb-selinux || sudo git clone https://github.com/mongodb/mongodb-selinux /root/mongodb-selinux
-        cd /root/mongodb-selinux && \
-        make && \
-        sudo make install
-    fi
-}
 
 mongodb_install()
 {
@@ -1029,10 +1043,7 @@ mongodb_install()
     sleep 10
 
     # Create admin user and user used by StackStorm (MongoDB needs to be running)
-    # NOTE: mongo shell will automatically exit when piping from stdin. There is
-    # no need to put quit(); at the end. This way last command exit code will be
-    # correctly preserved and install script will correctly fail and abort if this
-    # command fails.
+    
     mongosh <<EOF
 use admin;
 db.createUser({
@@ -1054,11 +1065,7 @@ db.createUser({
     ]
 });
 EOF
-
-    # Require authentication to be able to acccess the database
     sudo sed -ri 's/^  authorization: disabled$/  authorization: enabled/g' /etc/mongod.conf
-
-    # MongoDB needs to be restarted after enabling auth
     sudo systemctl restart mongod
 }
 ###############[ RABBITMQ ]###############
@@ -1142,8 +1149,6 @@ EOF
 
     sudo systemctl enable rabbitmq-server
     sudo systemctl restart rabbitmq-server
-
-    # configure RabbitMQ
     if ! sudo rabbitmqctl list_users | grep -E '^stackstorm'; then
         sudo rabbitmqctl add_user stackstorm "${ST2_RABBITMQ_PASSWORD}"
         sudo rabbitmqctl set_user_tags stackstorm administrator
@@ -1273,7 +1278,6 @@ done
 trap 'fail' EXIT
 
 step "Setup runtime arguments"
-# Side-effect: INSTALL_TYPE is updated from setup_install_parameters()
 setup_install_parameters "$VERSION" "$RELEASE" "$REPO_TYPE" "$DEV_BUILD"
 setup_username_password
 
@@ -1316,6 +1320,9 @@ st2_setup_kvstore_encryption_keys
 
 step "Verify StackStorm installation"
 st2_verification
+
+step "Install HTTP Reverse Proxy (nginx)"
+nginx_install
 
 step "Install Web Interface (st2web)"
 st2web_install
