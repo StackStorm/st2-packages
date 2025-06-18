@@ -7,6 +7,21 @@ mongodb_configure_repo()
                     "mongodb-org-7.0-key" \
                     "https://pgp.mongodb.com/server-7.0.asc"
 }
+mongodb_adjust_selinux_policies()
+{
+    if getenforce | grep -q 'Enforcing'; then
+        # RHEL9 selinux policy is more restrictive than RHEL8 by default which requires
+        # the installation of a mongodb policy to allow it to run.
+        # Note that depending on distro assembly/settings you may need more rules to change
+        # Apply these changes OR disable selinux in /etc/selinux/config (manually)
+        echo.info "Applying MongoDB SELinux policy."
+        pkg_install git make checkpolicy policycoreutils selinux-policy-devel
+        test -d /root/mongodb-selinux || sudo git clone https://github.com/mongodb/mongodb-selinux /root/mongodb-selinux
+        cd /root/mongodb-selinux && \
+        make && \
+        sudo make install
+    fi
+}
 mongodb_configuration()
 {
     local MONGODB_USER="mongod"
@@ -71,21 +86,6 @@ EOF
     sudo bash -c "cat <<<\"$TMP\" >${CFGFILE}"
 }
 
-mongodb_adjust_selinux_policies()
-{
-    if getenforce | grep -q 'Enforcing'; then
-        # RHEL9 selinux policy is more restrictive than RHEL8 by default which requires
-        # the installation of a mongodb policy to allow it to run.
-        # Note that depending on distro assembly/settings you may need more rules to change
-        # Apply these changes OR disable selinux in /etc/selinux/config (manually)
-        echo.info "Applying MongoDB SELinux policy."
-        pkg_install git make checkpolicy policycoreutils selinux-policy-devel
-        test -d /root/mongodb-selinux || sudo git clone https://github.com/mongodb/mongodb-selinux /root/mongodb-selinux
-        cd /root/mongodb-selinux && \
-        make && \
-        sudo make install
-    fi
-}
 
 mongodb_install()
 {
