@@ -1,28 +1,7 @@
 ###############[ ST2CHATOPS ]###############
-{% if id in ["rhel", "rocky", "centos", "opensuse-leap"] -%}
-nodejs_configure_repository()
-{
-    curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo -E bash -
-}
-{% elif id in ["ubuntu", "debian"] %}
-nodejs_configure_repository()
-{
-    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-}
-{% else %}
-nodejs_configure_repository()
-{
-    echo.error "Installing NodeJS on $OS_ID $OS_VERSION isn't supported by this script."
-    exit 4
-}
-{% endif %}
 st2chatops_install()
 {
-    # Add NodeJS 20 repo
-    nodejs_configure_repository
-    pkg_install nodejs
-
-    # Install st2chatops
+    nodejs_install
     st2_install_pkg_version st2chatops ${ST2CHATOPS_PKG_VERSION}
 }
 
