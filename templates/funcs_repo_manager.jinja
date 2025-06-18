@@ -44,15 +44,6 @@ EOF
 }
 
 
-pkg_get_versions()
-{
-    # Approximately equivalanet to apt-cache show
-    dnf -y info --showduplicates "$1"
-    # output processing hint (not completely correct):
-    # dnf info --showduplicates st2 | sed -r 's/ +: +/:/g' | awk -F: '/^(Name|Version|Release|Architecture|Size|Source|Repository|Summary|URL|License|Description)/ {print $2} | xargs -n11 | column -t
-}
-
-
 repo_clean_meta()
 {
     dnf -y clean metadata
@@ -102,12 +93,6 @@ pkg_get_latest_version()
     local PKG="$1"
     local VERSION="$2"
     apt-cache show "$PKG" | awk '/Version:/{print $2}' | grep "^${VERSION//./\\.}" | sort --version-sort | tail -n 1
-}
-
-
-pkg_get_versions()
-{
-    apt-cache show "$1"
 }
 
 
