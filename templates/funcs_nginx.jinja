@@ -1,0 +1,102 @@
+###############[ ST2WEB ]###############
+{% if id in ["rhel", "rocky", "centos", "opensuse-leap"] -%}
+nginx_configure_repo()
+{
+    repo_definition "nginx" \
+                    "http://nginx.org/packages/rhel/{{ version_id }}/x86_64/" \
+                    "nginx-key" \
+                    "http://nginx.org/keys/nginx_signing.key"
+}
+nginx_update_default_configuration()
+{
+    {#- backup conf #}
+    sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+    # comment out server block eg. server {...}
+    sudo awk '/^    server {/{f=1}f{$0 = "#" $0}{print}' /etc/nginx/nginx.conf.bak >/etc/nginx/nginx.conf
+    {#- remove double comments #}
+    sudo sed -i -e 's/##/#/' /etc/nginx/nginx.conf
+    {#- remove comment closing out server block #}
+    sudo sed -i -e 's/#}/}/' /etc/nginx/nginx.conf
+}
+nginx_update_firewall_rules()
+{
+    if command -v firewall-cmd >/dev/null 2>&1; then
+        sudo firewall-cmd --zone=public --add-service=http --add-service=https
+        sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https
+    fi
+}
+{% elif id in ["ubuntu", "debian"] %}
+nginx_configure_repo()
+{
+    repo_definition "nginx" \
+                    "http://nginx.org/packages/${OS_ID}" \
+                    "${OS_VERSION_CODENAME}" \
+                    "nginx" \
+                    "nginx-key" \
+                    "http://nginx.org/keys/nginx_signing.key"
+}
+nginx_update_default_configuration()
+{
+    {#- no alteration required. #}
+    true
+}
+nginx_update_firewall_rules()
+{
+    {#- no alteration required. #}
+    true
+}
+{% else %}
+nginx_configure_repo()
+{
+    echo.error "Installing nginx on $OS_ID $OS_VERSION isn't supported by this script."
+    exit 4
+}
+nginx_update_default_configuration()
+{
+    nginx_configure_repo
+}
+nginx_update_firewall_rules()
+{
+    nginx_configure_repo
+}
+{% endif %}
+nginx_gernerate_certificate()
+{
+    OPENSSL_VERSION=$(openssl version | awk '/OpenSSL/ {print $2}')
+    if grep -E '^1\.' <<<$OPENSSL_VERSION; then
+        FLAGS="-nodes"
+    else
+        # openssl v3.x replaced deprecated -nodes with -noenc.
+        FLAGS="-noenc"
+    fi
+    # Generate self-signed certificate or place your existing certificate under /etc/ssl/st2
+    sudo mkdir -p /etc/ssl/st2
+    sudo openssl req \
+        -x509 \
+        -newkey rsa:2048 \
+        -keyout /etc/ssl/st2/st2.key -out /etc/ssl/st2/st2.crt \
+        -days 365 \
+        $FLAGS \
+        -subj "/C=US/ST=California/L=Palo Alto/O=StackStorm/OU=Information Technology/CN=$(hostname)"
+}
+
+nginx_install()
+{
+    nginx_configure_repo
+    pkg_meta_update
+    pkg_install nginx
+
+    nginx_gernerate_certificate
+
+    {#- Remove default site, if present #}
+    sudo rm -f /etc/nginx/conf.d/default.conf
+
+    nginx_update_default_configuration
+    nginx_update_firewall_rules
+
+    # Copy and enable StackStorm's supplied config file
+    sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
+
+    sudo systemctl enable nginx
+    sudo systemctl restart nginx
+}

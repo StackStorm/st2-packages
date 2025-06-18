@@ -55,6 +55,7 @@ source <(sed 's/^/OS_/g' /etc/os-release)
 {% include 'funcs_st2.jinja' %}
 {% include 'funcs_st2chatops.jinja' %}
 {% include 'funcs_st2web.jinja' %}
+{% include 'funcs_nginx.jinja' %}
 {% include 'funcs_mongodb.jinja' %}
 {% include 'funcs_rabbitmq.jinja' %}
 {% include 'funcs_redis.jinja' %}
@@ -169,6 +170,9 @@ st2_setup_kvstore_encryption_keys
 
 step "Verify StackStorm installation"
 st2_verification
+
+step "Install HTTP Reverse Proxy (nginx)"
+nginx_install
 
 step "Install Web Interface (st2web)"
 st2web_install
