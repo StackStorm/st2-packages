@@ -25,7 +25,8 @@ st2chatops_configure()
         sudo sed -i -r "s/^(export HUBOT_SLACK_BOT_TOKEN.).*/\1$HUBOT_SLACK_BOT_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
         sudo sed -i -r "s/^(export HUBOT_SLACK_APP_TOKEN.).*/\1$HUBOT_SLACK_APP_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
 
-        sudo service st2chatops restart
+        sudo systemctl enable st2chatops
+        sudo systemctl restart st2chatops
     else
         echo.warning "Warning: Chatops requires manual configuration!"
         echo.info "Edit /opt/stackstorm/chatops/st2chatops.env to specify"
@@ -33,6 +34,7 @@ st2chatops_configure()
         echo.info "the chat you're using.  Don't forget to start the service"
         echo.info "afterwards:"
         echo.info ""
+        echo.info "  $ sudo systemctl enable st2chatops"
         echo.info "  $ sudo systemctl restart st2chatops"
         echo.info ""
         echo.info "For more information, please refer to documentation at"
