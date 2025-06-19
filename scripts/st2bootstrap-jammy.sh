@@ -524,6 +524,7 @@ ok_message()
                       Password credentials have been saved to /root/st2_credentials.
                       Please store them in a secure location and delete the file.
 
+* Logo generated thanks to the services at https://www.asciiart.eu/image-to-ascii
 
 EOF
 }
