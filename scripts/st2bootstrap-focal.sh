@@ -258,6 +258,7 @@ pkg_is_installed()
 ###############[ REPOSITORY MANAGER FUNCTIONS ]###############
 
 
+
 repo_definition()
 {
     REPO_PATH="/etc/apt/sources.list.d"
@@ -282,6 +283,25 @@ Signed-By: ${GPG_KEY_PATH}/${KEY_NAME}.gpg
 EOF
 }
 
+repo_kv_set()
+{
+    REPO_NAME="$1"
+    KEY="$2"
+    VALUE="$3"
+    REPO_PATH="/etc/apt/sources.list.d"
+    REPO_FILENAME="${REPO_PATH}/${REPO_NAME}.sources"
+    if [[ -f "${REPO_FILENAME}" ]]; then
+        if grep -Eq "^${KEY}:" "$REPO_FILENAME"; then
+            sudo sed -ri "s/^${KEY}:.*/${KEY}: ${VALUE}/g" "$REPO_FILENAME"
+        else
+            TMP=$(cat "${REPO_FILENAME}" <(echo "${KEY}: ${VALUE}"))
+            sudo bash -c "cat <<<\"$TMP\" >${REPO_FILENAME}"
+        fi
+    else
+        echo "Repository file ${REPO_FILENAME} not found, can't update $KEY"
+        exit 5
+    fi
+}
 
 repo_add_gpg_key()
 {

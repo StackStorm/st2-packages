@@ -253,6 +253,7 @@ pkg_is_installed()
 }
 ###############[ REPOSITORY MANAGER FUNCTIONS ]###############
 
+
 pkg_get_latest_version()
 {
     local PKG="$1" # st2
@@ -276,7 +277,7 @@ repo_definition()
     REPO_URL="$2"
     KEY_NAME="$3"
     KEY_URL="$4"
-    REPO_PATH="/etc/yum.repos.d/"
+    REPO_PATH="/etc/yum.repos.d"
 
     cat <<EOF >"${REPO_PATH}/${REPO_NAME}.repo"
 [${REPO_NAME}]
@@ -296,6 +297,25 @@ type=rpm-md
 EOF
 }
 
+repo_kv_set()
+{
+    REPO_NAME="$1"
+    KEY="$2"
+    VALUE="$3"
+    REPO_PATH="/etc/yum.repos.d"
+    REPO_FILENAME="${REPO_PATH}/${REPO_NAME}.repo"
+    if [[ -f "${REPO_FILENAME}" ]]; then
+        if grep -Eq "^${KEY}=" "$REPO_FILENAME"; then
+            sudo sed -ri "s/^${KEY}=.*/${KEY}=${VALUE}/g" "$REPO_FILENAME"
+        else
+            TMP=$(cat "${REPO_FILENAME}" <(echo "${KEY}=${VALUE}"))
+            sudo bash -c "cat <<<\"$TMP\" >${REPO_FILENAME}"
+        fi
+    else
+        echo "Repository file ${REPO_FILENAME} not found, can't update $KEY"
+        exit 5
+    fi
+}
 
 repo_clean_meta()
 {
@@ -873,6 +893,7 @@ nodejs_configure_repository()
                     "https://rpm.nodesource.com/pub_${NODE_VERSION}/nodistro/nodejs/x86_64" \
                     "nodejs-${NODE_VERSION}-key" \
                     "https://rpm.nodesource.com/gpgkey/ns-operations-public.key"
+    repo_kv_set "nodejs-${NODE_VERSION}" repo_gpgcheck 0
 
     # Add N|Solid repository if Node.js is an LTS version
     if [[ "$NODE_VERSION" =~ ^(18|20|22)".x" ]]; then
@@ -880,8 +901,9 @@ nodejs_configure_repository()
                         "https://rpm.nodesource.com/pub_${NODE_VERSION}/nodistro/nsolid/x86_64" \
                         "nsolid-key" \
                         "https://rpm.nodesource.com/gpgkey/ns-operations-public.key"
-        echo.info "Added N|Solid repository for LTS version: $NODE_VERSION"
+        repo_kv_set "nsolid" repo_gpgcheck 0
     fi
+
 }
 
 
