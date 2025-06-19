@@ -914,6 +914,15 @@ nginx_update_firewall_rules()
         sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https
     fi
 }
+nginx_adjust_selinux_policies()
+{
+    if getenforce | grep -q 'Enforcing'; then
+        # SELINUX management tools, not available for some minimal installations
+        pkg_install policycoreutils-python-utils
+        # Allow network access for nginx
+        sudo setsebool -P httpd_can_network_connect 1
+    fi
+}
 
 nginx_gernerate_certificate()
 {
@@ -946,6 +955,7 @@ nginx_install()
 
     nginx_update_default_configuration
     nginx_update_firewall_rules
+    nginx_adjust_selinux_policies
 
     # Copy and enable StackStorm's supplied config file
     sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
@@ -1064,32 +1074,9 @@ EOF
     sudo systemctl restart mongod
 }
 ###############[ RABBITMQ ]###############
-rabbitmq_adjust_selinux_policies()
+rabbitmq_configure_repo()
 {
-    if getenforce | grep -q 'Enforcing'; then
-        # SELINUX management tools, not available for some minimal installations
-        pkg_install policycoreutils-python-utils
-
-        # Allow rabbitmq to use '25672' port, otherwise it will fail to start
-        sudo semanage port --list | grep -q 25672 || sudo semanage port -a -t amqp_port_t -p tcp 25672
-
-        # Allow network access for nginx
-        sudo setsebool -P httpd_can_network_connect 1
-    fi
-}
-
-rabbitmq_install()
-{
-    local RABBITMQ_PKG=rabbitmq-server
-
-    if [[ $INSTALL_RABBITMQ -eq 0 ]]; then
-        echo.info "Skip RabbitMQ: Installation explicitly disabled at runtime."
-        return
-    elif pkg_is_installed "$RABBITMQ_PKG"; then
-        echo.info "Skip RabbitMQ: Package is already present on the system."
-        return
-    fi
-# https://www.rabbitmq.com/docs/install-rpm
+    # https://www.rabbitmq.com/docs/install-rpm
     repo_definition "erlang" \
                     "https://yum1.rabbitmq.com/erlang/el/9/\$basearch" \
                     "erlang-key" \
@@ -1105,20 +1092,31 @@ rabbitmq_install()
 
     rabbitmq_adjust_selinux_policies
 
+
+}
+rabbitmq_install_pkgs()
+{
     local PKGS=(
         erlang
         "$RABBITMQ_PKG"
     )
-
-
-    pkg_meta_update
     pkg_install ${PKGS[@]}
+}
 
-    # Configure RabbitMQ to listen on localhost only
-    sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
 
-    sudo systemctl enable rabbitmq-server
-    sudo systemctl restart rabbitmq-server
+rabbitmq_adjust_selinux_policies()
+{
+    if getenforce | grep -q 'Enforcing'; then
+        # SELINUX management tools, not available for some minimal installations
+        pkg_install policycoreutils-python-utils
+
+        # Allow rabbitmq to use '25672' port, otherwise it will fail to start
+        sudo semanage port --list | grep -q 25672 || sudo semanage port -a -t amqp_port_t -p tcp 25672
+    fi
+}
+
+rabbitmq_runtime_configuration()
+{
     if ! sudo rabbitmqctl list_users | grep -E '^stackstorm'; then
         sudo rabbitmqctl add_user stackstorm "${ST2_RABBITMQ_PASSWORD}"
         sudo rabbitmqctl set_user_tags stackstorm administrator
@@ -1127,6 +1125,31 @@ rabbitmq_install()
     if sudo rabbitmqctl list_users | grep -E '^guest'; then
         sudo rabbitmqctl delete_user guest
     fi
+}
+
+rabbitmq_install()
+{
+    local RABBITMQ_PKG=rabbitmq-server
+
+    if [[ $INSTALL_RABBITMQ -eq 0 ]]; then
+        echo.info "Skip RabbitMQ: Installation explicitly disabled at runtime."
+        return
+    elif pkg_is_installed "$RABBITMQ_PKG"; then
+        echo.info "Skip RabbitMQ: Package is already present on the system."
+        return
+    fi
+
+    rabbitmq_configure_repo
+    pkg_meta_update
+    rabbitmq_install_pkgs
+
+    # Configure RabbitMQ to listen on localhost only
+    sudo sh -c 'echo "RABBITMQ_NODE_IP_ADDRESS=127.0.0.1" >> /etc/rabbitmq/rabbitmq-env.conf'
+
+    sudo systemctl enable rabbitmq-server
+    sudo systemctl restart rabbitmq-server
+
+    rabbitmq_runtime_configuration
 }
 ###############[ REDIS ]###############
 redis_install()
