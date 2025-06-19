@@ -12,14 +12,20 @@ nodejs_configure_repository()
                     "nodejs-${NODE_VERSION}-key" \
                     "https://rpm.nodesource.com/gpgkey/ns-operations-public.key"
 
+    {#- repository jinja template enables repo_gpgcheck which breaks on nodejs 20.x #}
+    repo_kv_set "nodejs-${NODE_VERSION}" repo_gpgcheck 0
+
     # Add N|Solid repository if Node.js is an LTS version
     if [[ "$NODE_VERSION" =~ ^(18|20|22)".x" ]]; then
         repo_definition "nsolid" \
                         "https://rpm.nodesource.com/pub_${NODE_VERSION}/nodistro/nsolid/x86_64" \
                         "nsolid-key" \
                         "https://rpm.nodesource.com/gpgkey/ns-operations-public.key"
-        echo.info "Added N|Solid repository for LTS version: $NODE_VERSION"
+
+        {#- repository jinja template enables repo_gpgcheck which breaks on nodejs 20.x #}
+        repo_kv_set "nsolid" repo_gpgcheck 0
     fi
+
 }
 {% elif id in ["ubuntu", "debian"] %}
 nodejs_configure_repository()
