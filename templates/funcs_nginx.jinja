@@ -25,6 +25,15 @@ nginx_update_firewall_rules()
         sudo firewall-cmd --zone=public --permanent --add-service=http --add-service=https
     fi
 }
+nginx_adjust_selinux_policies()
+{
+    if getenforce | grep -q 'Enforcing'; then
+        # SELINUX management tools, not available for some minimal installations
+        pkg_install policycoreutils-python-utils
+        # Allow network access for nginx
+        sudo setsebool -P httpd_can_network_connect 1
+    fi
+}
 {% elif id in ["ubuntu", "debian"] %}
 nginx_configure_repo()
 {
@@ -45,6 +54,11 @@ nginx_update_firewall_rules()
     {#- no alteration required. #}
     true
 }
+nginx_adjust_selinux_policies()
+{
+    {#- no alteration required. #}
+    true
+}
 {% else %}
 nginx_configure_repo()
 {
@@ -56,6 +70,10 @@ nginx_update_default_configuration()
     nginx_configure_repo
 }
 nginx_update_firewall_rules()
+{
+    nginx_configure_repo
+}
+nginx_adjust_selinux_policies()
 {
     nginx_configure_repo
 }
@@ -93,6 +111,7 @@ nginx_install()
 
     nginx_update_default_configuration
     nginx_update_firewall_rules
+    nginx_adjust_selinux_policies
 
     # Copy and enable StackStorm's supplied config file
     sudo cp /usr/share/doc/st2/conf/nginx/st2.conf /etc/nginx/conf.d/
