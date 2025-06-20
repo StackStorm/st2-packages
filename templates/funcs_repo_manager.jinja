@@ -1,0 +1,166 @@
+###############[ REPOSITORY MANAGER FUNCTIONS ]###############
+{#- filter functions based on package manager. #}
+{% if pkg_mgr == "dnf" %}
+{% set repo_path = "/etc/yum.repos.d" %}
+pkg_get_latest_version()
+{
+    local PKG="$1" # st2
+    local VERSION="$2" # 3.9dev
+    LATEST=$(repoquery -y --nvr --show-duplicates "$PKG" | grep -F "${PKG}-${VERSION}" | sort --version-sort | tail -n 1)
+    echo "${LATEST#*-}"
+}
+
+
+repo_add_gpg_key()
+{
+    KEY_NAME="$1"
+    KEY_URL="$2"
+    rpm --import "${KEY_URL}"
+}
+
+
+repo_definition()
+{
+    REPO_NAME="$1"
+    REPO_URL="$2"
+    KEY_NAME="$3"
+    KEY_URL="$4"
+    REPO_PATH="{{ repo_path }}"
+
+    cat <<EOF >"${REPO_PATH}/${REPO_NAME}.repo"
+[${REPO_NAME}]
+name=${REPO_NAME}
+baseurl=${REPO_URL}
+repo_gpgcheck=1
+enabled=1
+# ${KEY_NAME}
+gpgkey=${KEY_URL}
+gpgcheck=0
+sslverify=1
+sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+metadata_expire=300
+pkg_gpgcheck=1
+autorefresh=1
+type=rpm-md
+EOF
+}
+
+repo_kv_set()
+{
+    REPO_NAME="$1"
+    KEY="$2"
+    VALUE="$3"
+    REPO_PATH="{{ repo_path }}"
+    REPO_FILENAME="${REPO_PATH}/${REPO_NAME}.repo"
+    if [[ -f "${REPO_FILENAME}" ]]; then
+        if grep -Eq "^${KEY}=" "$REPO_FILENAME"; then
+            sudo sed -ri "s/^${KEY}=.*/${KEY}=${VALUE}/g" "$REPO_FILENAME"
+        else
+            TMP=$(cat "${REPO_FILENAME}" <(echo "${KEY}=${VALUE}"))
+            sudo bash -c "cat <<<\"$TMP\" >${REPO_FILENAME}"
+        fi
+    else
+        echo "Repository file ${REPO_FILENAME} not found, can't update $KEY"
+        exit 5
+    fi
+}
+
+repo_clean_meta()
+{
+    dnf -y clean metadata
+    dnf -y clean dbcache
+    dnf -y clean all
+}
+{% elif pkg_mgr == "apt" %}
+{% set gpg_key_path = "/etc/apt/trusted.gpg.d" %}
+{% set repo_path = "/etc/apt/sources.list.d" %}
+repo_definition()
+{
+    REPO_PATH="{{ repo_path }}"
+    GPG_KEY_PATH="{{ gpg_key_path }}"
+
+    REPO_NAME="$1"
+    REPO_URL="$2"
+    REPO_SUITES="$3"
+    REPO_COMPONENT="$4"
+    KEY_NAME="$5"
+    KEY_URL="$6"
+
+    repo_add_gpg_key "$KEY_NAME" "$KEY_URL"
+    # DEB822 is preferred over list format.
+    sudo cat <<EOF >"${REPO_PATH}/${REPO_NAME}.sources"
+Types: deb
+URIs: ${REPO_URL}
+Suites: ${REPO_SUITES}
+Components: ${REPO_COMPONENT}
+Architectures: $(dpkg --print-architecture)
+Signed-By: ${GPG_KEY_PATH}/${KEY_NAME}.gpg
+EOF
+}
+
+repo_kv_set()
+{
+    REPO_NAME="$1"
+    KEY="$2"
+    VALUE="$3"
+    REPO_PATH="{{ repo_path }}"
+    REPO_FILENAME="${REPO_PATH}/${REPO_NAME}.sources"
+    if [[ -f "${REPO_FILENAME}" ]]; then
+        if grep -Eq "^${KEY}:" "$REPO_FILENAME"; then
+            sudo sed -ri "s/^${KEY}:.*/${KEY}: ${VALUE}/g" "$REPO_FILENAME"
+        else
+            TMP=$(cat "${REPO_FILENAME}" <(echo "${KEY}: ${VALUE}"))
+            sudo bash -c "cat <<<\"$TMP\" >${REPO_FILENAME}"
+        fi
+    else
+        echo "Repository file ${REPO_FILENAME} not found, can't update $KEY"
+        exit 5
+    fi
+}
+
+repo_add_gpg_key()
+{
+    GPG_KEY_PATH="{{ gpg_key_path }}"
+    KEY_NAME="$1"
+    KEY_URL="$2"
+
+    curl -1sLf "$KEY_URL" | sudo gpg --dearmor -o "${GPG_KEY_PATH}/${KEY_NAME}.gpg.tmp"
+    sudo mv "${GPG_KEY_PATH}/${KEY_NAME}.gpg.tmp" "${GPG_KEY_PATH}/${KEY_NAME}.gpg"
+}
+
+
+pkg_get_latest_version()
+{
+    local PKG="$1"
+    local VERSION="$2"
+    apt-cache show "$PKG" | awk '/Version:/{print $2}' | grep "^${VERSION//./\\.}" | sort --version-sort | tail -n 1
+}
+
+
+repo_clean_meta()
+{
+    true
+}
+{% endif %}
+
+repo_pkg_availability() {
+    # repo_pkg_availability  <PKG> <VERSION>
+    local PKG="$1"
+    local VERSION="$2"
+
+    local PKG_VER=""
+    {% if pkg_mgr in ["dnf", "apt"] %}
+        {#- rpm or deb based systems. #}
+        PKG_VER=$(pkg_get_latest_version "$PKG" "${VERSION}")
+    {% else %}
+        {#- unsupported/unknown package managers. #}
+        echo.error "Failed to detect a supported repository query tool (apt-cache or repoquery)."
+        exit 1
+    {% endif %}
+
+    if [[ -z "$PKG_VER" ]]; then
+        echo.error "${PKG}-${VERSION} couldn't be found in the pacakges available on this system."
+        exit 3
+    fi
+    echo "$PKG_VER"
+}

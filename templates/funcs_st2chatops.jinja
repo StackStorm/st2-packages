@@ -1,0 +1,43 @@
+###############[ ST2CHATOPS ]###############
+st2chatops_install()
+{
+    nodejs_install
+    st2_install_pkg_version st2chatops ${ST2CHATOPS_PKG_VERSION}
+}
+
+st2chatops_configure()
+{
+    # set API keys. This should work since CLI is configuered already.
+    ST2_API_KEY=$(st2 apikey create -k)
+    sudo sed -i -r "s/^(export ST2_API_KEY.).*/\1$ST2_API_KEY/" /opt/stackstorm/chatops/st2chatops.env
+
+    sudo sed -i -r "s/^(export ST2_AUTH_URL.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
+    sudo sed -i -r "s/^(export ST2_AUTH_USERNAME.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
+    sudo sed -i -r "s/^(export ST2_AUTH_PASSWORD.).*/# &/" /opt/stackstorm/chatops/st2chatops.env
+
+    # Setup adapter
+    if [[ "$HUBOT_ADAPTER"="slack" ]] && [[ ! -z "$HUBOT_SLACK_BOT_TOKEN" ]] && [[ ! -z "$HUBOT_SLACK_APP_TOKEN" ]];
+    then
+        sudo sed -i -r "s/^# (export HUBOT_ADAPTER=slack)/\1/" /opt/stackstorm/chatops/st2chatops.env
+        sudo sed -i -r "s/^# (export HUBOT_SLACK_BOT_TOKEN.).*/\1/" /opt/stackstorm/chatops/st2chatops.env
+        sudo sed -i -r "s/^# (export HUBOT_SLACK_APP_TOKEN.).*/\1/" /opt/stackstorm/chatops/st2chatops.env
+        sudo sed -i -r "s/^(export HUBOT_ADAPTER.).*/\1$HUBOT_ADAPTER/" /opt/stackstorm/chatops/st2chatops.env
+        sudo sed -i -r "s/^(export HUBOT_SLACK_BOT_TOKEN.).*/\1$HUBOT_SLACK_BOT_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
+        sudo sed -i -r "s/^(export HUBOT_SLACK_APP_TOKEN.).*/\1$HUBOT_SLACK_APP_TOKEN/" /opt/stackstorm/chatops/st2chatops.env
+
+        sudo systemctl enable st2chatops
+        sudo systemctl restart st2chatops
+    else
+        echo.warning "Warning: Chatops requires manual configuration!"
+        echo.info "Edit /opt/stackstorm/chatops/st2chatops.env to specify"
+        echo.info "the adapter and settings hubot should use to connect to"
+        echo.info "the chat you're using.  Don't forget to start the service"
+        echo.info "afterwards:"
+        echo.info ""
+        echo.info "  $ sudo systemctl enable st2chatops"
+        echo.info "  $ sudo systemctl restart st2chatops"
+        echo.info ""
+        echo.info "For more information, please refer to documentation at"
+        echo.info "https://docs.stackstorm.com/install/index.html"
+    fi
+}

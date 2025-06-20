@@ -1,0 +1,80 @@
+###############[ NODEJS ]###############
+{% if id in ["rhel", "rocky", "centos", "opensuse-leap"] -%}
+nodejs_configure_repository()
+{
+    local NODE_VERSION="20.x"
+    rm -f /etc/yum.repos.d/nodesource*.repo \
+        "nodejs-${NODE_VERSION}.repo" \
+        "nsolid.repo"
+
+    repo_definition "nodejs-${NODE_VERSION}" \
+                    "https://rpm.nodesource.com/pub_${NODE_VERSION}/nodistro/nodejs/x86_64" \
+                    "nodejs-${NODE_VERSION}-key" \
+                    "https://rpm.nodesource.com/gpgkey/ns-operations-public.key"
+
+    {#- repository jinja template enables repo_gpgcheck which breaks on nodejs 20.x #}
+    repo_kv_set "nodejs-${NODE_VERSION}" repo_gpgcheck 0
+
+    # Add N|Solid repository if Node.js is an LTS version
+    if [[ "$NODE_VERSION" =~ ^(18|20|22)".x" ]]; then
+        repo_definition "nsolid" \
+                        "https://rpm.nodesource.com/pub_${NODE_VERSION}/nodistro/nsolid/x86_64" \
+                        "nsolid-key" \
+                        "https://rpm.nodesource.com/gpgkey/ns-operations-public.key"
+
+        {#- repository jinja template enables repo_gpgcheck which breaks on nodejs 20.x #}
+        repo_kv_set "nsolid" repo_gpgcheck 0
+    fi
+
+}
+{% elif id in ["ubuntu", "debian"] %}
+nodejs_configure_repository()
+{
+    local NODE_VERSION="20.x"
+
+    local RM_FILES=(
+        /etc/apt/preferences.d/nsolid.pref
+        /usr/share/keyrings/nodesource.gpg
+        /etc/apt/sources.list.d/nodesource.list
+        /etc/apt/preferences.d/nodejs.pref
+    )
+    for f in "${RM_FILES[@]}"
+    do
+        rm -f "$i" || true
+    done
+
+    repo_definition "nodejs-${NODE_VERSION}" \
+                    "https://deb.nodesource.com/node_${NODE_VERSION}" \
+                    "nodistro" \
+                    "main" \
+                    "nodejs-${NODE_VERSION}-key" \
+                    "https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key"
+
+    # N|Solid pinning
+    sudo cat <<EOF >/etc/apt/preferences.d/nsolid.pref
+Package: nsolid
+Pin: origin deb.nodesource.com
+Pin-Priority: 600
+EOF
+
+    # N|Solid pinning
+    sudo cat <<EOF >/etc/apt/preferences.d/nodejs.pref
+Package: nodejs
+Pin: origin deb.nodesource.com
+Pin-Priority: 600
+EOF
+}
+{% else %}
+nodejs_configure_repository()
+{
+    echo.error "Installing NodeJS on $OS_ID $OS_VERSION isn't supported by this script."
+    exit 4
+}
+{% endif %}
+
+nodejs_install()
+{
+    nodejs_configure_repository
+    pkg_meta_update
+    pkg_install nodejs
+}
