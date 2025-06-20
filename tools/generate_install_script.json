@@ -1,0 +1,33 @@
+[
+    {
+        "comment": "this is here for backward compatibility with install script.  To be removed when the install script stops using master branch and uses st2 version branch.",
+        "id": "ubuntu",
+        "version_id": "22.04",
+        "script_filename": "st2bootstrap-deb.sh",
+        "pkg_mgr": "apt"
+    },
+    {
+        "id": "ubuntu",
+        "version_id": "20.04",
+        "script_filename": "st2bootstrap-focal.sh",
+        "pkg_mgr": "apt"
+    },
+    {
+        "id": "ubuntu",
+        "version_id": "22.04",
+        "script_filename": "st2bootstrap-jammy.sh",
+        "pkg_mgr": "apt"
+    },
+    {
+        "id": "rocky",
+        "version_id": "8",
+        "script_filename": "st2bootstrap-el8.sh",
+        "pkg_mgr": "dnf"
+    },
+    {
+        "id": "rocky",
+        "version_id": "9",
+        "script_filename": "st2bootstrap-el9.sh",
+        "pkg_mgr": "dnf"
+    }
+]

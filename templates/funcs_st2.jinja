@@ -1,0 +1,327 @@
+###############[ STACKSTORM ]###############
+{% set st2conf = "/etc/st2/st2.conf" %}
+{% if id in ["rhel", "rocky", "centos", "opensuse-leap"] -%}
+st2_configure_repository()
+{
+    local REPO_TGT="$1"
+    repo_definition "st2-${REPO_TGT}" \
+                    "https://packagecloud.io/StackStorm/${REPO_TGT}/el/{{ version_id }}/\$basearch/" \
+                    "st2-${REPO_TGT}-key" \
+                    "https://packagecloud.io/StackStorm/${REPO_TGT}/gpgkey"
+}
+st2_distribution_name()
+{
+    {#- Use jinja version id for major version only. #}
+    echo "el{{ version_id }}"
+}
+st2_install_from_url()
+{
+    local PACKAGE_URL="$1"
+    pkg_install "${PACKAGE_URL}"
+}
+st2_install_pkg_version()
+{
+    local PKG="$1"
+    local VERSION="$2"
+    pkg_install "${PKG}-${VERSION}"
+}
+{% elif id in ["ubuntu", "debian"] %}
+st2_configure_repository()
+{
+    local REPO_TGT="$1"
+    repo_definition "st2-${REPO_TGT}" \
+                    "https://packagecloud.io/StackStorm/${REPO_TGT}/${OS_ID}" \
+                    "${OS_VERSION_CODENAME}" \
+                    "main" \
+                    "st2-${REPO_TGT}-key" \
+                    "https://packagecloud.io/StackStorm/${REPO_TGT}/gpgkey"
+}
+st2_distribution_name()
+{
+    {#- codename is used rather than version id. #}
+    echo "${OS_VERSION_CODENAME}"
+}
+st2_install_from_url()
+{
+    local PACKAGE_URL="$1"
+    local PACKAGE_FILENAME="$(basename ${PACKAGE_URL})"
+    curl -sSL -k -o "${PACKAGE_FILENAME}" "${PACKAGE_URL}"
+    sudo dpkg --install --force-depends "${PACKAGE_FILENAME}"
+    sudo apt install --yes --fix-broken
+    rm "${PACKAGE_FILENAME}"
+}
+st2_install_pkg_version()
+{
+    local PKG="$1"
+    local VERSION="$2"
+    pkg_install "${PKG}=${VERSION}"
+}
+{% else %}
+st2_configure_repository()
+{
+    echo.error "Installing st2 on $OS_ID $OS_VERSION isn't supported by this script."
+    exit 4
+}
+st2_distribution_name()
+{
+    st2_configure_repository
+}
+st2_install_from_local()
+{
+    st2_configure_repository
+}
+st2_install_pkg_version()
+{
+    st2_configure_repository
+}
+{% endif %}
+
+st2_install_dev_build()
+{
+    # Retrieve package URL for the provided dev build from CircleCI build pipeline.
+    DEV_BUILD="$1" # Repo name and build number - <repo name>/<build_num> (e.g. st2/5646)
+    DISTRO="$(st2_distribution_name)"  # Distro name (e.g. focal, jammy, el8, el9)
+    PACKAGE_NAME_REGEX="${DISTRO}/st2[_-].*\.(deb|rpm)$"
+    MANIFEST_URL="https://circleci.com/api/v1.1/project/github/StackStorm/${DEV_BUILD}/artifacts"
+
+    PACKAGES_METADATA=$(curl -sSL -q "$MANIFEST_URL" || true)
+    if [[ -z "${PACKAGES_METADATA}" ]]; then
+        echo.error "Failed to retrieve packages metadata from $MANIFEST_URL"
+        exit 30
+    fi
+
+    ARTIFACT_URLS=$(jq -r '.[].url' <<<"$PACKAGES_METADATA" || true)
+    if [[ -z "$ARTIFACT_URLS" ]]; then
+        echo.error "No urls found in manifest.  This might be because the JSON structure changed or is invalid."
+        exit 31
+    fi
+
+    PACKAGE_URL=$(grep -E "${PACKAGE_NAME_REGEX}" <<<"$ARTIFACT_URLS" || true)
+    if [[ -z "${PACKAGE_URL}" ]]; then
+        echo.error "Failed to find url for ${DISTRO} package (${PACKAGE_NAME_REGEX})"
+        echo.error "Circle CI response: ${PACKAGES_METADATA}"
+        exit 32
+    fi
+    echo.info "Installing CI artifact from ${PACKAGE_URL}"
+    st2_install_from_url "$PACKAGE_URL"
+}
+
+st2_install()
+{
+    if [[ "${!INSTALL_TYPE[@]}" == "REPO" ]]; then
+        st2_configure_repository "${INSTALL_TYPE[REPO]}"
+        pkg_meta_update
+
+        ST2_PKG_VERSION="$(repo_pkg_availability st2 $VERSION)"
+        ST2WEB_PKG_VERSION="$(repo_pkg_availability st2web $VERSION)"
+        ST2CHATOPS_PKG_VERSION="$(repo_pkg_availability st2chatops $VERSION)"
+
+        echo.info "The following versions of packages will be installed"
+        echo.info "  ${ST2_PKG_VERSION}"
+        echo.info "  ${ST2WEB_PKG_VERSION}"
+        echo.info "  ${ST2CHATOPS_PKG_VERSION}"
+        st2_install_pkg_version st2 ${ST2_PKG_VERSION}
+
+    elif [[ "${!INSTALL_TYPE[@]}" == "CI" ]]; then
+        echo.info "Development build ${INSTALL_TYPE[CI]}"
+        st2_install_dev_build "${INSTALL_TYPE[CI]}"
+    else
+        echo.error "Unknown installation type ${!INSTALL_TYPE[@]}."
+        exit 3
+    fi
+
+    local ST2_CFGFILE="{{ st2conf }}"
+
+    # Configure [database] section in st2.conf (username password for MongoDB access)
+    local DB_URI="mongodb://stackstorm:${ST2_MONGODB_PASSWORD}@127.0.0.1:27017/st2?authSource=st2"
+    sudo crudini --set "$ST2_CFGFILE" database host "$DB_URI"
+
+    # Configure [messaging] section in st2.conf (username password for RabbitMQ access)
+    local AMQP="amqp://stackstorm:$ST2_RABBITMQ_PASSWORD@127.0.0.1:5672"
+    sudo crudini --set "$ST2_CFGFILE" messaging url "${AMQP}"
+
+    # Configure [coordination] section in st2.conf (url for Redis access)
+    sudo crudini --set "$ST2_CFGFILE" coordination url "redis://127.0.0.1:6379"
+
+    if [[ ! -d /var/log/st2 ]]; then
+        echo.warning "Work around packging bug: create /var/log/st2"
+        sudo mkdir -p /var/log/st2
+        sudo chown st2 /var/log/st2
+    fi
+    sudo st2ctl reload --register-all
+    sudo st2ctl restart
+}
+
+
+st2_configure_authentication() {
+    local ST2_CFGFILE="{{ st2conf }}"
+
+    # Create a user record in a password file.
+    sudo htpasswd -i /etc/st2/htpasswd $USERNAME <<<"${PASSWORD}"
+
+    # Configure [auth] section in st2.conf
+    sudo crudini --set "$ST2_CFGFILE" auth enable "True"
+    sudo crudini --set "$ST2_CFGFILE" auth backend "flat_file"
+    sudo crudini --set "$ST2_CFGFILE" auth backend_kwargs '{"file_path": "/etc/st2/htpasswd"}'
+
+    for srv in st2auth st2api st2stream
+    do
+        sudo st2ctl restart-component $srv
+    done
+}
+
+
+st2_configure_user()
+{
+    # Create an SSH system user (default `stanley` user may be already created)
+    if (! id stanley 2>/dev/null); then
+        sudo useradd stanley
+    fi
+
+    SYSTEM_HOME=$(echo ~stanley)
+
+    if [ ! -d "${SYSTEM_HOME}/.ssh" ]; then
+        sudo mkdir ${SYSTEM_HOME}/.ssh
+        sudo chmod 700 ${SYSTEM_HOME}/.ssh
+    fi
+
+    # Generate ssh keys
+    # NOTE: If the file already exists and is non-empty, then assume the key does not need
+    # to be generated again.
+    if ! sudo test -s ${SYSTEM_HOME}/.ssh/stanley_rsa; then
+        {#- added PEM to enforce PEM ssh key type in EL8 to maintain consistency #}
+        sudo ssh-keygen -f ${SYSTEM_HOME}/.ssh/stanley_rsa -P "" -m PEM
+    fi
+
+    if ! sudo grep -s -q -f ${SYSTEM_HOME}/.ssh/stanley_rsa.pub ${SYSTEM_HOME}/.ssh/authorized_keys;
+    then
+        # Authorize key-base access
+        sudo sh -c "cat ${SYSTEM_HOME}/.ssh/stanley_rsa.pub >> ${SYSTEM_HOME}/.ssh/authorized_keys"
+    fi
+
+    sudo chmod 0600 ${SYSTEM_HOME}/.ssh/authorized_keys
+    sudo chmod 0700 ${SYSTEM_HOME}/.ssh
+    sudo chown -R stanley:stanley ${SYSTEM_HOME}
+
+    # Enable passwordless sudo
+    local STANLEY_SUDOERS="stanley    ALL=(ALL)       NOPASSWD: SETENV: ALL"
+    if ! sudo grep -s -q ^"${STANLEY_SUDOERS}" /etc/sudoers.d/st2; then
+        sudo sh -c "echo '${STANLEY_SUDOERS}' >> /etc/sudoers.d/st2"
+    fi
+
+    sudo chmod 0440 /etc/sudoers.d/st2
+
+    # Disable requiretty for all users
+    sudo sed -i -r "s/^Defaults\s+\+?requiretty/# Defaults requiretty/g" /etc/sudoers
+}
+
+
+st2_configure_cli_config()
+{
+    local USERNAME="$1"
+    local PASSWORD="$2"
+    test -z "$USERNAME" && ( echo.error "Can't configure cli, missing username."; exit 9 )
+    test -z "$PASSWORD" && ( echo.error "Can't configure cli, missing password."; exit 9 )
+
+    # Configure CLI config (write credentials for the root user and user which ran the script)
+    ROOT_USER="root"
+    CURRENT_USER=$(whoami)
+
+    ROOT_HOME=$(eval echo ~${ROOT_USER})
+    : "${HOME:=$(eval echo ~${CURRENT_USER})}"
+
+    ROOT_USER_CLI_CONFIG_DIRECTORY="${ROOT_HOME}/.st2"
+    ROOT_USER_CLI_CONFIG_PATH="${ROOT_USER_CLI_CONFIG_DIRECTORY}/config"
+
+    CURRENT_USER_CLI_CONFIG_DIRECTORY="${HOME}/.st2"
+    CURRENT_USER_CLI_CONFIG_PATH="${CURRENT_USER_CLI_CONFIG_DIRECTORY}/config"
+
+    if ! sudo test -d ${ROOT_USER_CLI_CONFIG_DIRECTORY}; then
+        sudo mkdir -p ${ROOT_USER_CLI_CONFIG_DIRECTORY}
+    fi
+
+    # Write config for root user
+    sudo sh -c "cat <<EOF >${ROOT_USER_CLI_CONFIG_PATH}
+[credentials]
+username = ${USERNAME}
+password = ${PASSWORD}
+EOF"
+
+    # Write config for current user (in case current user is not the root user)
+    if [ "${CURRENT_USER}" == "${ROOT_USER}" ]; then
+        return
+    fi
+
+    if [ ! -d ${CURRENT_USER_CLI_CONFIG_DIRECTORY} ]; then
+        sudo mkdir -p ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
+    fi
+
+    sudo sh -c "cat <<EOF > ${CURRENT_USER_CLI_CONFIG_PATH}
+[credentials]
+username = ${USERNAME}
+password = ${PASSWORD}
+EOF"
+
+    # Fix the permissions
+    sudo chown -R ${CURRENT_USER}:${CURRENT_USER} ${CURRENT_USER_CLI_CONFIG_DIRECTORY}
+}
+
+
+st2_setup_kvstore_encryption_keys()
+{
+    DATASTORE_ENCRYPTION_KEYS_DIRECTORY="/etc/st2/keys"
+    DATASTORE_ENCRYPTION_KEY_PATH="${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}/datastore_key.json"
+
+    sudo mkdir -p ${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}
+
+    # If the file ${DATASTORE_ENCRYPTION_KEY_PATH} exists and is not empty, then do not generate
+    # a new key. st2-generate-symmetric-crypto-key fails if the key file already exists.
+    if ! sudo test -s ${DATASTORE_ENCRYPTION_KEY_PATH}; then
+        sudo st2-generate-symmetric-crypto-key --key-path ${DATASTORE_ENCRYPTION_KEY_PATH}
+    fi
+
+    # Make sure only st2 user can read the file
+    for dir in "${DATASTORE_ENCRYPTION_KEYS_DIRECTORY}" "${DATASTORE_ENCRYPTION_KEY_PATH}"
+    do
+        sudo chgrp st2 "$dir"
+        sudo chmod o-r "${dir}"
+    done
+    # set path to the key file in the config
+    sudo crudini --set /etc/st2/st2.conf keyvalue encryption_key_path ${DATASTORE_ENCRYPTION_KEY_PATH}
+
+    # NOTE: We need to restart all the affected services so they pick the key and load it in memory
+    for srv in st2api st2sensorcontainer st2workflowengine st2actionrunner
+    do
+        sudo st2ctl restart-component $srv
+    done
+}
+
+
+st2_verification()
+{
+    echo.info "Check version"
+    st2 --version
+
+    echo.info "Check help"
+    st2 -h
+
+    echo.info "Check Authentication"
+    st2 auth $USERNAME -p $PASSWORD
+    # A shortcut to authenticate and export the token
+    export ST2_AUTH_TOKEN=$(st2 auth $USERNAME -p $PASSWORD -t)
+
+    echo.info "Check actions list for 'core' pack"
+    st2 action list --pack=core
+
+    echo.info "Check local shell command"
+    st2 run core.local -- date -R
+
+    echo.info "Check execution list"
+    st2 execution list
+
+    echo.info "Check remote comand via SSH (Requires passwordless SSH)"
+    st2 run core.remote hosts='127.0.0.1' -- uname -a
+
+    echo.info "Check pack installation"
+    st2 pack install st2
+}

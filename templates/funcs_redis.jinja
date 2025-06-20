@@ -1,0 +1,59 @@
+###############[ REDIS ]###############
+redis_install()
+{
+    local REDIS_PKG=redis
+
+    if [[ $INSTALL_REDIS -eq 0 ]]; then
+        echo.info "Skip Redis: Installation explicitly disabled at runtime."
+        return
+    elif pkg_is_installed "$REDIS_PKG"; then
+        echo.info "Skip Redis: Package is already present on the system."
+        return
+    fi
+{% if id in ["rhel", "rocky", "centos", "opensuse-leap"] -%}
+    # https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/install-redis-on-linux/#install-on-red-hatrocky
+    # use system provided packages.
+    local REDIS_SERVICE=redis
+{% elif id in ["ubuntu", "debian"] %}
+    # https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/install-redis-on-linux/
+    repo_definition "redis" \
+                    "https://packages.redis.io/deb" \
+                    "${OS_VERSION_CODENAME}" \
+                    "main" \
+                    "redis-key" \
+                    "https://packages.redis.io/gpg"
+    local REDIS_SERVICE=redis-server
+{% else %}
+    echo.error "Installing redis-server on $OS_ID $OS_VERSION isn't supported by this script."
+    exit 4
+{% endif %}
+    pkg_meta_update
+    pkg_install "$REDIS_PKG"
+
+    TMP=$(cat <<EOF
+bind 127.0.0.1
+protected-mode yes
+port 6379
+tcp-backlog 511
+timeout 0
+tcp-keepalive 300
+daemonize no
+logfile /var/log/redis/redis.log
+databases 16
+dbfilename dump.rdb
+dir /var/lib/redis
+EOF
+)
+    if [[ -f /etc/redis.conf ]]; then
+        # redis v5 configuration
+        sudo bash -c "cat <<<\"$TMP\" >/etc/redis.conf"
+    elif [[ -f /etc/redis/redis.conf ]]; then
+        # redis v6 configuration
+        sudo bash -c "cat <<<\"$TMP\" >/etc/redis/redis.conf"
+    else
+        echo.warning "Unable to find redis configuration file at /etc/redis.conf or /etc/redis/redis.conf."
+    fi
+
+    sudo systemctl enable "${REDIS_SERVICE}"
+    sudo systemctl start "${REDIS_SERVICE}"
+}
