@@ -93,11 +93,12 @@ Conflicts: st2common
 %pre
   %include rpm/preinst_script.spec
 
+# Execute postinst_script before start post install services so the generators have created .service and .socket files.
 %post
-  %service_post st2actionrunner st2api st2stream st2auth st2notifier st2workflowengine
+  %include rpm/postinst_script.spec
+  %service_post st2api st2stream st2auth st2actionrunner st2notifier st2workflowengine
   %service_post st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
   %service_post st2scheduler
-  %include rpm/postinst_script.spec
 
 %preun
   %service_preun st2actionrunner %{worker_name} st2api st2stream st2auth st2notifier st2workflowengine
@@ -132,9 +133,6 @@ Conflicts: st2common
   %attr(775, root, %{packs_group}) /opt/stackstorm/virtualenvs
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
-  %{_unitdir}/st2api.service
-  %{_unitdir}/st2stream.service
-  %{_unitdir}/st2auth.service
   %{_unitdir}/st2notifier.service
   %{_unitdir}/st2rulesengine.service
   %{_unitdir}/st2sensorcontainer.service
