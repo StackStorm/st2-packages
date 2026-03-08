@@ -1,7 +1,4 @@
 ## Suites configuration
-#
-version: "3.8"
-
 services:
   suite:
     image: fake
@@ -26,7 +23,6 @@ services:
       service: suite
 
   ## Volumes passed during compose or ci builds
-  #
   volumes-compose:
     image: fake
     volumes:
