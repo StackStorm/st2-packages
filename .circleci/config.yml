@@ -66,7 +66,7 @@ jobs:
           command: |
             set -x
             # Clean-up running containers
-            .circle/docker-compose2.sh clean
+            .circle/docker-compose.sh clean
             # Remove st2-packages-vol container
             docker rm -v --force st2-packages-vol || true
             # Clean-up any created volumes
@@ -82,7 +82,7 @@ jobs:
             docker cp ~/st2-packages st2-packages-vol:/root
       - run:
           name: Pull dependent Docker Images
-          command: .circle/docker-compose2.sh pull ${DISTRO} || .circle/docker-compose2.sh pull ${DISTRO}
+          command: .circle/docker-compose.sh pull ${DISTRO} || .circle/docker-compose.sh pull ${DISTRO}
       - run:
           name: Build the ${DISTRO} Packages
           command: |
@@ -90,13 +90,13 @@ jobs:
             mkdir -p ~/st2-packages/build/${DISTRO}/log/
 
             # Run the build
-            .circle/docker-compose2.sh build ${DISTRO}
+            .circle/docker-compose.sh build ${DISTRO}
 
             # Once build container finishes we can copy packages directly from it
             docker cp st2-packages-vol:/root/build/. ~/st2-packages/build/${DISTRO}
       - run:
           name: Test the Packages
-          command: .circle/docker-compose2.sh test ${DISTRO}
+          command: .circle/docker-compose.sh test ${DISTRO}
       - run:
           when: always
           name: Grab the st2 logs
@@ -118,7 +118,7 @@ jobs:
           command: |
             set -x
             # Clean-up running containers
-            .circle/docker-compose2.sh clean
+            .circle/docker-compose.sh clean
             # Remove st2-packages-vol container
             docker rm -v --force st2-packages-vol || true
             # Clean-up any created volumes
