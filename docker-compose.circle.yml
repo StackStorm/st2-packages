@@ -1,10 +1,9 @@
-version: "3.8"
 services:
   focal:
     image: quay.io/stackstorm/packagingrunner
-    extends:
-      file: docker-compose.override.yml
-      service: suite-compose
+    working_dir: /root/st2-packages
+    volumes_from:
+      - container:st2-packages-vol
     environment:
       - BUILDNODE=focalbuild
       - TESTNODE=focaltest
@@ -18,9 +17,9 @@ services:
 
   jammy:
     image: quay.io/stackstorm/packagingrunner
-    extends:
-      file: docker-compose.override.yml
-      service: suite-compose
+    working_dir: /root/st2-packages
+    volumes_from:
+      - container:st2-packages-vol
     environment:
       - BUILDNODE=jammybuild
       - TESTNODE=jammytest
@@ -34,13 +33,12 @@ services:
 
   el8:
     image: quay.io/stackstorm/packagingrunner
-    extends:
-      file: docker-compose.override.yml
-      service: suite-compose
+    working_dir: /root/st2-packages
+    volumes_from:
+      - container:st2-packages-vol
     environment:
       - BUILDNODE=rockylinux8build
       - TESTNODE=rockylinux8test
-      - ST2_PACKAGES=st2
     links:
       - rockylinux8build
       - rockylinux8test
@@ -50,13 +48,12 @@ services:
 
   el9:
     image: quay.io/stackstorm/packagingrunner
-    extends:
-      file: docker-compose.override.yml
-      service: suite-compose
+    working_dir: /root/st2-packages
+    volumes_from:
+      - container:st2-packages-vol
     environment:
       - BUILDNODE=rockylinux9build
       - TESTNODE=rockylinux9test
-      - ST2_PACKAGES=st2
     links:
       - rockylinux9build
       - rockylinux9test
@@ -65,64 +62,68 @@ services:
       - redis
 
   ## Package build nodes
-  #
   focalbuild:
     image: stackstorm/packagingbuild:focal
     volumes_from:
-      - st2-packages-vol
+      - container:st2-packages-vol
 
   jammybuild:
     image: stackstorm/packagingbuild:jammy
     volumes_from:
-      - st2-packages-vol
+      - container:st2-packages-vol
 
   rockylinux8build:
     image: stackstorm/packagingbuild:rockylinux8
-    extends:
-      file: docker-compose.override.yml
-      service: volumes-compose
+    volumes_from:
+      - container:st2-packages-vol
 
   rockylinux9build:
     image: stackstorm/packagingbuild:rockylinux9
-    extends:
-      file: docker-compose.override.yml
-      service: volumes-compose
+    volumes_from:
+      - container:st2-packages-vol
 
   ## Package testing nodes
-  #
   focaltest:
     image: stackstorm/packagingtest:focal-systemd
     privileged: true
+    cgroup: host
     volumes_from:
-      - st2-packages-vol
+      - container:st2-packages-vol
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup
 
   jammytest:
     image: stackstorm/packagingtest:jammy-systemd
     privileged: true
+    cgroup: host
     volumes_from:
-      - st2-packages-vol
+      - container:st2-packages-vol
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup
 
   rockylinux8test:
     image: stackstorm/packagingtest:rockylinux8-systemd
     privileged: true
+    cgroup: host
     cap_add:
       - SYS_ADMIN
     security_opt:
       - seccomp:unconfined
+    volumes_from:
+      - container:st2-packages-vol
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
 
   rockylinux9test:
     image: stackstorm/packagingtest:rockylinux9-systemd
     privileged: true
+    cgroup: host
     cap_add:
       - SYS_ADMIN
     security_opt:
       - seccomp:unconfined
+    volumes_from:
+      - container:st2-packages-vol
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
 
