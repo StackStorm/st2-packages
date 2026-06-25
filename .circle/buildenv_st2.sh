@@ -12,6 +12,8 @@ source "$my_dir/buildenv_common.sh"
 distros=($DISTROS)
 DISTRO=${distros[$CIRCLE_NODE_INDEX]}
 
+echo "distros: ${DISTROS}"
+echo "circle node index: ${CIRCLE_NODE_INDEX}"
 echo "Using distro: ${DISTRO}"
 echo "Using Python: $(python --version 2>&1)"
 
