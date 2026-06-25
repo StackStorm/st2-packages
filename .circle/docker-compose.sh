@@ -37,6 +37,8 @@ case "$1" in
             -e ST2PKG_RELEASE=${ST2PKG_RELEASE} \
             -e ST2_PACKAGES="${ST2_PACKAGES}" \
             -e ST2_CIRCLE_URL="${CIRCLE_BUILD_URL}" \
+            -e PYTHON_VERSION=${PYTHON_VERSION} \
+            -e PIP_VERSION=${PIP_VERSION} \
             "$2" build
     ;;
     test)
