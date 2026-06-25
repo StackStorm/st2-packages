@@ -7,8 +7,9 @@
 %define venv_dir %{buildroot}/%{venv_install_dir}
 %define venv_bin %{venv_dir}/bin
 
-%define python_binname python3
-%define pip_binname pip3
+%{!?python_version: %define python_version 3}
+%define python_binname python%{python_version}
+%define pip_binname pip%{python_version}
 
 %define venv_python %{venv_bin}/%{python_binname}
 # https://github.com/StackStorm/st2/wiki/Where-all-to-update-pip-and-or-virtualenv

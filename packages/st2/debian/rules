@@ -22,7 +22,7 @@ BUILD_PRE_DEPENDS := python$(PYTHON_VERSION)
 BUILD_DEPENDS := python$(PYTHON_VERSION)-distutils, python$(PYTHON_VERSION)-dev
 
 %:
-	dh $@ --with python-virtualenv --python /usr/bin/python3
+	dh $@ --with python-virtualenv --python /usr/bin/python$(PYTHON_VERSION)
 
 override_dh_installdirs:
 	dh_installdirs

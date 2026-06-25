@@ -28,6 +28,25 @@ PIP_VERSION ?= 25.3
 # Moved from top of file to handle when only py2 or py3 available
 ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
 
+.PHONY: ensure-python
+ensure-python:
+ifeq ($(DEBIAN),1)
+	@if [ "$(PYTHON_VERSION)" != "3" ] && [ ! -x "$(PYTHON_BINARY)" ]; then \
+		echo "Installing Python $(PYTHON_VERSION) on Debian/Ubuntu..."; \
+		apt-get update && \
+		apt-get install -y software-properties-common && \
+		add-apt-repository -y ppa:deadsnakes/ppa && \
+		apt-get update && \
+		apt-get install -y python$(PYTHON_VERSION) python$(PYTHON_VERSION)-dev python$(PYTHON_VERSION)-venv; \
+	fi
+else ifeq ($(REDHAT),1)
+	@if [ "$(PYTHON_VERSION)" != "3" ] && [ ! -x "$(PYTHON_BINARY)" ]; then \
+		echo "Installing Python $(PYTHON_VERSION) on RHEL/Rocky..."; \
+		yum install -y python$(PYTHON_VERSION) python$(PYTHON_VERSION)-devel 2>/dev/null || \
+		dnf install -y python$(PYTHON_VERSION) python$(PYTHON_VERSION)-devel; \
+	fi
+endif
+
 # Note: We dynamically obtain the version, this is required because dev
 # build versions don't store correct version identifier in __init__.py
 # and we need setup.py to normalize it (e.g. 1.4dev -> 1.4.dev0)
@@ -45,7 +64,7 @@ info:
 	$(PIP_BINARY) --version
 
 .PHONY: populate_version requirements wheelhouse bdist_wheel
-all: info populate_version requirements bdist_wheel
+all: ensure-python info populate_version requirements bdist_wheel
 
 populate_version: .stamp-populate_version
 .stamp-populate_version:
