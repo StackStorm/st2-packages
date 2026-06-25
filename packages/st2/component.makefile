@@ -19,17 +19,9 @@ else
 	DEB_DISTRO := unstable
 endif
 
-ifeq ($(DEB_DISTRO),focal)
-	PYTHON_BINARY := /usr/bin/python3
-	PIP_BINARY := /usr/local/bin/pip3.8
-else ifeq ($(EL_VERSION),8)
-	PYTHON_BINARY := /usr/bin/python3.8
-	PIP_BINARY := /usr/local/bin/pip3.8
-else
-	PYTHON_BINARY := /usr/bin/python3
-	PIP_BINARY := pip3
-	PYTHON_ALT_BINARY := python3
-endif
+PYTHON_BINARY := /usr/bin/python3
+PIP_BINARY := pip3
+PYTHON_ALT_BINARY := python3
 
 # Moved from top of file to handle when only py2 or py3 available
 ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) -c "from $(ST2_COMPONENT) import __version__; print(__version__),")

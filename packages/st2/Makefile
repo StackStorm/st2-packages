@@ -20,18 +20,9 @@ else
 	DEB_DISTRO := unstable
 endif
 
-ifeq ($(DEB_DISTRO),focal)
-	PYTHON_BINARY := /usr/bin/python3
-	PIP_BINARY := /usr/local/bin/pip3.8
-else ifeq ($(EL_VERSION),8)
-	PYTHON_BINARY := /usr/bin/python3.8
-	PIP_BINARY := /usr/local/bin/pip3.8
-	PYTHON_ALT_BINARY := python3.8
-else
-	PYTHON_BINARY := /usr/bin/python3
-	PIP_BINARY := pip3
-	PYTHON_ALT_BINARY := python3
-endif
+PYTHON_BINARY := /usr/bin/python3
+PIP_BINARY := pip3
+PYTHON_ALT_BINARY := python3
 
 RUNNERS := $(shell ls ../contrib/runners)
 
