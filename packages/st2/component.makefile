@@ -19,9 +19,11 @@ else
 	DEB_DISTRO := unstable
 endif
 
-PYTHON_BINARY := /usr/bin/python3
-PIP_BINARY := pip3
-PYTHON_ALT_BINARY := python3
+PYTHON_VERSION ?= 3
+PYTHON_BINARY := /usr/bin/python$(PYTHON_VERSION)
+PIP_BINARY := pip$(PYTHON_VERSION)
+PYTHON_ALT_BINARY := python$(PYTHON_VERSION)
+PIP_VERSION ?= 25.3
 
 # Moved from top of file to handle when only py2 or py3 available
 ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
@@ -60,6 +62,8 @@ wheelhouse: .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements
 	# Install wheels into shared location
 	cat requirements.txt
+	# Upgrade pip to specified version
+	$(PIP_BINARY) install --upgrade pip==$(PIP_VERSION)
 	# Try to install wheels 2x in case the first one fails
 	$(PIP_BINARY) --use-deprecated=legacy-resolver wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
 		$(PIP_BINARY) --use-deprecated=legacy-resolver wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
@@ -68,6 +72,8 @@ wheelhouse: .stamp-wheelhouse
 bdist_wheel: .stamp-bdist_wheel
 .stamp-bdist_wheel: | populate_version requirements inject-deps
 	cat requirements.txt
+	# Upgrade pip to specified version
+	$(PIP_BINARY) install --upgrade pip==$(PIP_VERSION)
 # We need to install these python packages to handle rpmbuild 4.14 in EL8
 ifeq ($(EL_VERSION),8)
 	$(PIP_BINARY) install wheel setuptools virtualenv
