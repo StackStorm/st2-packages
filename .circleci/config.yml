@@ -17,7 +17,7 @@ jobs:
       - image: cimg/python:3.10
     working_directory: ~/st2-packages
     environment:
-      DISTROS: "jammy jammy el9 el9"
+      DISTROS: "jammy focal el9 el10"
       BASH_ENV: ~/.buildenv
       # These should be set to an empty string, so that st2cd prep tasks are able to replace these
       # with real gitrevs during releases. Note that they are commented out, so that they do not interfere
@@ -131,7 +131,7 @@ jobs:
       - image: cimg/ruby:2.7
     working_directory: /tmp/deploy
     environment:
-      - DISTROS: "jammy jammy el9 el9"
+      - DISTROS: "jammy focal el9 el10"
     steps:
       - attach_workspace:
           at: .
