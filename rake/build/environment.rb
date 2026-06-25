@@ -55,6 +55,10 @@ pipeopts do
   envpass :artifact_dir, '/root/build'
   envpass :wheeldir, '/tmp/wheelhouse'
 
+  # Python and pip versions (defaults to 3 and 25.3 if not set)
+  envpass :python_version, '3'
+  envpass :pip_version, '25.3'
+
   # Default hostnames of dependat services (the value can take an address also)
   envpass :rabbitmqhost, 'rabbitmq', proc: convert_to_ipaddr
   envpass :mongodbhost,  'mongodb',  proc: convert_to_ipaddr
