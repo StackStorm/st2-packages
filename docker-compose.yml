@@ -1,20 +1,4 @@
 services:
-  focal:
-    image: quay.io/stackstorm/packagingrunner
-    extends:
-      file: docker-compose.override.yml
-      service: suite-compose
-    environment:
-      - BUILDNODE=focalbuild
-      - TESTNODE=focaltest
-      - ST2_PACKAGES=st2
-    links:
-      - focalbuild
-      - focaltest
-      - rabbitmq
-      - mongodb
-      - redis
-
   jammy:
     image: quay.io/stackstorm/packagingrunner
     extends:
@@ -27,22 +11,6 @@ services:
     links:
       - jammybuild
       - jammytest
-      - rabbitmq
-      - mongodb
-      - redis
-
-  el8:
-    image: quay.io/stackstorm/packagingrunner
-    extends:
-      file: docker-compose.override.yml
-      service: suite-compose
-    environment:
-      - BUILDNODE=rockylinux8build
-      - TESTNODE=rockylinux8test
-      - ST2_PACKAGES=st2
-    links:
-      - rockylinux8build
-      - rockylinux8test
       - rabbitmq
       - mongodb
       - redis
@@ -64,21 +32,8 @@ services:
       - redis
 
   ## Package build nodes
-  #
-  focalbuild:
-    image: stackstorm/packagingbuild:focal
-    extends:
-      file: docker-compose.override.yml
-      service: volumes-compose
-
   jammybuild:
     image: stackstorm/packagingbuild:jammy
-    extends:
-      file: docker-compose.override.yml
-      service: volumes-compose
-
-  rockylinux8build:
-    image: stackstorm/packagingbuild:rockylinux8
     extends:
       file: docker-compose.override.yml
       service: volumes-compose
@@ -90,35 +45,10 @@ services:
       service: volumes-compose
 
   ## Package testing nodes
-  #
-  focaltest:
-    image: stackstorm/packagingtest:focal-systemd
-    privileged: true
-    cgroup: host
-    extends:
-      file: docker-compose.override.yml
-      service: volumes-compose
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup
-
   jammytest:
     image: stackstorm/packagingtest:jammy-systemd
     privileged: true
     cgroup: host
-    extends:
-      file: docker-compose.override.yml
-      service: volumes-compose
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup
-
-  rockylinux8test:
-    image: stackstorm/packagingtest:rockylinux8-systemd
-    privileged: true
-    cgroup: host
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - seccomp:unconfined
     extends:
       file: docker-compose.override.yml
       service: volumes-compose
@@ -140,7 +70,7 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup
 
   rabbitmq:
-    image: rabbitmq:3.12-management
+    image: rabbitmq:4.2-management
     privileged: true
     hostname: rabbit
     ports:
@@ -148,11 +78,11 @@ services:
       - "5672:5672"
 
   mongodb:
-    image: mongo:4.4
+    image: mongo:8.2
     ports:
       - "27017:27017"
 
   redis:
-    image: redis:7.2.4
+    image: redis:8.6
     ports:
       - "6379:6379"
