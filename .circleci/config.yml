@@ -19,6 +19,8 @@ jobs:
     environment:
       DISTROS: "jammy el9"
       BASH_ENV: ~/.buildenv
+      PIP_VERSION: "25.3"
+      PYTHON_VERSION: "3.11"
       # These should be set to an empty string, so that st2cd prep tasks are able to replace these
       # with real gitrevs during releases. Note that they are commented out, so that they do not interfere
       # with build parameters. st2cd prep tasks will uncomment these on a branch, and replace with proper

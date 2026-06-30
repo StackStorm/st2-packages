@@ -20,14 +20,35 @@ else
 	DEB_DISTRO := unstable
 endif
 
-PYTHON_BINARY := /usr/bin/python3
-PIP_BINARY := pip3
-PYTHON_ALT_BINARY := python3
+PYTHON_VERSION ?= 3
+PYTHON_BINARY := /usr/bin/python$(PYTHON_VERSION)
+PIP_BINARY := /usr/bin/pip$(PYTHON_VERSION)
+PYTHON_ALT_BINARY := python$(PYTHON_VERSION)
+PIP_VERSION ?= 25.3
 
 RUNNERS := $(shell ls ../contrib/runners)
 
 # Moved from top of file to handle when only py2 or py3 available
 ST2PKG_VERSION ?= $(shell $(PYTHON_BINARY) -c "from $(ST2_COMPONENT) import __version__; print(__version__),")
+
+.PHONY: ensure-python
+ensure-python:
+ifeq ($(DEBIAN),1)
+	@if [ "$(PYTHON_VERSION)" != "3" ] && [ ! -x "$(PYTHON_BINARY)" ]; then \
+		echo "Installing Python $(PYTHON_VERSION) on Debian/Ubuntu..."; \
+		apt-get update && \
+		apt-get install -y software-properties-common && \
+		add-apt-repository -y ppa:deadsnakes/ppa && \
+		apt-get update && \
+		apt-get install -y python$(PYTHON_VERSION) python$(PYTHON_VERSION)-dev python$(PYTHON_VERSION)-distutils python$(PYTHON_VERSION)-venv; \
+	fi
+else ifeq ($(REDHAT),1)
+	@if [ "$(PYTHON_VERSION)" != "3" ] && [ ! -x "$(PYTHON_BINARY)" ]; then \
+		echo "Installing Python $(PYTHON_VERSION) on RHEL/Rocky..."; \
+		yum install -y python$(PYTHON_VERSION) python$(PYTHON_VERSION)-devel 2>/dev/null || \
+		dnf install -y python$(PYTHON_VERSION) python$(PYTHON_VERSION)-devel; \
+	fi
+endif
 
 # Note: We dynamically obtain the version, this is required because dev
 # build versions don't store correct version identifier in __init__.py
@@ -40,10 +61,10 @@ ST2PKG_NORMALIZED_VERSION ?= $(shell $(PYTHON_BINARY) setup.py --version || echo
 retry = $(2) $(foreach t,$(shell seq 1 ${1}),|| (echo -e "\033[33m Failed ($$?): '$(2)'\n Retrying $t ... \033[0m"; $(2)))
 
 .PHONY: all install wheelhouse
-all: info install
+all: ensure-python info install
 
 .PHONY: info
-info:
+info: ensure-python
 	@echo "DEBIAN=$(DEBIAN)"
 	@echo "REDHAT=$(REDHAT)"
 	@echo "EL_DISTRO=$(EL_DISTRO)"
@@ -113,6 +134,8 @@ endif
 wheelhouse: .build-runners .stamp-wheelhouse
 .stamp-wheelhouse: | populate_version requirements inject-deps
 	cat requirements.txt
+	# Upgrade pip to specified version
+	$(PIP_BINARY) install --upgrade pip==$(PIP_VERSION)
 	# Try to install wheels 2x in case the first one fails
 	$(PIP_BINARY) --use-deprecated=legacy-resolver  wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt || \
 		$(PIP_BINARY) --use-deprecated=legacy-resolver wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r requirements.txt
@@ -123,6 +146,8 @@ wheelhouse: .build-runners .stamp-wheelhouse
 	@echo "#            Building Runners            #"
 	@echo "##########################################"
 	@echo $(RUNNERS)
+	# Upgrade pip to specified version
+	$(PIP_BINARY) install --upgrade pip==$(PIP_VERSION)
 	@for runner in $(RUNNERS); do \
 		echo "Installing $$runner"; \
 		$(PIP_BINARY) wheel --wheel-dir=$(WHEELDIR) --find-links=$(WHEELDIR) -r ../contrib/runners/$$runner/requirements.txt ../contrib/runners/$$runner; \

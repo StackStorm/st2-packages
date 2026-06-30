@@ -11,16 +11,18 @@ PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 WHEELDIR ?= /tmp/wheelhouse
 DH_VIRTUALENV_INSTALL_ROOT := /opt/stackstorm
 export DH_VIRTUALENV_INSTALL_ROOT
-PIP_VERSION = 25.3
+PIP_VERSION ?= 25.3
+export PIP_VERSION
 
 IS_SYSTEMD = $(shell command -v dh_systemd_enable > /dev/null 2>&1 && echo true)
 DEB_DISTRO := $(shell lsb_release -cs)
 
-BUILD_PRE_DEPENDS := python3
-BUILD_DEPENDS := python3-distutils, python3-dev
+PYTHON_VERSION ?= 3
+BUILD_PRE_DEPENDS := python$(PYTHON_VERSION)
+BUILD_DEPENDS := python$(PYTHON_VERSION)-distutils, python$(PYTHON_VERSION)-dev
 
 %:
-	dh $@ --with python-virtualenv --python /usr/bin/python3
+	dh $@ --with python-virtualenv --python /usr/bin/python$(PYTHON_VERSION)
 
 override_dh_installdirs:
 	dh_installdirs
