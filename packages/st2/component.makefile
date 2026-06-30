@@ -53,7 +53,7 @@ endif
 ST2PKG_NORMALIZED_VERSION ?= $(shell $(PYTHON_BINARY) setup.py --version || echo "failed_to_retrieve_version")
 
 .PHONY: info
-info:
+info: ensure-python
 	@echo "DEBIAN=$(DEBIAN)"
 	@echo "REDHAT=$(REDHAT)"
 	@echo "DEB_DISTRO=$(DEB_DISTRO)"

@@ -64,7 +64,7 @@ retry = $(2) $(foreach t,$(shell seq 1 ${1}),|| (echo -e "\033[33m Failed ($$?):
 all: ensure-python info install
 
 .PHONY: info
-info:
+info: ensure-python
 	@echo "DEBIAN=$(DEBIAN)"
 	@echo "REDHAT=$(REDHAT)"
 	@echo "EL_DISTRO=$(EL_DISTRO)"
