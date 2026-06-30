@@ -63,7 +63,7 @@ retry = $(2) $(foreach t,$(shell seq 1 ${1}),|| (echo -e "\033[33m Failed ($$?):
 .PHONY: all install wheelhouse
 all: ensure-python info install
 
-.PHONY: ensure-python info
+.PHONY: info
 info:
 	@echo "DEBIAN=$(DEBIAN)"
 	@echo "REDHAT=$(REDHAT)"
