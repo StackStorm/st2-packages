@@ -68,3 +68,8 @@ override_dh_virtualenv:
 
 override_dh_compress:
 	dh_compress -X.conf
+
+override_dh_strip_nondeterminism:
+	# Exclude .whl: virtualenv hardcodes sha256 of its embedded seed wheels,
+	# and normalizing them here breaks that check.
+	dh_strip_nondeterminism -X.whl
