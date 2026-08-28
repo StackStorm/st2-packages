@@ -2,35 +2,37 @@
 #   - package
 
 # Cat debian/package.dirs, set buildroot prefix and create directories.
-%define debian_dirs cat debian/%{name}.dirs | grep -v '^\\s*#' | sed 's~^~%{buildroot}/~' | \
-          while read dir_path; do \
-            mkdir -p "${dir_path}" \
-          done \
+%define debian_dirs \
+    grep -v '^\\s*#' debian/%{name}.dirs | sed 's~^~%{buildroot}/~' | \
+    while read dir_path; do \
+        mkdir -p "${dir_path}" \
+    done \
 %{nil}
 
 # Cat debian/package.links, set buildroot prefix and create symlinks.
-%define debian_links cat debian/%{name}.links | grep -v '^\\s*#' | \
-            sed -r -e 's~\\b~/~' -e 's~\\s+\\b~ %{buildroot}/~' | \
-          while read link_rule; do \
-            linkpath=$(echo "$link_rule" | cut -f2 -d' ') && [ -d $(dirname "$linkpath") ] || \
-              mkdir -p $(dirname "$linkpath") && ln -s $link_rule \
-          done \
+%define debian_links \
+    grep -v '^\\s*#' debian/%{name}.links | sed -r -e 's~\\b~/~' -e 's~\\s+\\b~ %{buildroot}/~' | \
+    while read link_rule; do \
+        linkpath=$(echo "$link_rule" | cut -f2 -d' ') && [ -d $(dirname "$linkpath") ] || \
+        mkdir -p $(dirname "$linkpath") && ln -s $link_rule \
+    done \
 %{nil}
 
 # Cat debian/install, set buildroot prefix and copy files.
-%define debian_install cat debian/install | grep -v '^\s*#' | sed -r -e 's~ lib/systemd~ usr/lib/systemd~' -e 's~ +~ %{buildroot}/~' | \
-          while read copy_rule; do \
-            parent=$(echo "$copy_rule" | cut -f2 -d' ') \
-            [ -d "$parent" ] || install -d "$parent" && cp -r $copy_rule \
-          done \
+%define debian_install \
+    grep -v '^\s*#' debian/install | sed -r -e 's~ lib/systemd~ usr/lib/systemd~' -e 's~ +~ %{buildroot}/~' | \
+    while read copy_rule; do \
+        parent=$(echo "$copy_rule" | cut -f2 -d' ') \
+        [ -d "$parent" ] || install -d "$parent" && cp -r $copy_rule \
+    done \
 %{nil}
 
-# We hate duplication right :)?, so let's use debian files # 2026 FIX: Nothing justifies crossing platform build tools metadata!
+# We hate duplication right :)?, so let's use debian files. TODO: Stop using debian metafiles.
 %define default_install \
-  %debian_dirs \
-  %debian_install \
-  %debian_links \
-  %make_install \
+    %debian_dirs \
+    %debian_install \
+    %debian_links \
+    %make_install \
 %{nil}
 
 # Find a supported version of Python.
@@ -39,28 +41,28 @@
 ## Clean up RECORD and some other files left by python, which may contain
 #   absolute buildroot paths.
 %define cleanup_python_abspath \
-  find %{buildroot} -name RECORD -o -name '*.egg-link' -o -name '*.pth' -o -name 'pyvenv.cfg' | \
-      xargs -I{} -n1 sed -i 's@%{buildroot}@@' {} \
+    find %{buildroot} -name RECORD -o -name '*.egg-link' -o -name '*.pth' -o -name 'pyvenv.cfg' | \
+    xargs -I{} -n1 sed -i 's@%{buildroot}@@' {} \
 %{nil}
 
 #Cleanup .so files that contain buildroot
 %define cleanup_so_abspath \
-   for f in `find %{venv_dir}/lib -type f -name "*.so" | \
-      xargs grep -l %{buildroot} `; do strip $f; done \
+    for f in `find %{venv_dir}/lib -type f -name "*.so" | \
+    xargs grep -l %{buildroot} `; do strip $f; done \
 %{nil}
 
 # Define use_systemd to know if we on a systemd system
 #
 %if 0%{?_unitdir:1}
-  %define use_systemd 1
+    %define use_systemd 1
 %endif
 
 ## St2 package version parsing
 #   if package name starts with st2 then it's st2 component.
 #
 %if %(PKG=%{package}; [ "${PKG##st2}" != "$PKG" ] && echo 1 || echo 0 ) == 1
-%define st2pkg_version %(%{pyexecutable} -c "from %{package} import __version__; print(__version__),")
-# st2 package version parsing
+    # st2 package version parsing
+    %define st2pkg_version %(%{pyexecutable} -c "from %{package} import __version__; print(__version__),")
 %endif
 
 # Redefine and to drop python brp bytecompile
@@ -73,31 +75,30 @@
 %{nil}
 
 # Install systemd service into the package
-#
 %define service_install() \
-  for svc in %{?*}; do \
-    install -D -p -m0644 %{SOURCE0}/rpm/$svc.service %{buildroot}%{_unitdir}/$svc.service \
-    [ -f %{SOURCE0}/rpm/$svc.socket ] && install -D -p -m0644 %{SOURCE0}/rpm/$svc.socket %{buildroot}%{_unitdir}/$svc.socket \
-  done \
+    for svc in %{?*}; do \
+        test -f %{SOURCE0}/rpm/$svc.service && install -D -p -m0644 %{SOURCE0}/rpm/$svc.service %{buildroot}%{_unitdir}/$svc.service \
+        test -f %{SOURCE0}/rpm/$svc.socket && install -D -p -m0644 %{SOURCE0}/rpm/$svc.socket %{buildroot}%{_unitdir}/$svc.socket \
+    done \
 %{nil}
 
 # Service post stage action
 # enables used to enforce the policy, which seems to be disabled by default
-#
+# systemctl --no-reload enable %{?*} >/dev/null 2>&1 || : \
 %define service_post() \
-  %{expand: %systemd_post %%{?*}} \
-  systemctl --no-reload enable %{?*} >/dev/null 2>&1 || : \
+    %{expand: %systemd_post %%{?*}} \
+    systemctl --no-reload enable %{?*} \
 %{nil}
 
 # Service preun stage action
 #
 %define service_preun() \
-  %{expand: %systemd_preun %%{?*}} \
+    %{expand: %systemd_preun %%{?*}} \
 %{nil}
 
 # Service postun stage action
 # ($1 > 1 on package upgrade)
 #
 %define service_postun() \
-  %{expand: %systemd_postun_with_restart %%{?*}} \
+    %{expand: %systemd_postun_with_restart %%{?*}} \
 %{nil}

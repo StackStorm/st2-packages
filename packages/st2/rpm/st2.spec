@@ -84,7 +84,8 @@ Conflicts: st2common
   %include rpm/preinst_script.spec
 
 %post
-  %service_post st2actionrunner st2api st2stream st2auth st2notifier st2workflowengine
+  %service_post st2api st2stream st2auth
+  %service_post st2actionrunner st2notifier st2workflowengine
   %service_post st2rulesengine st2timersengine st2sensorcontainer st2garbagecollector
   %service_post st2scheduler
   %include rpm/postinst_script.spec
@@ -122,9 +123,6 @@ Conflicts: st2common
   %attr(775, root, %{packs_group}) /opt/stackstorm/virtualenvs
   %{_unitdir}/st2actionrunner.service
   %{_unitdir}/%{worker_name}.service
-  %{_unitdir}/st2api.service
-  %{_unitdir}/st2stream.service
-  %{_unitdir}/st2auth.service
   %{_unitdir}/st2notifier.service
   %{_unitdir}/st2rulesengine.service
   %{_unitdir}/st2sensorcontainer.service
