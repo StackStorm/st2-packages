@@ -77,7 +77,7 @@ jobs:
           name: Copy st2-packages files to build containers
           command: |
             # creating dummy container which will hold a volume with data files
-            docker create -v /root/st2-packages -v /root/build -v /var/log/st2 -v /root/.cache/pip -v /tmp/wheelhouse --name st2-packages-vol alpine:3.4 /bin/true
+            docker create -v /root/st2-packages -v /root/build -v /var/log/st2 -v /root/.cache/pip -v /tmp/wheelhouse --name st2-packages-vol alpine:3.24 /bin/true
             # copy st2-packages data files into this volume
             docker cp ~/st2-packages st2-packages-vol:/root
       - run:

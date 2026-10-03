@@ -141,6 +141,6 @@ services:
       - "27017:27017"
 
   redis:
-    image: redis:8.6
+    image: redis:8.10
     ports:
       - "6379:6379"

@@ -12,7 +12,7 @@ PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 WHEELDIR ?= /tmp/wheelhouse
 DH_VIRTUALENV_INSTALL_ROOT := /opt/stackstorm
 export DH_VIRTUALENV_INSTALL_ROOT
-PIP_VERSION = 26.1.2
+PIP_VERSION = 26.2.1
 
 IS_SYSTEMD = $(shell command -v dh_systemd_enable > /dev/null 2>&1 && echo true)
 DEB_DISTRO := $(shell source /etc/os-release; echo $$VERSION_CODENAME)

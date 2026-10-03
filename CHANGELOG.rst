@@ -13,8 +13,10 @@ Changed
  * Updated 3rd party services to tested/supported version for StackStorm core:
      - mongo v8.2
      - rabbitmq v4.2
-     - redis v8.6
+     - redis v8.10
    Contributed by @nzlosh
+
+ * Updated pip to 26.2.1 in the st2 virtualenv for deb and rpm packages.
 
  * Added systemd generators for st2auth, st2api, st2stream service unit files.
    Contributed by @nzlosh #762

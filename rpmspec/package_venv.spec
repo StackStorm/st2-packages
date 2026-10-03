@@ -9,7 +9,7 @@
 
 %define pybin python3
 %define pipbin pip3
-%define pipversion 26.1.2
+%define pipversion 26.2.1
 
 # Forced to py3.11 instead of default py3.9 when building st2 v3.10 on rocky9
 %if 0%{?rhel} == 9
