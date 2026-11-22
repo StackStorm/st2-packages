@@ -19,6 +19,11 @@ Changed
  * Added systemd generators for st2auth, st2api, st2stream service unit files.
    Contributed by @nzlosh #762
 
+ * The installer sets up Node.js 24 LTS (NodeSource) for ChatOps, replacing Node.js 20, which
+   reached end of life in April 2026. A previous major's NodeSource repository is now removed first
+   (including one written by NodeSource's own setup script), and the Ubuntu script's cleanup of old
+   NodeSource files (it removed ``$i``, never set) is fixed.
+
 Removed
 ~~~~~~~
 

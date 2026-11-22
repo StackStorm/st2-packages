@@ -2,27 +2,28 @@
 {% if id in ["rhel", "rocky", "centos", "opensuse-leap"] -%}
 nodejs_configure_repository()
 {
-    local NODE_VERSION="20.x"
+    local NODE_VERSION="24.x"
+    {#- also removes the repository of a previous Node.js major version #}
     rm -f /etc/yum.repos.d/nodesource*.repo \
-        "nodejs-${NODE_VERSION}.repo" \
-        "nsolid.repo"
+        /etc/yum.repos.d/nodejs-*.repo \
+        /etc/yum.repos.d/nsolid.repo
 
     repo_definition "nodejs-${NODE_VERSION}" \
                     "https://rpm.nodesource.com/pub_${NODE_VERSION}/nodistro/nodejs/x86_64" \
                     "nodejs-${NODE_VERSION}-key" \
                     "https://rpm.nodesource.com/gpgkey/ns-operations-public.key"
 
-    {#- repository jinja template enables repo_gpgcheck which breaks on nodejs 20.x #}
+    {#- repository jinja template enables repo_gpgcheck which breaks on nodesource repositories #}
     repo_kv_set "nodejs-${NODE_VERSION}" repo_gpgcheck 0
 
     # Add N|Solid repository if Node.js is an LTS version
-    if [[ "$NODE_VERSION" =~ ^(18|20|22)".x" ]]; then
+    if [[ "$NODE_VERSION" =~ ^(20|22|24)".x" ]]; then
         repo_definition "nsolid" \
                         "https://rpm.nodesource.com/pub_${NODE_VERSION}/nodistro/nsolid/x86_64" \
                         "nsolid-key" \
                         "https://rpm.nodesource.com/gpgkey/ns-operations-public.key"
 
-        {#- repository jinja template enables repo_gpgcheck which breaks on nodejs 20.x #}
+        {#- repository jinja template enables repo_gpgcheck which breaks on nodesource repositories #}
         repo_kv_set "nsolid" repo_gpgcheck 0
     fi
 
@@ -30,17 +31,19 @@ nodejs_configure_repository()
 {% elif id in ["ubuntu", "debian"] %}
 nodejs_configure_repository()
 {
-    local NODE_VERSION="20.x"
+    local NODE_VERSION="24.x"
 
     local RM_FILES=(
         /etc/apt/preferences.d/nsolid.pref
         /usr/share/keyrings/nodesource.gpg
         /etc/apt/sources.list.d/nodesource.list
+        /etc/apt/sources.list.d/nodesource.sources
         /etc/apt/preferences.d/nodejs.pref
+        /etc/apt/sources.list.d/nodejs-*.sources
     )
     for f in "${RM_FILES[@]}"
     do
-        rm -f "$i" || true
+        rm -f "$f" || true
     done
 
     repo_definition "nodejs-${NODE_VERSION}" \

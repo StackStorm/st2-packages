@@ -891,17 +891,19 @@ st2web_install()
 
 nodejs_configure_repository()
 {
-    local NODE_VERSION="20.x"
+    local NODE_VERSION="24.x"
 
     local RM_FILES=(
         /etc/apt/preferences.d/nsolid.pref
         /usr/share/keyrings/nodesource.gpg
         /etc/apt/sources.list.d/nodesource.list
+        /etc/apt/sources.list.d/nodesource.sources
         /etc/apt/preferences.d/nodejs.pref
+        /etc/apt/sources.list.d/nodejs-*.sources
     )
     for f in "${RM_FILES[@]}"
     do
-        rm -f "$i" || true
+        rm -f "$f" || true
     done
 
     repo_definition "nodejs-${NODE_VERSION}" \
