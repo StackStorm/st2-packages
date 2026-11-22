@@ -885,10 +885,10 @@ st2web_install()
 ###############[ NODEJS ]###############
 nodejs_configure_repository()
 {
-    local NODE_VERSION="20.x"
+    local NODE_VERSION="24.x"
     rm -f /etc/yum.repos.d/nodesource*.repo \
-        "nodejs-${NODE_VERSION}.repo" \
-        "nsolid.repo"
+        /etc/yum.repos.d/nodejs-*.repo \
+        /etc/yum.repos.d/nsolid.repo
 
     repo_definition "nodejs-${NODE_VERSION}" \
                     "https://rpm.nodesource.com/pub_${NODE_VERSION}/nodistro/nodejs/x86_64" \
@@ -897,7 +897,7 @@ nodejs_configure_repository()
     repo_kv_set "nodejs-${NODE_VERSION}" repo_gpgcheck 0
 
     # Add N|Solid repository if Node.js is an LTS version
-    if [[ "$NODE_VERSION" =~ ^(18|20|22)".x" ]]; then
+    if [[ "$NODE_VERSION" =~ ^(20|22|24)".x" ]]; then
         repo_definition "nsolid" \
                         "https://rpm.nodesource.com/pub_${NODE_VERSION}/nodistro/nsolid/x86_64" \
                         "nsolid-key" \
